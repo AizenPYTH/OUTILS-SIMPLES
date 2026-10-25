@@ -19,7 +19,14 @@ interface PageThumbnailProps {
  * Lazily renders a page preview when it scrolls into view. Re-renders when
  * the extra rotation changes so rotate/organize previews stay truthful.
  */
-export function PageThumbnail({ doc, page, width, height, extraRotation = 0, className }: PageThumbnailProps) {
+export function PageThumbnail({
+  doc,
+  page,
+  width,
+  height,
+  extraRotation = 0,
+  className,
+}: PageThumbnailProps) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   // Without IntersectionObserver (old browsers, tests) render immediately.
@@ -49,7 +56,11 @@ export function PageThumbnail({ doc, page, width, height, extraRotation = 0, cla
     const controller = new AbortController();
     const size = visualSize(page, extraRotation);
     const scale = fitScale(size.width, size.height, width, height);
-    renderPageToCanvas(doc, page.index, canvas, { scale, extraRotation, signal: controller.signal }).catch(() => {
+    renderPageToCanvas(doc, page.index, canvas, {
+      scale,
+      extraRotation,
+      signal: controller.signal,
+    }).catch(() => {
       if (!controller.signal.aborted) setFailed(true);
     });
     return () => controller.abort();
@@ -62,7 +73,11 @@ export function PageThumbnail({ doc, page, width, height, extraRotation = 0, cla
       style={{ width, height }}
       aria-hidden="true"
     >
-      {failed ? <span className="text-xs text-muted-foreground">—</span> : <canvas ref={canvasRef} className="max-h-full max-w-full shadow-sm" />}
+      {failed ? (
+        <span className="text-xs text-muted-foreground">—</span>
+      ) : (
+        <canvas ref={canvasRef} className="max-h-full max-w-full shadow-sm" />
+      )}
     </div>
   );
 }

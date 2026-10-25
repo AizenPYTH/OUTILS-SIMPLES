@@ -16,9 +16,27 @@ async function textPdf(pageCount, { rotateSecond = false, mixedSizes = false } =
   for (let i = 0; i < pageCount; i += 1) {
     const size = mixedSizes && i % 2 === 1 ? [595.28, 841.89].reverse() : [595.28, 841.89];
     const page = doc.addPage(size);
-    page.drawText(`Page ${i + 1} / ${pageCount}`, { x: 60, y: size[1] - 80, size: 24, font, color: rgb(0.1, 0.1, 0.3) });
-    page.drawText("Document de test OUTILIA — contenu synthétique.", { x: 60, y: size[1] - 120, size: 12, font });
-    page.drawRectangle({ x: 60, y: 60, width: 120, height: 40, borderWidth: 1, borderColor: rgb(0, 0, 0) });
+    page.drawText(`Page ${i + 1} / ${pageCount}`, {
+      x: 60,
+      y: size[1] - 80,
+      size: 24,
+      font,
+      color: rgb(0.1, 0.1, 0.3),
+    });
+    page.drawText("Document de test OUTILIA — contenu synthétique.", {
+      x: 60,
+      y: size[1] - 120,
+      size: 12,
+      font,
+    });
+    page.drawRectangle({
+      x: 60,
+      y: 60,
+      width: 120,
+      height: 40,
+      borderWidth: 1,
+      borderColor: rgb(0, 0, 0),
+    });
     if (rotateSecond && i === 1) page.setRotation(degrees(90));
   }
   doc.setTitle(`Fixture ${pageCount} pages`);
@@ -57,8 +75,14 @@ async function imagePdf() {
   const name = page.node.newXObject("Im1", ref);
   page.drawText("Image de test", { x: 60, y: 780, size: 18 });
   // Draw the image with raw operators (pdf-lib has no helper for a pre-registered XObject).
-  const { pushGraphicsState, popGraphicsState, concatTransformationMatrix, drawObject } = await import("pdf-lib");
-  page.pushOperators(pushGraphicsState(), concatTransformationMatrix(400, 0, 0, 300, 60, 400), drawObject(name), popGraphicsState());
+  const { pushGraphicsState, popGraphicsState, concatTransformationMatrix, drawObject } =
+    await import("pdf-lib");
+  page.pushOperators(
+    pushGraphicsState(),
+    concatTransformationMatrix(400, 0, 0, 300, 60, 400),
+    drawObject(name),
+    popGraphicsState(),
+  );
   doc.setTitle("Fixture image");
   return doc.save({ useObjectStreams: false });
 }
@@ -131,7 +155,9 @@ async function main() {
     "watermark-annotation.pdf": await watermarkAnnotationPdf(),
     "encrypted-flag.pdf": await encryptedLikePdf(),
     "not-a-pdf.txt": new TextEncoder().encode("Ceci n'est pas un PDF.\n"),
-    "corrupted.pdf": new TextEncoder().encode("%PDF-1.7\n1 0 obj << /Type /Catalog >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF\n"),
+    "corrupted.pdf": new TextEncoder().encode(
+      "%PDF-1.7\n1 0 obj << /Type /Catalog >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF\n",
+    ),
   };
   // Tiny valid PNG (2x2, with alpha) and JPEG for image/signature tests.
   files["signature.png"] = Uint8Array.from(

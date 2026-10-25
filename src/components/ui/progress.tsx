@@ -20,7 +20,10 @@ function Progress({ className, value, label, ...props }: ProgressProps) {
       {...props}
     >
       {determinate ? (
-        <div className="h-full bg-primary transition-[width] duration-200" style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
+        <div
+          className="h-full bg-primary transition-[width] duration-200"
+          style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
+        />
       ) : (
         <div className="h-full w-1/3 animate-[indeterminate_1.2s_ease-in-out_infinite] rounded-full bg-primary" />
       )}

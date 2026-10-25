@@ -15,7 +15,10 @@ interface FileSummaryProps {
 
 export function FileSummary({ name, size, pageCount, onReset, children }: FileSummaryProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-[14px] border border-border bg-surface px-4 py-3" data-testid="file-summary">
+    <div
+      className="flex flex-wrap items-center gap-3 rounded-[14px] border border-border bg-surface px-4 py-3"
+      data-testid="file-summary"
+    >
       <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-primary-soft text-link">
         <FileText className="size-5" aria-hidden="true" />
       </span>

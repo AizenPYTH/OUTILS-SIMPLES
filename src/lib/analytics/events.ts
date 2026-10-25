@@ -53,7 +53,9 @@ export function pagesBucket(pages: number): string {
 }
 
 /** Strips anything not in the allow-list so a mistake upstream cannot leak data. */
-export function sanitizeProps(props: AnalyticsEventProps | undefined): Record<string, string | number> {
+export function sanitizeProps(
+  props: AnalyticsEventProps | undefined,
+): Record<string, string | number> {
   const out: Record<string, string | number> = {};
   if (!props) return out;
   for (const key of ALLOWED_PROP_KEYS) {

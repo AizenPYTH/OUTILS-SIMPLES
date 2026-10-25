@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { FileSummary } from "@/components/pdf/shared/file-summary";
@@ -17,15 +23,30 @@ import { downloadPdf } from "@/components/pdf/shared/result-utils";
 import { useOperation } from "@/components/pdf/hooks/use-operation";
 import type { LoadedPdf } from "@/components/pdf/hooks/use-pdf-document";
 import { formatBytes } from "@/lib/files/format";
-import { openPdf, renderPageToCanvas, fitScale, visualSize, type OpenedPdf } from "@/lib/pdf/browser/pdfjs";
-import { fillForm, inspectForm, type FormFieldInfo, type FormValues } from "@/lib/pdf/operations/forms";
+import {
+  openPdf,
+  renderPageToCanvas,
+  fitScale,
+  visualSize,
+  type OpenedPdf,
+} from "@/lib/pdf/browser/pdfjs";
+import {
+  fillForm,
+  inspectForm,
+  type FormFieldInfo,
+  type FormValues,
+} from "@/lib/pdf/operations/forms";
 import { getToolById, getToolPath } from "@/lib/tools";
 import { t } from "@/lib/i18n";
 
 const TOOL_ID = "pdf-fill-form";
 
 export function FillFormTool() {
-  return <SingleFileTool toolId={TOOL_ID}>{({ pdf, reset }) => <FormWorkspace pdf={pdf} reset={reset} />}</SingleFileTool>;
+  return (
+    <SingleFileTool toolId={TOOL_ID}>
+      {({ pdf, reset }) => <FormWorkspace pdf={pdf} reset={reset} />}
+    </SingleFileTool>
+  );
 }
 
 function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
@@ -58,7 +79,8 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
     };
   }, [pdf.bytes]);
 
-  const setValue = (name: string, value: string | boolean | string[]) => setValues((v) => ({ ...v, [name]: value }));
+  const setValue = (name: string, value: string | boolean | string[]) =>
+    setValues((v) => ({ ...v, [name]: value }));
 
   const refreshPreview = async () => {
     setPreviewBusy(true);
@@ -72,7 +94,8 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
   const run = () => void op.run(() => fillForm(pdf.bytes, values, { flatten }));
 
   if (op.state.status === "busy") return <BusyPanel progress={op.state.progress} />;
-  if (op.state.status === "error") return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={reset} />;
+  if (op.state.status === "error")
+    return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={reset} />;
   if (op.state.status === "done") {
     const bytes = op.state.result;
     return (
@@ -87,9 +110,12 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
     );
   }
 
-  if (fields === null) return <BusyPanel progress={{ current: 0, total: 0, label: "Analyse des champs…" }} />;
+  if (fields === null)
+    return <BusyPanel progress={{ current: 0, total: 0, label: "Analyse des champs…" }} />;
 
-  const editable = fields.filter((f) => f.kind !== "button" && f.kind !== "signature" && f.kind !== "unknown");
+  const editable = fields.filter(
+    (f) => f.kind !== "button" && f.kind !== "signature" && f.kind !== "unknown",
+  );
   const byPage = new Map<number | null, FormFieldInfo[]>();
   for (const f of editable) {
     const list = byPage.get(f.pageIndex) ?? [];
@@ -100,11 +126,22 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
 
   return (
     <div className="space-y-6">
-      <FileSummary name={pdf.file.name} size={pdf.file.size} pageCount={pdf.pageCount} onReset={reset} />
-      {hasXfa ? <Alert variant="warning" title="Formulaire XFA détecté">Les formulaires XFA (technologie Adobe) ne sont pas pris en charge ; seuls les champs AcroForm éventuels sont listés.</Alert> : null}
+      <FileSummary
+        name={pdf.file.name}
+        size={pdf.file.size}
+        pageCount={pdf.pageCount}
+        onReset={reset}
+      />
+      {hasXfa ? (
+        <Alert variant="warning" title="Formulaire XFA détecté">
+          Les formulaires XFA (technologie Adobe) ne sont pas pris en charge ; seuls les champs
+          AcroForm éventuels sont listés.
+        </Alert>
+      ) : null}
       {editable.length === 0 ? (
         <Alert variant="warning" title="Aucun champ interactif détecté">
-          Ce PDF ne contient pas de champs de formulaire remplissables : il s&apos;agit probablement d&apos;un formulaire scanné ou aplati.{" "}
+          Ce PDF ne contient pas de champs de formulaire remplissables : il s&apos;agit probablement
+          d&apos;un formulaire scanné ou aplati.{" "}
           {addText ? (
             <a href={getToolPath(addText)} className="font-medium underline">
               Utilisez « Ajouter du texte » pour le compléter.
@@ -121,10 +158,21 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
             }}
           >
             {pageKeys.map((key) => (
-              <fieldset key={String(key)} className="space-y-4 rounded-[14px] border border-border bg-surface p-4">
-                <legend className="px-1 text-sm font-semibold">{key === null ? "Champs sans page identifiée" : `${t.common.page} ${key + 1}`}</legend>
+              <fieldset
+                key={String(key)}
+                className="space-y-4 rounded-[14px] border border-border bg-surface p-4"
+              >
+                <legend className="px-1 text-sm font-semibold">
+                  {key === null ? "Champs sans page identifiée" : `${t.common.page} ${key + 1}`}
+                </legend>
                 {byPage.get(key)!.map((field) => (
-                  <FormFieldControl key={field.name} field={field} value={values[field.name]} onChange={(v) => setValue(field.name, v)} onFocus={() => key !== null && setActivePage(key)} />
+                  <FormFieldControl
+                    key={field.name}
+                    field={field}
+                    value={values[field.name]}
+                    onChange={(v) => setValue(field.name, v)}
+                    onFocus={() => key !== null && setActivePage(key)}
+                  />
                 ))}
               </fieldset>
             ))}
@@ -133,7 +181,9 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
                 <Label htmlFor="flatten" className="text-sm font-medium">
                   Aplatir le formulaire
                 </Label>
-                <p className="text-xs text-muted-foreground">Les valeurs deviennent fixes et ne sont plus modifiables.</p>
+                <p className="text-xs text-muted-foreground">
+                  Les valeurs deviennent fixes et ne sont plus modifiables.
+                </p>
               </div>
               <Switch id="flatten" checked={flatten} onCheckedChange={setFlatten} />
             </div>
@@ -143,17 +193,37 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           </form>
           <aside className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium">Aperçu · {t.common.pageOf(activePage + 1, pdf.pageCount)}</p>
-              <Button type="button" variant="outline" size="sm" onClick={() => void refreshPreview()} loading={previewBusy}>
+              <p className="text-sm font-medium">
+                Aperçu · {t.common.pageOf(activePage + 1, pdf.pageCount)}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void refreshPreview()}
+                loading={previewBusy}
+              >
                 <RefreshCw aria-hidden="true" /> Mettre à jour l&apos;aperçu
               </Button>
             </div>
             <FormPreview bytes={previewBytes} fallback={pdf.opened} pageIndex={activePage} />
             <div className="flex items-center justify-between">
-              <Button type="button" variant="ghost" size="sm" disabled={activePage === 0} onClick={() => setActivePage((p) => p - 1)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={activePage === 0}
+                onClick={() => setActivePage((p) => p - 1)}
+              >
                 {t.common.previous}
               </Button>
-              <Button type="button" variant="ghost" size="sm" disabled={activePage >= pdf.pageCount - 1} onClick={() => setActivePage((p) => p + 1)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={activePage >= pdf.pageCount - 1}
+                onClick={() => setActivePage((p) => p + 1)}
+              >
                 {t.common.next}
               </Button>
             </div>
@@ -164,13 +234,25 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
   );
 }
 
-function FormFieldControl({ field, value, onChange, onFocus }: { field: FormFieldInfo; value: string | boolean | string[] | undefined; onChange: (v: string | boolean | string[]) => void; onFocus: () => void }) {
+function FormFieldControl({
+  field,
+  value,
+  onChange,
+  onFocus,
+}: {
+  field: FormFieldInfo;
+  value: string | boolean | string[] | undefined;
+  onChange: (v: string | boolean | string[]) => void;
+  onFocus: () => void;
+}) {
   const id = `field-${field.name.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
   const label = (
     <Label htmlFor={id} className="text-sm">
       {field.name}
       {field.required ? <span className="text-destructive"> *</span> : null}
-      {field.readOnly ? <span className="text-xs font-normal text-muted-foreground"> (lecture seule)</span> : null}
+      {field.readOnly ? (
+        <span className="text-xs font-normal text-muted-foreground"> (lecture seule)</span>
+      ) : null}
     </Label>
   );
   switch (field.kind) {
@@ -179,16 +261,36 @@ function FormFieldControl({ field, value, onChange, onFocus }: { field: FormFiel
         <div className="space-y-1.5">
           {label}
           {field.multiline ? (
-            <Textarea id={id} value={typeof value === "string" ? value : ""} onChange={(e) => onChange(e.target.value)} onFocus={onFocus} disabled={field.readOnly} maxLength={field.maxLength ?? undefined} />
+            <Textarea
+              id={id}
+              value={typeof value === "string" ? value : ""}
+              onChange={(e) => onChange(e.target.value)}
+              onFocus={onFocus}
+              disabled={field.readOnly}
+              maxLength={field.maxLength ?? undefined}
+            />
           ) : (
-            <Input id={id} value={typeof value === "string" ? value : ""} onChange={(e) => onChange(e.target.value)} onFocus={onFocus} disabled={field.readOnly} maxLength={field.maxLength ?? undefined} />
+            <Input
+              id={id}
+              value={typeof value === "string" ? value : ""}
+              onChange={(e) => onChange(e.target.value)}
+              onFocus={onFocus}
+              disabled={field.readOnly}
+              maxLength={field.maxLength ?? undefined}
+            />
           )}
         </div>
       );
     case "checkbox":
       return (
         <div className="flex items-center gap-2">
-          <Checkbox id={id} checked={value === true} onCheckedChange={(c) => onChange(c === true)} disabled={field.readOnly} onFocus={onFocus} />
+          <Checkbox
+            id={id}
+            checked={value === true}
+            onCheckedChange={(c) => onChange(c === true)}
+            disabled={field.readOnly}
+            onFocus={onFocus}
+          />
           {label}
         </div>
       );
@@ -197,7 +299,11 @@ function FormFieldControl({ field, value, onChange, onFocus }: { field: FormFiel
       return (
         <div className="space-y-1.5">
           {label}
-          <Select value={typeof value === "string" && value ? value : undefined} onValueChange={onChange} disabled={field.readOnly}>
+          <Select
+            value={typeof value === "string" && value ? value : undefined}
+            onValueChange={onChange}
+            disabled={field.readOnly}
+          >
             <SelectTrigger id={id} onFocus={onFocus}>
               <SelectValue placeholder="Choisir…" />
             </SelectTrigger>
@@ -218,7 +324,14 @@ function FormFieldControl({ field, value, onChange, onFocus }: { field: FormFiel
           <legend className="text-sm font-medium">{field.name}</legend>
           {field.options.map((o) => (
             <div key={o} className="flex items-center gap-2">
-              <Checkbox id={`${id}-${o}`} checked={selected.includes(o)} disabled={field.readOnly} onCheckedChange={(c) => onChange(c === true ? [...selected, o] : selected.filter((s) => s !== o))} />
+              <Checkbox
+                id={`${id}-${o}`}
+                checked={selected.includes(o)}
+                disabled={field.readOnly}
+                onCheckedChange={(c) =>
+                  onChange(c === true ? [...selected, o] : selected.filter((s) => s !== o))
+                }
+              />
               <Label htmlFor={`${id}-${o}`} className="text-sm font-normal">
                 {o}
               </Label>
@@ -232,7 +345,15 @@ function FormFieldControl({ field, value, onChange, onFocus }: { field: FormFiel
   }
 }
 
-function FormPreview({ bytes, fallback, pageIndex }: { bytes: Uint8Array | null; fallback: OpenedPdf; pageIndex: number }) {
+function FormPreview({
+  bytes,
+  fallback,
+  pageIndex,
+}: {
+  bytes: Uint8Array | null;
+  fallback: OpenedPdf;
+  pageIndex: number;
+}) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [error, setError] = React.useState(false);
 
@@ -250,7 +371,10 @@ function FormPreview({ bytes, fallback, pageIndex }: { bytes: Uint8Array | null;
         const page = target.pages[pageIndex] ?? target.pages[0]!;
         const size = visualSize(page);
         const scale = fitScale(size.width, size.height, 340, 480);
-        await renderPageToCanvas(target.doc, page.index, canvas, { scale, signal: controller.signal });
+        await renderPageToCanvas(target.doc, page.index, canvas, {
+          scale,
+          signal: controller.signal,
+        });
         setError(false);
       } catch {
         if (!controller.signal.aborted) setError(true);
@@ -264,7 +388,11 @@ function FormPreview({ bytes, fallback, pageIndex }: { bytes: Uint8Array | null;
 
   return (
     <div className="flex min-h-[200px] items-center justify-center rounded-[6px] border border-border bg-muted p-2">
-      {error ? <p className="text-sm text-muted-foreground">{t.errors.renderFailed}</p> : <canvas ref={canvasRef} className="max-w-full shadow-sm" aria-label="Aperçu de la page" />}
+      {error ? (
+        <p className="text-sm text-muted-foreground">{t.errors.renderFailed}</p>
+      ) : (
+        <canvas ref={canvasRef} className="max-w-full shadow-sm" aria-label="Aperçu de la page" />
+      )}
     </div>
   );
 }

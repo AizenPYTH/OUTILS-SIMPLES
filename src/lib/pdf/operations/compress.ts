@@ -25,9 +25,27 @@ export interface CompressionProfile {
 }
 
 export const compressionProfiles: Record<CompressionLevel, CompressionProfile> = {
-  structure: { level: "structure", recompressImages: false, jpegQuality: 1, maxDimension: Infinity, lossy: false },
-  balanced: { level: "balanced", recompressImages: true, jpegQuality: 0.75, maxDimension: 1600, lossy: true },
-  strong: { level: "strong", recompressImages: true, jpegQuality: 0.5, maxDimension: 1200, lossy: true },
+  structure: {
+    level: "structure",
+    recompressImages: false,
+    jpegQuality: 1,
+    maxDimension: Infinity,
+    lossy: false,
+  },
+  balanced: {
+    level: "balanced",
+    recompressImages: true,
+    jpegQuality: 0.75,
+    maxDimension: 1600,
+    lossy: true,
+  },
+  strong: {
+    level: "strong",
+    recompressImages: true,
+    jpegQuality: 0.5,
+    maxDimension: 1200,
+    lossy: true,
+  },
 };
 
 /** Raw image description handed to the environment-specific re-encoder. */
@@ -52,7 +70,11 @@ export interface ReencodedImage {
  * Re-encodes an image as JPEG. In the browser this is implemented with a canvas
  * (see src/lib/pdf/browser/image-reencoder.ts); tests inject a stub.
  */
-export type ImageReencoder = (image: SourceImage, quality: number, maxDimension: number) => Promise<ReencodedImage | null>;
+export type ImageReencoder = (
+  image: SourceImage,
+  quality: number,
+  maxDimension: number,
+) => Promise<ReencodedImage | null>;
 
 export interface CompressionStats {
   originalSize: number;
@@ -130,7 +152,12 @@ function filtersOf(dict: PDFDict, doc: PDFDocument): string[] {
  */
 function toSourceImage(candidate: ImageCandidate, doc: PDFDocument): SourceImage | null {
   const { dict, stream } = candidate;
-  if (dict.has(PDFName.of("SMask")) || dict.has(PDFName.of("Mask")) || dict.has(PDFName.of("Decode"))) return null;
+  if (
+    dict.has(PDFName.of("SMask")) ||
+    dict.has(PDFName.of("Mask")) ||
+    dict.has(PDFName.of("Decode"))
+  )
+    return null;
   if (dict.has(PDFName.of("ImageMask"))) return null;
   const width = numberOf(doc.context.lookup(dict.get(PDFName.of("Width"))));
   const height = numberOf(doc.context.lookup(dict.get(PDFName.of("Height"))));
@@ -140,7 +167,14 @@ function toSourceImage(candidate: ImageCandidate, doc: PDFDocument): SourceImage
   if (colorSpace !== "DeviceRGB" && colorSpace !== "DeviceGray") return null;
   const filters = filtersOf(dict, doc);
   if (filters.length === 1 && filters[0] === "DCTDecode") {
-    return { width, height, encoding: "jpeg", data: stream.contents, colorSpace, bitsPerComponent: bpc };
+    return {
+      width,
+      height,
+      encoding: "jpeg",
+      data: stream.contents,
+      colorSpace,
+      bitsPerComponent: bpc,
+    };
   }
   if (filters.length === 0 || (filters.length === 1 && filters[0] === "FlateDecode")) {
     let data: Uint8Array;
@@ -198,7 +232,11 @@ export async function compressPdf(
     stats.imagesFound = candidates.length;
     for (let i = 0; i < candidates.length; i += 1) {
       const candidate = candidates[i]!;
-      onProgress?.({ current: i + 1, total: candidates.length, label: `Image ${i + 1} sur ${candidates.length}…` });
+      onProgress?.({
+        current: i + 1,
+        total: candidates.length,
+        label: `Image ${i + 1} sur ${candidates.length}…`,
+      });
       const sourceImage = toSourceImage(candidate, output);
       if (!sourceImage) {
         stats.imagesSkipped += 1;

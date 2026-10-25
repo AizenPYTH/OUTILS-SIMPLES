@@ -98,16 +98,28 @@ export function buildViewportTransform(
   let rotateA: number, rotateB: number, rotateC: number, rotateD: number;
   switch (rot) {
     case 180:
-      rotateA = -1; rotateB = 0; rotateC = 0; rotateD = 1;
+      rotateA = -1;
+      rotateB = 0;
+      rotateC = 0;
+      rotateD = 1;
       break;
     case 90:
-      rotateA = 0; rotateB = 1; rotateC = 1; rotateD = 0;
+      rotateA = 0;
+      rotateB = 1;
+      rotateC = 1;
+      rotateD = 0;
       break;
     case 270:
-      rotateA = 0; rotateB = -1; rotateC = -1; rotateD = 0;
+      rotateA = 0;
+      rotateB = -1;
+      rotateC = -1;
+      rotateD = 0;
       break;
     default:
-      rotateA = 1; rotateB = 0; rotateC = 0; rotateD = -1;
+      rotateA = 1;
+      rotateB = 0;
+      rotateC = 0;
+      rotateD = -1;
   }
   let offsetCanvasX: number, offsetCanvasY: number, width: number, height: number;
   if (rotateA === 0) {

@@ -1,7 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { defaultConsent, hasDecided, readConsent, subscribeConsent, writeConsent, type ConsentState } from "./store";
+import {
+  defaultConsent,
+  hasDecided,
+  readConsent,
+  subscribeConsent,
+  writeConsent,
+  type ConsentState,
+} from "./store";
 
 const getServerSnapshot = () => defaultConsent;
 const subscribeNoop = () => () => {};

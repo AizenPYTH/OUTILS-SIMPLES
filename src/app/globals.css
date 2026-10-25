@@ -9,33 +9,33 @@
    ------------------------------------------------------------------------- */
 :root {
   /* Design handoff tokens (OUTILIA — Refonte outils et recherche) */
-  --background: #f8f9fc;          /* --bg  */
-  --foreground: #15172b;          /* --tx  */
-  --muted: #f0f1f8;               /* --bg2 */
-  --muted-foreground: #696d82;    /* --mu  (4.9:1 on white) */
-  --surface: #ffffff;             /* --sf  */
+  --background: #f8f9fc; /* --bg  */
+  --foreground: #15172b; /* --tx  */
+  --muted: #f0f1f8; /* --bg2 */
+  --muted-foreground: #696d82; /* --mu  (4.9:1 on white) */
+  --surface: #ffffff; /* --sf  */
   --surface-foreground: #15172b;
-  --border: #e5e7f0;              /* --bd  */
+  --border: #e5e7f0; /* --bd  */
   --input: #e5e7f0;
-  --ring: #ededfd;                /* --soft focus ring (3px) */
+  --ring: #ededfd; /* --soft focus ring (3px) */
 
-  --primary: #5146e5;             /* --btn */
-  --primary-hover: #4338ca;       /* --btnh */
+  --primary: #5146e5; /* --btn */
+  --primary-hover: #4338ca; /* --btnh */
   --primary-foreground: #ffffff;
-  --primary-soft: #edebfd;        /* --soft */
-  --link: #5146e5;                /* --pr  */
-  --accent: #7958f5;              /* --ac  */
+  --primary-soft: #edebfd; /* --soft */
+  --link: #5146e5; /* --pr  */
+  --accent: #7958f5; /* --ac  */
   --accent-soft: #edebfd;
   --accent-foreground: #3b32b0;
 
-  --success: #12805c;             /* --ok  */
-  --success-soft: #e3f6ee;        /* --okb */
+  --success: #12805c; /* --ok  */
+  --success-soft: #e3f6ee; /* --okb */
   --success-foreground: #0f6a4c;
   --warning: #b7791f;
   --warning-soft: #fdf3dd;
   --warning-foreground: #7a4f0a;
-  --destructive: #c0392b;         /* --er  */
-  --destructive-soft: #fceae7;    /* --erb */
+  --destructive: #c0392b; /* --er  */
+  --destructive-soft: #fceae7; /* --erb */
   --destructive-foreground: #ffffff;
 
   --radius-xs: 6px;
@@ -124,15 +124,22 @@
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
 
-  --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans:
+    var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-heading: var(--font-heading), var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-signature: var(--font-signature), "Segoe Script", cursive;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   --animate-fade-in: fade-in 0.2s ease-out;
   @keyframes fade-in {
-    from { opacity: 0; transform: translateY(2px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(2px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
@@ -160,12 +167,21 @@
     outline-offset: 2px;
     box-shadow: 0 0 0 3px var(--ring);
   }
-  h1, h2, h3, .font-heading {
+  h1,
+  h2,
+  h3,
+  .font-heading {
     font-family: var(--font-heading);
     letter-spacing: -0.02em;
   }
-  h1 { font-weight: 800; letter-spacing: -0.025em; }
-  h2, h3 { font-weight: 700; }
+  h1 {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+  h2,
+  h3 {
+    font-weight: 700;
+  }
   ::selection {
     background: var(--primary-soft);
   }
@@ -197,7 +213,9 @@
   .prose-tool {
     max-width: 68ch;
   }
-  .prose-tool p + p { margin-top: 0.75rem; }
+  .prose-tool p + p {
+    margin-top: 0.75rem;
+  }
   .checkerboard {
     background-color: var(--muted);
     background-image:
@@ -206,7 +224,13 @@
       linear-gradient(45deg, transparent 75%, var(--border) 75%),
       linear-gradient(-45deg, transparent 75%, var(--border) 75%);
     background-size: 16px 16px;
-    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    background-position:
+      0 0,
+      0 8px,
+      8px -8px,
+      -8px 0;
   }
-  .touch-none-important { touch-action: none; }
+  .touch-none-important {
+    touch-action: none;
+  }
 }

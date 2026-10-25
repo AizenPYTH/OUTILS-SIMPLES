@@ -43,7 +43,9 @@ export const guides: readonly Guide[] = [
       },
       {
         heading: "Fusionner dans le navigateur",
-        paragraphs: ["Avec l'outil Fusionner des PDF d'OUTILIA, la procédure tient en trois étapes :"],
+        paragraphs: [
+          "Avec l'outil Fusionner des PDF d'OUTILIA, la procédure tient en trois étapes :",
+        ],
         list: [
           "Déposez vos fichiers dans la zone prévue (ou cliquez pour les sélectionner). Vous pouvez en ajouter d'autres ensuite.",
           "Réorganisez-les par glisser-déposer ou avec les flèches. L'ordre affiché est l'ordre final.",
@@ -80,7 +82,9 @@ export const guides: readonly Guide[] = [
       },
       {
         heading: "Les trois niveaux proposés par OUTILIA",
-        paragraphs: ["L'outil Compresser un PDF propose trois niveaux correspondant à des traitements réellement différents :"],
+        paragraphs: [
+          "L'outil Compresser un PDF propose trois niveaux correspondant à des traitements réellement différents :",
+        ],
         list: [
           "Structure seule : réécriture du fichier avec des flux d'objets et suppression des objets non référencés. Aucune image n'est touchée, aucune perte.",
           "Équilibré : en plus du nettoyage, les images JPEG et les images non compressées sont réencodées en JPEG de bonne qualité et limitées à 1 600 px de côté.",

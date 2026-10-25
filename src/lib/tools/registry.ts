@@ -91,7 +91,8 @@ export const toolRegistry: readonly ToolDefinition[] = [
     slug: "fusionner",
     category: "pdf",
     name: "Fusionner des PDF",
-    shortDescription: "Combinez plusieurs fichiers PDF en un seul document, dans l'ordre de votre choix.",
+    shortDescription:
+      "Combinez plusieurs fichiers PDF en un seul document, dans l'ordre de votre choix.",
     description:
       "Rassemblez plusieurs PDF en un seul fichier. Ajoutez vos documents, réorganisez-les par glisser-déposer, retirez ceux dont vous n'avez plus besoin, puis téléchargez le PDF fusionné. Toutes les pages, leurs dimensions et leurs rotations sont conservées.",
     icon: "merge",
@@ -154,7 +155,8 @@ export const toolRegistry: readonly ToolDefinition[] = [
     slug: "diviser",
     category: "pdf",
     name: "Diviser un PDF",
-    shortDescription: "Découpez un PDF en plusieurs fichiers selon des plages de pages que vous définissez.",
+    shortDescription:
+      "Découpez un PDF en plusieurs fichiers selon des plages de pages que vous définissez.",
     description:
       "Divisez un document PDF en plusieurs fichiers : indiquez des plages de pages (par exemple « 1-3, 4-6, 10 »), choisissez d'obtenir un fichier par plage ou un seul fichier regroupant les pages retenues, vérifiez l'aperçu puis téléchargez le résultat, individuellement ou dans une archive ZIP.",
     icon: "scissors",
@@ -315,7 +317,8 @@ export const toolRegistry: readonly ToolDefinition[] = [
     slug: "rotation",
     category: "pdf",
     name: "Pivoter un PDF",
-    shortDescription: "Faites pivoter toutes les pages, une sélection ou des pages individuelles de 90°, 180° ou 270°.",
+    shortDescription:
+      "Faites pivoter toutes les pages, une sélection ou des pages individuelles de 90°, 180° ou 270°.",
     description:
       "Corrigez l'orientation de vos PDF : faites pivoter l'ensemble du document, une plage de pages ou des pages précises. L'aperçu reflète la rotation appliquée et le fichier exporté s'ouvre correctement orienté dans tous les lecteurs.",
     icon: "rotate-cw",
@@ -360,7 +363,8 @@ export const toolRegistry: readonly ToolDefinition[] = [
     slug: "extraire-pages",
     category: "pdf",
     name: "Extraire des pages d'un PDF",
-    shortDescription: "Sélectionnez des pages sur les vignettes ou par plage et exportez-les dans un nouveau PDF.",
+    shortDescription:
+      "Sélectionnez des pages sur les vignettes ou par plage et exportez-les dans un nouveau PDF.",
     description:
       "Extrayez uniquement les pages dont vous avez besoin : cliquez sur les vignettes pour les sélectionner ou saisissez une plage (« 2-4, 7 »), vérifiez la sélection puis téléchargez un nouveau PDF contenant seulement ces pages, dans l'ordre du document.",
     icon: "file-output",
@@ -402,7 +406,8 @@ export const toolRegistry: readonly ToolDefinition[] = [
     slug: "ajouter-texte",
     category: "pdf",
     name: "Ajouter du texte à un PDF",
-    shortDescription: "Placez du texte où vous voulez sur vos pages : taille, couleur, police et alignement.",
+    shortDescription:
+      "Placez du texte où vous voulez sur vos pages : taille, couleur, police et alignement.",
     description:
       "Ajoutez du texte sur un PDF existant : cliquez à l'endroit souhaité, saisissez votre texte, ajustez la police, la taille, la couleur et l'alignement, puis exportez. Idéal pour compléter un document, ajouter une mention ou dater un formulaire non interactif.",
     icon: "type",
@@ -449,7 +454,8 @@ export const toolRegistry: readonly ToolDefinition[] = [
     slug: "annoter",
     category: "pdf",
     name: "Annoter un PDF",
-    shortDescription: "Surlignez, soulignez, dessinez, commentez et ajoutez des formes sur vos PDF.",
+    shortDescription:
+      "Surlignez, soulignez, dessinez, commentez et ajoutez des formes sur vos PDF.",
     description:
       "Annotez vos documents PDF : surlignage de zones, soulignement, dessin à main levée, commentaires texte, rectangles, ellipses et flèches. Supprimez une annotation d'un clic, annulez ou rétablissez vos actions, puis exportez un PDF lisible partout.",
     icon: "highlighter",
@@ -503,7 +509,8 @@ export const toolRegistry: readonly ToolDefinition[] = [
     slug: "signer",
     category: "pdf",
     name: "Signer un PDF",
-    shortDescription: "Dessinez ou importez votre signature, placez-la et exportez le document signé.",
+    shortDescription:
+      "Dessinez ou importez votre signature, placez-la et exportez le document signé.",
     description:
       "Signez un PDF depuis votre navigateur : tracez votre signature à la souris ou au doigt, ou importez une image de signature (PNG, JPEG), positionnez-la et redimensionnez-la sur la page, puis téléchargez. Votre signature ne quitte jamais votre appareil.",
     icon: "pen-line",
@@ -558,7 +565,8 @@ export const toolRegistry: readonly ToolDefinition[] = [
     slug: "ajouter-filigrane",
     category: "pdf",
     name: "Ajouter un filigrane à un PDF",
-    shortDescription: "Apposez un texte ou une image en filigrane, avec opacité, rotation, taille et position réglables.",
+    shortDescription:
+      "Apposez un texte ou une image en filigrane, avec opacité, rotation, taille et position réglables.",
     description:
       "Protégez ou marquez vos documents avec un filigrane texte (« CONFIDENTIEL », « BROUILLON », votre nom…) ou une image (logo). Réglez l'opacité, la rotation, la taille et la position, choisissez les pages concernées, prévisualisez puis exportez.",
     icon: "droplets",
@@ -657,7 +665,8 @@ export const toolRegistry: readonly ToolDefinition[] = [
     slug: "remplir-formulaire",
     category: "pdf",
     name: "Remplir un formulaire PDF",
-    shortDescription: "Détectez les champs interactifs d'un formulaire PDF, remplissez-les et exportez.",
+    shortDescription:
+      "Détectez les champs interactifs d'un formulaire PDF, remplissez-les et exportez.",
     description:
       "Remplissez un formulaire PDF interactif (AcroForm) : OUTILIA détecte les champs texte, cases à cocher, boutons radio et listes déroulantes, vous permet de les compléter dans une interface claire avec aperçu de la page, puis exporte le document rempli, aplati ou non.",
     icon: "clipboard-list",

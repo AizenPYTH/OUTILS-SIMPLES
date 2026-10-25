@@ -28,7 +28,11 @@ export class PdfError extends Error {
   readonly code: PdfErrorCode;
   readonly recoverable: boolean;
 
-  constructor(code: PdfErrorCode, message: string, options?: { recoverable?: boolean; cause?: unknown }) {
+  constructor(
+    code: PdfErrorCode,
+    message: string,
+    options?: { recoverable?: boolean; cause?: unknown },
+  ) {
     super(message, options?.cause !== undefined ? { cause: options.cause } : undefined);
     this.name = "PdfError";
     this.code = code;
@@ -41,7 +45,10 @@ export function isPdfError(error: unknown): error is PdfError {
 }
 
 /** Maps any thrown value (pdf-lib, pdf.js, DOM) to a PdfError with a safe message. */
-export function toPdfError(error: unknown, fallbackCode: PdfErrorCode = "PROCESSING_FAILED"): PdfError {
+export function toPdfError(
+  error: unknown,
+  fallbackCode: PdfErrorCode = "PROCESSING_FAILED",
+): PdfError {
   if (isPdfError(error)) return error;
   const message = error instanceof Error ? error.message : String(error);
   const name = error instanceof Error ? error.name : "";
@@ -64,12 +71,17 @@ export function toPdfError(error: unknown, fallbackCode: PdfErrorCode = "PROCESS
   ) {
     return new PdfError("CORRUPTED", t.errors.corrupted, { cause: error });
   }
-  if (lower.includes("out of memory") || lower.includes("allocation failed") || lower.includes("array buffer allocation")) {
+  if (
+    lower.includes("out of memory") ||
+    lower.includes("allocation failed") ||
+    lower.includes("array buffer allocation")
+  ) {
     return new PdfError("OUT_OF_MEMORY", t.errors.outOfMemory, { cause: error });
   }
   if (lower.includes("timeout") || lower.includes("aborted")) {
     return new PdfError("TIMEOUT", t.errors.timeout, { cause: error, recoverable: true });
   }
-  const fallbackMessage = fallbackCode === "RENDER_FAILED" ? t.errors.renderFailed : t.errors.processingFailed;
+  const fallbackMessage =
+    fallbackCode === "RENDER_FAILED" ? t.errors.renderFailed : t.errors.processingFailed;
   return new PdfError(fallbackCode, fallbackMessage, { cause: error, recoverable: true });
 }

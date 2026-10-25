@@ -16,10 +16,16 @@ export const metadata: Metadata = buildPageMetadata({
 export default function GuidesPage() {
   return (
     <div className="container-page py-8 sm:py-10">
-      <Breadcrumbs items={[{ name: t.nav.home, path: "/" }, { name: t.nav.guides, path: "/guides/" }]} />
+      <Breadcrumbs
+        items={[
+          { name: t.nav.home, path: "/" },
+          { name: t.nav.guides, path: "/guides/" },
+        ]}
+      />
       <h1 className="mt-6 text-[clamp(32px,4.4vw,52px)] leading-[1.05]">Guides pratiques</h1>
       <p className="mt-2 max-w-2xl text-lg text-muted-foreground">
-        Des explications concrètes, rédigées à la main, pour résoudre les problèmes courants et bien utiliser les outils.
+        Des explications concrètes, rédigées à la main, pour résoudre les problèmes courants et bien
+        utiliser les outils.
       </p>
       <ul className="mt-8 grid gap-4 md:grid-cols-2">
         {guides.map((guide) => {
@@ -32,7 +38,9 @@ export default function GuidesPage() {
               >
                 <h2 className="text-lg">{guide.title}</h2>
                 <p className="mt-2 text-sm text-muted-foreground">{guide.description}</p>
-                {tool ? <p className="mt-3 text-xs font-medium text-link">Outil : {tool.name}</p> : null}
+                {tool ? (
+                  <p className="mt-3 text-xs font-medium text-link">Outil : {tool.name}</p>
+                ) : null}
               </Link>
             </li>
           );

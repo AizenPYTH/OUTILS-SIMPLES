@@ -1,6 +1,18 @@
 "use client";
 
-import { ArrowUpRight, Circle, Highlighter, ImageIcon, MessageSquare, MousePointer2, PenLine, Pencil, Square, Type, Underline } from "lucide-react";
+import {
+  ArrowUpRight,
+  Circle,
+  Highlighter,
+  ImageIcon,
+  MessageSquare,
+  MousePointer2,
+  PenLine,
+  Pencil,
+  Square,
+  Type,
+  Underline,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toolLabels, type WorkspaceTool } from "./types";
 
@@ -32,7 +44,10 @@ export function Toolbar({ tools, active, onChange, orientation }: ToolbarProps) 
       role="toolbar"
       aria-label="Outils d'édition"
       aria-orientation={orientation}
-      className={cn("flex gap-1", orientation === "vertical" ? "flex-col" : "flex-row overflow-x-auto px-2")}
+      className={cn(
+        "flex gap-1",
+        orientation === "vertical" ? "flex-col" : "flex-row overflow-x-auto px-2",
+      )}
     >
       {tools.map((tool) => {
         const Icon = icons[tool];
@@ -45,7 +60,9 @@ export function Toolbar({ tools, active, onChange, orientation }: ToolbarProps) 
             onClick={() => onChange(tool)}
             className={cn(
               "flex h-14 min-w-16 shrink-0 flex-col items-center justify-center gap-1 rounded-[10px] text-[11px] font-medium transition-colors",
-              isActive ? "bg-primary-soft text-link" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              isActive
+                ? "bg-primary-soft text-link"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
             data-testid={`tool-${tool}`}
           >

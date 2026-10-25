@@ -32,7 +32,9 @@ function Alert({ className, variant = "info", title, children, role, ...props }:
       <Icon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1 space-y-1">
         {title ? <p className="font-medium leading-tight">{title}</p> : null}
-        {children ? <div className="text-sm leading-relaxed [&_p]:leading-relaxed">{children}</div> : null}
+        {children ? (
+          <div className="text-sm leading-relaxed [&_p]:leading-relaxed">{children}</div>
+        ) : null}
       </div>
     </div>
   );

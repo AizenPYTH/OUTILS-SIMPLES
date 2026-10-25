@@ -8,7 +8,10 @@ export default function NotFound() {
   return (
     <>
       <SiteHeader />
-      <main id="contenu" className="container-page flex flex-1 flex-col items-center justify-center py-24 text-center">
+      <main
+        id="contenu"
+        className="container-page flex flex-1 flex-col items-center justify-center py-24 text-center"
+      >
         <p className="text-sm font-semibold text-link">404</p>
         <h1 className="mt-2 text-3xl sm:text-4xl">{t.notFound.title}</h1>
         <p className="mt-3 max-w-md text-muted-foreground">{t.notFound.body}</p>

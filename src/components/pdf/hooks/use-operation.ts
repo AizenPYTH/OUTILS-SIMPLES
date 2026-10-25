@@ -27,7 +27,9 @@ export function useOperation<R>(toolId: string) {
   const runIdRef = React.useRef(0);
 
   const run = React.useCallback(
-    async (work: (report: (progress: OperationProgress) => void) => Promise<R>): Promise<R | null> => {
+    async (
+      work: (report: (progress: OperationProgress) => void) => Promise<R>,
+    ): Promise<R | null> => {
       const runId = (runIdRef.current += 1);
       setState({ status: "busy", progress: { current: 0, total: 1, label: t.progress.preparing } });
       await new Promise((resolve) => setTimeout(resolve, 30));

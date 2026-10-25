@@ -1,8 +1,22 @@
 "use client";
 
 import * as React from "react";
-import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ArrowDown, ArrowUp, FileText, GripVertical, Merge, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -36,14 +50,24 @@ export function MergeTool() {
   const [loading, setLoading] = React.useState(false);
   const op = useOperation<MergeResult>(TOOL_ID);
   const editor = getToolById("pdf-edit");
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const addFiles = async (incoming: File[]) => {
     setLoading(true);
     try {
       const next: QueuedFile[] = [];
       for (const file of incoming) {
-        if (files.some((f) => f.file.name === file.name && f.file.size === file.size && f.file.lastModified === file.lastModified)) {
+        if (
+          files.some(
+            (f) =>
+              f.file.name === file.name &&
+              f.file.size === file.size &&
+              f.file.lastModified === file.lastModified,
+          )
+        ) {
           toast.info(t.upload.fileRejected(file.name, t.errors.duplicateFile));
           continue;
         }
@@ -52,18 +76,31 @@ export function MergeTool() {
           const pageCount = await countPages(bytes);
           next.push({ id: uid("file"), file, bytes, pageCount });
         } catch (error) {
-          toast.error(t.upload.fileRejected(file.name, isPdfError(error) ? error.message : t.errors.notPdf));
+          toast.error(
+            t.upload.fileRejected(file.name, isPdfError(error) ? error.message : t.errors.notPdf),
+          );
         }
       }
       const combined = [...files, ...next];
       try {
-        validateFileBatch(combined.map((f) => f.file), { maxFileCount: tool.limits.maxFileCount, maxTotalSizeBytes: pdfLimits.maxTotalSizeBytes });
+        validateFileBatch(
+          combined.map((f) => f.file),
+          {
+            maxFileCount: tool.limits.maxFileCount,
+            maxTotalSizeBytes: pdfLimits.maxTotalSizeBytes,
+          },
+        );
       } catch (error) {
         toast.error(toPdfError(error).message);
         return;
       }
       setFiles(combined);
-      if (next.length) toast.success(next.length === 1 ? t.upload.fileAdded(next[0]!.file.name) : t.upload.filesAdded(next.length));
+      if (next.length)
+        toast.success(
+          next.length === 1
+            ? t.upload.fileAdded(next[0]!.file.name)
+            : t.upload.filesAdded(next.length),
+        );
     } finally {
       setLoading(false);
     }
@@ -80,7 +117,13 @@ export function MergeTool() {
   const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    setFiles((list) => arrayMove(list, list.findIndex((f) => f.id === active.id), list.findIndex((f) => f.id === over.id)));
+    setFiles((list) =>
+      arrayMove(
+        list,
+        list.findIndex((f) => f.id === active.id),
+        list.findIndex((f) => f.id === over.id),
+      ),
+    );
   };
 
   const merge = () => {
@@ -88,7 +131,12 @@ export function MergeTool() {
       toast.error(t.errors.needTwoFiles);
       return;
     }
-    void op.run((report) => mergePdfs(files.map((f) => ({ name: f.file.name, bytes: f.bytes })), report));
+    void op.run((report) =>
+      mergePdfs(
+        files.map((f) => ({ name: f.file.name, bytes: f.bytes })),
+        report,
+      ),
+    );
   };
 
   const resetAll = () => {
@@ -97,7 +145,8 @@ export function MergeTool() {
   };
 
   if (op.state.status === "busy") return <BusyPanel progress={op.state.progress} />;
-  if (op.state.status === "error") return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={resetAll} />;
+  if (op.state.status === "error")
+    return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={resetAll} />;
   if (op.state.status === "done") {
     const result = op.state.result;
     const firstName = files[0]?.file.name ?? "document.pdf";
@@ -117,12 +166,22 @@ export function MergeTool() {
   return (
     <div className="space-y-5">
       {files.length === 0 ? (
-        <PdfDropzone onFiles={(f) => void addFiles(f)} multiple maxFileSizeBytes={tool.limits.maxFileSizeBytes} maxFileCount={tool.limits.maxFileCount} disabled={loading} />
+        <PdfDropzone
+          onFiles={(f) => void addFiles(f)}
+          multiple
+          maxFileSizeBytes={tool.limits.maxFileSizeBytes}
+          maxFileCount={tool.limits.maxFileCount}
+          disabled={loading}
+        />
       ) : (
         <>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext items={files.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-              <ol className="space-y-2" aria-label="Fichiers à fusionner" data-testid="merge-file-list">
+              <ol
+                className="space-y-2"
+                aria-label="Fichiers à fusionner"
+                data-testid="merge-file-list"
+              >
                 {files.map((item, index) => (
                   <SortableFileRow
                     key={item.id}
@@ -137,12 +196,27 @@ export function MergeTool() {
               </ol>
             </SortableContext>
           </DndContext>
-          <PdfDropzone onFiles={(f) => void addFiles(f)} multiple compact maxFileSizeBytes={tool.limits.maxFileSizeBytes} maxFileCount={tool.limits.maxFileCount} disabled={loading} />
+          <PdfDropzone
+            onFiles={(f) => void addFiles(f)}
+            multiple
+            compact
+            maxFileSizeBytes={tool.limits.maxFileSizeBytes}
+            maxFileCount={tool.limits.maxFileCount}
+            disabled={loading}
+          />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
-              {files.length} {t.common.files} · {t.result.pages(totalPages)} · {formatBytes(totalSize)}
+              {files.length} {t.common.files} · {t.result.pages(totalPages)} ·{" "}
+              {formatBytes(totalSize)}
             </p>
-            <Button type="button" size="lg" className="w-full sm:w-auto" onClick={merge} disabled={files.length < 2 || loading} data-testid="merge-button">
+            <Button
+              type="button"
+              size="lg"
+              className="w-full sm:w-auto"
+              onClick={merge}
+              disabled={files.length < 2 || loading}
+              data-testid="merge-button"
+            >
               <Merge aria-hidden="true" />
               Fusionner {files.length > 1 ? `${files.length} fichiers` : ""}
             </Button>
@@ -168,7 +242,9 @@ function SortableFileRow({
   onMoveDown: () => void;
   onRemove: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.id,
+  });
   return (
     <li
       ref={setNodeRef}
@@ -198,13 +274,34 @@ function SortableFileRow({
           {item.pageCount !== null ? ` · ${t.result.pages(item.pageCount)}` : ""}
         </p>
       </div>
-      <Button type="button" variant="ghost" size="icon-sm" onClick={onMoveUp} disabled={index === 0} aria-label="Monter">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={onMoveUp}
+        disabled={index === 0}
+        aria-label="Monter"
+      >
         <ArrowUp aria-hidden="true" />
       </Button>
-      <Button type="button" variant="ghost" size="icon-sm" onClick={onMoveDown} disabled={index === total - 1} aria-label="Descendre">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={onMoveDown}
+        disabled={index === total - 1}
+        aria-label="Descendre"
+      >
         <ArrowDown aria-hidden="true" />
       </Button>
-      <Button type="button" variant="ghost" size="icon-sm" onClick={onRemove} aria-label={`${t.common.remove} ${item.file.name}`} className="text-destructive hover:text-destructive">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={onRemove}
+        aria-label={`${t.common.remove} ${item.file.name}`}
+        className="text-destructive hover:text-destructive"
+      >
         <Trash2 aria-hidden="true" />
       </Button>
     </li>
@@ -217,7 +314,11 @@ async function countPages(bytes: Uint8Array): Promise<number | null> {
     const doc = await loadPdfDocument(bytes, { maxPageCount: Number.MAX_SAFE_INTEGER });
     return doc.getPageCount();
   } catch (error) {
-    if (isPdfError(error) && (error.code === "ENCRYPTED" || error.code === "CORRUPTED" || error.code === "EMPTY")) throw error;
+    if (
+      isPdfError(error) &&
+      (error.code === "ENCRYPTED" || error.code === "CORRUPTED" || error.code === "EMPTY")
+    )
+      throw error;
     if (error instanceof PdfError) throw error;
     return null;
   }

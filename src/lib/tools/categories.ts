@@ -20,11 +20,13 @@ export const toolCategories: readonly ToolCategory[] = [
     slug: "images",
     name: "Outils images",
     shortName: "Images",
-    description: "Compresser, redimensionner, convertir et recadrer vos images sans les envoyer sur un serveur.",
+    description:
+      "Compresser, redimensionner, convertir et recadrer vos images sans les envoyer sur un serveur.",
     icon: "image",
     seo: {
       title: "Outils images en ligne",
-      description: "Outils de compression, redimensionnement et conversion d'images traités localement.",
+      description:
+        "Outils de compression, redimensionnement et conversion d'images traités localement.",
     },
   },
   {

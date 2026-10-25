@@ -27,7 +27,11 @@ const SECTION_LIMIT = 8;
 
 /** Suggest tools for a query that matched nothing, searching planned tools as a hint only. */
 function suggestAlternatives(query: string): ToolDefinition[] {
-  const planned = searchTools(toolRegistry.filter((x) => x.status === "planned"), query, 3).map((r) => r.tool);
+  const planned = searchTools(
+    toolRegistry.filter((x) => x.status === "planned"),
+    query,
+    3,
+  ).map((r) => r.tool);
   const sameCategory = planned.flatMap((p) => getToolsByCategory(p.category));
   const popular = publishedTools.filter((x) => x.featured);
   const merged = [...sameCategory, ...popular];
@@ -55,12 +59,16 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
   const isFiltering = trimmed.length > 0 || category !== "all";
 
   const results = React.useMemo(() => {
-    const pool = category === "all" ? publishedTools : publishedTools.filter((x) => x.category === category);
+    const pool =
+      category === "all" ? publishedTools : publishedTools.filter((x) => x.category === category);
     if (trimmed.length === 0) return pool;
     return searchTools(pool, trimmed).map((r) => r.tool);
   }, [category, trimmed]);
 
-  const alternatives = React.useMemo(() => (results.length === 0 && trimmed ? suggestAlternatives(trimmed) : []), [results.length, trimmed]);
+  const alternatives = React.useMemo(
+    () => (results.length === 0 && trimmed ? suggestAlternatives(trimmed) : []),
+    [results.length, trimmed],
+  );
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +84,8 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
     inputRef.current?.focus();
   };
 
-  const countFor = (id: string) => (id === "all" ? publishedTools.length : publishedTools.filter((x) => x.category === id).length);
+  const countFor = (id: string) =>
+    id === "all" ? publishedTools.length : publishedTools.filter((x) => x.category === id).length;
 
   const categoryButton = (id: string, label: string, icon?: ToolCategory["icon"]) => (
     <button
@@ -111,7 +120,10 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
         <label htmlFor="catalog-search" className="sr-only">
           {t.nav.search}
         </label>
-        <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+        <Search
+          className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
+          aria-hidden="true"
+        />
         <input
           id="catalog-search"
           ref={inputRef}
@@ -134,26 +146,39 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
             <X className="size-4" aria-hidden="true" />
           </button>
         ) : null}
-        <Button type="submit" className="absolute right-1.5 top-1/2 h-10 -translate-y-1/2 rounded-[12px] px-4">
+        <Button
+          type="submit"
+          className="absolute right-1.5 top-1/2 h-10 -translate-y-1/2 rounded-[12px] px-4"
+        >
           Rechercher
         </Button>
       </form>
 
       <div className="grid gap-6 lg:grid-cols-[210px_1fr]">
-        <nav aria-label={t.nav.categories} className="lg:sticky lg:top-[calc(var(--header-height)+16px)] lg:self-start">
+        <nav
+          aria-label={t.nav.categories}
+          className="lg:sticky lg:top-[calc(var(--header-height)+16px)] lg:self-start"
+        >
           <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 lg:mx-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:px-0 lg:pb-0">
             {categoryButton("all", t.directory.filterAll)}
             {activeCategories.map((c) => categoryButton(c.id, c.shortName, c.icon))}
           </div>
           {plannedCategories.length ? (
             <div className="mt-6 hidden lg:block">
-              <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.directory.plannedTitle}</p>
+              <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t.directory.plannedTitle}
+              </p>
               <ul className="space-y-1">
                 {plannedCategories.map((c) => (
-                  <li key={c.id} className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground">
+                  <li
+                    key={c.id}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground"
+                  >
                     <ToolIcon name={c.icon} className="size-4 opacity-60" />
                     <span className="flex-1">{c.shortName}</span>
-                    <span className="rounded-full bg-muted px-1.5 text-[11px]">{t.common.soon}</span>
+                    <span className="rounded-full bg-muted px-1.5 text-[11px]">
+                      {t.common.soon}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -167,14 +192,22 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
               <section aria-labelledby="results-heading">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 id="results-heading" className="text-lg">
-                    {trimmed ? `Résultats pour « ${trimmed} »` : (activeCategories.find((c) => c.id === category)?.name ?? t.directory.title)}
+                    {trimmed
+                      ? `Résultats pour « ${trimmed} »`
+                      : (activeCategories.find((c) => c.id === category)?.name ??
+                        t.directory.title)}
                   </h2>
-                  <span className="text-sm text-muted-foreground">{t.directory.resultsCount(results.length)}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {t.directory.resultsCount(results.length)}
+                  </span>
                 </div>
                 <ToolGrid tools={results} />
               </section>
             ) : (
-              <div className="rounded-[20px] border border-dashed border-border p-10 text-center" data-testid="no-results">
+              <div
+                className="rounded-[20px] border border-dashed border-border p-10 text-center"
+                data-testid="no-results"
+              >
                 <h2 className="text-lg">{t.directory.noResultsTitle}</h2>
                 <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
                   {alternatives.length ? t.directory.noResultsBody : t.directory.noResultsEmpty}
@@ -215,7 +248,9 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
                           {c.name}
                         </Link>
                       </h2>
-                      <span className="text-sm text-muted-foreground">{t.directory.resultsCount(tools.length)}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {t.directory.resultsCount(tools.length)}
+                      </span>
                     </div>
                     <ToolGrid tools={visible} />
                     {tools.length > SECTION_LIMIT ? (
@@ -242,7 +277,10 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
 
 function ToolGrid({ tools }: { tools: ToolDefinition[] }) {
   return (
-    <ul className="grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]" data-testid="tool-grid">
+    <ul
+      className="grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"
+      data-testid="tool-grid"
+    >
       {tools.map((tool) => (
         <li key={tool.id}>
           <ToolCard tool={tool} compact />

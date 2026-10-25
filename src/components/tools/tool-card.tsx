@@ -29,17 +29,28 @@ export function ToolCard({ tool, className, featured = false }: ToolCardProps) {
       <span
         className={cn(
           "flex shrink-0 items-center justify-center rounded-[10px]",
-          featured ? "size-12 bg-primary text-primary-foreground" : "size-10 bg-primary-soft text-link",
+          featured
+            ? "size-12 bg-primary text-primary-foreground"
+            : "size-10 bg-primary-soft text-link",
         )}
       >
         <ToolIcon name={tool.icon} className={featured ? "size-6" : "size-5"} strokeWidth={1.7} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
-          <span className={cn("font-semibold leading-snug text-foreground", featured ? "text-base" : "text-[15px]")}>{tool.name}</span>
+          <span
+            className={cn(
+              "font-semibold leading-snug text-foreground",
+              featured ? "text-base" : "text-[15px]",
+            )}
+          >
+            {tool.name}
+          </span>
           {tool.status === "beta" ? <Badge variant="warning">{t.tool.betaBadge}</Badge> : null}
         </span>
-        <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">{tool.shortDescription}</span>
+        <span className="mt-1 line-clamp-2 block text-sm leading-relaxed text-muted-foreground">
+          {tool.shortDescription}
+        </span>
       </span>
     </Link>
   );

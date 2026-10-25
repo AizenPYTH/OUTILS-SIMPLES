@@ -10,7 +10,17 @@ function makeTool(toolId: string, mode: WorkspaceMode, notice?: string) {
     return (
       <div className="space-y-4">
         {notice ? <Alert variant="info">{notice}</Alert> : null}
-        <SingleFileTool toolId={toolId}>{({ pdf, tool, reset }) => <AnnotationWorkspace pdf={pdf} mode={mode} toolId={toolId} title={tool.name} onClose={reset} />}</SingleFileTool>
+        <SingleFileTool toolId={toolId}>
+          {({ pdf, tool, reset }) => (
+            <AnnotationWorkspace
+              pdf={pdf}
+              mode={mode}
+              toolId={toolId}
+              title={tool.name}
+              onClose={reset}
+            />
+          )}
+        </SingleFileTool>
       </div>
     );
   };
@@ -21,7 +31,11 @@ export const EditorTool = makeTool(
   "editor",
   "Les ajouts (texte, dessins, images, signature) sont superposés au document : le texte d'origine n'est pas modifié. L'éditeur s'ouvre en plein écran dès qu'un fichier est chargé.",
 );
-export const AnnotateTool = makeTool("pdf-annotate", "annotate", "Les annotations sont dessinées dans les pages (visibles partout, non modifiables après export).");
+export const AnnotateTool = makeTool(
+  "pdf-annotate",
+  "annotate",
+  "Les annotations sont dessinées dans les pages (visibles partout, non modifiables après export).",
+);
 export const AddTextTool = makeTool("pdf-add-text", "text");
 export const SignTool = makeTool(
   "pdf-sign",

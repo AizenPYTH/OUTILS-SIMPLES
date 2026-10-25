@@ -31,7 +31,10 @@ export function AnalyticsLoader() {
     const id = publicEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID;
     return (
       <>
-        <Script src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`} strategy="afterInteractive" />
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`}
+          strategy="afterInteractive"
+        />
         <Script id="gtag-init" strategy="afterInteractive">
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('js',new Date());gtag('config',${JSON.stringify(id)},{anonymize_ip:true});`}
         </Script>

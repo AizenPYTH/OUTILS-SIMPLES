@@ -25,7 +25,11 @@ function tokenize(text: string): string[] {
  * then descriptions. Every query token must match somewhere (AND semantics)
  * so results stay relevant; a token matches if a field token starts with it.
  */
-export function searchTools(tools: readonly ToolDefinition[], query: string, limit = 20): SearchResult[] {
+export function searchTools(
+  tools: readonly ToolDefinition[],
+  query: string,
+  limit = 20,
+): SearchResult[] {
   const queryTokens = tokenize(query);
   if (queryTokens.length === 0) return [];
 
@@ -57,5 +61,7 @@ export function searchTools(tools: readonly ToolDefinition[], query: string, lim
     if (tool.keywords.some((k) => normalizeSearchText(k) === normalizedQuery)) score += 8;
     results.push({ tool, score });
   }
-  return results.sort((a, b) => b.score - a.score || a.tool.name.localeCompare(b.tool.name, "fr")).slice(0, limit);
+  return results
+    .sort((a, b) => b.score - a.score || a.tool.name.localeCompare(b.tool.name, "fr"))
+    .slice(0, limit);
 }

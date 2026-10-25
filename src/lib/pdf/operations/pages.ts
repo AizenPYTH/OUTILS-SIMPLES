@@ -6,10 +6,13 @@ import type { ProgressReporter } from "./merge";
 import { t } from "@/lib/i18n";
 
 function assertIndices(indices: number[], pageCount: number): void {
-  if (indices.length === 0) throw new PdfError("NO_SELECTION", t.errors.noSelection, { recoverable: true });
+  if (indices.length === 0)
+    throw new PdfError("NO_SELECTION", t.errors.noSelection, { recoverable: true });
   for (const index of indices) {
     if (!Number.isInteger(index) || index < 0 || index >= pageCount) {
-      throw new PdfError("INVALID_RANGE", t.ranges.errorOutOfBounds(pageCount), { recoverable: true });
+      throw new PdfError("INVALID_RANGE", t.ranges.errorOutOfBounds(pageCount), {
+        recoverable: true,
+      });
     }
   }
 }
@@ -51,7 +54,8 @@ export async function splitPdf(
   mode: SplitMode,
   onProgress?: ProgressReporter,
 ): Promise<SplitOutput[]> {
-  if (ranges.length === 0) throw new PdfError("NO_SELECTION", t.errors.noSelection, { recoverable: true });
+  if (ranges.length === 0)
+    throw new PdfError("NO_SELECTION", t.errors.noSelection, { recoverable: true });
   const source = await loadPdfDocument(bytes);
   const pageCount = source.getPageCount();
 
@@ -69,7 +73,11 @@ export async function splitPdf(
     const range = ranges[i]!;
     const indices = rangeToIndices(range);
     assertIndices(indices, pageCount);
-    onProgress?.({ current: i + 1, total: ranges.length, label: t.progress.processingFile(i + 1, ranges.length) });
+    onProgress?.({
+      current: i + 1,
+      total: ranges.length,
+      label: t.progress.processingFile(i + 1, ranges.length),
+    });
     const output = await createPdfDocument();
     const copied = await output.copyPages(source, indices);
     for (const page of copied) output.addPage(page);
@@ -81,7 +89,7 @@ export async function splitPdf(
 export type RotationDelta = 0 | 90 | 180 | 270;
 
 export function normalizeRotation(angle: number): RotationDelta {
-  const normalized = ((Math.round(angle / 90) * 90) % 360 + 360) % 360;
+  const normalized = (((Math.round(angle / 90) * 90) % 360) + 360) % 360;
   return normalized as RotationDelta;
 }
 
@@ -90,15 +98,22 @@ export function normalizeRotation(angle: number): RotationDelta {
  * absent from the map are left untouched. Rotation is stored as the standard
  * page attribute: content is never re-rendered, so quality is preserved.
  */
-export async function rotatePages(bytes: Uint8Array, rotations: Record<number, number>): Promise<Uint8Array> {
+export async function rotatePages(
+  bytes: Uint8Array,
+  rotations: Record<number, number>,
+): Promise<Uint8Array> {
   const doc = await loadPdfDocument(bytes);
   const pages = doc.getPages();
   const entries = Object.entries(rotations);
-  if (entries.length === 0) throw new PdfError("NO_SELECTION", t.errors.noSelection, { recoverable: true });
+  if (entries.length === 0)
+    throw new PdfError("NO_SELECTION", t.errors.noSelection, { recoverable: true });
   for (const [key, delta] of entries) {
     const index = Number(key);
     const page = pages[index];
-    if (!page) throw new PdfError("INVALID_RANGE", t.ranges.errorOutOfBounds(pages.length), { recoverable: true });
+    if (!page)
+      throw new PdfError("INVALID_RANGE", t.ranges.errorOutOfBounds(pages.length), {
+        recoverable: true,
+      });
     if (normalizeRotation(delta) === 0) continue;
     const current = page.getRotation().angle;
     page.setRotation(degrees(normalizeRotation(current + delta)));
@@ -117,7 +132,10 @@ export interface PageArrangement {
  * Produces a document whose pages follow `arrangement` exactly (order,
  * deletions by omission, duplicates by repetition, per-page rotation).
  */
-export async function organizePages(bytes: Uint8Array, arrangement: PageArrangement[]): Promise<Uint8Array> {
+export async function organizePages(
+  bytes: Uint8Array,
+  arrangement: PageArrangement[],
+): Promise<Uint8Array> {
   const source = await loadPdfDocument(bytes);
   const indices = arrangement.map((a) => a.sourceIndex);
   assertIndices(indices, source.getPageCount());
@@ -126,7 +144,8 @@ export async function organizePages(bytes: Uint8Array, arrangement: PageArrangem
     const copied = await output.copyPages(source, indices);
     copied.forEach((page, i) => {
       const extra = normalizeRotation(arrangement[i]!.rotation);
-      if (extra !== 0) page.setRotation(degrees(normalizeRotation(page.getRotation().angle + extra)));
+      if (extra !== 0)
+        page.setRotation(degrees(normalizeRotation(page.getRotation().angle + extra)));
       output.addPage(page);
     });
   } catch (error) {

@@ -64,8 +64,15 @@ export function usePdfDocument({ toolId, maxFileSizeBytes, maxPageCount }: Optio
           throw error;
         }
         openedRef.current = opened;
-        setState({ status: "ready", pdf: { file, bytes, pageCount: opened.pageCount, pages: opened.pages, opened } });
-        track("tool_start", { tool: toolId, sizeBucket: sizeBucket(file.size), pagesBucket: pagesBucket(opened.pageCount) });
+        setState({
+          status: "ready",
+          pdf: { file, bytes, pageCount: opened.pageCount, pages: opened.pages, opened },
+        });
+        track("tool_start", {
+          tool: toolId,
+          sizeBucket: sizeBucket(file.size),
+          pagesBucket: pagesBucket(opened.pageCount),
+        });
       } catch (error) {
         if (request !== requestRef.current) return;
         const pdfError = toPdfError(error, "CORRUPTED");

@@ -14,7 +14,16 @@ interface PageTileProps {
 }
 
 /** Thumbnail frame (handoff: 2px border, radius 6, active = primary). */
-export function PageTile({ pageNumber, selected = false, children, actions, onClick, ariaLabel, className, dragging }: PageTileProps) {
+export function PageTile({
+  pageNumber,
+  selected = false,
+  children,
+  actions,
+  onClick,
+  ariaLabel,
+  className,
+  dragging,
+}: PageTileProps) {
   const Wrapper = onClick ? "button" : "div";
   return (
     <div className={cn("group relative flex flex-col items-center gap-1.5", className)}>

@@ -18,7 +18,9 @@ export async function readPdfFile(file: File, maxFileSizeBytes?: number): Promis
   return bytes;
 }
 
-export async function readImageFile(file: File): Promise<{ bytes: Uint8Array; mimeType: Exclude<DetectedImageType, null> }> {
+export async function readImageFile(
+  file: File,
+): Promise<{ bytes: Uint8Array; mimeType: Exclude<DetectedImageType, null> }> {
   const bytes = await readFileBytes(file);
   const mimeType = validateImageFile(file, bytes);
   if (!mimeType) throw toPdfError(new Error("not an image"), "UNSUPPORTED");
@@ -26,7 +28,10 @@ export async function readImageFile(file: File): Promise<{ bytes: Uint8Array; mi
 }
 
 /** Reads the natural size of an encoded image in the browser. */
-export function measureImage(bytes: Uint8Array, mimeType: string): Promise<{ width: number; height: number }> {
+export function measureImage(
+  bytes: Uint8Array,
+  mimeType: string,
+): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const copy = new Uint8Array(bytes.byteLength);
     copy.set(bytes);

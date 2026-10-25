@@ -4,7 +4,14 @@ import * as React from "react";
 import { toast } from "sonner";
 import { publicEnv } from "@/config/env";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useConsent } from "@/lib/consent/use-consent";
@@ -51,7 +58,9 @@ export function ConsentPreferencesDialog({ open, onOpenChange }: ConsentPreferen
               <p className="text-sm font-medium">{t.consent.necessary}</p>
               <p className="text-xs text-muted-foreground">{t.consent.necessaryBody}</p>
             </div>
-            <span className="shrink-0 text-xs font-medium text-muted-foreground">{t.consent.alwaysOn}</span>
+            <span className="shrink-0 text-xs font-medium text-muted-foreground">
+              {t.consent.alwaysOn}
+            </span>
           </li>
           <li className="flex items-start justify-between gap-4 py-3">
             <div>
@@ -60,7 +69,12 @@ export function ConsentPreferencesDialog({ open, onOpenChange }: ConsentPreferen
               </Label>
               <p className="text-xs text-muted-foreground">{t.consent.analyticsBody}</p>
             </div>
-            <Switch id="consent-analytics" checked={analytics} onCheckedChange={setAnalytics} disabled={!analyticsConfigured} />
+            <Switch
+              id="consent-analytics"
+              checked={analytics}
+              onCheckedChange={setAnalytics}
+              disabled={!analyticsConfigured}
+            />
           </li>
           <li className="flex items-start justify-between gap-4 py-3">
             <div>
@@ -69,7 +83,12 @@ export function ConsentPreferencesDialog({ open, onOpenChange }: ConsentPreferen
               </Label>
               <p className="text-xs text-muted-foreground">{t.consent.advertisingBody}</p>
             </div>
-            <Switch id="consent-ads" checked={advertising} onCheckedChange={setAdvertising} disabled={!adsConfigured} />
+            <Switch
+              id="consent-ads"
+              checked={advertising}
+              onCheckedChange={setAdvertising}
+              disabled={!adsConfigured}
+            />
           </li>
         </ul>
         <DialogFooter>

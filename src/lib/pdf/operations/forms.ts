@@ -13,7 +13,8 @@ import {
 import { toPdfError } from "../errors";
 import { loadPdfDocument, savePdfDocument } from "../load";
 
-export type FormFieldKind = "text" | "checkbox" | "radio" | "dropdown" | "optionlist" | "button" | "signature" | "unknown";
+export type FormFieldKind =
+  "text" | "checkbox" | "radio" | "dropdown" | "optionlist" | "button" | "signature" | "unknown";
 
 export interface FormFieldInfo {
   name: string;
@@ -123,7 +124,11 @@ export interface FillFormOptions {
 }
 
 /** Applies values and returns the new bytes. Unknown names and read-only fields are skipped. */
-export async function fillForm(bytes: Uint8Array, values: FormValues, options: FillFormOptions): Promise<Uint8Array> {
+export async function fillForm(
+  bytes: Uint8Array,
+  values: FormValues,
+  options: FillFormOptions,
+): Promise<Uint8Array> {
   const doc = await loadPdfDocument(bytes);
   const form = doc.getForm();
   try {

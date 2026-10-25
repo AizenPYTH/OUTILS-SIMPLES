@@ -27,7 +27,8 @@ export function parsePageRanges(input: string, pageCount: number): ParsedRanges 
     throw new PdfError("INVALID_RANGE", t.ranges.errorEmpty);
   }
   const normalized = input.replace(/[;–—]/g, (m) => (m === ";" ? "," : "-")).trim();
-  if (normalized.length === 0) throw new PdfError("INVALID_RANGE", t.ranges.errorEmpty, { recoverable: true });
+  if (normalized.length === 0)
+    throw new PdfError("INVALID_RANGE", t.ranges.errorEmpty, { recoverable: true });
 
   const ranges: PageRange[] = [];
   for (const rawToken of normalized.split(",")) {
@@ -38,12 +39,16 @@ export function parsePageRanges(input: string, pageCount: number): ParsedRanges 
     const from = Number.parseInt(match[1]!, 10);
     const to = match[2] !== undefined ? Number.parseInt(match[2], 10) : from;
     if (from < 1 || to < 1 || from > pageCount || to > pageCount) {
-      throw new PdfError("INVALID_RANGE", t.ranges.errorOutOfBounds(pageCount), { recoverable: true });
+      throw new PdfError("INVALID_RANGE", t.ranges.errorOutOfBounds(pageCount), {
+        recoverable: true,
+      });
     }
-    if (to < from) throw new PdfError("INVALID_RANGE", t.ranges.errorReversed(from, to), { recoverable: true });
+    if (to < from)
+      throw new PdfError("INVALID_RANGE", t.ranges.errorReversed(from, to), { recoverable: true });
     ranges.push({ from, to });
   }
-  if (ranges.length === 0) throw new PdfError("INVALID_RANGE", t.ranges.errorEmpty, { recoverable: true });
+  if (ranges.length === 0)
+    throw new PdfError("INVALID_RANGE", t.ranges.errorEmpty, { recoverable: true });
 
   const set = new Set<number>();
   for (const r of ranges) for (let p = r.from; p <= r.to; p += 1) set.add(p - 1);
@@ -82,7 +87,8 @@ export function formatPageIndices(indices: number[]): string {
 
 /** "Every N pages" split: [1-N], [N+1-2N], … */
 export function chunkRanges(pageCount: number, chunkSize: number): PageRange[] {
-  if (chunkSize < 1) throw new PdfError("INVALID_RANGE", t.ranges.errorFormat, { recoverable: true });
+  if (chunkSize < 1)
+    throw new PdfError("INVALID_RANGE", t.ranges.errorFormat, { recoverable: true });
   const ranges: PageRange[] = [];
   for (let from = 1; from <= pageCount; from += chunkSize) {
     ranges.push({ from, to: Math.min(pageCount, from + chunkSize - 1) });

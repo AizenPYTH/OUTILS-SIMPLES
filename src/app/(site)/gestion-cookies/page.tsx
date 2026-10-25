@@ -12,7 +12,8 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function GestionCookiesPage() {
-  const thirdParties = publicEnv.NEXT_PUBLIC_ANALYTICS_PROVIDER !== "none" || publicEnv.NEXT_PUBLIC_ADS_ENABLED;
+  const thirdParties =
+    publicEnv.NEXT_PUBLIC_ANALYTICS_PROVIDER !== "none" || publicEnv.NEXT_PUBLIC_ADS_ENABLED;
   return (
     <LegalPage
       title="Gestion des cookies"
@@ -23,19 +24,27 @@ export default function GestionCookiesPage() {
         <h2>Ce que le site stocke sur votre appareil</h2>
         <ul>
           <li>
-            <strong>Thème</strong> (clair / sombre / système) — stockage local, indispensable au fonctionnement, sans identifiant.
+            <strong>Thème</strong> (clair / sombre / système) — stockage local, indispensable au
+            fonctionnement, sans identifiant.
           </li>
           <li>
-            <strong>Choix de consentement</strong> — stockage local, pour ne pas vous redemander votre avis à chaque visite.
+            <strong>Choix de consentement</strong> — stockage local, pour ne pas vous redemander
+            votre avis à chaque visite.
           </li>
         </ul>
         {thirdParties ? (
-          <p>Des services tiers soumis à consentement sont configurés sur ce site. Ils ne se chargent qu&apos;après votre accord.</p>
+          <p>
+            Des services tiers soumis à consentement sont configurés sur ce site. Ils ne se chargent
+            qu&apos;après votre accord.
+          </p>
         ) : (
           <p>
-            <strong>Aucun service tiers (mesure d&apos;audience, publicité) n&apos;est actuellement activé.</strong> Aucun cookie
-            publicitaire ni traceur n&apos;est donc déposé. Les réglages ci-dessous sont présents pour le jour où l&apos;éditeur
-            activerait de tels services.
+            <strong>
+              Aucun service tiers (mesure d&apos;audience, publicité) n&apos;est actuellement
+              activé.
+            </strong>{" "}
+            Aucun cookie publicitaire ni traceur n&apos;est donc déposé. Les réglages ci-dessous
+            sont présents pour le jour où l&apos;éditeur activerait de tels services.
           </p>
         )}
       </section>

@@ -9,11 +9,34 @@ import { cn } from "@/lib/utils";
 export type AdPlacement = "directory-footer" | "tool-aside" | "tool-bottom" | "guide-bottom";
 
 /** Reserved sizes per placement (handoff: 728×90 catalogue footer, 300×250 tool aside). */
-const placementConfig: Record<AdPlacement, { width: number; height: number; slotEnv: string; label: string }> = {
-  "directory-footer": { width: 728, height: 90, slotEnv: publicEnv.NEXT_PUBLIC_ADSENSE_SLOT_DIRECTORY, label: "728×90" },
-  "tool-aside": { width: 300, height: 250, slotEnv: publicEnv.NEXT_PUBLIC_ADSENSE_SLOT_TOOL_BOTTOM, label: "300×250" },
-  "tool-bottom": { width: 728, height: 90, slotEnv: publicEnv.NEXT_PUBLIC_ADSENSE_SLOT_TOOL_BOTTOM, label: "728×90" },
-  "guide-bottom": { width: 728, height: 90, slotEnv: publicEnv.NEXT_PUBLIC_ADSENSE_SLOT_GUIDE_BOTTOM, label: "728×90" },
+const placementConfig: Record<
+  AdPlacement,
+  { width: number; height: number; slotEnv: string; label: string }
+> = {
+  "directory-footer": {
+    width: 728,
+    height: 90,
+    slotEnv: publicEnv.NEXT_PUBLIC_ADSENSE_SLOT_DIRECTORY,
+    label: "728×90",
+  },
+  "tool-aside": {
+    width: 300,
+    height: 250,
+    slotEnv: publicEnv.NEXT_PUBLIC_ADSENSE_SLOT_TOOL_BOTTOM,
+    label: "300×250",
+  },
+  "tool-bottom": {
+    width: 728,
+    height: 90,
+    slotEnv: publicEnv.NEXT_PUBLIC_ADSENSE_SLOT_TOOL_BOTTOM,
+    label: "728×90",
+  },
+  "guide-bottom": {
+    width: 728,
+    height: 90,
+    slotEnv: publicEnv.NEXT_PUBLIC_ADSENSE_SLOT_GUIDE_BOTTOM,
+    label: "728×90",
+  },
 };
 
 interface AdSlotProps {
@@ -32,7 +55,8 @@ interface AdSlotProps {
 export function AdSlot({ placement, className }: AdSlotProps) {
   const { consent, hydrated } = useConsent();
   const config = placementConfig[placement];
-  const enabled = publicEnv.NEXT_PUBLIC_ADS_ENABLED && !!publicEnv.NEXT_PUBLIC_ADSENSE_CLIENT && !!config.slotEnv;
+  const enabled =
+    publicEnv.NEXT_PUBLIC_ADS_ENABLED && !!publicEnv.NEXT_PUBLIC_ADSENSE_CLIENT && !!config.slotEnv;
 
   if (!enabled) return null;
 
@@ -56,7 +80,12 @@ export function AdSlot({ placement, className }: AdSlotProps) {
           />
           <ins
             className="adsbygoogle block"
-            style={{ display: "block", width: "100%", maxWidth: config.width, height: config.height }}
+            style={{
+              display: "block",
+              width: "100%",
+              maxWidth: config.width,
+              height: config.height,
+            }}
             data-ad-client={publicEnv.NEXT_PUBLIC_ADSENSE_CLIENT}
             data-ad-slot={config.slotEnv}
             data-ad-format="auto"

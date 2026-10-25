@@ -14,7 +14,9 @@ export function generateStaticParams() {
   });
 }
 
-export async function generateMetadata({ params }: PageProps<"/[category]/[slug]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/[category]/[slug]">): Promise<Metadata> {
   const { category, slug } = await params;
   const tool = getToolByPath(category, slug);
   if (!tool || tool.status === "planned") return {};

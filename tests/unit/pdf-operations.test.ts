@@ -3,7 +3,13 @@ import { PDFName, PDFDict } from "pdf-lib";
 import { mergePdfs } from "@/lib/pdf/operations/merge";
 import { extractPages, organizePages, rotatePages, splitPdf } from "@/lib/pdf/operations/pages";
 import { applyAnnotations } from "@/lib/pdf/operations/annotate";
-import { addWatermark, analyzeWatermarks, removeWatermarks, stripMarkedContent, readWatermarkRecord } from "@/lib/pdf/operations/watermark";
+import {
+  addWatermark,
+  analyzeWatermarks,
+  removeWatermarks,
+  stripMarkedContent,
+  readWatermarkRecord,
+} from "@/lib/pdf/operations/watermark";
 import { compressPdf, type ImageReencoder } from "@/lib/pdf/operations/compress";
 import { fillForm, inspectForm } from "@/lib/pdf/operations/forms";
 import { loadPdfDocument } from "@/lib/pdf/load";
@@ -18,9 +24,13 @@ describe("loadPdfDocument", () => {
     expect(doc.getPageCount()).toBe(3);
   });
   it("rejects non-PDF, corrupted and encrypted inputs with clear codes", async () => {
-    await expect(loadPdfDocument(await fixture("not-a-pdf.txt"))).rejects.toMatchObject({ code: "NOT_PDF" });
+    await expect(loadPdfDocument(await fixture("not-a-pdf.txt"))).rejects.toMatchObject({
+      code: "NOT_PDF",
+    });
     await expect(loadPdfDocument(await fixture("corrupted.pdf"))).rejects.toBeInstanceOf(PdfError);
-    await expect(loadPdfDocument(await fixture("encrypted-flag.pdf"))).rejects.toMatchObject({ code: "ENCRYPTED" });
+    await expect(loadPdfDocument(await fixture("encrypted-flag.pdf"))).rejects.toMatchObject({
+      code: "ENCRYPTED",
+    });
   });
 });
 
@@ -144,12 +154,79 @@ describe("annotations", () => {
         color: { r: 0, g: 0, b: 1 },
         align: "left",
       },
-      { id: "h1", type: "highlight", pageIndex: 0, x: 50, y: 700, width: 300, height: 20, color: { r: 1, g: 1, b: 0 }, opacity: 0.4 },
-      { id: "r1", type: "rect", pageIndex: 1, x: 50, y: 50, width: 100, height: 60, strokeWidth: 2, strokeColor: { r: 1, g: 0, b: 0 }, fillColor: null, opacity: 1 },
-      { id: "e1", type: "ellipse", pageIndex: 1, x: 200, y: 50, width: 100, height: 60, strokeWidth: 2, strokeColor: null, fillColor: { r: 0, g: 1, b: 0 }, opacity: 0.5 },
-      { id: "l1", type: "line", pageIndex: 1, start: { x: 10, y: 10 }, end: { x: 100, y: 100 }, strokeWidth: 3, color: { r: 0, g: 0, b: 0 }, opacity: 1, arrow: true },
-      { id: "p1", type: "path", pageIndex: 2, points: [{ x: 10, y: 10 }, { x: 50, y: 80 }, { x: 90, y: 20 }], strokeWidth: 2, color: { r: 0, g: 0, b: 0 }, opacity: 1 },
-      { id: "i1", type: "image", pageIndex: 2, x: 300, y: 300, width: 120, height: 60, bytes: png, mimeType: "image/png", role: "signature" },
+      {
+        id: "h1",
+        type: "highlight",
+        pageIndex: 0,
+        x: 50,
+        y: 700,
+        width: 300,
+        height: 20,
+        color: { r: 1, g: 1, b: 0 },
+        opacity: 0.4,
+      },
+      {
+        id: "r1",
+        type: "rect",
+        pageIndex: 1,
+        x: 50,
+        y: 50,
+        width: 100,
+        height: 60,
+        strokeWidth: 2,
+        strokeColor: { r: 1, g: 0, b: 0 },
+        fillColor: null,
+        opacity: 1,
+      },
+      {
+        id: "e1",
+        type: "ellipse",
+        pageIndex: 1,
+        x: 200,
+        y: 50,
+        width: 100,
+        height: 60,
+        strokeWidth: 2,
+        strokeColor: null,
+        fillColor: { r: 0, g: 1, b: 0 },
+        opacity: 0.5,
+      },
+      {
+        id: "l1",
+        type: "line",
+        pageIndex: 1,
+        start: { x: 10, y: 10 },
+        end: { x: 100, y: 100 },
+        strokeWidth: 3,
+        color: { r: 0, g: 0, b: 0 },
+        opacity: 1,
+        arrow: true,
+      },
+      {
+        id: "p1",
+        type: "path",
+        pageIndex: 2,
+        points: [
+          { x: 10, y: 10 },
+          { x: 50, y: 80 },
+          { x: 90, y: 20 },
+        ],
+        strokeWidth: 2,
+        color: { r: 0, g: 0, b: 0 },
+        opacity: 1,
+      },
+      {
+        id: "i1",
+        type: "image",
+        pageIndex: 2,
+        x: 300,
+        y: 300,
+        width: 120,
+        height: 60,
+        bytes: png,
+        mimeType: "image/png",
+        role: "signature",
+      },
     ];
     const { bytes, report } = await applyAnnotations(src, annotations);
     expect(report.drawn).toBe(7);
@@ -168,7 +245,22 @@ describe("annotations", () => {
   it("reports replaced characters instead of failing", async () => {
     const src = await fixture("simple-3-pages.pdf");
     const { report } = await applyAnnotations(src, [
-      { id: "t", type: "text", pageIndex: 0, x: 10, y: 10, width: 100, height: 20, text: "Привет 🙂", fontFamily: "times", fontSize: 12, bold: false, italic: true, color: { r: 0, g: 0, b: 0 }, align: "right" },
+      {
+        id: "t",
+        type: "text",
+        pageIndex: 0,
+        x: 10,
+        y: 10,
+        width: 100,
+        height: 20,
+        text: "Привет 🙂",
+        fontFamily: "times",
+        fontSize: 12,
+        bold: false,
+        italic: true,
+        color: { r: 0, g: 0, b: 0 },
+        align: "right",
+      },
     ]);
     expect(report.replacedCharacters).toBe(1);
   });
@@ -176,7 +268,22 @@ describe("annotations", () => {
   it("places text on a rotated page without throwing", async () => {
     const src = await fixture("rotated-2nd-page.pdf");
     const { bytes } = await applyAnnotations(src, [
-      { id: "t", type: "text", pageIndex: 1, x: 100, y: 100, width: 40, height: 200, text: "Rotated", fontFamily: "courier", fontSize: 12, bold: false, italic: false, color: { r: 0, g: 0, b: 0 }, align: "center" },
+      {
+        id: "t",
+        type: "text",
+        pageIndex: 1,
+        x: 100,
+        y: 100,
+        width: 40,
+        height: 200,
+        text: "Rotated",
+        fontFamily: "courier",
+        fontSize: 12,
+        bold: false,
+        italic: false,
+        color: { r: 0, g: 0, b: 0 },
+        align: "center",
+      },
     ]);
     expect((await extractPageText(bytes, 1)).join(" ")).toContain("Rotated");
   });
@@ -207,7 +314,10 @@ describe("watermark", () => {
     expect(diagnostic.watermarkAnnotations).toEqual([]);
     expect(diagnostic.recordedButMissing).toEqual([]);
 
-    const removed = await removeWatermarks(bytes, { removeOutilia: true, removeWatermarkAnnotations: false });
+    const removed = await removeWatermarks(bytes, {
+      removeOutilia: true,
+      removeWatermarkAnnotations: false,
+    });
     expect(removed.removedBlocks).toBe(2);
     expect((await extractPageText(removed.bytes, 0)).join(" ")).not.toContain("CONFIDENTIEL");
     expect((await extractPageText(removed.bytes, 0)).join(" ")).toContain("Page 1 / 3");
@@ -236,18 +346,24 @@ describe("watermark", () => {
     const src = await fixture("watermark-annotation.pdf");
     const diagnostic = await analyzeWatermarks(src);
     expect(diagnostic.watermarkAnnotations).toEqual([{ pageIndex: 0, count: 1 }]);
-    const result = await removeWatermarks(src, { removeOutilia: false, removeWatermarkAnnotations: true });
+    const result = await removeWatermarks(src, {
+      removeOutilia: false,
+      removeWatermarkAnnotations: true,
+    });
     expect(result.removedAnnotations).toBe(1);
     expect((await analyzeWatermarks(result.bytes)).watermarkAnnotations).toEqual([]);
   });
 
   it("refuses honestly when nothing removable exists", async () => {
     const src = await fixture("simple-3-pages.pdf");
-    await expect(removeWatermarks(src, { removeOutilia: true, removeWatermarkAnnotations: true })).rejects.toMatchObject({ code: "UNSUPPORTED" });
+    await expect(
+      removeWatermarks(src, { removeOutilia: true, removeWatermarkAnnotations: true }),
+    ).rejects.toMatchObject({ code: "UNSUPPORTED" });
   });
 
   it("strips only tagged blocks, including nested marked content", () => {
-    const content = "q 1 0 0 RG BT (keep) Tj ET Q /OutiliaWatermark BMC /Span BDC (wm) Tj EMC (wm2) Tj EMC q (after) Tj Q";
+    const content =
+      "q 1 0 0 RG BT (keep) Tj ET Q /OutiliaWatermark BMC /Span BDC (wm) Tj EMC (wm2) Tj EMC q (after) Tj Q";
     const { content: cleaned, removed } = stripMarkedContent(content);
     expect(removed).toBe(1);
     expect(cleaned).toContain("(keep) Tj");
@@ -285,7 +401,11 @@ describe("compress", () => {
     expect(doc.getPageCount()).toBe(1);
     expect((await extractPageText(bytes, 0)).join(" ")).toContain("Image de test");
 
-    const keepOriginal: ImageReencoder = async () => ({ jpeg: new Uint8Array(10_000_000), width: 1, height: 1 });
+    const keepOriginal: ImageReencoder = async () => ({
+      jpeg: new Uint8Array(10_000_000),
+      width: 1,
+      height: 1,
+    });
     const kept = await compressPdf(src, "strong", keepOriginal);
     expect(kept.stats.imagesKeptOriginal).toBe(1);
     expect(kept.stats.imagesRecompressed).toBe(0);
@@ -312,7 +432,14 @@ describe("forms", () => {
     const src = await fixture("form-acroform.pdf");
     const filled = await fillForm(
       src,
-      { nom: "Jeanne Martin", accepte: true, civilite: "Madame", pays: "Suisse", reference: "HACK", unknown: "x" },
+      {
+        nom: "Jeanne Martin",
+        accepte: true,
+        civilite: "Madame",
+        pays: "Suisse",
+        reference: "HACK",
+        unknown: "x",
+      },
       { flatten: false },
     );
     const { fields } = await inspectForm(filled);

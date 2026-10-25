@@ -22,14 +22,20 @@ export function SiteFooter() {
           <ul className="space-y-2 text-sm">
             {categories.map((category) => (
               <li key={category.id}>
-                <Link href={getCategoryPath(category)} className="text-muted-foreground hover:text-foreground">
+                <Link
+                  href={getCategoryPath(category)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
                   {category.name}
                 </Link>
               </li>
             ))}
             {tools.slice(0, 6).map((tool) => (
               <li key={tool.id}>
-                <Link href={getToolPath(tool)} className="text-muted-foreground hover:text-foreground">
+                <Link
+                  href={getToolPath(tool)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
                   {tool.name}
                 </Link>
               </li>
@@ -44,19 +50,63 @@ export function SiteFooter() {
         <div>
           <h2 className="mb-3 text-sm font-semibold">{t.footer.siteHeading}</h2>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/guides/" className="text-muted-foreground hover:text-foreground">{t.nav.guides}</Link></li>
-            <li><Link href="/a-propos/" className="text-muted-foreground hover:text-foreground">{t.nav.about}</Link></li>
-            <li><Link href="/contact/" className="text-muted-foreground hover:text-foreground">{t.nav.contact}</Link></li>
+            <li>
+              <Link href="/guides/" className="text-muted-foreground hover:text-foreground">
+                {t.nav.guides}
+              </Link>
+            </li>
+            <li>
+              <Link href="/a-propos/" className="text-muted-foreground hover:text-foreground">
+                {t.nav.about}
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact/" className="text-muted-foreground hover:text-foreground">
+                {t.nav.contact}
+              </Link>
+            </li>
           </ul>
         </div>
         <div>
           <h2 className="mb-3 text-sm font-semibold">{t.footer.legalHeading}</h2>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/mentions-legales/" className="text-muted-foreground hover:text-foreground">{t.nav.legal}</Link></li>
-            <li><Link href="/confidentialite/" className="text-muted-foreground hover:text-foreground">{t.nav.privacy}</Link></li>
-            <li><Link href="/conditions-utilisation/" className="text-muted-foreground hover:text-foreground">{t.nav.terms}</Link></li>
-            <li><Link href="/gestion-cookies/" className="text-muted-foreground hover:text-foreground">{t.nav.cookies}</Link></li>
-            <li><Link href="/affiliation/" className="text-muted-foreground hover:text-foreground">{t.nav.affiliate}</Link></li>
+            <li>
+              <Link
+                href="/mentions-legales/"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {t.nav.legal}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/confidentialite/"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {t.nav.privacy}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/conditions-utilisation/"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {t.nav.terms}
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/gestion-cookies/"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {t.nav.cookies}
+              </Link>
+            </li>
+            <li>
+              <Link href="/affiliation/" className="text-muted-foreground hover:text-foreground">
+                {t.nav.affiliate}
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

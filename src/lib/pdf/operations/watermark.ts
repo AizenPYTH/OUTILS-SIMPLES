@@ -106,7 +106,12 @@ export function placeWatermark(
 }
 
 /** Tile anchors (bottom-left of each tile) covering the page with spacing. */
-export function tilePositions(pageWidth: number, pageHeight: number, width: number, height: number): { x: number; y: number }[] {
+export function tilePositions(
+  pageWidth: number,
+  pageHeight: number,
+  width: number,
+  height: number,
+): { x: number; y: number }[] {
   const gapX = Math.max(width * 1.6, 120);
   const gapY = Math.max(height * 3, 120);
   const out: { x: number; y: number }[] = [];
@@ -127,12 +132,18 @@ export interface WatermarkResult {
  * and records the marked pages in the Info dictionary so that the
  * "manage watermark" tool can remove it later without guessing.
  */
-export async function addWatermark(bytes: Uint8Array, options: WatermarkOptions): Promise<WatermarkResult> {
+export async function addWatermark(
+  bytes: Uint8Array,
+  options: WatermarkOptions,
+): Promise<WatermarkResult> {
   const doc = await loadPdfDocument(bytes);
   const pages = doc.getPages();
   const targets = options.pageIndices.length === 0 ? pages.map((_, i) => i) : options.pageIndices;
   for (const index of targets) {
-    if (!pages[index]) throw new PdfError("INVALID_RANGE", t.ranges.errorOutOfBounds(pages.length), { recoverable: true });
+    if (!pages[index])
+      throw new PdfError("INVALID_RANGE", t.ranges.errorOutOfBounds(pages.length), {
+        recoverable: true,
+      });
   }
   if (options.kind === "text" && options.text.trim().length === 0) {
     throw new PdfError("NO_SELECTION", "Saisissez le texte du filigrane.", { recoverable: true });
@@ -143,12 +154,17 @@ export async function addWatermark(bytes: Uint8Array, options: WatermarkOptions)
   let replacedCharacters = false;
   let text = "";
   if (options.kind === "text") {
-    font = await doc.embedFont(resolveStandardFont(options.fontFamily, { bold: options.bold, italic: false }));
+    font = await doc.embedFont(
+      resolveStandardFont(options.fontFamily, { bold: options.bold, italic: false }),
+    );
     const sanitized = sanitizeForStandardFont(options.text);
     text = sanitized.text;
     replacedCharacters = sanitized.replaced;
   } else {
-    image = options.mimeType === "image/png" ? await doc.embedPng(options.bytes) : await doc.embedJpg(options.bytes);
+    image =
+      options.mimeType === "image/png"
+        ? await doc.embedPng(options.bytes)
+        : await doc.embedJpg(options.bytes);
   }
 
   try {
@@ -208,7 +224,14 @@ function drawWatermarkOnPage(
         rotate: rotation,
       });
     } else {
-      page.drawImage(assets.image!, { x, y, width: w, height: h, opacity: options.opacity, rotate: rotation });
+      page.drawImage(assets.image!, {
+        x,
+        y,
+        width: w,
+        height: h,
+        opacity: options.opacity,
+        rotate: rotation,
+      });
     }
   }
 }
@@ -239,7 +262,8 @@ export function readWatermarkRecord(doc: PDFDocument): number[] {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw) as { pages?: unknown };
-    if (Array.isArray(parsed.pages)) return parsed.pages.filter((p): p is number => Number.isInteger(p));
+    if (Array.isArray(parsed.pages))
+      return parsed.pages.filter((p): p is number => Number.isInteger(p));
   } catch {
     return [];
   }
@@ -258,7 +282,10 @@ export interface WatermarkDiagnostic {
   pageCount: number;
 }
 
-function getPageContentStreams(doc: PDFDocument, page: PDFPage): { ref: PDFRef; stream: PDFRawStream }[] {
+function getPageContentStreams(
+  doc: PDFDocument,
+  page: PDFPage,
+): { ref: PDFRef; stream: PDFRawStream }[] {
   const contents = page.node.Contents();
   const out: { ref: PDFRef; stream: PDFRawStream }[] = [];
   const collect = (ref: PDFRef) => {
@@ -372,7 +399,11 @@ export async function analyzeWatermarks(bytes: Uint8Array): Promise<WatermarkDia
       let count = 0;
       for (let i = 0; i < annots.size(); i += 1) {
         const annot = doc.context.lookup(annots.get(i));
-        if (annot instanceof PDFDict && annot.get(PDFName.of("Subtype")) === PDFName.of("Watermark")) count += 1;
+        if (
+          annot instanceof PDFDict &&
+          annot.get(PDFName.of("Subtype")) === PDFName.of("Watermark")
+        )
+          count += 1;
       }
       if (count > 0) watermarkAnnotations.push({ pageIndex: index, count });
     }
@@ -394,7 +425,10 @@ export interface RemoveWatermarkResult {
   removedAnnotations: number;
 }
 
-export async function removeWatermarks(bytes: Uint8Array, options: RemoveWatermarkOptions): Promise<RemoveWatermarkResult> {
+export async function removeWatermarks(
+  bytes: Uint8Array,
+  options: RemoveWatermarkOptions,
+): Promise<RemoveWatermarkResult> {
   const doc = await loadPdfDocument(bytes);
   const pages = doc.getPages();
   let removedBlocks = 0;
@@ -429,7 +463,10 @@ export async function removeWatermarks(bytes: Uint8Array, options: RemoveWaterma
           for (let i = 0; i < annots.size(); i += 1) {
             const item = annots.get(i);
             const annot = doc.context.lookup(item);
-            if (annot instanceof PDFDict && annot.get(PDFName.of("Subtype")) === PDFName.of("Watermark")) {
+            if (
+              annot instanceof PDFDict &&
+              annot.get(PDFName.of("Subtype")) === PDFName.of("Watermark")
+            ) {
               removedAnnotations += 1;
               continue;
             }
@@ -451,7 +488,11 @@ export async function removeWatermarks(bytes: Uint8Array, options: RemoveWaterma
   }
 
   if (removedBlocks === 0 && removedAnnotations === 0) {
-    throw new PdfError("UNSUPPORTED", "Aucun filigrane retirable n'a été trouvé dans ce document.", { recoverable: true });
+    throw new PdfError(
+      "UNSUPPORTED",
+      "Aucun filigrane retirable n'a été trouvé dans ce document.",
+      { recoverable: true },
+    );
   }
   return { bytes: await savePdfDocument(doc), removedBlocks, removedAnnotations };
 }

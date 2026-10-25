@@ -32,7 +32,9 @@ describe("public env", () => {
     expect(env.NEXT_PUBLIC_SITE_URL).toBe("http://localhost:3000");
   });
   it("strips trailing slashes and rejects invalid values", () => {
-    expect(parsePublicEnv({ NEXT_PUBLIC_SITE_URL: "https://outilia.fr/" }).NEXT_PUBLIC_SITE_URL).toBe("https://outilia.fr");
+    expect(
+      parsePublicEnv({ NEXT_PUBLIC_SITE_URL: "https://outilia.fr/" }).NEXT_PUBLIC_SITE_URL,
+    ).toBe("https://outilia.fr");
     expect(() => parsePublicEnv({ NEXT_PUBLIC_ANALYTICS_PROVIDER: "spyware" })).toThrow();
     expect(() => parsePublicEnv({ NEXT_PUBLIC_SITE_URL: "not a url" })).toThrow();
   });
@@ -40,7 +42,11 @@ describe("public env", () => {
 
 describe("analytics hygiene", () => {
   it("drops any property outside the allow-list", () => {
-    const props = sanitizeProps({ tool: "pdf-merge", sizeBucket: sizeBucket(5 * 1024 * 1024), fileName: "secret.pdf" } as never);
+    const props = sanitizeProps({
+      tool: "pdf-merge",
+      sizeBucket: sizeBucket(5 * 1024 * 1024),
+      fileName: "secret.pdf",
+    } as never);
     expect(props).toEqual({ tool: "pdf-merge", sizeBucket: "1-10mb" });
   });
 });
@@ -48,7 +54,13 @@ describe("analytics hygiene", () => {
 describe("consent parsing", () => {
   it("treats malformed storage as no consent", () => {
     expect(parseConsent("{nope")).toEqual(defaultConsent);
-    expect(parseConsent(JSON.stringify({ analytics: "yes" }))).toEqual({ decidedAt: undefined, analytics: false, advertising: false });
-    expect(parseConsent(JSON.stringify({ decidedAt: "2026-01-01", analytics: true })).analytics).toBe(true);
+    expect(parseConsent(JSON.stringify({ analytics: "yes" }))).toEqual({
+      decidedAt: undefined,
+      analytics: false,
+      advertising: false,
+    });
+    expect(
+      parseConsent(JSON.stringify({ decidedAt: "2026-01-01", analytics: true })).analytics,
+    ).toBe(true);
   });
 });

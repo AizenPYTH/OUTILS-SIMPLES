@@ -7,7 +7,13 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileSummary } from "@/components/pdf/shared/file-summary";
@@ -26,7 +32,14 @@ import { fontFamilies, type FontFamily } from "@/lib/pdf/fonts";
 import { isPdfError } from "@/lib/pdf/errors";
 import { pdfRectToViewport } from "@/lib/pdf/coordinates";
 import type { ParsedRanges } from "@/lib/pdf/page-ranges";
-import { addWatermark, placeWatermark, tilePositions, type WatermarkOptions, type WatermarkPosition, type WatermarkResult } from "@/lib/pdf/operations/watermark";
+import {
+  addWatermark,
+  placeWatermark,
+  tilePositions,
+  type WatermarkOptions,
+  type WatermarkPosition,
+  type WatermarkResult,
+} from "@/lib/pdf/operations/watermark";
 import { getToolById, getToolPath } from "@/lib/tools";
 import { t } from "@/lib/i18n";
 
@@ -45,7 +58,11 @@ const positions: { value: WatermarkPosition; label: string }[] = [
 ];
 
 export function WatermarkTool() {
-  return <SingleFileTool toolId={TOOL_ID}>{({ pdf, reset }) => <WatermarkWorkspace pdf={pdf} reset={reset} />}</SingleFileTool>;
+  return (
+    <SingleFileTool toolId={TOOL_ID}>
+      {({ pdf, reset }) => <WatermarkWorkspace pdf={pdf} reset={reset} />}
+    </SingleFileTool>
+  );
 }
 
 interface ImageAsset {
@@ -80,15 +97,38 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
     };
   }, [image]);
 
-  const pageIndices = pageMode === "all" ? [] : range?.indices ?? [];
+  const pageIndices = pageMode === "all" ? [] : (range?.indices ?? []);
   const options: WatermarkOptions | null =
     kind === "text"
-      ? { kind: "text", text, fontSize, fontFamily, bold: true, color: hexToRgb(color), opacity, rotation, position, pageIndices }
+      ? {
+          kind: "text",
+          text,
+          fontSize,
+          fontFamily,
+          bold: true,
+          color: hexToRgb(color),
+          opacity,
+          rotation,
+          position,
+          pageIndices,
+        }
       : image
-        ? { kind: "image", bytes: image.bytes, mimeType: image.mimeType, widthRatio, opacity, rotation, position, pageIndices }
+        ? {
+            kind: "image",
+            bytes: image.bytes,
+            mimeType: image.mimeType,
+            widthRatio,
+            opacity,
+            rotation,
+            position,
+            pageIndices,
+          }
         : null;
 
-  const canRun = !!options && (kind === "image" || text.trim().length > 0) && (pageMode === "all" || (!!range && !rangeError));
+  const canRun =
+    !!options &&
+    (kind === "image" || text.trim().length > 0) &&
+    (pageMode === "all" || (!!range && !rangeError));
 
   const onImage = async (file: File | undefined) => {
     if (!file) return;
@@ -105,7 +145,8 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
   };
 
   if (op.state.status === "busy") return <BusyPanel progress={op.state.progress} />;
-  if (op.state.status === "error") return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={reset} />;
+  if (op.state.status === "error")
+    return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={reset} />;
   if (op.state.status === "done") {
     const result = op.state.result;
     return (
@@ -117,7 +158,12 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
           reset();
         }}
       >
-        {result.replacedCharacters ? <Alert variant="warning">Certains caractères non pris en charge par les polices standard ont été remplacés par « ? ».</Alert> : null}
+        {result.replacedCharacters ? (
+          <Alert variant="warning">
+            Certains caractères non pris en charge par les polices standard ont été remplacés par «
+            ? ».
+          </Alert>
+        ) : null}
         {manageTool ? (
           <p className="text-center text-sm text-muted-foreground">
             Ce filigrane porte un marqueur OUTILIA : vous pourrez le retirer plus tard avec{" "}
@@ -133,7 +179,12 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
 
   return (
     <div className="space-y-6">
-      <FileSummary name={pdf.file.name} size={pdf.file.size} pageCount={pdf.pageCount} onReset={reset} />
+      <FileSummary
+        name={pdf.file.name}
+        size={pdf.file.size}
+        pageCount={pdf.pageCount}
+        onReset={reset}
+      />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-5">
           <Tabs value={kind} onValueChange={(v) => setKind(v as "text" | "image")}>
@@ -148,7 +199,13 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
             <TabsContent value="text" className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="wm-text">Texte du filigrane</Label>
-                <Input id="wm-text" value={text} onChange={(e) => setText(e.target.value)} maxLength={80} data-testid="wm-text" />
+                <Input
+                  id="wm-text"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  maxLength={80}
+                  data-testid="wm-text"
+                />
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-1.5">
@@ -168,11 +225,25 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="wm-size">Taille ({fontSize} pt)</Label>
-                  <Slider id="wm-size" min={8} max={160} step={1} value={[fontSize]} onValueChange={([v]) => v !== undefined && setFontSize(v)} aria-label="Taille du texte" />
+                  <Slider
+                    id="wm-size"
+                    min={8}
+                    max={160}
+                    step={1}
+                    value={[fontSize]}
+                    onValueChange={([v]) => v !== undefined && setFontSize(v)}
+                    aria-label="Taille du texte"
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="wm-color">Couleur</Label>
-                  <input id="wm-color" type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-11 w-full cursor-pointer rounded-md border border-input bg-background p-1" />
+                  <input
+                    id="wm-color"
+                    type="color"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    className="h-11 w-full cursor-pointer rounded-md border border-input bg-background p-1"
+                  />
                 </div>
               </div>
             </TabsContent>
@@ -181,14 +252,40 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                 <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-surface px-4 text-sm font-medium shadow-sm hover:bg-muted">
                   <ImageIcon className="size-4" aria-hidden="true" />
                   {image ? "Changer l'image" : t.upload.imageBrowse}
-                  <input type="file" accept="image/png,image/jpeg" className="sr-only" onChange={(e) => void onImage(e.target.files?.[0])} data-testid="wm-image-input" />
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg"
+                    className="sr-only"
+                    onChange={(e) => void onImage(e.target.files?.[0])}
+                    data-testid="wm-image-input"
+                  />
                 </label>
                 {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
-                {image ? <img src={image.url} alt="Aperçu de l'image du filigrane" className="h-12 max-w-32 rounded border border-border object-contain checkerboard" /> : <span className="text-sm text-muted-foreground">PNG ou JPEG, transparence conservée</span>}
+                {image ? (
+                  <img
+                    src={image.url}
+                    alt="Aperçu de l'image du filigrane"
+                    className="h-12 max-w-32 rounded border border-border object-contain checkerboard"
+                  />
+                ) : (
+                  <span className="text-sm text-muted-foreground">
+                    PNG ou JPEG, transparence conservée
+                  </span>
+                )}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="wm-width">Largeur ({Math.round(widthRatio * 100)} % de la page)</Label>
-                <Slider id="wm-width" min={5} max={100} step={1} value={[Math.round(widthRatio * 100)]} onValueChange={([v]) => v !== undefined && setWidthRatio(v / 100)} aria-label="Largeur de l'image" />
+                <Label htmlFor="wm-width">
+                  Largeur ({Math.round(widthRatio * 100)} % de la page)
+                </Label>
+                <Slider
+                  id="wm-width"
+                  min={5}
+                  max={100}
+                  step={1}
+                  value={[Math.round(widthRatio * 100)]}
+                  onValueChange={([v]) => v !== undefined && setWidthRatio(v / 100)}
+                  aria-label="Largeur de l'image"
+                />
               </div>
             </TabsContent>
           </Tabs>
@@ -196,18 +293,38 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="wm-opacity">Opacité ({Math.round(opacity * 100)} %)</Label>
-              <Slider id="wm-opacity" min={5} max={100} step={1} value={[Math.round(opacity * 100)]} onValueChange={([v]) => v !== undefined && setOpacity(v / 100)} aria-label="Opacité" />
+              <Slider
+                id="wm-opacity"
+                min={5}
+                max={100}
+                step={1}
+                value={[Math.round(opacity * 100)]}
+                onValueChange={([v]) => v !== undefined && setOpacity(v / 100)}
+                aria-label="Opacité"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="wm-rotation">Rotation ({rotation}°)</Label>
-              <Slider id="wm-rotation" min={-90} max={90} step={5} value={[rotation]} onValueChange={([v]) => v !== undefined && setRotation(v)} aria-label="Rotation" />
+              <Slider
+                id="wm-rotation"
+                min={-90}
+                max={90}
+                step={5}
+                value={[rotation]}
+                onValueChange={([v]) => v !== undefined && setRotation(v)}
+                aria-label="Rotation"
+              />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <Label>Position</Label>
             <div className="flex flex-wrap items-center gap-3">
-              <div className="grid grid-cols-3 gap-1 rounded-md border border-border bg-surface p-1" role="radiogroup" aria-label="Position du filigrane">
+              <div
+                className="grid grid-cols-3 gap-1 rounded-md border border-border bg-surface p-1"
+                role="radiogroup"
+                aria-label="Position du filigrane"
+              >
                 {positions.map((p) => (
                   <button
                     key={p.value}
@@ -220,7 +337,12 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                   />
                 ))}
               </div>
-              <Button type="button" variant={position === "tiled" ? "default" : "outline"} onClick={() => setPosition("tiled")} aria-pressed={position === "tiled"}>
+              <Button
+                type="button"
+                variant={position === "tiled" ? "default" : "outline"}
+                onClick={() => setPosition("tiled")}
+                aria-pressed={position === "tiled"}
+              >
                 Mosaïque (toute la page)
               </Button>
             </div>
@@ -251,24 +373,51 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
             ) : null}
           </div>
 
-          <Button type="button" size="lg" className="w-full" disabled={!canRun} onClick={() => options && void op.run(() => addWatermark(pdf.bytes, options))} data-testid="watermark-button">
+          <Button
+            type="button"
+            size="lg"
+            className="w-full"
+            disabled={!canRun}
+            onClick={() => options && void op.run(() => addWatermark(pdf.bytes, options))}
+            data-testid="watermark-button"
+          >
             <Droplets aria-hidden="true" /> Appliquer le filigrane
           </Button>
         </div>
 
         <aside className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Aperçu · {t.common.pageOf(previewPage + 1, pdf.pageCount)}</p>
+            <p className="text-sm font-medium">
+              Aperçu · {t.common.pageOf(previewPage + 1, pdf.pageCount)}
+            </p>
             <div className="flex gap-1">
-              <Button type="button" variant="ghost" size="sm" disabled={previewPage === 0} onClick={() => setPreviewPage((p) => p - 1)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={previewPage === 0}
+                onClick={() => setPreviewPage((p) => p - 1)}
+              >
                 {t.common.previous}
               </Button>
-              <Button type="button" variant="ghost" size="sm" disabled={previewPage >= pdf.pageCount - 1} onClick={() => setPreviewPage((p) => p + 1)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={previewPage >= pdf.pageCount - 1}
+                onClick={() => setPreviewPage((p) => p + 1)}
+              >
                 {t.common.next}
               </Button>
             </div>
           </div>
-          <WatermarkPreview pdf={pdf} pageIndex={previewPage} options={options} image={image} applies={pageMode === "all" || (range?.indices.includes(previewPage) ?? false)} />
+          <WatermarkPreview
+            pdf={pdf}
+            pageIndex={previewPage}
+            options={options}
+            image={image}
+            applies={pageMode === "all" || (range?.indices.includes(previewPage) ?? false)}
+          />
         </aside>
       </div>
     </div>
@@ -279,9 +428,25 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
  * Live preview: renders the page with pdf.js, then draws the watermark boxes
  * using the same placement math as the exporter (placeWatermark/tilePositions).
  */
-function WatermarkPreview({ pdf, pageIndex, options, image, applies }: { pdf: LoadedPdf; pageIndex: number; options: WatermarkOptions | null; image: ImageAsset | null; applies: boolean }) {
+function WatermarkPreview({
+  pdf,
+  pageIndex,
+  options,
+  image,
+  applies,
+}: {
+  pdf: LoadedPdf;
+  pageIndex: number;
+  options: WatermarkOptions | null;
+  image: ImageAsset | null;
+  applies: boolean;
+}) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const [viewport, setViewport] = React.useState<{ width: number; height: number; transform: number[] } | null>(null);
+  const [viewport, setViewport] = React.useState<{
+    width: number;
+    height: number;
+    transform: number[];
+  } | null>(null);
   const page = pdf.pages[pageIndex] ?? pdf.pages[0]!;
 
   React.useEffect(() => {
@@ -291,7 +456,11 @@ function WatermarkPreview({ pdf, pageIndex, options, image, applies }: { pdf: Lo
     const size = visualSize(page);
     const scale = fitScale(size.width, size.height, 320, 440);
     renderPageToCanvas(pdf.opened.doc, page.index, canvas, { scale, signal: controller.signal })
-      .then(({ viewport: vp }) => !controller.signal.aborted && setViewport({ width: vp.width, height: vp.height, transform: vp.transform }))
+      .then(
+        ({ viewport: vp }) =>
+          !controller.signal.aborted &&
+          setViewport({ width: vp.width, height: vp.height, transform: vp.transform }),
+      )
       .catch(() => {});
     return () => controller.abort();
   }, [pdf.opened.doc, page]);
@@ -308,14 +477,24 @@ function WatermarkPreview({ pdf, pageIndex, options, image, applies }: { pdf: Lo
       w = page.width * Math.min(1, Math.max(0.05, options.widthRatio));
       h = w * (image?.ratio ?? 0.5);
     }
-    const anchors = options.position === "tiled" ? tilePositions(page.width, page.height, w, h) : [placeWatermark(page.width, page.height, w, h, options.position)];
-    return anchors.map((a) => ({ rect: pdfRectToViewport(viewport, { x: a.x, y: a.y, width: w, height: h }), w, h }));
+    const anchors =
+      options.position === "tiled"
+        ? tilePositions(page.width, page.height, w, h)
+        : [placeWatermark(page.width, page.height, w, h, options.position)];
+    return anchors.map((a) => ({
+      rect: pdfRectToViewport(viewport, { x: a.x, y: a.y, width: w, height: h }),
+      w,
+      h,
+    }));
   }, [options, viewport, applies, page.width, page.height, image?.ratio]);
 
   const scale = viewport ? Math.hypot(viewport.transform[0]!, viewport.transform[1]!) : 1;
 
   return (
-    <div className="relative mx-auto inline-block overflow-hidden rounded-[6px] border border-border bg-muted" data-testid="watermark-preview">
+    <div
+      className="relative mx-auto inline-block overflow-hidden rounded-[6px] border border-border bg-muted"
+      data-testid="watermark-preview"
+    >
       <canvas ref={canvasRef} aria-label="Aperçu de la page avec filigrane" />
       {viewport && options ? (
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
@@ -335,7 +514,11 @@ function WatermarkPreview({ pdf, pageIndex, options, image, applies }: { pdf: Lo
               {options.kind === "text" ? (
                 <span
                   className="whitespace-nowrap font-bold leading-none"
-                  style={{ fontSize: options.fontSize * scale, color: rgbToCss(options.color), fontFamily: fontFamilies.find((f) => f.id === options.fontFamily)?.css }}
+                  style={{
+                    fontSize: options.fontSize * scale,
+                    color: rgbToCss(options.color),
+                    fontFamily: fontFamilies.find((f) => f.id === options.fontFamily)?.css,
+                  }}
                 >
                   {options.text}
                 </span>
@@ -347,7 +530,11 @@ function WatermarkPreview({ pdf, pageIndex, options, image, applies }: { pdf: Lo
           ))}
         </div>
       ) : null}
-      {!applies ? <p className="absolute inset-x-0 bottom-0 bg-background/80 p-1 text-center text-xs text-muted-foreground">Page non concernée par la sélection</p> : null}
+      {!applies ? (
+        <p className="absolute inset-x-0 bottom-0 bg-background/80 p-1 text-center text-xs text-muted-foreground">
+          Page non concernée par la sélection
+        </p>
+      ) : null}
       <span className="sr-only">{rgbToHex(hexToRgb("#000"))}</span>
     </div>
   );

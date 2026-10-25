@@ -23,7 +23,12 @@ export async function generateMetadata({ params }: PageProps<"/guides/[slug]">):
   const { slug } = await params;
   const guide = getGuideBySlug(slug);
   if (!guide) return {};
-  return buildPageMetadata({ title: guide.seoTitle, description: guide.description, path: `/guides/${guide.slug}/`, type: "article" });
+  return buildPageMetadata({
+    title: guide.seoTitle,
+    description: guide.description,
+    path: `/guides/${guide.slug}/`,
+    type: "article",
+  });
 }
 
 export default async function GuidePage({ params }: PageProps<"/guides/[slug]">) {
@@ -59,7 +64,10 @@ export default async function GuidePage({ params }: PageProps<"/guides/[slug]">)
         <h1 className="text-[clamp(30px,4vw,44px)] leading-[1.08]">{guide.title}</h1>
         <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{guide.intro}</p>
         <p className="mt-2 text-sm text-muted-foreground">
-          Mis à jour le {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date(guide.updatedAt))}
+          Mis à jour le{" "}
+          {new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(
+            new Date(guide.updatedAt),
+          )}
         </p>
         {tool && tool.status === "published" ? (
           <Button asChild size="lg" className="mt-6">

@@ -42,13 +42,16 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
       <div className="mx-auto mt-6 max-w-3xl text-center">
         <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
           <Badge variant="success">
-            <ShieldCheck aria-hidden="true" /> {tool.processing === "client" ? t.tool.processingLocal : t.tool.processingServer}
+            <ShieldCheck aria-hidden="true" />{" "}
+            {tool.processing === "client" ? t.tool.processingLocal : t.tool.processingServer}
           </Badge>
           <Badge variant="neutral">{t.tool.freeBadge}</Badge>
           {tool.status === "beta" ? <Badge variant="warning">{t.tool.betaBadge}</Badge> : null}
         </div>
         <h1 className="text-[clamp(32px,4.4vw,52px)] leading-[1.05]">{tool.name}</h1>
-        <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground sm:text-lg">{tool.description}</p>
+        <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground sm:text-lg">
+          {tool.description}
+        </p>
       </div>
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -91,13 +94,18 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
                 <dt className="text-muted-foreground">{t.tool.maxSize}</dt>
                 <dd className="font-medium">
                   {formatBytes(tool.limits.maxFileSizeBytes)}
-                  {tool.limits.maxFileCount > 1 ? ` · ${tool.limits.maxFileCount} ${t.common.files} max` : ""}
+                  {tool.limits.maxFileCount > 1
+                    ? ` · ${tool.limits.maxFileCount} ${t.common.files} max`
+                    : ""}
                 </dd>
               </div>
             </dl>
           </section>
 
-          <section aria-labelledby="privacy-heading" className="prose-tool rounded-[16px] border border-success/30 bg-success-soft/50 p-5">
+          <section
+            aria-labelledby="privacy-heading"
+            className="prose-tool rounded-[16px] border border-success/30 bg-success-soft/50 p-5"
+          >
             <h2 id="privacy-heading" className="flex items-center gap-2 text-xl">
               <ShieldCheck className="size-5 text-success" aria-hidden="true" />
               {t.tool.privacy}
@@ -106,7 +114,10 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
               {tool.content.privacyNote ??
                 "Votre fichier est traité directement dans votre navigateur et n'est jamais envoyé sur nos serveurs."}
             </p>
-            <Link href="/confidentialite/" className="mt-3 inline-block text-sm font-medium text-link underline-offset-4 hover:underline">
+            <Link
+              href="/confidentialite/"
+              className="mt-3 inline-block text-sm font-medium text-link underline-offset-4 hover:underline"
+            >
               {t.home.privacyLink}
             </Link>
           </section>
@@ -121,7 +132,10 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
               <ul className="mt-4 space-y-2">
                 {guides.map((guide) => (
                   <li key={guide.slug}>
-                    <Link href={`/guides/${guide.slug}/`} className="inline-flex items-center gap-2 text-[15px] font-medium text-link hover:underline">
+                    <Link
+                      href={`/guides/${guide.slug}/`}
+                      className="inline-flex items-center gap-2 text-[15px] font-medium text-link hover:underline"
+                    >
                       <BookOpen className="size-4" aria-hidden="true" />
                       {guide.title}
                     </Link>

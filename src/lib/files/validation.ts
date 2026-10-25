@@ -69,12 +69,18 @@ export function validateFileBatch(
 ): void {
   const maxCount = options.maxFileCount ?? pdfLimits.maxFileCount;
   const maxTotal = options.maxTotalSizeBytes ?? pdfLimits.maxTotalSizeBytes;
-  if (files.length > maxCount) throw new PdfError("TOO_MANY_FILES", t.errors.tooManyFiles(maxCount));
+  if (files.length > maxCount)
+    throw new PdfError("TOO_MANY_FILES", t.errors.tooManyFiles(maxCount));
   const total = files.reduce((sum, f) => sum + f.size, 0);
-  if (total > maxTotal) throw new PdfError("TOTAL_TOO_LARGE", t.errors.totalTooLarge(formatBytes(maxTotal)));
+  if (total > maxTotal)
+    throw new PdfError("TOTAL_TOO_LARGE", t.errors.totalTooLarge(formatBytes(maxTotal)));
 }
 
-export function validateImageFile(file: FileLike, bytes: Uint8Array, maxSize = pdfLimits.maxImageSizeBytes): DetectedImageType {
+export function validateImageFile(
+  file: FileLike,
+  bytes: Uint8Array,
+  maxSize = pdfLimits.maxImageSizeBytes,
+): DetectedImageType {
   if (file.size > maxSize) throw new PdfError("TOO_LARGE", t.errors.tooLarge(formatBytes(maxSize)));
   const detected = detectImageType(bytes);
   if (!detected || !(acceptedImageMimeTypes as readonly string[]).includes(detected)) {

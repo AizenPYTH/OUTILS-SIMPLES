@@ -25,13 +25,28 @@ export function buildSitemapEntries(): MetadataRoute.Sitemap {
     priority: path === "/" ? 1 : 0.4,
   }));
   for (const category of getActiveCategories()) {
-    entries.push({ url: absoluteUrl(getCategoryPath(category)), lastModified, changeFrequency: "weekly", priority: 0.8 });
+    entries.push({
+      url: absoluteUrl(getCategoryPath(category)),
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    });
   }
   for (const tool of getIndexableTools()) {
-    entries.push({ url: absoluteUrl(getToolPath(tool)), lastModified, changeFrequency: "monthly", priority: 0.9 });
+    entries.push({
+      url: absoluteUrl(getToolPath(tool)),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    });
   }
   for (const guide of guides) {
-    entries.push({ url: absoluteUrl(`/guides/${guide.slug}/`), lastModified, changeFrequency: "monthly", priority: 0.6 });
+    entries.push({
+      url: absoluteUrl(`/guides/${guide.slug}/`),
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    });
   }
   return entries;
 }

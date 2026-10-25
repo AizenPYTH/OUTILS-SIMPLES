@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { buildViewportTransform, pdfRectToViewport, pdfToViewport, viewportRectToPdf, viewportToPdf, viewportScale } from "@/lib/pdf/coordinates";
+import {
+  buildViewportTransform,
+  pdfRectToViewport,
+  pdfToViewport,
+  viewportRectToPdf,
+  viewportToPdf,
+  viewportScale,
+} from "@/lib/pdf/coordinates";
 
 const A4: readonly [number, number, number, number] = [0, 0, 595.28, 841.89];
 

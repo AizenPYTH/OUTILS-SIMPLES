@@ -90,7 +90,11 @@ export function SearchDialog({ variant = "field" }: { variant?: "field" | "icon"
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="top-[12%] translate-y-0 gap-0 p-0" showCloseButton={false} size="md">
+        <DialogContent
+          className="top-[12%] translate-y-0 gap-0 p-0"
+          showCloseButton={false}
+          size="md"
+        >
           <DialogTitle className="sr-only">{t.nav.search}</DialogTitle>
           <DialogDescription className="sr-only">{t.directory.subtitle}</DialogDescription>
           <div className="flex items-center gap-2 border-b border-border px-3">
@@ -101,7 +105,9 @@ export function SearchDialog({ variant = "field" }: { variant?: "field" | "icon"
               role="combobox"
               aria-expanded="true"
               aria-controls={listId}
-              aria-activedescendant={results[activeIndex] ? `${listId}-${results[activeIndex]!.id}` : undefined}
+              aria-activedescendant={
+                results[activeIndex] ? `${listId}-${results[activeIndex]!.id}` : undefined
+              }
               aria-autocomplete="list"
               autoComplete="off"
               autoFocus
@@ -116,9 +122,18 @@ export function SearchDialog({ variant = "field" }: { variant?: "field" | "icon"
               data-testid="search-input"
             />
           </div>
-          <ul id={listId} role="listbox" aria-label={t.nav.search} className="max-h-80 overflow-y-auto p-2">
+          <ul
+            id={listId}
+            role="listbox"
+            aria-label={t.nav.search}
+            className="max-h-80 overflow-y-auto p-2"
+          >
             {results.length === 0 ? (
-              <li className="px-3 py-6 text-center text-sm text-muted-foreground" role="option" aria-selected={false}>
+              <li
+                className="px-3 py-6 text-center text-sm text-muted-foreground"
+                role="option"
+                aria-selected={false}
+              >
                 {t.directory.noResultsTitle}
               </li>
             ) : (
@@ -142,7 +157,9 @@ export function SearchDialog({ variant = "field" }: { variant?: "field" | "icon"
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block font-medium">{tool.name}</span>
-                    <span className="block truncate text-xs text-muted-foreground">{tool.shortDescription}</span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {tool.shortDescription}
+                    </span>
                   </span>
                 </li>
               ))

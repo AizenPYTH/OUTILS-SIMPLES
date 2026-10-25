@@ -15,7 +15,10 @@ export interface LoadOptions {
  * Loads bytes into a pdf-lib document with the platform's validation rules:
  * magic bytes, encryption detection, page count limits and friendly errors.
  */
-export async function loadPdfDocument(bytes: Uint8Array, options: LoadOptions = {}): Promise<PDFDocument> {
+export async function loadPdfDocument(
+  bytes: Uint8Array,
+  options: LoadOptions = {},
+): Promise<PDFDocument> {
   assertPdfBytes(bytes);
   let doc: PDFDocument;
   try {

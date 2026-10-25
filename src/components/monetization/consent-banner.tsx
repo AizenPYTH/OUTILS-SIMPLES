@@ -39,7 +39,11 @@ export function ConsentBanner() {
         </Link>
       </p>
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <Button onClick={() => update({ analytics: true, advertising: publicEnv.NEXT_PUBLIC_ADS_ENABLED })}>
+        <Button
+          onClick={() =>
+            update({ analytics: true, advertising: publicEnv.NEXT_PUBLIC_ADS_ENABLED })
+          }
+        >
           {t.consent.acceptAll}
         </Button>
         <Button variant="outline" onClick={() => update({ analytics: false, advertising: false })}>

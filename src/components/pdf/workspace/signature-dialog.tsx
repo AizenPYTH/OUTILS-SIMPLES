@@ -4,7 +4,14 @@ import * as React from "react";
 import { Eraser, ImageIcon, PenLine, Type } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -37,10 +44,12 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
     setBusy(true);
     try {
       let asset: SignatureAsset | null = null;
-      if (tab === "draw") asset = await padRef.current?.export() ?? null;
+      if (tab === "draw") asset = (await padRef.current?.export()) ?? null;
       else if (tab === "type") asset = await renderTypedSignature(typed.trim(), color);
       if (!asset) {
-        toast.error(tab === "draw" ? "Tracez votre signature avant de valider." : "Saisissez votre nom.");
+        toast.error(
+          tab === "draw" ? "Tracez votre signature avant de valider." : "Saisissez votre nom.",
+        );
         return;
       }
       onConfirm(asset);
@@ -67,7 +76,10 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
       <DialogContent size="md" className="rounded-[20px]">
         <DialogHeader>
           <DialogTitle>Ajouter une signature</DialogTitle>
-          <DialogDescription>Signature visuelle : elle est dessinée sur la page et n&apos;a pas la valeur d&apos;une signature électronique qualifiée.</DialogDescription>
+          <DialogDescription>
+            Signature visuelle : elle est dessinée sur la page et n&apos;a pas la valeur d&apos;une
+            signature électronique qualifiée.
+          </DialogDescription>
         </DialogHeader>
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="w-full">
@@ -86,9 +98,20 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
             <div className="flex items-center justify-between gap-3">
               <label className="flex items-center gap-2 text-sm">
                 Couleur
-                <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="size-9 cursor-pointer rounded-md border border-input bg-background p-0.5" aria-label="Couleur du trait" />
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="size-9 cursor-pointer rounded-md border border-input bg-background p-0.5"
+                  aria-label="Couleur du trait"
+                />
               </label>
-              <Button type="button" variant="ghost" size="sm" onClick={() => padRef.current?.clear()}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => padRef.current?.clear()}
+              >
                 <Eraser aria-hidden="true" /> Effacer
               </Button>
             </div>
@@ -96,10 +119,20 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
           <TabsContent value="type" className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="typed-signature">Votre nom</Label>
-              <Input id="typed-signature" value={typed} onChange={(e) => setTyped(e.target.value)} maxLength={60} autoComplete="name" />
+              <Input
+                id="typed-signature"
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+                maxLength={60}
+                autoComplete="name"
+              />
             </div>
             <div className="flex h-28 items-center justify-center rounded-[12px] border border-dashed border-border bg-muted">
-              <span className="font-[family-name:var(--font-signature)] text-4xl" style={{ color }} aria-live="polite">
+              <span
+                className="font-[family-name:var(--font-signature)] text-4xl"
+                style={{ color }}
+                aria-live="polite"
+              >
                 {typed || "Aperçu"}
               </span>
             </div>
@@ -108,9 +141,17 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
             <label className="flex h-32 cursor-pointer flex-col items-center justify-center gap-2 rounded-[12px] border-2 border-dashed border-border bg-muted text-sm hover:border-primary">
               <ImageIcon className="size-6 text-link" aria-hidden="true" />
               {t.upload.imageDropTitle}
-              <input type="file" accept="image/png,image/jpeg" className="sr-only" onChange={(e) => void onImport(e.target.files?.[0])} data-testid="signature-import" />
+              <input
+                type="file"
+                accept="image/png,image/jpeg"
+                className="sr-only"
+                onChange={(e) => void onImport(e.target.files?.[0])}
+                data-testid="signature-import"
+              />
             </label>
-            <p className="text-xs text-muted-foreground">Un PNG à fond transparent donne le meilleur résultat.</p>
+            <p className="text-xs text-muted-foreground">
+              Un PNG à fond transparent donne le meilleur résultat.
+            </p>
           </TabsContent>
         </Tabs>
         {tab !== "import" ? (
@@ -118,7 +159,12 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {t.common.cancel}
             </Button>
-            <Button type="button" onClick={() => void confirm()} loading={busy} data-testid="signature-confirm">
+            <Button
+              type="button"
+              onClick={() => void confirm()}
+              loading={busy}
+              data-testid="signature-confirm"
+            >
               Utiliser cette signature
             </Button>
           </DialogFooter>
@@ -133,7 +179,10 @@ interface SignaturePadHandle {
   clear: () => void;
 }
 
-const SignaturePad = React.forwardRef<SignaturePadHandle, { color: string }>(function SignaturePad({ color }, ref) {
+const SignaturePad = React.forwardRef<SignaturePadHandle, { color: string }>(function SignaturePad(
+  { color },
+  ref,
+) {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const drawing = React.useRef(false);
   const hasInk = React.useRef(false);
@@ -218,7 +267,10 @@ function trimCanvas(source: HTMLCanvasElement): HTMLCanvasElement {
   if (!ctx) return source;
   const { width, height } = source;
   const data = ctx.getImageData(0, 0, width, height).data;
-  let minX = width, minY = height, maxX = -1, maxY = -1;
+  let minX = width,
+    minY = height,
+    maxX = -1,
+    maxY = -1;
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       if (data[(y * width + x) * 4 + 3]! > 10) {
@@ -234,19 +286,28 @@ function trimCanvas(source: HTMLCanvasElement): HTMLCanvasElement {
   const out = document.createElement("canvas");
   out.width = Math.min(width, maxX - minX + 1 + pad * 2);
   out.height = Math.min(height, maxY - minY + 1 + pad * 2);
-  out.getContext("2d")?.drawImage(source, minX - pad, minY - pad, out.width, out.height, 0, 0, out.width, out.height);
+  out
+    .getContext("2d")
+    ?.drawImage(source, minX - pad, minY - pad, out.width, out.height, 0, 0, out.width, out.height);
   return out;
 }
 
 async function canvasToAsset(canvas: HTMLCanvasElement): Promise<SignatureAsset | null> {
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!blob) return null;
-  return { bytes: new Uint8Array(await blob.arrayBuffer()), mimeType: "image/png", width: canvas.width, height: canvas.height };
+  return {
+    bytes: new Uint8Array(await blob.arrayBuffer()),
+    mimeType: "image/png",
+    width: canvas.width,
+    height: canvas.height,
+  };
 }
 
 async function renderTypedSignature(text: string, color: string): Promise<SignatureAsset | null> {
   if (!text) return null;
-  const family = getComputedStyle(document.documentElement).getPropertyValue("--font-signature").trim() || "cursive";
+  const family =
+    getComputedStyle(document.documentElement).getPropertyValue("--font-signature").trim() ||
+    "cursive";
   try {
     await document.fonts.load(`600 96px ${family}`);
   } catch {

@@ -20,7 +20,11 @@ import { t } from "@/lib/i18n";
 const TOOL_ID = "pdf-rotate";
 
 export function RotateTool() {
-  return <SingleFileTool toolId={TOOL_ID}>{({ pdf, reset }) => <RotateWorkspace pdf={pdf} reset={reset} />}</SingleFileTool>;
+  return (
+    <SingleFileTool toolId={TOOL_ID}>
+      {({ pdf, reset }) => <RotateWorkspace pdf={pdf} reset={reset} />}
+    </SingleFileTool>
+  );
 }
 
 function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
@@ -38,10 +42,12 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
 
   const changed = Object.entries(rotations).filter(([, v]) => normalizeRotation(v) !== 0);
   const all = pdf.pages.map((p) => p.index);
-  const run = () => void op.run(() => rotatePages(pdf.bytes, Object.fromEntries(changed.map(([k, v]) => [k, v]))));
+  const run = () =>
+    void op.run(() => rotatePages(pdf.bytes, Object.fromEntries(changed.map(([k, v]) => [k, v]))));
 
   if (op.state.status === "busy") return <BusyPanel progress={op.state.progress} />;
-  if (op.state.status === "error") return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={reset} />;
+  if (op.state.status === "error")
+    return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={reset} />;
   if (op.state.status === "done") {
     const bytes = op.state.result;
     return (
@@ -58,16 +64,31 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
 
   return (
     <div className="space-y-6">
-      <FileSummary name={pdf.file.name} size={pdf.file.size} pageCount={pdf.pageCount} onReset={reset} />
+      <FileSummary
+        name={pdf.file.name}
+        size={pdf.file.size}
+        pageCount={pdf.pageCount}
+        onReset={reset}
+      />
       <div className="flex flex-col gap-4 rounded-[14px] border border-border bg-surface p-4 lg:flex-row lg:items-end">
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" onClick={() => rotate(all, 90)} data-testid="rotate-all-cw">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => rotate(all, 90)}
+            data-testid="rotate-all-cw"
+          >
             <RotateCw aria-hidden="true" /> Tout pivoter à droite
           </Button>
           <Button type="button" variant="outline" onClick={() => rotate(all, -90)}>
             <RotateCcw aria-hidden="true" /> Tout pivoter à gauche
           </Button>
-          <Button type="button" variant="ghost" onClick={() => setRotations({})} disabled={changed.length === 0}>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setRotations({})}
+            disabled={changed.length === 0}
+          >
             {t.common.reset}
           </Button>
         </div>
@@ -84,16 +105,32 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
             />
           </div>
           <div className="flex gap-2">
-            <Button type="button" variant="secondary" disabled={!rangeParsed} onClick={() => rangeParsed && rotate(rangeParsed.indices, 90)} aria-label="Pivoter la plage à droite">
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={!rangeParsed}
+              onClick={() => rangeParsed && rotate(rangeParsed.indices, 90)}
+              aria-label="Pivoter la plage à droite"
+            >
               <RotateCw aria-hidden="true" /> 90°
             </Button>
-            <Button type="button" variant="secondary" disabled={!rangeParsed} onClick={() => rangeParsed && rotate(rangeParsed.indices, 180)} aria-label="Pivoter la plage de 180 degrés">
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={!rangeParsed}
+              onClick={() => rangeParsed && rotate(rangeParsed.indices, 180)}
+              aria-label="Pivoter la plage de 180 degrés"
+            >
               180°
             </Button>
           </div>
         </div>
       </div>
-      <ul className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(112px,1fr))]" aria-label="Pages du document" data-testid="page-grid">
+      <ul
+        className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(112px,1fr))]"
+        aria-label="Pages du document"
+        data-testid="page-grid"
+      >
         {pdf.pages.map((page) => {
           const extra = rotations[page.index] ?? 0;
           return (
@@ -103,24 +140,53 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
                 selected={normalizeRotation(extra) !== 0}
                 actions={
                   <>
-                    <Button type="button" variant="ghost" size="icon-sm" onClick={() => rotate([page.index], -90)} aria-label={`Pivoter la page ${page.index + 1} à gauche`}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => rotate([page.index], -90)}
+                      aria-label={`Pivoter la page ${page.index + 1} à gauche`}
+                    >
                       <RotateCcw aria-hidden="true" />
                     </Button>
-                    <span className="w-8 text-center text-xs tabular-nums text-muted-foreground">{normalizeRotation(extra)}°</span>
-                    <Button type="button" variant="ghost" size="icon-sm" onClick={() => rotate([page.index], 90)} aria-label={`Pivoter la page ${page.index + 1} à droite`} data-testid={`rotate-page-${page.index}`}>
+                    <span className="w-8 text-center text-xs tabular-nums text-muted-foreground">
+                      {normalizeRotation(extra)}°
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => rotate([page.index], 90)}
+                      aria-label={`Pivoter la page ${page.index + 1} à droite`}
+                      data-testid={`rotate-page-${page.index}`}
+                    >
                       <RotateCw aria-hidden="true" />
                     </Button>
                   </>
                 }
               >
-                <PageThumbnail doc={pdf.opened.doc} page={page} width={96} height={136} extraRotation={extra} />
+                <PageThumbnail
+                  doc={pdf.opened.doc}
+                  page={page}
+                  width={96}
+                  height={136}
+                  extraRotation={extra}
+                />
               </PageTile>
             </li>
           );
         })}
       </ul>
-      <Button type="button" size="lg" className="w-full" onClick={run} disabled={changed.length === 0} data-testid="rotate-export">
-        {t.common.export} ({changed.length} page{changed.length > 1 ? "s" : ""} modifiée{changed.length > 1 ? "s" : ""})
+      <Button
+        type="button"
+        size="lg"
+        className="w-full"
+        onClick={run}
+        disabled={changed.length === 0}
+        data-testid="rotate-export"
+      >
+        {t.common.export} ({changed.length} page{changed.length > 1 ? "s" : ""} modifiée
+        {changed.length > 1 ? "s" : ""})
       </Button>
     </div>
   );

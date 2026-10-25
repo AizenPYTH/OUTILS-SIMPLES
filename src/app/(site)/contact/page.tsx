@@ -12,7 +12,11 @@ export const metadata: Metadata = buildPageMetadata({
 export default function ContactPage() {
   const email = siteConfig.legal.contactEmail;
   return (
-    <LegalPage title="Contact" path="/contact/" intro="Une question, un bug, une idée d'outil ? Écrivez-nous.">
+    <LegalPage
+      title="Contact"
+      path="/contact/"
+      intro="Une question, un bug, une idée d'outil ? Écrivez-nous."
+    >
       <section>
         <h2>Par e-mail</h2>
         <p>
@@ -23,15 +27,17 @@ export default function ContactPage() {
           )}
         </p>
         <p className="text-sm text-muted-foreground">
-          Pour un problème avec un fichier, décrivez les étapes suivies et le message affiché. N&apos;envoyez pas de document
-          confidentiel : nous n&apos;en avons pas besoin pour reproduire la plupart des problèmes.
+          Pour un problème avec un fichier, décrivez les étapes suivies et le message affiché.
+          N&apos;envoyez pas de document confidentiel : nous n&apos;en avons pas besoin pour
+          reproduire la plupart des problèmes.
         </p>
       </section>
       <section>
         <h2>Suggestion d&apos;outil</h2>
         <p>
-          Nous ajoutons un outil lorsqu&apos;il répond à un besoin réel et peut fonctionner de manière fiable dans le navigateur.
-          Décrivez le problème que vous cherchez à résoudre plutôt que la solution : c&apos;est ce qui nous aide le plus.
+          Nous ajoutons un outil lorsqu&apos;il répond à un besoin réel et peut fonctionner de
+          manière fiable dans le navigateur. Décrivez le problème que vous cherchez à résoudre
+          plutôt que la solution : c&apos;est ce qui nous aide le plus.
         </p>
       </section>
     </LegalPage>

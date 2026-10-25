@@ -13,8 +13,9 @@ let idCounter = 0;
 /** Short unique id for client-side objects (annotations, files). */
 export function uid(prefix = "id"): string {
   idCounter += 1;
-  const random = typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID().slice(0, 8)
-    : Math.random().toString(36).slice(2, 10);
+  const random =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID().slice(0, 8)
+      : Math.random().toString(36).slice(2, 10);
   return `${prefix}-${idCounter}-${random}`;
 }

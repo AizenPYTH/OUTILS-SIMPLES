@@ -22,8 +22,12 @@ export interface MergeResult {
  * Copies every page of every input, in order, into a fresh document.
  * Pages keep their size, rotation, content and resources.
  */
-export async function mergePdfs(inputs: MergeInput[], onProgress?: ProgressReporter): Promise<MergeResult> {
-  if (inputs.length === 0) throw new PdfError("NO_SELECTION", t.errors.noFiles, { recoverable: true });
+export async function mergePdfs(
+  inputs: MergeInput[],
+  onProgress?: ProgressReporter,
+): Promise<MergeResult> {
+  if (inputs.length === 0)
+    throw new PdfError("NO_SELECTION", t.errors.noFiles, { recoverable: true });
   if (inputs.length > pdfLimits.maxFileCount) {
     throw new PdfError("TOO_MANY_FILES", t.errors.tooManyFiles(pdfLimits.maxFileCount));
   }
@@ -31,7 +35,11 @@ export async function mergePdfs(inputs: MergeInput[], onProgress?: ProgressRepor
   let totalPages = 0;
   for (let i = 0; i < inputs.length; i += 1) {
     const input = inputs[i]!;
-    onProgress?.({ current: i + 1, total: inputs.length, label: t.progress.processingFile(i + 1, inputs.length) });
+    onProgress?.({
+      current: i + 1,
+      total: inputs.length,
+      label: t.progress.processingFile(i + 1, inputs.length),
+    });
     const source = await loadPdfDocument(input.bytes, { maxPageCount: Number.MAX_SAFE_INTEGER });
     totalPages += source.getPageCount();
     if (totalPages > pdfLimits.maxPageCount * 5) {

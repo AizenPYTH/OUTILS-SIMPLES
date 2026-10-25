@@ -106,14 +106,23 @@ export type AnnotationType = Annotation["type"];
 
 export function hexToRgb(hex: string): RgbColor {
   const clean = hex.replace("#", "");
-  const full = clean.length === 3 ? clean.split("").map((c) => c + c).join("") : clean;
+  const full =
+    clean.length === 3
+      ? clean
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : clean;
   const value = Number.parseInt(full, 16);
   if (!Number.isFinite(value) || full.length !== 6) return { r: 0, g: 0, b: 0 };
   return { r: ((value >> 16) & 255) / 255, g: ((value >> 8) & 255) / 255, b: (value & 255) / 255 };
 }
 
 export function rgbToHex(color: RgbColor): string {
-  const to = (v: number) => Math.round(Math.min(1, Math.max(0, v)) * 255).toString(16).padStart(2, "0");
+  const to = (v: number) =>
+    Math.round(Math.min(1, Math.max(0, v)) * 255)
+      .toString(16)
+      .padStart(2, "0");
   return `#${to(color.r)}${to(color.g)}${to(color.b)}`;
 }
 
@@ -130,7 +139,12 @@ export function annotationBounds(annotation: Annotation): PdfRect {
       const pad = annotation.strokeWidth / 2;
       const minX = Math.min(...xs) - pad;
       const minY = Math.min(...ys) - pad;
-      return { x: minX, y: minY, width: Math.max(...xs) + pad - minX, height: Math.max(...ys) + pad - minY };
+      return {
+        x: minX,
+        y: minY,
+        width: Math.max(...xs) + pad - minX,
+        height: Math.max(...ys) + pad - minY,
+      };
     }
     case "line": {
       const pad = Math.max(annotation.strokeWidth, 4);
@@ -144,15 +158,27 @@ export function annotationBounds(annotation: Annotation): PdfRect {
       };
     }
     default:
-      return { x: annotation.x, y: annotation.y, width: annotation.width, height: annotation.height };
+      return {
+        x: annotation.x,
+        y: annotation.y,
+        width: annotation.width,
+        height: annotation.height,
+      };
   }
 }
 
 /** Moves an annotation by (dx, dy) in PDF space. */
-export function translateAnnotation<T extends Annotation>(annotation: T, dx: number, dy: number): T {
+export function translateAnnotation<T extends Annotation>(
+  annotation: T,
+  dx: number,
+  dy: number,
+): T {
   switch (annotation.type) {
     case "path":
-      return { ...annotation, points: annotation.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) };
+      return {
+        ...annotation,
+        points: annotation.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
+      };
     case "line":
       return {
         ...annotation,

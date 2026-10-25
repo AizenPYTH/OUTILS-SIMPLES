@@ -22,13 +22,21 @@ function reducer(state: HistoryState, action: Action): HistoryState {
   switch (action.type) {
     case "commit":
       if (action.next === state.present) return state;
-      return { present: action.next, past: [...state.past.slice(-LIMIT), state.present], future: [] };
+      return {
+        present: action.next,
+        past: [...state.past.slice(-LIMIT), state.present],
+        future: [],
+      };
     case "replace":
       return { ...state, present: action.next };
     case "undo": {
       const previous = state.past.at(-1);
       if (!previous) return state;
-      return { present: previous, past: state.past.slice(0, -1), future: [state.present, ...state.future] };
+      return {
+        present: previous,
+        past: state.past.slice(0, -1),
+        future: [state.present, ...state.future],
+      };
     }
     case "redo": {
       const [next, ...rest] = state.future;
@@ -47,12 +55,9 @@ export function useAnnotationHistory() {
   const dragStartRef = React.useRef<Annotation[] | null>(null);
 
   const commit = React.useCallback((next: Annotation[]) => dispatch({ type: "commit", next }), []);
-  const replaceLive = React.useCallback(
-    (next: Annotation[]) => {
-      dispatch({ type: "replace", next });
-    },
-    [],
-  );
+  const replaceLive = React.useCallback((next: Annotation[]) => {
+    dispatch({ type: "replace", next });
+  }, []);
   const beginLive = React.useCallback((current: Annotation[]) => {
     dragStartRef.current = current;
   }, []);

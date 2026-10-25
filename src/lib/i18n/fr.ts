@@ -75,7 +75,8 @@ export const fr = {
     heroSecondaryCta: "Ouvrir l'éditeur PDF",
     featuredTitle: "Outils les plus utilisés",
     categoriesTitle: "Par catégorie",
-    categoriesSubtitle: "La suite PDF est disponible dès aujourd'hui. Les autres catégories sont en préparation.",
+    categoriesSubtitle:
+      "La suite PDF est disponible dès aujourd'hui. Les autres catégories sont en préparation.",
     privacyTitle: "Vos fichiers restent chez vous",
     privacyBody:
       "Tous les outils PDF d'OUTILIA fonctionnent dans votre navigateur grâce à des bibliothèques open source. Vos documents ne transitent par aucun serveur, ne sont ni stockés ni analysés, et disparaissent dès que vous fermez l'onglet.",
@@ -85,7 +86,10 @@ export const fr = {
     howSteps: [
       { title: "Choisissez un outil", body: "Parcourez les catégories ou utilisez la recherche." },
       { title: "Déposez votre fichier", body: "Il est lu directement par votre navigateur." },
-      { title: "Téléchargez le résultat", body: "Le fichier est généré localement, sans attente ni inscription." },
+      {
+        title: "Téléchargez le résultat",
+        body: "Le fichier est généré localement, sans attente ni inscription.",
+      },
     ],
   },
   directory: {
@@ -164,8 +168,10 @@ export const fr = {
   progress: {
     preparing: "Préparation…",
     processing: "Traitement en cours…",
-    processingFile: (current: number, total: number) => `Traitement du fichier ${current} sur ${total}…`,
-    processingPage: (current: number, total: number) => `Traitement de la page ${current} sur ${total}…`,
+    processingFile: (current: number, total: number) =>
+      `Traitement du fichier ${current} sur ${total}…`,
+    processingPage: (current: number, total: number) =>
+      `Traitement de la page ${current} sur ${total}…`,
     finalizing: "Finalisation du PDF…",
     done: "Terminé",
     cancel: "Interrompre",
@@ -189,25 +195,28 @@ export const fr = {
     placeholder: "ex. 1-3, 5, 8-10",
     help: "Séparez les pages ou plages par des virgules. Utilisez un tiret pour une plage (ex. 2-5).",
     preview: (count: number, total: number) => `${count} page(s) sélectionnée(s) sur ${total}`,
-    errorFormat: "Format non reconnu. Utilisez des nombres, des virgules et des tirets (ex. 1-3, 5).",
-    errorOutOfBounds: (max: number) => `Les numéros de page doivent être compris entre 1 et ${max}.`,
+    errorFormat:
+      "Format non reconnu. Utilisez des nombres, des virgules et des tirets (ex. 1-3, 5).",
+    errorOutOfBounds: (max: number) =>
+      `Les numéros de page doivent être compris entre 1 et ${max}.`,
     errorReversed: (from: number, to: number) => `La plage ${from}-${to} est inversée.`,
     errorEmpty: "Indiquez au moins une page.",
   },
   consent: {
     title: "Cookies et mesure d'audience",
-    body:
-      "OUTILIA fonctionne sans cookie publicitaire ni traceur par défaut. Si des services tiers (mesure d'audience, publicité) sont activés par l'éditeur, ils ne se chargent qu'avec votre accord.",
+    body: "OUTILIA fonctionne sans cookie publicitaire ni traceur par défaut. Si des services tiers (mesure d'audience, publicité) sont activés par l'éditeur, ils ne se chargent qu'avec votre accord.",
     acceptAll: "Tout accepter",
     rejectAll: "Tout refuser",
     customize: "Personnaliser",
     save: "Enregistrer mes choix",
     necessary: "Fonctionnement du site",
-    necessaryBody: "Indispensable : préférences de thème et de consentement, stockées sur votre appareil.",
+    necessaryBody:
+      "Indispensable : préférences de thème et de consentement, stockées sur votre appareil.",
     analytics: "Mesure d'audience",
     analyticsBody: "Statistiques anonymisées de fréquentation pour améliorer le site.",
     advertising: "Publicité",
-    advertisingBody: "Affichage de publicités par un partenaire tiers, potentiellement personnalisées.",
+    advertisingBody:
+      "Affichage de publicités par un partenaire tiers, potentiellement personnalisées.",
     manage: "Gérer mes préférences",
     updated: "Vos préférences ont été enregistrées.",
     alwaysOn: "Toujours actif",

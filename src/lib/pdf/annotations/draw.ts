@@ -10,7 +10,13 @@ import {
 } from "pdf-lib";
 import { resolveStandardFont, sanitizeForStandardFont } from "../fonts";
 import { toPdfError } from "../errors";
-import type { Annotation, ImageAnnotation, LineAnnotation, PathAnnotation, TextAnnotation } from "./types";
+import type {
+  Annotation,
+  ImageAnnotation,
+  LineAnnotation,
+  PathAnnotation,
+  TextAnnotation,
+} from "./types";
 
 export interface DrawReport {
   /** Text annotations whose characters had to be replaced (outside WinAnsi). */
@@ -27,7 +33,10 @@ export interface DrawReport {
  * pages carrying a /Rotate attribute: the UI stores them in user space where a
  * 90°-rotated page has its "visual top" on the x axis.
  */
-export async function drawAnnotations(doc: PDFDocument, annotations: Annotation[]): Promise<DrawReport> {
+export async function drawAnnotations(
+  doc: PDFDocument,
+  annotations: Annotation[],
+): Promise<DrawReport> {
   const report: DrawReport = { replacedCharacters: 0, drawn: 0 };
   const fontCache = new Map<string, PDFFont>();
   const imageCache = new Map<string, PDFImage>();
@@ -37,7 +46,9 @@ export async function drawAnnotations(doc: PDFDocument, annotations: Annotation[
     const key = `${a.fontFamily}-${a.bold}-${a.italic}`;
     let font = fontCache.get(key);
     if (!font) {
-      font = await doc.embedFont(resolveStandardFont(a.fontFamily, { bold: a.bold, italic: a.italic }));
+      font = await doc.embedFont(
+        resolveStandardFont(a.fontFamily, { bold: a.bold, italic: a.italic }),
+      );
       fontCache.set(key, font);
     }
     return font;
@@ -46,7 +57,8 @@ export async function drawAnnotations(doc: PDFDocument, annotations: Annotation[
   const getImage = async (a: ImageAnnotation): Promise<PDFImage> => {
     let image = imageCache.get(a.id);
     if (!image) {
-      image = a.mimeType === "image/png" ? await doc.embedPng(a.bytes) : await doc.embedJpg(a.bytes);
+      image =
+        a.mimeType === "image/png" ? await doc.embedPng(a.bytes) : await doc.embedJpg(a.bytes);
       imageCache.set(a.id, image);
     }
     return image;
@@ -78,7 +90,9 @@ export async function drawAnnotations(doc: PDFDocument, annotations: Annotation[
             borderColor: annotation.strokeColor
               ? rgb(annotation.strokeColor.r, annotation.strokeColor.g, annotation.strokeColor.b)
               : undefined,
-            color: annotation.fillColor ? rgb(annotation.fillColor.r, annotation.fillColor.g, annotation.fillColor.b) : undefined,
+            color: annotation.fillColor
+              ? rgb(annotation.fillColor.r, annotation.fillColor.g, annotation.fillColor.b)
+              : undefined,
             opacity: annotation.opacity,
             borderOpacity: annotation.opacity,
           });
@@ -93,7 +107,9 @@ export async function drawAnnotations(doc: PDFDocument, annotations: Annotation[
             borderColor: annotation.strokeColor
               ? rgb(annotation.strokeColor.r, annotation.strokeColor.g, annotation.strokeColor.b)
               : undefined,
-            color: annotation.fillColor ? rgb(annotation.fillColor.r, annotation.fillColor.g, annotation.fillColor.b) : undefined,
+            color: annotation.fillColor
+              ? rgb(annotation.fillColor.r, annotation.fillColor.g, annotation.fillColor.b)
+              : undefined,
             opacity: annotation.opacity,
             borderOpacity: annotation.opacity,
           });
@@ -132,7 +148,10 @@ export async function drawAnnotations(doc: PDFDocument, annotations: Annotation[
  * left of the first line). We compute the anchor so the visual box stays where
  * the user placed it.
  */
-function rotatedAnchor(rect: { x: number; y: number; width: number; height: number }, rotation: number) {
+function rotatedAnchor(
+  rect: { x: number; y: number; width: number; height: number },
+  rotation: number,
+) {
   switch (((rotation % 360) + 360) % 360) {
     case 90:
       return { x: rect.x + rect.width, y: rect.y };
@@ -197,12 +216,23 @@ function localToUser(anchor: { x: number; y: number }, dx: number, dy: number, r
   }
 }
 
-function drawImageBlock(page: PDFPage, a: ImageAnnotation, image: PDFImage, rotation: number): void {
+function drawImageBlock(
+  page: PDFPage,
+  a: ImageAnnotation,
+  image: PDFImage,
+  rotation: number,
+): void {
   const rot = ((rotation % 360) + 360) % 360;
   const anchor = rotatedAnchor(a, rot);
   const visualWidth = rot === 90 || rot === 270 ? a.height : a.width;
   const visualHeight = rot === 90 || rot === 270 ? a.width : a.height;
-  page.drawImage(image, { x: anchor.x, y: anchor.y, width: visualWidth, height: visualHeight, rotate: degrees(rot) });
+  page.drawImage(image, {
+    x: anchor.x,
+    y: anchor.y,
+    width: visualWidth,
+    height: visualHeight,
+    rotate: degrees(rot),
+  });
 }
 
 function drawPath(page: PDFPage, a: PathAnnotation): void {
@@ -210,13 +240,22 @@ function drawPath(page: PDFPage, a: PathAnnotation): void {
   const color = rgb(a.color.r, a.color.g, a.color.b);
   if (a.points.length === 1) {
     const p = a.points[0]!;
-    page.drawCircle({ x: p.x, y: p.y, size: a.strokeWidth / 2, color, opacity: a.opacity, borderWidth: 0 });
+    page.drawCircle({
+      x: p.x,
+      y: p.y,
+      size: a.strokeWidth / 2,
+      color,
+      opacity: a.opacity,
+      borderWidth: 0,
+    });
     return;
   }
   // pdf-lib's drawSvgPath flips y (SVG convention); build the path in a
   // flipped frame so it lands exactly on the stored points.
   const first = a.points[0]!;
-  const d = a.points.map((p, i) => `${i === 0 ? "M" : "L"} ${round(p.x - first.x)} ${round(first.y - p.y)}`).join(" ");
+  const d = a.points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${round(p.x - first.x)} ${round(first.y - p.y)}`)
+    .join(" ");
   page.drawSvgPath(d, {
     x: first.x,
     y: first.y,
@@ -230,14 +269,41 @@ function drawPath(page: PDFPage, a: PathAnnotation): void {
 
 function drawLine(page: PDFPage, a: LineAnnotation): void {
   const color = rgb(a.color.r, a.color.g, a.color.b);
-  page.drawLine({ start: a.start, end: a.end, thickness: a.strokeWidth, color, opacity: a.opacity, lineCap: LineCapStyle.Round });
+  page.drawLine({
+    start: a.start,
+    end: a.end,
+    thickness: a.strokeWidth,
+    color,
+    opacity: a.opacity,
+    lineCap: LineCapStyle.Round,
+  });
   if (a.arrow) {
     const angle = Math.atan2(a.end.y - a.start.y, a.end.x - a.start.x);
     const size = Math.max(8, a.strokeWidth * 4);
-    const left = { x: a.end.x - size * Math.cos(angle - Math.PI / 6), y: a.end.y - size * Math.sin(angle - Math.PI / 6) };
-    const right = { x: a.end.x - size * Math.cos(angle + Math.PI / 6), y: a.end.y - size * Math.sin(angle + Math.PI / 6) };
-    page.drawLine({ start: a.end, end: left, thickness: a.strokeWidth, color, opacity: a.opacity, lineCap: LineCapStyle.Round });
-    page.drawLine({ start: a.end, end: right, thickness: a.strokeWidth, color, opacity: a.opacity, lineCap: LineCapStyle.Round });
+    const left = {
+      x: a.end.x - size * Math.cos(angle - Math.PI / 6),
+      y: a.end.y - size * Math.sin(angle - Math.PI / 6),
+    };
+    const right = {
+      x: a.end.x - size * Math.cos(angle + Math.PI / 6),
+      y: a.end.y - size * Math.sin(angle + Math.PI / 6),
+    };
+    page.drawLine({
+      start: a.end,
+      end: left,
+      thickness: a.strokeWidth,
+      color,
+      opacity: a.opacity,
+      lineCap: LineCapStyle.Round,
+    });
+    page.drawLine({
+      start: a.end,
+      end: right,
+      thickness: a.strokeWidth,
+      color,
+      opacity: a.opacity,
+      lineCap: LineCapStyle.Round,
+    });
   }
 }
 

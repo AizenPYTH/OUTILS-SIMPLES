@@ -40,7 +40,9 @@ describe("tool registry", () => {
         "pdf-watermark",
       ].sort(),
     );
-    expect(toolRegistry.filter((t) => t.status === "planned").every((t) => !isToolIndexable(t))).toBe(true);
+    expect(
+      toolRegistry.filter((t) => t.status === "planned").every((t) => !isToolIndexable(t)),
+    ).toBe(true);
   });
 
   it("builds the documented URL structure", () => {
@@ -77,9 +79,12 @@ describe("tool registry", () => {
 describe("sitemap", () => {
   it("contains indexable tools only", () => {
     const urls = buildSitemapEntries().map((e) => e.url);
-    for (const tool of getIndexableTools()) expect(urls).toContain(`http://localhost:3000${getToolPath(tool)}`);
+    for (const tool of getIndexableTools())
+      expect(urls).toContain(`http://localhost:3000${getToolPath(tool)}`);
     for (const tool of toolRegistry.filter((t) => t.status !== "published")) {
-      expect(urls.some((u) => u.endsWith(`/${tool.slug}/`) && u.includes(`/${tool.category}/`))).toBe(false);
+      expect(
+        urls.some((u) => u.endsWith(`/${tool.slug}/`) && u.includes(`/${tool.category}/`)),
+      ).toBe(false);
     }
     expect(urls).toContain("http://localhost:3000/");
     expect(urls).toContain("http://localhost:3000/pdf/");

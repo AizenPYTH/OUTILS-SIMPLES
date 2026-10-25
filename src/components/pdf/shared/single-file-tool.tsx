@@ -19,7 +19,13 @@ export function SingleFileTool({ toolId, children }: SingleFileToolProps) {
   return <SingleFileToolInner tool={tool}>{children}</SingleFileToolInner>;
 }
 
-function SingleFileToolInner({ tool, children }: { tool: ToolDefinition; children: SingleFileToolProps["children"] }) {
+function SingleFileToolInner({
+  tool,
+  children,
+}: {
+  tool: ToolDefinition;
+  children: SingleFileToolProps["children"];
+}) {
   const { state, load, reset } = usePdfDocument({
     toolId: tool.id,
     maxFileSizeBytes: tool.limits.maxFileSizeBytes,
@@ -27,7 +33,12 @@ function SingleFileToolInner({ tool, children }: { tool: ToolDefinition; childre
   });
 
   if (state.status === "idle") {
-    return <PdfDropzone onFiles={(files) => files[0] && void load(files[0])} maxFileSizeBytes={tool.limits.maxFileSizeBytes} />;
+    return (
+      <PdfDropzone
+        onFiles={(files) => files[0] && void load(files[0])}
+        maxFileSizeBytes={tool.limits.maxFileSizeBytes}
+      />
+    );
   }
   if (state.status === "loading") {
     return <BusyPanel progress={{ current: 0, total: 0, label: t.upload.reading }} />;

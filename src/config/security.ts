@@ -102,7 +102,9 @@ export function buildContentSecurityPolicy(options: SecurityHeaderOptions): stri
     .join("; ");
 }
 
-export function buildSecurityHeaders(options: SecurityHeaderOptions): { key: string; value: string }[] {
+export function buildSecurityHeaders(
+  options: SecurityHeaderOptions,
+): { key: string; value: string }[] {
   return [
     { key: "Content-Security-Policy", value: buildContentSecurityPolicy(options) },
     { key: "X-Content-Type-Options", value: "nosniff" },

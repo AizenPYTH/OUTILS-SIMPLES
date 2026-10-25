@@ -18,7 +18,16 @@ export async function openPdf(bytes: Uint8Array): Promise<PDFDocument> {
 /** Extracts text with pdf.js (Node build, no canvas needed) to verify content positions. */
 export async function extractPageText(bytes: Uint8Array, pageIndex: number): Promise<string[]> {
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  const loadingTask = pdfjs.getDocument({ data: new Uint8Array(bytes), useWorkerFetch: false, disableFontFace: true, verbosity: 0, standardFontDataUrl: path.join(path.dirname(require.resolve("pdfjs-dist/package.json")), "standard_fonts/") });
+  const loadingTask = pdfjs.getDocument({
+    data: new Uint8Array(bytes),
+    useWorkerFetch: false,
+    disableFontFace: true,
+    verbosity: 0,
+    standardFontDataUrl: path.join(
+      path.dirname(require.resolve("pdfjs-dist/package.json")),
+      "standard_fonts/",
+    ),
+  });
   const doc = await loadingTask.promise;
   const page = await doc.getPage(pageIndex + 1);
   const content = await page.getTextContent();

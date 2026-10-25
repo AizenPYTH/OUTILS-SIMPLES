@@ -13,9 +13,11 @@ import { fixture } from "../helpers";
 
 describe("sanitizeFilename", () => {
   it("removes path separators and control characters", () => {
-    expect(sanitizeFilename("../../etc/passwd")).toBe("-..-..-etc-passwd".replace(/^-/, "").replace(/^\.+/, "") || "document");
+    expect(sanitizeFilename("../../etc/passwd")).toBe(
+      "-..-..-etc-passwd".replace(/^-/, "").replace(/^\.+/, "") || "document",
+    );
     expect(sanitizeFilename("rapport\u0000final.pdf")).toBe("rapportfinal.pdf");
-    expect(sanitizeFilename("a/b\\c:d*e?f\"g<h>i|j")).toBe("a-b-c-d-e-f-g-h-i-j");
+    expect(sanitizeFilename('a/b\\c:d*e?f"g<h>i|j')).toBe("a-b-c-d-e-f-g-h-i-j");
   });
   it("falls back for empty or reserved names", () => {
     expect(sanitizeFilename("   ")).toBe("document");
@@ -46,7 +48,9 @@ describe("formatBytes", () => {
 describe("validation", () => {
   it("detects PDF magic bytes even after a BOM", async () => {
     expect(looksLikePdf(await fixture("simple-3-pages.pdf"))).toBe(true);
-    expect(looksLikePdf(new Uint8Array([0xef, 0xbb, 0xbf, 0x25, 0x50, 0x44, 0x46, 0x2d]))).toBe(true);
+    expect(looksLikePdf(new Uint8Array([0xef, 0xbb, 0xbf, 0x25, 0x50, 0x44, 0x46, 0x2d]))).toBe(
+      true,
+    );
     expect(looksLikePdf(await fixture("not-a-pdf.txt"))).toBe(false);
     expect(() => assertPdfBytes(new Uint8Array([1, 2, 3]))).toThrowError(PdfError);
   });
@@ -58,12 +62,31 @@ describe("validation", () => {
   });
 
   it("enforces size and count limits", () => {
-    expect(() => validatePdfFileMeta({ name: "a.pdf", size: 0, type: "application/pdf" })).toThrowError(PdfError);
-    expect(() => validatePdfFileMeta({ name: "a.pdf", size: 10, type: "application/pdf" }, { maxFileSizeBytes: 5 })).toThrowError(/maximale/);
-    expect(() => validatePdfFileMeta({ name: "a.png", size: 10, type: "image/png" })).toThrowError(PdfError);
+    expect(() =>
+      validatePdfFileMeta({ name: "a.pdf", size: 0, type: "application/pdf" }),
+    ).toThrowError(PdfError);
+    expect(() =>
+      validatePdfFileMeta(
+        { name: "a.pdf", size: 10, type: "application/pdf" },
+        { maxFileSizeBytes: 5 },
+      ),
+    ).toThrowError(/maximale/);
+    expect(() => validatePdfFileMeta({ name: "a.png", size: 10, type: "image/png" })).toThrowError(
+      PdfError,
+    );
     // Empty type with .pdf extension is accepted (common on Windows).
     expect(() => validatePdfFileMeta({ name: "a.pdf", size: 10, type: "" })).not.toThrow();
-    expect(() => validateFileBatch([{ name: "a", size: 1, type: "" }, { name: "b", size: 1, type: "" }], { maxFileCount: 1 })).toThrowError(PdfError);
-    expect(() => validateFileBatch([{ name: "a", size: 10, type: "" }], { maxTotalSizeBytes: 5 })).toThrowError(PdfError);
+    expect(() =>
+      validateFileBatch(
+        [
+          { name: "a", size: 1, type: "" },
+          { name: "b", size: 1, type: "" },
+        ],
+        { maxFileCount: 1 },
+      ),
+    ).toThrowError(PdfError);
+    expect(() =>
+      validateFileBatch([{ name: "a", size: 10, type: "" }], { maxTotalSizeBytes: 5 }),
+    ).toThrowError(PdfError);
   });
 });

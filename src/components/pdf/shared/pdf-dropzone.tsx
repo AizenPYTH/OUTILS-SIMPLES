@@ -51,7 +51,9 @@ export function PdfDropzone({
         validatePdfFileMeta(file, { maxFileSizeBytes });
         accepted.push(file);
       } catch (error) {
-        rejected.push(t.upload.fileRejected(file.name, isPdfError(error) ? error.message : t.errors.notPdf));
+        rejected.push(
+          t.upload.fileRejected(file.name, isPdfError(error) ? error.message : t.errors.notPdf),
+        );
       }
     }
     if (rejected.length) {
@@ -72,7 +74,10 @@ export function PdfDropzone({
     handleFiles(e.dataTransfer.files);
   };
 
-  const hint = multiple && maxFileCount ? t.upload.hintMultiple(formatBytes(maxFileSizeBytes), maxFileCount) : t.upload.hint(formatBytes(maxFileSizeBytes));
+  const hint =
+    multiple && maxFileCount
+      ? t.upload.hintMultiple(formatBytes(maxFileSizeBytes), maxFileCount)
+      : t.upload.hint(formatBytes(maxFileSizeBytes));
 
   return (
     <div className={className}>
@@ -93,12 +98,23 @@ export function PdfDropzone({
         )}
         data-testid="pdf-dropzone"
       >
-        <span className={cn("flex items-center justify-center rounded-[14px] bg-primary-soft text-link", compact ? "size-10" : "size-14")}>
-          {dragActive ? <FileUp className={compact ? "size-5" : "size-7"} aria-hidden="true" /> : <Upload className={compact ? "size-5" : "size-7"} aria-hidden="true" />}
+        <span
+          className={cn(
+            "flex items-center justify-center rounded-[14px] bg-primary-soft text-link",
+            compact ? "size-10" : "size-14",
+          )}
+        >
+          {dragActive ? (
+            <FileUp className={compact ? "size-5" : "size-7"} aria-hidden="true" />
+          ) : (
+            <Upload className={compact ? "size-5" : "size-7"} aria-hidden="true" />
+          )}
         </span>
         <div>
           <p className={cn("font-heading font-bold", compact ? "text-base" : "text-xl")}>
-            {dragActive ? t.upload.dragActive : title ?? (multiple ? t.upload.dropTitleMultiple : t.upload.dropTitle)}
+            {dragActive
+              ? t.upload.dragActive
+              : (title ?? (multiple ? t.upload.dropTitleMultiple : t.upload.dropTitle))}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">{hint}</p>
         </div>

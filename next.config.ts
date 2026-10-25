@@ -4,6 +4,8 @@ import { buildSecurityHeaders } from "./src/config/security";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Canonical URLs, sitemap and internal links all use trailing slashes.
+  trailingSlash: true,
   turbopack: {
     rules: {
       "*.css": {

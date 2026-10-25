@@ -27,10 +27,17 @@ export default async function CategoryPage({ params }: PageProps<"/[category]">)
 
   return (
     <div className="container-page py-8 sm:py-10">
-      <Breadcrumbs items={[{ name: t.nav.home, path: "/" }, { name: category.name, path: `/${category.slug}/` }]} />
+      <Breadcrumbs
+        items={[
+          { name: t.nav.home, path: "/" },
+          { name: category.name, path: `/${category.slug}/` },
+        ]}
+      />
       <div className="mb-8 mt-4">
         <h1 className="text-[clamp(32px,4.4vw,52px)] leading-[1.05]">{category.name}</h1>
-        <p className="mt-2 max-w-2xl text-base text-muted-foreground sm:text-lg">{category.description}</p>
+        <p className="mt-2 max-w-2xl text-base text-muted-foreground sm:text-lg">
+          {category.description}
+        </p>
       </div>
       <Suspense fallback={<div className="h-[52px] rounded-[16px] bg-muted" aria-hidden="true" />}>
         <ToolCatalog initialCategory={category.id} />

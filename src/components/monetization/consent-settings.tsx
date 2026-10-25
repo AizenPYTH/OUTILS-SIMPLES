@@ -16,15 +16,21 @@ export function ConsentSettings() {
       <dl className="grid gap-2 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-muted-foreground">{t.consent.analytics}</dt>
-          <dd className="font-medium">{hydrated ? (consent.analytics ? t.common.yes : t.common.no) : "…"}</dd>
+          <dd className="font-medium">
+            {hydrated ? (consent.analytics ? t.common.yes : t.common.no) : "…"}
+          </dd>
         </div>
         <div>
           <dt className="text-muted-foreground">{t.consent.advertising}</dt>
-          <dd className="font-medium">{hydrated ? (consent.advertising ? t.common.yes : t.common.no) : "…"}</dd>
+          <dd className="font-medium">
+            {hydrated ? (consent.advertising ? t.common.yes : t.common.no) : "…"}
+          </dd>
         </div>
       </dl>
       {hydrated && !decided ? (
-        <p className="mt-3 text-xs text-muted-foreground">Aucun choix enregistré : aucun service tiers n&apos;est chargé.</p>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Aucun choix enregistré : aucun service tiers n&apos;est chargé.
+        </p>
       ) : null}
       <Button className="mt-4" onClick={() => setOpen(true)}>
         {t.consent.manage}

@@ -63,7 +63,12 @@ export async function openPdf(bytes: Uint8Array): Promise<OpenedPdf> {
   for (let i = 1; i <= doc.numPages; i += 1) {
     const page = await doc.getPage(i);
     const viewport = page.getViewport({ scale: 1, rotation: 0 });
-    pages.push({ index: i - 1, width: viewport.width, height: viewport.height, rotation: page.rotate });
+    pages.push({
+      index: i - 1,
+      width: viewport.width,
+      height: viewport.height,
+      rotation: page.rotate,
+    });
     page.cleanup();
   }
   return {
@@ -114,14 +119,18 @@ export async function renderPageToCanvas(
   canvas.height = Math.floor(viewport.height * ratio);
   canvas.style.width = `${Math.floor(viewport.width)}px`;
   canvas.style.height = `${Math.floor(viewport.height)}px`;
-  const renderViewport = ratio === 1 ? viewport : page.getViewport({ scale: options.scale * ratio, rotation });
+  const renderViewport =
+    ratio === 1 ? viewport : page.getViewport({ scale: options.scale * ratio, rotation });
   const task = page.render({ canvas, viewport: renderViewport, intent: "display" });
   const onAbort = () => task.cancel();
   options.signal?.addEventListener("abort", onAbort, { once: true });
   try {
     await task.promise;
   } catch (error) {
-    if (options.signal?.aborted || (error instanceof Error && error.name === "RenderingCancelledException")) {
+    if (
+      options.signal?.aborted ||
+      (error instanceof Error && error.name === "RenderingCancelledException")
+    ) {
       return { viewport };
     }
     throw toPdfError(error, "RENDER_FAILED");
@@ -132,12 +141,19 @@ export async function renderPageToCanvas(
 }
 
 /** Scale that fits a page of (w, h) points into a box of (maxW, maxH) CSS px. */
-export function fitScale(pageWidth: number, pageHeight: number, maxWidth: number, maxHeight: number): number {
+export function fitScale(
+  pageWidth: number,
+  pageHeight: number,
+  maxWidth: number,
+  maxHeight: number,
+): number {
   return Math.min(maxWidth / pageWidth, maxHeight / pageHeight);
 }
 
 /** Visual (rotated) size of a page in points. */
 export function visualSize(page: PageInfo, extraRotation = 0): { width: number; height: number } {
-  const rotation = ((page.rotation + extraRotation) % 360 + 360) % 360;
-  return rotation === 90 || rotation === 270 ? { width: page.height, height: page.width } : { width: page.width, height: page.height };
+  const rotation = (((page.rotation + extraRotation) % 360) + 360) % 360;
+  return rotation === 90 || rotation === 270
+    ? { width: page.height, height: page.width }
+    : { width: page.width, height: page.height };
 }

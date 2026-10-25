@@ -11,7 +11,10 @@ const DialogTrigger = DialogPrimitive.Trigger;
 const DialogPortal = DialogPrimitive.Portal;
 const DialogClose = DialogPrimitive.Close;
 
-function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+function DialogOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
@@ -29,7 +32,13 @@ interface DialogContentProps extends React.ComponentProps<typeof DialogPrimitive
   size?: "sm" | "md" | "lg" | "xl";
 }
 
-function DialogContent({ className, children, showCloseButton = true, size = "md", ...props }: DialogContentProps) {
+function DialogContent({
+  className,
+  children,
+  showCloseButton = true,
+  size = "md",
+  ...props
+}: DialogContentProps) {
   const sizes = { sm: "sm:max-w-sm", md: "sm:max-w-lg", lg: "sm:max-w-2xl", xl: "sm:max-w-4xl" };
   return (
     <DialogPortal>
@@ -58,7 +67,13 @@ function DialogContent({ className, children, showCloseButton = true, size = "md
 }
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return <div data-slot="dialog-header" className={cn("flex flex-col gap-1.5 text-left", className)} {...props} />;
+  return (
+    <div
+      data-slot="dialog-header"
+      className={cn("flex flex-col gap-1.5 text-left", className)}
+      {...props}
+    />
+  );
 }
 
 function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
@@ -81,7 +96,10 @@ function DialogTitle({ className, ...props }: React.ComponentProps<typeof Dialog
   );
 }
 
-function DialogDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>) {
+function DialogDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"

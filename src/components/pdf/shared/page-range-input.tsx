@@ -53,8 +53,14 @@ export function PageRangeInput({ pageCount, value, onChange, label, id }: PageRa
         aria-describedby={`${inputId}-help`}
         data-testid="page-range-input"
       />
-      <p id={`${inputId}-help`} className={parsed.error ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>
-        {parsed.error ?? (parsed.parsed ? t.ranges.preview(parsed.parsed.indices.length, pageCount) : t.ranges.help)}
+      <p
+        id={`${inputId}-help`}
+        className={parsed.error ? "text-sm text-destructive" : "text-sm text-muted-foreground"}
+      >
+        {parsed.error ??
+          (parsed.parsed
+            ? t.ranges.preview(parsed.parsed.indices.length, pageCount)
+            : t.ranges.help)}
       </p>
     </div>
   );

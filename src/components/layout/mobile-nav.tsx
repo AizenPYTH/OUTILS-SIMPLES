@@ -36,7 +36,13 @@ export function MobileNav({ categories, editorPath }: MobileNavProps) {
 
   return (
     <div className="lg:hidden">
-      <Button variant="ghost" size="icon" onClick={() => setOpen(true)} aria-label={t.common.openMenu} data-testid="mobile-menu-trigger">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setOpen(true)}
+        aria-label={t.common.openMenu}
+        data-testid="mobile-menu-trigger"
+      >
         <Menu className="size-5" aria-hidden="true" />
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -56,7 +62,9 @@ export function MobileNav({ categories, editorPath }: MobileNavProps) {
               </Button>
             ) : null}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.nav.categories}</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t.nav.categories}
+              </p>
               <ul className="flex flex-col">
                 {categories.map((category) => (
                   <li key={category.id}>
@@ -74,7 +82,10 @@ export function MobileNav({ categories, editorPath }: MobileNavProps) {
             <ul className="flex flex-col border-t border-border pt-4">
               {links.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href} className="block rounded-md px-2 py-2.5 text-sm font-medium hover:bg-muted">
+                  <Link
+                    href={link.href}
+                    className="block rounded-md px-2 py-2.5 text-sm font-medium hover:bg-muted"
+                  >
                     {link.label}
                   </Link>
                 </li>

@@ -45,7 +45,10 @@ export function getCategoryPath(category: ToolCategory): string {
   return `/${category.slug}/`;
 }
 
-export function getToolsByCategory(categoryId: ToolCategoryId, publishedOnly = true): ToolDefinition[] {
+export function getToolsByCategory(
+  categoryId: ToolCategoryId,
+  publishedOnly = true,
+): ToolDefinition[] {
   const list = publishedOnly ? getPublishedTools() : [...toolRegistry];
   return list.filter((t) => t.category === categoryId);
 }
@@ -134,7 +137,10 @@ export function validateRegistry(tools: readonly ToolDefinition[] = toolRegistry
         issues.push({ toolId: tool.id, message: "published tool must document limitations" });
       }
       if (seoTitles.has(tool.seo.title)) {
-        issues.push({ toolId: tool.id, message: `seo.title duplicates ${seoTitles.get(tool.seo.title)}` });
+        issues.push({
+          toolId: tool.id,
+          message: `seo.title duplicates ${seoTitles.get(tool.seo.title)}`,
+        });
       }
       seoTitles.set(tool.seo.title, tool.id);
       if (seoDescriptions.has(tool.seo.description)) {

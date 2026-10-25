@@ -20,7 +20,11 @@ import { t } from "@/lib/i18n";
 const TOOL_ID = "pdf-extract-pages";
 
 export function ExtractPagesTool() {
-  return <SingleFileTool toolId={TOOL_ID}>{({ pdf, reset }) => <ExtractWorkspace pdf={pdf} reset={reset} />}</SingleFileTool>;
+  return (
+    <SingleFileTool toolId={TOOL_ID}>
+      {({ pdf, reset }) => <ExtractWorkspace pdf={pdf} reset={reset} />}
+    </SingleFileTool>
+  );
 }
 
 function ExtractWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
@@ -45,13 +49,21 @@ function ExtractWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void })
   const run = () => void op.run(() => extractPages(pdf.bytes, indices));
 
   if (op.state.status === "busy") return <BusyPanel progress={op.state.progress} />;
-  if (op.state.status === "error") return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={reset} />;
+  if (op.state.status === "error")
+    return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={reset} />;
   if (op.state.status === "done") {
     const bytes = op.state.result;
     return (
       <DonePanel
         summary={`${t.result.pages(indices.length)} · ${formatBytes(bytes.byteLength)}`}
-        onDownload={() => downloadPdf(bytes, pdf.file.name, `pages-${formatPageIndices(indices).replace(/[,\s]+/g, "_")}`, TOOL_ID)}
+        onDownload={() =>
+          downloadPdf(
+            bytes,
+            pdf.file.name,
+            `pages-${formatPageIndices(indices).replace(/[,\s]+/g, "_")}`,
+            TOOL_ID,
+          )
+        }
         onStartOver={() => {
           op.reset();
           reset();
@@ -62,13 +74,28 @@ function ExtractWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void })
 
   return (
     <div className="space-y-6">
-      <FileSummary name={pdf.file.name} size={pdf.file.size} pageCount={pdf.pageCount} onReset={reset} />
+      <FileSummary
+        name={pdf.file.name}
+        size={pdf.file.size}
+        pageCount={pdf.pageCount}
+        onReset={reset}
+      />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
         <div className="flex-1">
-          <PageRangeInput pageCount={pdf.pageCount} value={rangeText} onChange={onRange} label="Pages à extraire (ou cliquez sur les vignettes)" />
+          <PageRangeInput
+            pageCount={pdf.pageCount}
+            value={rangeText}
+            onChange={onRange}
+            label="Pages à extraire (ou cliquez sur les vignettes)"
+          />
         </div>
         <div className="flex gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => setSelected(new Set(pdf.pages.map((p) => p.index)))}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setSelected(new Set(pdf.pages.map((p) => p.index)))}
+          >
             {t.common.selectAll}
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={() => setSelected(new Set())}>
@@ -76,7 +103,11 @@ function ExtractWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void })
           </Button>
         </div>
       </div>
-      <ul className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(112px,1fr))]" aria-label="Pages du document" data-testid="page-grid">
+      <ul
+        className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(112px,1fr))]"
+        aria-label="Pages du document"
+        data-testid="page-grid"
+      >
         {pdf.pages.map((page) => (
           <li key={page.index} className="flex justify-center">
             <PageTile
@@ -92,9 +123,18 @@ function ExtractWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void })
       </ul>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-muted-foreground" data-testid="extract-summary">
-          {indices.length > 0 ? `${t.ranges.preview(indices.length, pdf.pageCount)} : ${formatPageIndices(indices)}` : t.errors.noSelection}
+          {indices.length > 0
+            ? `${t.ranges.preview(indices.length, pdf.pageCount)} : ${formatPageIndices(indices)}`
+            : t.errors.noSelection}
         </p>
-        <Button type="button" size="lg" className="w-full sm:w-auto" onClick={run} disabled={indices.length === 0} data-testid="extract-button">
+        <Button
+          type="button"
+          size="lg"
+          className="w-full sm:w-auto"
+          onClick={run}
+          disabled={indices.length === 0}
+          data-testid="extract-button"
+        >
           <FileOutput aria-hidden="true" />
           Extraire {indices.length > 0 ? t.result.pages(indices.length) : ""}
         </Button>

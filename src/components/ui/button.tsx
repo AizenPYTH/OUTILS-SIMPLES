@@ -29,17 +29,29 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   loading?: boolean;
 }
 
-function Button({ className, variant, size, asChild = false, loading = false, children, disabled, ...props }: ButtonProps) {
+function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  loading = false,
+  children,
+  disabled,
+  ...props
+}: ButtonProps) {
   if (asChild) {
     // Slot requires exactly one element child: no loader in this mode.
     return (
-      <Slot data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props}>
+      <Slot
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        {...props}
+      >
         {children}
       </Slot>
     );
