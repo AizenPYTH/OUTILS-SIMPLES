@@ -78,7 +78,8 @@ Principes de design et application page par page : `docs/DESIGN_PRINCIPES.md`.
   texte extrait par pdf.js, aucun rectangle), extraction des passages sur fixtures (positions,
   codes y compris caractères non vus sur la page, indices stables après modification, page
   pivotée, page image → « scanné »).
-- Playwright (Chromium desktop + Pixel 7 émulé) : voir le résultat en fin de ce rapport.
+- Playwright (Chromium desktop + Pixel 7 émulé), compilation finale : **95 parcours × 2 projets :
+  181 réussis, 9 ignorés volontairement (parcours clavier ou desktop seulement), 0 échec** en 4,2 min.
   Nouveaux parcours : recherche de l'accueil → catalogue ; catalogue et filtres sur `/outils/` ;
   navigation par les cartes de catégories ; édition de texte dans l'éditeur (boîte sur le texte,
   modification, réaffichage, retour, repli de police, export relu par pdf.js, aucun rectangle
