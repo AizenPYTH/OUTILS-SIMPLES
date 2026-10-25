@@ -13,6 +13,7 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "test-results/**",
     "coverage/**",
+    "public/pdfjs/**",
   ]),
 ]);
 

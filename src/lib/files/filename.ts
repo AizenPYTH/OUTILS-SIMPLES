@@ -9,7 +9,6 @@ const WINDOWS_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
 export function sanitizeFilename(name: string, fallback = "document"): string {
   let base = name
     .normalize("NFKC")
-    // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001f\u007f]/g, "")
     .replace(/[\\/:*?"<>|]/g, "-")
     .replace(/\s+/g, " ")

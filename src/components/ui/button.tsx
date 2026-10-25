@@ -36,9 +36,16 @@ export interface ButtonProps
 }
 
 function Button({ className, variant, size, asChild = false, loading = false, children, disabled, ...props }: ButtonProps) {
-  const Comp = asChild ? Slot : "button";
+  if (asChild) {
+    // Slot requires exactly one element child: no loader in this mode.
+    return (
+      <Slot data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props}>
+        {children}
+      </Slot>
+    );
+  }
   return (
-    <Comp
+    <button
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       disabled={disabled || loading}
@@ -47,7 +54,7 @@ function Button({ className, variant, size, asChild = false, loading = false, ch
     >
       {loading ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
       {children}
-    </Comp>
+    </button>
   );
 }
 
