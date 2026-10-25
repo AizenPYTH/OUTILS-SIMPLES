@@ -49,6 +49,45 @@ export async function extractPageText(bytes: Uint8Array, pageIndex: number): Pro
   return items;
 }
 
+export interface TextItemInfo {
+  str: string;
+  transform: number[];
+  width: number;
+  height: number;
+}
+
+/** Text items with their matrices (position, size, rotation), via pdf.js in Node. */
+export async function extractTextItems(
+  bytes: Uint8Array,
+  pageIndex: number,
+): Promise<TextItemInfo[]> {
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const loadingTask = pdfjs.getDocument({
+    data: new Uint8Array(bytes),
+    useWorkerFetch: false,
+    disableFontFace: true,
+    verbosity: 0,
+    standardFontDataUrl: path.join(
+      path.dirname(require.resolve("pdfjs-dist/package.json")),
+      "standard_fonts/",
+    ),
+  });
+  const doc = await loadingTask.promise;
+  const page = await doc.getPage(pageIndex + 1);
+  const content = await page.getTextContent();
+  const items = content.items
+    .filter((item): item is import("pdfjs-dist/types/src/display/api").TextItem => "str" in item)
+    .filter((item) => item.str.trim().length > 0)
+    .map((item) => ({
+      str: item.str,
+      transform: item.transform as number[],
+      width: item.width,
+      height: item.height,
+    }));
+  await loadingTask.destroy();
+  return items;
+}
+
 // ------------------------------------------------------------------ audit helpers
 
 import { PDFArray, PDFRawStream, decodePDFRawStream } from "pdf-lib";
@@ -60,9 +99,16 @@ export async function pageContentOps(bytes: Uint8Array, pageIndex: number): Prom
   const page = doc.getPage(pageIndex);
   const contents = page.node.Contents();
   if (!contents) return "";
-  const streams = contents instanceof PDFArray ? contents.asArray().map((ref) => doc.context.lookup(ref)) : [contents];
+  const streams =
+    contents instanceof PDFArray
+      ? contents.asArray().map((ref) => doc.context.lookup(ref))
+      : [contents];
   return streams
-    .map((s) => (s instanceof PDFRawStream ? Buffer.from(decodePDFRawStream(s).decode()).toString("latin1") : ""))
+    .map((s) =>
+      s instanceof PDFRawStream
+        ? Buffer.from(decodePDFRawStream(s).decode()).toString("latin1")
+        : "",
+    )
     .join("\n");
 }
 
@@ -78,12 +124,17 @@ const CRC_TABLE = (() => {
 
 function crc32(bytes: Uint8Array): number {
   let crc = 0xffffffff;
-  for (let i = 0; i < bytes.length; i += 1) crc = CRC_TABLE[(crc ^ bytes[i]!) & 0xff]! ^ (crc >>> 8);
+  for (let i = 0; i < bytes.length; i += 1)
+    crc = CRC_TABLE[(crc ^ bytes[i]!) & 0xff]! ^ (crc >>> 8);
   return (crc ^ 0xffffffff) >>> 0;
 }
 
 /** Builds an 8-bit RGB PNG whose pixel colour is given by `paint(x, y)`. */
-export function buildPng(width: number, height: number, paint: (x: number, y: number) => [number, number, number]): Buffer {
+export function buildPng(
+  width: number,
+  height: number,
+  paint: (x: number, y: number) => [number, number, number],
+): Buffer {
   const raw = new Uint8Array((width * 3 + 1) * height);
   for (let y = 0; y < height; y += 1) {
     raw[y * (width * 3 + 1)] = 0;
@@ -107,11 +158,21 @@ export function buildPng(width: number, height: number, paint: (x: number, y: nu
   ihdr.writeUInt32BE(width, 0);
   ihdr.writeUInt32BE(height, 4);
   ihdr.set([8, 2, 0, 0, 0], 8);
-  return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk("IHDR", ihdr), chunk("IDAT", zlibSync(raw, { level: 6 })), chunk("IEND", new Uint8Array(0))]);
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk("IHDR", ihdr),
+    chunk("IDAT", zlibSync(raw, { level: 6 })),
+    chunk("IEND", new Uint8Array(0)),
+  ]);
 }
 
 /** Samples the pixels of an encoded image inside the page and returns the distinct RGB triplets seen. */
-export async function samplePixels(page: Page, bytes: Uint8Array, mimeType: string, step = 7): Promise<string[]> {
+export async function samplePixels(
+  page: Page,
+  bytes: Uint8Array,
+  mimeType: string,
+  step = 7,
+): Promise<string[]> {
   return page.evaluate(
     async ({ b64, mime, step }) => {
       const bin = atob(b64);
@@ -125,7 +186,8 @@ export async function samplePixels(page: Page, bytes: Uint8Array, mimeType: stri
       ctx.drawImage(bitmap, 0, 0);
       const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
       const seen = new Set<string>();
-      for (let i = 0; i < data.length; i += 4 * step) seen.add(`${data[i]},${data[i + 1]},${data[i + 2]}`);
+      for (let i = 0; i < data.length; i += 4 * step)
+        seen.add(`${data[i]},${data[i + 1]},${data[i + 2]}`);
       return Array.from(seen);
     },
     { b64: Buffer.from(bytes).toString("base64"), mime: mimeType, step },

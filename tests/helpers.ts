@@ -38,6 +38,46 @@ export async function extractPageText(bytes: Uint8Array, pageIndex: number): Pro
   return items;
 }
 
+export interface TextItemInfo {
+  str: string;
+  /** pdf.js text matrix [a b c d e f] in PDF user space. */
+  transform: number[];
+  width: number;
+  height: number;
+}
+
+/** Text items with their matrices (position, size and rotation of each run). */
+export async function extractTextItems(
+  bytes: Uint8Array,
+  pageIndex: number,
+): Promise<TextItemInfo[]> {
+  const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const loadingTask = pdfjs.getDocument({
+    data: new Uint8Array(bytes),
+    useWorkerFetch: false,
+    disableFontFace: true,
+    verbosity: 0,
+    standardFontDataUrl: path.join(
+      path.dirname(require.resolve("pdfjs-dist/package.json")),
+      "standard_fonts/",
+    ),
+  });
+  const doc = await loadingTask.promise;
+  const page = await doc.getPage(pageIndex + 1);
+  const content = await page.getTextContent();
+  const items = content.items
+    .filter((item): item is import("pdfjs-dist/types/src/display/api").TextItem => "str" in item)
+    .filter((item) => item.str.trim().length > 0)
+    .map((item) => ({
+      str: item.str,
+      transform: item.transform as number[],
+      width: item.width,
+      height: item.height,
+    }));
+  await loadingTask.destroy();
+  return items;
+}
+
 export function decodeLatin1(bytes: Uint8Array): string {
   return Buffer.from(bytes).toString("latin1");
 }
