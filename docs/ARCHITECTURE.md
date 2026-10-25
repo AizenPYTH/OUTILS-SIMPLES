@@ -13,23 +13,35 @@
 └───────────────────────────────────────────────────────────────────────────────────────┘
              │ importe                                  │ charge dynamiquement (client)
              ▼                                          ▼
-┌──────── src/lib/tools ────────┐          ┌──────── src/components/pdf ────────────┐
-│ registry.ts  (source unique)  │          │ tool-renderer.tsx  id → composant      │
-│ queries.ts   (publiés, liés…) │          │ shared/  dropzone, panels, vignettes    │
-│ search.ts    (accents, synon.)│          │ tools/   13 outils                      │
-│ categories.ts                 │          │ workspace/ éditeur plein écran          │
-└───────────────────────────────┘          └────────────────┬───────────────────────┘
-                                                            │ appelle
-                                                            ▼
-┌──────── src/lib/pdf ──────────────────────────────────────────────────────────────┐
-│ load.ts        chargement validé (signature, chiffrement, pages)                  │
-│ operations/    merge, pages (extract/split/rotate/organize), annotate, watermark, │
-│                compress, forms — pures, testées en Node                            │
-│ annotations/   modèle en espace PDF + export pdf-lib                               │
-│ coordinates.ts écran ⇄ viewport ⇄ PDF (même matrice que pdf.js)                    │
-│ browser/       pdf.js (rendu), réencodeur canvas, lecture fichiers, ZIP            │
-└───────────────────────────────────────────────────────────────────────────────────┘
+┌──────── src/lib/tools ──────────────┐    ┌──────── src/components ───────────────────────┐
+│ registry/  pdf-core, pdf-extra,     │    │ tools/tool-renderer.tsx  id → composant       │
+│            scan, images, text,      │    │   (next/dynamic, ssr:false, un bundle/outil)  │
+│            developer, calculators,  │    │ tools/shared  dropzone générique, text-io,    │
+│            codes, documents         │    │               panels, copy/download           │
+│ queries.ts (publiés, liés…)         │    │ pdf/  shared, tools (27), workspace (éditeur) │
+│ search.ts  (accents, synonymes)     │    │ scan/ ocr/ images/ text/ dev/ calc/ codes/    │
+│ categories.ts (9, 8 actives)        │    │ documents/                                    │
+└─────────────────────────────────────┘    └──────────────────────┬────────────────────────┘
+                                                                  │ appelle des bibliothèques pures
+                                                                  ▼
+┌──────── src/lib ─────────────────────────────────────────────────────────────────────────┐
+│ pdf/   load, operations (merge, pages, annotate, watermark, compress, forms, extract-text,│
+│        crop, stamps, metadata, images-to-pdf, links, extract-images, compare, redact,    │
+│        text-to-pdf, printables), qpdf.ts (WebAssembly), annotations/, browser/ (pdf.js)  │
+│ ocr/   engine (Tesseract worker), searchable-pdf, export                                 │
+│ scan/  geometry (homographie), detect (coins), page-pipeline (filtres), detect-browser    │
+│ images/ canvas, pixels (Otsu, document, palette), metadata (EXIF/PNG), png-encode,       │
+│        watermark, types                                                                  │
+│ text/  stats, transform, diff · dev/ json, csv, encoding, random, regex, timestamp        │
+│ calc/  percent (+ TVA), dates (fériés, ouvrés), units · codes/ qr, qr-read, barcode, color│
+│ files/ validation, filename, download, format · consent/ · analytics/ · i18n/ · seo       │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+Règle d'organisation : toute logique métier vit dans `src/lib` sous forme de fonctions pures (octets →
+octets, texte → texte, pixels → pixels) testables en Node ; les composants n'ajoutent que l'état
+d'interface, le canvas et les téléchargements. Les bibliothèques lourdes (pdf.js, pdf-lib, Tesseract,
+qpdf, exifr, marked, jsqr, dnd-kit) sont importées dynamiquement par outil.
 
 ## Flux de données d'un outil
 
@@ -41,9 +53,26 @@
 5. `DonePanel` propose le téléchargement : `bytesToBlob` → `triggerDownload` (URL révoquée ensuite).
 6. `reset()` détruit le document pdf.js et libère les références.
 
-Aucune étape ne quitte le navigateur. Les Web Workers sont utilisés par pdf.js pour le rendu ; les
-opérations pdf-lib s'exécutent sur le thread principal avec des rendez-vous (`setTimeout`) pour laisser
-l'interface peindre. Déplacer pdf-lib dans un worker est une amélioration prévue (voir limitations).
+Aucune étape ne quitte le navigateur. Les Web Workers sont utilisés par pdf.js (rendu) et Tesseract
+(OCR) ; les opérations pdf-lib et les filtres d'image s'exécutent sur le thread principal avec des
+rendez-vous (`setTimeout`) pour laisser l'interface peindre. Déplacer pdf-lib dans un worker est une
+amélioration prévue (voir limitations).
+
+Variantes du flux pour les autres familles :
+
+- **Images** : `ImageBatchTool` + `useImageBatch` (liste, aperçus, traitement séquentiel annulable,
+  ZIP) reçoivent un `BatchProcessor` pur (bitmap → blob) propre à chaque outil.
+- **Texte / développeur / calculatrices** : état local + fonction pure recalculée à chaque frappe
+  (`useMemo`), sortie dans `TextOutputPanel` (copie, téléchargement).
+- **Scanner / perspective** : `ImageBitmap` conservé en mémoire par page, réglages (`ScanPageSettings`)
+  appliqués par `renderScanPage` pour l'aperçu (taille réduite) et l'export (taille plafonnée).
+- **OCR** : rendu de la page à 200 dpi (pdf.js) ou image ≤ 3000 px → Tesseract (worker) → texte éditable
+  par page → exports TXT/Markdown ou PDF recherchable (`buildSearchablePdf`).
+- **Caviardage** : rectangles stockés en points visuels (échelle 1, rotation appliquée) ; à l'export, les
+  pages marquées sont rendues à 150–300 dpi, noircies sur le canvas, encodées puis substituées dans le
+  document (`replacePagesWithImages`), métadonnées supprimées.
+- **Documents générés** (Markdown, texte, feuilles, calendriers, page de garde) : mise en page
+  entièrement en pdf-lib avec les 14 polices standard, pagination et liens cliquables (`Link` annots).
 
 ## Éditeur / annotations
 
@@ -59,10 +88,18 @@ l'interface peindre. Déplacer pdf-lib dans un worker est une amélioration pré
 ## Frontières de sécurité
 
 - **CSP statique** (`src/config/security.ts`) : `default-src 'self'`, `object-src 'none'`,
-  `frame-ancestors 'none'`, `worker-src 'self' blob:`, `img-src 'self' blob: data:`. `'unsafe-inline'` est
-  requis par les scripts d'hydratation Next.js en rendu statique ; nous avons privilégié des pages
-  statiques (coût, cache CDN, SEO) à une CSP à nonce qui imposerait un rendu dynamique de chaque page.
-  Les hôtes publicitaires / analytics ne sont ajoutés que lorsque la fonctionnalité est activée.
+  `frame-ancestors 'none'`, `worker-src 'self' blob:`, `img-src 'self' blob: data:` (la caméra est
+  affichée via `srcObject`, sans directive `media-src` supplémentaire). `script-src` contient `'unsafe-inline'` (hydratation Next.js en
+  rendu statique) et `'wasm-unsafe-eval'` (WebAssembly : Tesseract, qpdf, décodeurs pdf.js) mais jamais
+  `'unsafe-eval'`. Nous avons privilégié des pages statiques (coût, cache CDN, SEO) à une CSP à nonce qui
+  imposerait un rendu dynamique de chaque page. Les hôtes publicitaires / analytics ne sont ajoutés que
+  lorsque la fonctionnalité est activée.
+- **Actifs WebAssembly et modèles** : copiés depuis `node_modules` dans `public/` par
+  `scripts/copy-pdfjs-assets.mjs` (`postinstall`, `prebuild`) et servis par le site lui-même ; aucun CDN
+  tiers n'est contacté. `fs` et `path` sont aliasés vers un module vide pour la glue Emscripten de qpdf
+  (`next.config.ts`).
+- **Caméra** : `getUserMedia` demandé uniquement au clic, flux arrêté à la fermeture du dialogue ; les
+  photos ne sont jamais envoyées.
 - Autres en-têtes : HSTS (prod), `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`,
   `Permissions-Policy`, COOP.
 - Fichiers : vérification de signature (`%PDF`, PNG, JPEG), limites de taille/nombre/pages

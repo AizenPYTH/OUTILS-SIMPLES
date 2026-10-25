@@ -1,9 +1,10 @@
 # OUTILIA — outils en ligne simples, rapides et privés
 
-OUTILIA est une plateforme d'outils en ligne dont la première brique est une **suite PDF complète traitée
-intégralement dans le navigateur** : fusionner, diviser, extraire, organiser, pivoter, compresser, ajouter du
-texte, annoter, signer, ajouter / gérer un filigrane, remplir un formulaire, et un éditeur plein écran.
-Aucun fichier ne quitte l'appareil de l'utilisateur.
+OUTILIA est une plateforme de **66 outils en ligne traités intégralement dans le navigateur** : une suite
+PDF complète (fusion, division, compression, édition, signature, protection, OCR, caviardage…), un scanner
+de documents pour mobile, des outils images, texte, développeur, des calculatrices, des générateurs de
+QR codes et codes-barres et des documents à imprimer. Aucun fichier ne quitte l'appareil de l'utilisateur :
+il n'y a aucun endpoint serveur.
 
 Le projet est conçu pour devenir un site à trafic organique (SEO) monétisable (publicité, premium, affiliation)
 sans sacrifier la confiance : rien n'est publié tant que ça ne fonctionne pas, aucun chiffre ou témoignage
@@ -16,14 +17,17 @@ n'est inventé, et les limites techniques sont écrites noir sur blanc sur chaqu
 | Application | Next.js 16 (App Router, Turbopack, génération statique), React 19, TypeScript strict           |
 | Style       | Tailwind CSS 4 + tokens CSS issus de la charte (`src/app/globals.css`), polices auto-hébergées |
 | Composants  | Primitives Radix (dialog, select, slider…), lucide-react, sonner, dnd-kit                      |
-| PDF         | pdf.js (rendu, vignettes) + pdf-lib (manipulation), fflate (ZIP)                               |
+| PDF         | pdf.js (rendu, texte) + pdf-lib (manipulation), qpdf WebAssembly (chiffrement), fflate (ZIP)   |
+| OCR / scan  | Tesseract.js 7 (WebAssembly, modèles fra/eng auto-hébergés), homographie et filtres maison     |
+| Images      | Canvas + opérations pixel maison, exifr (lecture EXIF), encodeur PNG maison                    |
+| Codes/docs  | qrcode, jsqr, encodeurs de codes-barres maison, marked + DOMPurify (Markdown), diff (Myers)    |
 | Validation  | Zod (variables d'environnement), vérifications de signature de fichiers                        |
 | Tests       | Vitest (unitaires + intégration sur fichiers réels), Playwright (parcours complets, mobile)    |
 
 ## Démarrage
 
 ```bash
-pnpm install          # copie aussi les actifs pdf.js dans public/pdfjs (postinstall)
+pnpm install          # copie aussi les actifs pdf.js, Tesseract, modèles OCR et qpdf dans public/ (postinstall)
 cp .env.example .env.local
 pnpm dev              # http://localhost:3000
 ```
@@ -37,8 +41,10 @@ Commandes :
 | `pnpm typecheck`            | `next typegen` + `tsc --noEmit`                                             |
 | `pnpm lint`                 | ESLint (config Next core-web-vitals + TypeScript)                           |
 | `pnpm test`                 | tests unitaires et d'intégration Vitest                                     |
-| `pnpm test:e2e`             | Playwright (lance `pnpm start` sur le port 3100 ; faire `pnpm build` avant) |
+| `pnpm test:e2e`             | Playwright (lance Next sur le port 3100 ; faire `pnpm build` avant)         |
 | `pnpm fixtures`             | régénère les PDF de test synthétiques dans `tests/fixtures`                 |
+| `node scripts/generate-image-fixtures.mjs` | régénère les images de test (Chromium)                       |
+| `node scripts/generate-links-fixture.mjs`, `generate-code-fixtures.mjs` | fixtures PDF liens/images et QR |
 | `pnpm check`                | typecheck + lint + tests + build                                            |
 
 Prérequis : Node ≥ 20.9, pnpm 10.
@@ -60,6 +66,22 @@ Toutes sont publiques (`NEXT_PUBLIC_*`), validées par Zod dans `src/config/env.
 
 Il n'y a aucun secret côté serveur : le site n'a ni base de données ni API.
 
+## Catalogue (66 outils, 8 catégories actives)
+
+| Catégorie            | Outils                                                                                                                                                                                                                                                                                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PDF (27)             | Modifier, fusionner, diviser, compresser, organiser, pivoter, extraire des pages, ajouter du texte, annoter, signer, filigrane (ajout, gestion), formulaires, extraire le texte, rechercher, PDF → images, images → PDF, recadrer, numéroter, protéger, déverrouiller, vérifier/réparer, métadonnées, extraire les liens, extraire les images, comparer, caviarder |
+| Numérisation (3)     | Scanner un document (caméra), corriger un document photographié, OCR + PDF recherchable                                                                                                                                                                                                                                                                  |
+| Images (7)           | Compresser, redimensionner, recadrer, convertir, pivoter/retourner, EXIF (lire/supprimer), filigrane — par lot                                                                                                                                                                                                                                             |
+| Texte (5)            | Compteur de mots, casse, nettoyage, comparaison, slug                                                                                                                                                                                                                                                                                                    |
+| Développeur (10)     | JSON, CSV → JSON, Base64, URL, entités HTML, UUID, mots de passe, hash, regex, timestamp                                                                                                                                                                                                                                                                   |
+| Calculatrices (4)    | Pourcentage, TVA, jours entre deux dates / jours ouvrés, unités                                                                                                                                                                                                                                                                                           |
+| Codes & couleurs (5) | QR code (générer, lire), codes-barres, convertisseur de couleurs + contraste WCAG, palette d'image                                                                                                                                                                                                                                                       |
+| Documents (5)        | Markdown → PDF, texte → PDF, feuilles à imprimer, calendrier, page de garde                                                                                                                                                                                                                                                                              |
+
+Le rapport détaillé de l'extension (outils, limites, licences, coûts, prochaines étapes) est dans
+`docs/RAPPORT_EXTENSION.md`.
+
 ## Architecture (résumé)
 
 Voir `docs/ARCHITECTURE.md` pour le détail.
@@ -67,22 +89,27 @@ Voir `docs/ARCHITECTURE.md` pour le détail.
 ```
 src/
   config/        marque (OUTILIA), env, limites, en-têtes de sécurité / CSP
-  lib/tools/     registre d'outils typé = source unique (navigation, recherche, sitemap, SEO)
-  lib/pdf/       opérations pdf-lib pures et testées, modèle d'annotations, coordonnées, couche pdf.js
+  lib/tools/     registre d'outils typé (un fichier par domaine) = source unique (navigation, recherche, sitemap, SEO)
+  lib/pdf/       opérations pdf-lib pures et testées, qpdf (chiffrement), annotations, coordonnées, couche pdf.js
+  lib/ocr/       moteur Tesseract (chargement, pages, nettoyage), PDF recherchable, exports
+  lib/scan/      géométrie (homographie), détection de coins, pipeline de page (filtres)
+  lib/images/    canvas, opérations pixel, métadonnées EXIF/PNG, encodeur PNG, filigrane
+  lib/text/, lib/dev/, lib/calc/, lib/codes/   bibliothèques pures des outils texte, développeur, calculs, codes
   lib/files/     validation (signatures), noms de fichiers sûrs, téléchargement
   lib/consent/   état de consentement first-party ; lib/analytics/ : événements sans données sensibles
-  components/    ui (design system), layout, tools (catalogue, page outil), pdf (outils + éditeur), monetization
+  components/    ui, layout, tools (catalogue, page outil, renderer), pdf, scan, ocr, images, text, dev, calc, codes, documents
   app/           routes : / (catalogue), /[category]/, /[category]/[slug]/, guides, pages légales, sitemap, robots
 ```
 
 ### Registre d'outils
 
-`src/lib/tools/registry.ts` décrit chaque outil (id, slug, catégorie, textes, SEO, statut, indexabilité,
-formats, limites, outils liés, contenu éditorial). Un outil n'est public que si `status === "published"` ;
-les entrées `planned` servent de feuille de route et de suggestions de recherche mais ne génèrent aucune
-page. `validateRegistry()` (testé) vérifie l'unicité des ids/slugs/titres/descriptions et la complétude des
-entrées publiées. Ajouter un outil = une entrée dans le registre + un composant dans
-`src/components/pdf/tool-renderer.tsx`.
+`src/lib/tools/registry/*.ts` (un fichier par domaine, assemblés dans `index.ts`) décrit chaque outil (id,
+slug, catégorie, textes, SEO, statut, indexabilité, formats, limites, outils liés, contenu éditorial). Un
+outil n'est public que si `status === "published"` ; une entrée `planned` servirait de feuille de route sans
+générer de page. `validateRegistry()` (testé) vérifie l'unicité des ids/slugs/titres/descriptions, les
+longueurs SEO et la complétude des entrées publiées. Ajouter un outil = une entrée dans le registre + un
+composant dans `src/components/tools/tool-renderer.tsx` (chargé dynamiquement, client uniquement ; un
+test statique vérifie que chaque outil publié a son composant).
 
 ### Traitement PDF
 
@@ -99,6 +126,25 @@ entrées publiées. Ajouter un outil = une entrée dans le registre + un composa
   flux d'objets et, en mode avec perte, réencode uniquement les images JPEG / Flate RVB-gris sans masque,
   en conservant l'original si le résultat serait plus lourd. Aucune page n'est pixellisée.
 
+### OCR et numérisation
+
+- Tesseract.js 7 est exécuté dans un Web Worker avec le moteur WebAssembly auto-hébergé (`public/ocr/core`,
+  variante SIMD / relaxed-SIMD choisie à l'exécution) et les modèles de langue `public/ocr/lang`
+  (`fra.traineddata.gz` 6,3 Mo, `eng.traineddata.gz` 10,9 Mo). Rien n'est téléchargé depuis un CDN tiers.
+  Mémoire : ≈ 50–100 Mo pour le moteur, plus la page rendue à 200 dpi.
+- Le PDF recherchable (`src/lib/ocr/searchable-pdf.ts`) embarque l'image de la page et dessine chaque mot
+  reconnu en texte invisible (`Tr 3`) à sa position, ce qui rend le document sélectionnable et indexable.
+- Le scanner et la correction de perspective reposent sur une homographie calculée à partir de quatre
+  coins (détectés par seuillage d'Otsu + plus grande composante claire, ou placés à la main) et sur des
+  filtres pixel purs (document, niveaux de gris, noir et blanc, luminosité/contraste).
+
+### Chiffrement PDF
+
+Le chiffrement, le déverrouillage et la vérification utilisent qpdf compilé en WebAssembly
+(`@neslinesli93/qpdf-wasm`, actif `public/qpdf/qpdf.wasm`). Les mots de passe ne quittent pas le
+navigateur. La CSP autorise `'wasm-unsafe-eval'` (sans `'unsafe-eval'`) pour qpdf, Tesseract et les
+décodeurs pdf.js.
+
 ### Confidentialité
 
 Tout le traitement est local. Aucun endpoint serveur, aucun stockage, aucun log de contenu. Les URL
@@ -108,12 +154,15 @@ de nom de fichier.
 
 ## Tests
 
-- `pnpm test` : 56 tests (plages de pages, validation, noms de fichiers, registre, sitemap, SEO, CSP, env,
-  consentement, coordonnées, et toutes les opérations PDF sur fixtures réelles).
-- `pnpm build && pnpm test:e2e` : 39 parcours Playwright (desktop + mobile Pixel 7) : catalogue, recherche,
-  filtres, navigation, 404, métadonnées, sitemap/robots/CSP, thème, et pour chaque outil un parcours
-  complet avec téléchargement vérifié par pdf-lib / pdf.js (fusion, division + ZIP, rotation, organisation,
-  extraction, compression, filigrane + retrait, formulaire, éditeur texte/dessin/undo/export, signature).
+- `pnpm test` : 121 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
+  sur fixtures réelles, géométrie/détection du scanner, OCR → PDF recherchable, métadonnées d'images,
+  encodeur PNG, extraction d'images et de liens, comparaison, caviardage, Markdown → PDF, regex, dates et
+  jours fériés, TVA, unités, codes-barres, couleurs, décodage QR, documents imprimables).
+- `pnpm build && pnpm test:e2e` : 56 parcours Playwright exécutés sur desktop et mobile (Pixel 7) :
+  catalogue, recherche, navigation, 404, métadonnées, sitemap/robots/CSP, thème, absence de débordement
+  horizontal sur mobile, et pour chaque famille d'outils un parcours complet avec fichiers téléchargés
+  vérifiés par pdf-lib / pdf.js (y compris OCR sur une image de texte français et caviardage vérifié par
+  disparition du texte).
 
 ## Déploiement
 
@@ -156,9 +205,18 @@ serveur par webhook et une base de données : voir `docs/ARCHITECTURE.md` § Pre
 ## Limites connues
 
 Voir `docs/KNOWN_LIMITATIONS.md`. Les principales : pas de modification du texte existant (annotations
-superposées), polices standard PDF uniquement (latin), signature visuelle non qualifiée, retrait de
-filigrane limité aux filigranes OUTILIA et aux annotations `/Watermark`, formulaires XFA non pris en charge.
+superposées), polices standard PDF uniquement (latin) pour tout texte généré, OCR limité au texte imprimé
+net en français/anglais, pas de conversion Office, formats image HEIC/TIFF non lus, caviardage par
+rastérisation des pages marquées, comparaison de PDF textuelle uniquement.
 
 ## Licence des dépendances
 
-pdf.js (Apache-2.0), pdf-lib (MIT), polices Bricolage Grotesque / Instrument Sans / Caveat (OFL-1.1).
+| Dépendance                                  | Licence                 |
+| ------------------------------------------- | ----------------------- |
+| Next.js, React, Radix UI, dnd-kit, sonner, next-themes, zod, pdf-lib, qrcode, exifr, marked, fflate, tailwind-merge, clsx | MIT |
+| pdf.js (pdfjs-dist), tesseract.js, tesseract.js-core, modèles @tesseract.js-data, jsqr | Apache-2.0 |
+| @neslinesli93/qpdf-wasm                     | ISC (qpdf : Apache-2.0) |
+| diff                                        | BSD-3-Clause            |
+| dompurify                                   | MPL-2.0 ou Apache-2.0   |
+| lucide-react                                | ISC                     |
+| Polices Bricolage Grotesque, Instrument Sans, Caveat | OFL-1.1        |

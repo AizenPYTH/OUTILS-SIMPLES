@@ -1,45 +1,91 @@
 # Limites connues et améliorations prévues
 
-## Limites fonctionnelles (documentées sur les pages concernées)
+Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (section « Limites »).
 
-- **Éditeur** : les ajouts sont superposés ; le texte d'origine n'est ni modifié ni reformaté. Pas d'OCR.
-- **Polices** : 14 polices standard PDF (WinAnsi). Caractères non latins et emojis remplacés par « ? »
-  avec avertissement. L'intégration de polices Unicode (fontkit) est l'évolution naturelle.
-- **Annotations** : aplaties dans le contenu des pages, pas d'objets `/Annot` natifs éditables ailleurs.
-- **Surlignage / soulignement** : par zone, sans sélection automatique du texte (pas de couche texte pdf.js
-  interactive pour l'instant).
+## PDF
+
+- **Éditeur** : les ajouts sont superposés ; le texte d'origine n'est ni modifié ni reformaté.
+- **Polices** : 14 polices standard PDF (WinAnsi) pour tout texte dessiné (éditeur, numérotation,
+  Markdown/texte → PDF, page de garde). Caractères non latins et emojis remplacés par « ? » avec
+  avertissement. Intégration de polices Unicode (fontkit) prévue.
+- **Annotations** : aplaties dans le contenu des pages, pas d'objets `/Annot` natifs.
 - **Signature** : visuelle uniquement, pas de signature numérique (PKCS#7) ni qualifiée eIDAS.
-- **Filigrane** : retrait fiable uniquement pour les filigranes OUTILIA (marqueur) et les annotations
-  `/Watermark`. Les filigranes fondus dans le contenu ou dans des images ne sont pas traités, par choix.
-- **Compression** : seules les images DCT (JPEG) et Flate RVB/gris 8 bits sans masque sont réencodées ;
-  les autres sont conservées. Gain non garanti (documents déjà compacts).
-- **Formulaires** : AcroForm uniquement ; XFA non pris en charge ; champs de signature non signables.
+- **Filigrane** : retrait fiable uniquement pour les filigranes OUTILIA et les annotations `/Watermark`.
+- **Compression** : seules les images JPEG et Flate RVB/gris 8 bits sans masque sont réencodées ; gain
+  non garanti ; aucune page pixellisée.
+- **Formulaires** : AcroForm uniquement ; XFA non pris en charge.
 - **Fusion / division** : signets et liens internes non conservés.
-- **Fichiers chiffrés** : refusés avec message clair (pas de déverrouillage par mot de passe).
+- **Protection / déverrouillage** (qpdf WebAssembly) : le déverrouillage exige le mot de passe ; aucune
+  attaque par force brute. Les permissions (impression, copie) sont indicatives : un lecteur peut les
+  ignorer.
+- **Extraction d'images** : CCITT fax et JBIG2 non décodés (renvoi vers « PDF vers images ») ; JPEG 2000
+  fourni en .jp2 ; masque de transparence d'un JPEG non conservé.
+- **Extraction de liens** : liens internes comptés mais non listés ; URL coupées sur deux lignes
+  possiblement tronquées ; pas de détection sur les scans sans OCR.
+- **Comparaison** : texte uniquement, page à page par numéro ; pas de comparaison d'images ni de mise
+  en page.
+- **Caviardage** : les pages marquées deviennent des images (150–300 dpi), donc plus de texte
+  sélectionnable sur ces pages ; la recherche automatique ne couvre que le texte réel ; relecture humaine
+  indispensable.
+- **Rechercher / extraire le texte** : ordre de lecture suivant la position des éléments ; colonnes et
+  tableaux parfois mélangés ; polices mal encodées illisibles (limite du fichier source).
 
-## Limites techniques
+## Numérisation et OCR
 
-- pdf-lib s'exécute sur le thread principal : sur mobile d'entrée de gamme, un document de plusieurs
-  centaines de pages ou de plusieurs dizaines de Mo peut bloquer l'interface quelques secondes. Prévu :
-  exécuter les opérations dans un Web Worker (les fonctions sont déjà pures et sans DOM, sauf le
-  réencodage d'images qui peut utiliser `OffscreenCanvas`).
-- Le réencodage d'images via canvas convertit les JPEG niveaux de gris en RVB (léger surpoids possible,
-  l'original est alors conservé).
+- Tesseract 5 LSTM en WebAssembly : 2 à 15 s par page ; qualité dépendante du document (texte imprimé net
+  à 200–300 dpi recommandé) ; écriture manuscrite, polices fantaisie, photos floues et tableaux mal
+  reconnus ; mots de confiance < 30 ignorés dans le PDF recherchable ; 200 pages maximum.
+- Langues : français et anglais (modèles auto-hébergés, ≈ 6,3 Mo et 10,9 Mo compressés, téléchargés une
+  fois par session ; pas encore de mise en cache persistante).
+- Scanner : recadrage rectangulaire ; pour une photo de biais, l'outil de perspective ; résolution de
+  sortie plafonnée (2400 px) ; capture caméra uniquement en HTTPS avec un navigateur récent.
+- Perspective : détection des coins supposant une feuille plus claire que le fond ; documents pliés ou
+  courbés non corrigés localement ; 3000 px maximum ; une page à la fois.
+
+## Images
+
+- Formats lus par le navigateur uniquement (JPG, PNG, WebP, GIF première image, BMP, AVIF, SVG) ; HEIC/HEIF
+  (iPhone) et TIFF exclus.
+- Les fichiers produits ne contiennent plus l'EXIF (orientation appliquée avant traitement).
+- Filigrane : texte uniquement, pas de logo.
+- EXIF : suppression sans perte pour JPEG et PNG seulement ; autres formats réencodés en PNG.
+- Palette : couleurs moyennes sur une image réduite à 320 px ; une petite zone importante peut être
+  absorbée.
+
+## Documents et conversions
+
+- Markdown → PDF : images ignorées (texte alternatif conservé), HTML brut ignoré, tableaux à colonnes
+  égales, notes de bas de page non interprétées.
+- Pas de conversion Office (DOCX, XLSX, PPTX) : impossible à faire fidèlement sans serveur.
+- Calendriers : jours fériés légaux français (option Alsace-Moselle) ; pas de vacances scolaires.
+- Feuilles : imprimer à 100 % pour des dimensions exactes.
+
+## Codes, couleurs, calculatrices, développeur
+
+- Lecteur de QR : QR uniquement (pas de codes-barres linéaires ni Data Matrix) ; photo analysée, pas de
+  flux vidéo continu.
+- Codes-barres : dessin conforme, mais les préfixes EAN/UPC doivent être attribués par GS1 ; Code 128
+  limité à l'ASCII imprimable.
+- CMYK : approximation sans profil ICC. Noms CSS limités aux plus courants.
+- Jours ouvrés : lundi à vendredi ; fériés nationaux seulement ; pas de jours ouvrables (samedi inclus).
+- TVA : taux français ; arrondi au centime par ligne.
+- Hash : pas de MD5 (absent de Web Crypto) ; fichiers lus entièrement en mémoire.
+- Regex : syntaxe JavaScript ; une expression pathologique peut figer l'onglet un instant.
+
+## Limites techniques transversales
+
+- pdf-lib, les filtres d'image et l'homographie s'exécutent sur le thread principal (rendez-vous
+  `setTimeout` pour laisser peindre) ; déplacement vers un Web Worker prévu. Tesseract et pdf.js utilisent
+  déjà leurs propres workers.
+- CSP : `'unsafe-inline'` (hydratation statique Next.js) et `'wasm-unsafe-eval'` (Tesseract, qpdf,
+  décodeurs pdf.js) dans `script-src` ; pas d'`'unsafe-eval'`.
+- Les actifs lourds (pdf.js 5,2 Mo, Tesseract ≈ 6,8 Mo par variante, modèles OCR, qpdf 1,3 Mo) sont
+  servis par le site lui-même et téléchargés uniquement sur la page qui les utilise.
 - La bannière de consentement interne n'est pas une CMP certifiée Google : obligatoire avant AdSense en EEE.
-- Pas d'image Open Graph dédiée (carte `summary`) ; à produire avec la charte.
-- `'unsafe-inline'` dans `script-src` (contrainte du rendu statique Next.js).
+- Pas d'image Open Graph dédiée.
 
 ## Qualité / tests
 
-- Les tests Playwright couvrent chaque outil avec un parcours réel, mais pas le glisser-déposer tactile de
-  dnd-kit (testé manuellement via les boutons flèches / clavier) ni le pad de signature dessiné (le mode
-  « Taper » est testé ; le mode « Dessiner » repose sur les mêmes conversions).
-- Aucun test de performance automatisé ; à mesurer avec Lighthouse sur l'hébergement final.
-
-## Prochaines étapes recommandées
-
-1. Compléter l'identité légale (`src/config/site.ts`), déployer avec `NEXT_PUBLIC_SITE_URL`, déclarer le
-   sitemap dans Search Console et observer les requêtes réelles avant d'étendre le catalogue.
-2. Déplacer les opérations pdf-lib dans un Web Worker et ajouter l'intégration de polices Unicode.
-3. Lancer la catégorie Images (compression, redimensionnement, conversion WebP) sur la même architecture
-   (`SingleFileTool`-like pour les images), puis le générateur de QR codes.
+- 121 tests Vitest ; 56 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
+  fichiers produits. Non couverts automatiquement : glisser-déposer tactile de dnd-kit, pad de signature
+  dessiné, capture caméra réelle (nécessite un périphérique), performances sur mobile bas de gamme.

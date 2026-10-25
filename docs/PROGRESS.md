@@ -1,51 +1,47 @@
 # Suivi d'avancement
 
-## Phase 1 — Socle ✅
+## MVP (phases 1 à 6) ✅
 
-- [x] Inspection du dépôt (vide) et choix de l'architecture
-- [x] Configuration centrale (marque, env Zod, limites, sécurité/CSP)
-- [x] Registre d'outils typé + validation + recherche
-- [x] Design system (tokens charte, polices auto-hébergées, composants UI)
-- [x] Layout global (header, recherche Ctrl K, thème, sélecteur de langue, menu mobile, footer)
-- [x] Catalogue en accueil (recherche, filtres, populaires, sections, état vide avec suggestions)
-- [x] Pages catégorie, modèle de page outil, pages légales/à propos/contact, guides
-- [x] SEO : métadonnées uniques, canonical, robots, sitemap, JSON-LD, 404
+- [x] Socle Next.js 16, design system (charte), registre d'outils typé, catalogue, SEO, pages légales
+- [x] Cœur PDF (opérations pures testées) et 13 outils PDF avec éditeur plein écran
+- [x] Monétisation désactivée par défaut (consentement, AdSlot, analytics gated), guides
+- [x] Vérifications, documentation, premier déploiement possible
 
-## Phase 2 — Cœur PDF ✅
+## Extension du catalogue — lot 1 ✅ (`fa9916b`)
 
-- [x] Chargement validé, erreurs utilisateur, plages de pages, noms de fichiers
-- [x] Fusion, extraction, division, rotation, organisation
-- [x] Modèle d'annotations + export (texte, chemins, formes, surlignage, images, pages pivotées)
-- [x] Filigrane (texte/image, positions, mosaïque, marqueur retirable) + analyse + retrait
-- [x] Compression (copie des pages, flux d'objets, réencodage d'images injectable)
-- [x] Formulaires (inspection, remplissage, aplatissement)
-- [x] 56 tests Vitest sur fixtures synthétiques
+- [x] Registre scindé par domaine (`src/lib/tools/registry/*`), 9 catégories, rendu client uniquement
+- [x] PDF : extraire le texte, rechercher, PDF → images, images → PDF, recadrer, numéroter, protéger,
+      déverrouiller, vérifier/réparer, métadonnées (qpdf WebAssembly pour le chiffrement)
+- [x] Numérisation : scanner mobile (caméra, filtres, pages), OCR Tesseract + PDF recherchable
+- [x] Images : compresser, redimensionner, recadrer, convertir, pivoter (lot + ZIP)
+- [x] Texte : compteur, casse, nettoyage, diff · Développeur : JSON, CSV → JSON · QR code
+- [x] Actifs auto-hébergés (pdf.js, Tesseract, modèles fra/eng, qpdf), CSP `'wasm-unsafe-eval'`
 
-## Phase 3 — Interface PDF ✅
+## Extension du catalogue — lot 2 ✅ (`8795989`)
 
-- [x] Couche pdf.js, vignettes paresseuses, zone de dépôt, états busy/done/error
-- [x] 9 outils à état (fusion, division, extraction, organisation, rotation, compression, filigrane,
-      gestion filigrane, formulaire)
-- [x] Espace d'annotation plein écran (éditeur, annoter, ajouter du texte, signer)
+- [x] Correction de perspective (détection des coins, poignées, aperçu, export)
+- [x] EXIF (lecture, suppression sans perte), filigrane image par lot
+- [x] PDF : liens, images intégrées, comparaison, caviardage réel
+- [x] Markdown → PDF et texte → PDF (mise en page maison, polices standard)
+- [x] Slug, Base64 (texte et fichier), URL, entités HTML
+- [x] Débordement mobile corrigé, serveur Playwright fiabilisé, balayage mobile des pages
 
-## Phase 4 — Fiabilité & monétisation ✅
+## Extension du catalogue — lot 3 ✅ (`a806b09`)
 
-- [x] Limites, nettoyage mémoire, messages d'erreur, raccourcis clavier
-- [x] Consentement first-party, analytics gated, AdSlot désactivé par défaut
-- [x] Guides éditoriaux (5 articles)
+- [x] Développeur : UUID, mots de passe, hash, regex, timestamp
+- [x] Calculatrices : pourcentage, TVA, dates et jours ouvrés, unités
+- [x] Codes : lecteur de QR, codes-barres (EAN-13/8, UPC-A, Code 128, Code 39), couleurs et contraste,
+      palette d'image
+- [x] Documents : feuilles à imprimer, calendrier, page de garde
 
-## Phase 5 — Vérifications ✅
+## Vérifications (dernier passage)
 
-- [x] `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`
-- [x] `pnpm test:e2e` (desktop + mobile)
+- [x] `pnpm typecheck` · `pnpm lint` · `pnpm test` (121) · `pnpm build` (96 pages) · `pnpm test:e2e`
+      (56 parcours × desktop + mobile)
 
-## Phase 6 — Documentation ✅
+## Reste à faire
 
-- [x] README, ARCHITECTURE, KNOWN_LIMITATIONS, .env.example
-
-## Reste à faire (hors périmètre MVP)
-
-- [ ] Identité légale et domaine (propriétaire)
-- [ ] CMP certifiée + AdSense (propriétaire)
-- [ ] Web Worker pour pdf-lib, polices Unicode
-- [ ] Catégorie Images, QR codes
+- [ ] Identité légale, domaine, `NEXT_PUBLIC_SITE_URL`, Search Console (propriétaire)
+- [ ] CMP certifiée + AdSense si publicité (propriétaire)
+- [ ] Web Worker pour pdf-lib / filtres d'image ; polices Unicode ; cache persistant du moteur OCR
+- [ ] Comparaison visuelle de PDF ; langues OCR supplémentaires ; guides pour les nouvelles familles
