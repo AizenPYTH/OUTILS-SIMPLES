@@ -7,7 +7,7 @@ test.describe("site", () => {
     await page.goto("/");
     await expect(page).toHaveTitle(/OUTILIA/);
     await expect(page.locator("h1")).toHaveCount(1);
-    await expect(page.locator("h1")).toHaveText("Des outils simples pour vos fichiers");
+    await expect(page.locator("h1")).toHaveText("Vos fichiers, vos outils, votre navigateur.");
     await expect(page.getByTestId("home-search")).toBeVisible();
     await expect(page.getByTestId("home-categories").getByRole("link")).toHaveCount(8);
     await expect(page.getByTestId("home-all-tools")).toHaveAttribute("href", "/outils/");
@@ -17,7 +17,9 @@ test.describe("site", () => {
       /^https?:\/\/[^/]+\/?$/,
     );
     const cards = page.getByTestId("tool-card");
-    expect(await cards.count()).toBe(9);
+    expect(await cards.count()).toBe(8); // popular tools only, never the whole catalogue
+    await expect(page.getByTestId("home-journeys").getByRole("listitem")).toHaveCount(4);
+    await expect(page.getByTestId("home-faq").locator("dt")).toHaveCount(4);
     // Categories without a published tool are not linked.
     await expect(page.locator('a[href*="/conversion/"]')).toHaveCount(0);
     await expect(page.getByTestId("consent-banner")).toHaveCount(0);
@@ -37,14 +39,15 @@ test.describe("site", () => {
   test("category chips filter and search finds synonyms", async ({ page }) => {
     await page.goto("/outils/");
     await expect(page.locator("h1")).toHaveText("Tous les outils");
-    // Every category is listed (long ones folded to 8 cards behind « Voir les N »).
-    expect(await page.getByTestId("tool-card").count()).toBeGreaterThanOrEqual(40);
-    await expect(page.getByRole("button", { name: "Voir les 27" })).toBeVisible();
+    // Every published tool is listed, grouped by family and sub-group (plus the popular row).
+    expect(await page.getByTestId("tool-card").count()).toBeGreaterThanOrEqual(66);
+    await expect(page.getByRole("heading", { name: "Organiser les pages" })).toBeVisible();
     await page.getByTestId("category-chip-pdf").click();
-    expect(
-      await page.getByTestId("tool-grid").first().getByTestId("tool-card").count(),
-    ).toBeGreaterThanOrEqual(13);
-    await expect(page.getByTestId("tool-grid").first()).not.toContainText("Compresser une image");
+    await expect(page.locator("#results-heading")).toHaveText("Outils PDF");
+    expect(await page.getByTestId("tool-card").count()).toBeGreaterThanOrEqual(27);
+    await expect(
+      page.getByTestId("tool-card").filter({ hasText: "Compresser une image" }),
+    ).toHaveCount(0);
     const search = page.getByTestId("catalog-search");
     await search.fill("assembler");
     await expect(page.getByTestId("tool-grid").first().getByTestId("tool-card")).toHaveCount(1);

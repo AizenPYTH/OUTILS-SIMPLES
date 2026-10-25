@@ -155,3 +155,59 @@ et comment ils sont groupés ; (4) sur une page d'outil, à quelle hauteur comme
 (5) ce qui disparaît de l'écran pendant le traitement ; (6) comment le résultat est présenté
 (bouton unique, options, retour au début) ; (7) le menu mobile : nombre d'entrées, taille des
 cibles. Comparer avec OUTILIA après refonte, pas avant.
+
+---
+
+# Identité visuelle OUTILIA — version 2 (refonte « plateforme professionnelle »)
+
+Écrit avant l'application. Les sites de référence restent inaccessibles depuis l'environnement
+(voir § 1) : les principes ci-dessous s'appuient sur les attentes exprimées, sur les mesures de
+l'interface actuelle et sur des patrons documentés d'interfaces d'outils de fichiers, sans copie.
+
+## A. Direction artistique
+
+| Élément | Choix | Pourquoi |
+| --- | --- | --- |
+| Couleur principale | Indigo OUTILIA `#5146E5` (survol `#4338CA`), teinte douce `#EDEBFD` | Déjà associée à la marque ; distinctive sans être criarde ; contraste AA sur blanc |
+| Couleur de confiance | Vert `#12805C` (fond `#E3F6EE`) | Réservée à « traitement local », résultats et états réussis |
+| Teintes par famille d'outils | PDF indigo · Numérisation violet · Images turquoise · Texte ambre · Développeur ardoise · Calculs émeraude · Codes rose · Documents bleu ciel | Repérage immédiat dans le catalogue, cartes « distinctes mais cohérentes » |
+| Fond | Blanc cassé `#F8F9FC`, surfaces blanches, bordures `#E5E7F0`, halo radial indigo très léger derrière le héros | Lumineux, pas de dégradés décoratifs |
+| Typographie | Titres Bricolage Grotesque (800 / 700), texte Instrument Sans (400 / 500 / 600), code monospace système | Déjà chargées ; contraste titres/texte net |
+| Échelle | Hero 44–56 px ; H1 32–40 ; H2 24–28 ; H3 18–20 ; corps 15–16 ; secondaire 13–14 | Hiérarchie lisible, pas de titres géants |
+| Espacements | 8 px de base ; sections 64–96 px ; cartes 20 px ; gouttières 16–24 px | Généreux sans vide |
+| Rayons | 10 px (contrôles), 14 px (cartes), 20–24 px (panneaux) | Cohérent avec la marque |
+| Ombres | `sm` repos, `md` au survol (léger relèvement de 2 px), `lg` seulement pour la recherche et les dialogues | Discret |
+| Icônes | lucide, trait 1,7, dans une pastille teintée par famille | Un seul jeu |
+| Mouvement | 150–200 ms ; survol : bordure + relèvement ; apparition des sections : fondu 4 px ; `prefers-reduced-motion` respecté | Compréhension, pas décoration |
+
+## B. Composants
+
+- **Carte d'outil** : pastille d'icône teintée par famille, nom, description sur deux lignes,
+  étiquette de famille en petit ; variante « populaire » (pastille plus grande, trois lignes).
+- **Tuile de famille** : grande pastille, nom, nombre d'outils, deux exemples ; fond teinté 8 %.
+- **Zone d'import** : panneau clair à bordure pointillée fine, icône dans une pastille, titre, formats
+  acceptés, bouton principal ; au survol/glisser : fond indigo doux et bordure pleine.
+- **Panneaux de traitement** : « en cours » avec barre et libellé de l'étape, « terminé » avec icône de
+  succès, résumé chiffré, **un** bouton principal de téléchargement, actions secondaires discrètes ;
+  « erreur » avec cause, correctif et deux actions.
+- **Options** : essentielles visibles, avancées repliées (« Options avancées »).
+- **États vides** : illustration légère (icône), phrase, action.
+- **Navigation** : en-tête logo · Outils · Guides · recherche · thème/langue · bouton « Tous les
+  outils » ; menu mobile tactile (lignes ≥ 44 px, familles avec compte) ; pied de page en 4 colonnes.
+
+## C. Déclinaison page par page
+
+- **Accueil** (10 sections) : en-tête ; héros (titre, phrase, recherche) ; 8 outils populaires ; 8
+  familles en tuiles ; 4 parcours (travailler sur un PDF, scanner, convertir une image, reconnaître
+  du texte) ; 3 engagements (local, sans compte, bibliothèques open source) ; 3 guides ; FAQ (4) ;
+  pied de page.
+- **Catalogue `/outils/`** : recherche, colonne des familles, outils populaires, familles avec
+  **sous-groupes** (PDF : organiser / modifier / convertir / optimiser et sécuriser / analyser ;
+  images : retoucher / optimiser et convertir ; développeur : données / encodages / générateurs /
+  utilitaires), état vide avec suggestions.
+- **Pages d'outil** : titre compact, zone d'action, options, résultat ; contenu éditorial après.
+- **Éditeur** : rail d'outils regroupé par tâche (sélection · texte · annotation · insertion) avec
+  intitulés de groupe ; zoom visible ; export en haut à droite.
+- **Scanner** : caméra plein écran sur mobile, commandes au pouce (déclencheur central 72 px,
+  compteur, terminer), vignettes des pages, filtres sans perte de l'original.
+- **OCR** : aperçu avec zones de confiance, texte corrigible, options avancées repliées, export.

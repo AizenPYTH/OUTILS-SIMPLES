@@ -15,7 +15,8 @@ export interface DecodedImage {
 
 export async function decodeImage(file: Blob): Promise<DecodedImage> {
   try {
-    const bitmap = await createImageBitmap(file);
+    // Honour the EXIF orientation of phone photos explicitly (browsers differ in their default).
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
     return { bitmap, width: bitmap.width, height: bitmap.height, type: file.type };
   } catch {
     // Fallback through an <img> element (SVG, some AVIF builds).

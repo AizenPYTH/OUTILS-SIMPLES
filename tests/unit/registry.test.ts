@@ -13,6 +13,7 @@ import {
   getActiveCategories,
 } from "@/lib/tools";
 import { buildSitemapEntries } from "@/app/sitemap";
+import { toolGroups } from "@/lib/tools/groups";
 import { buildToolMetadata } from "@/lib/seo";
 
 describe("tool registry", () => {
@@ -124,5 +125,20 @@ describe("search", () => {
     expect(searchTools(published, "xyzzy")).toEqual([]);
     expect(searchTools(published, "fusionner licorne")).toEqual([]);
     expect(searchTools(published, "   ")).toEqual([]);
+  });
+});
+
+describe("catalogue groups", () => {
+  it("reference existing published tools of their own category, each at most once", () => {
+    const seen = new Set<string>();
+    for (const group of toolGroups) {
+      for (const id of group.ids) {
+        const tool = toolRegistry.find((t) => t.id === id);
+        expect(tool, id).toBeTruthy();
+        expect(tool!.category, id).toBe(group.category);
+        expect(seen.has(id), `${id} listed twice`).toBe(false);
+        seen.add(id);
+      }
+    }
   });
 });

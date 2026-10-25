@@ -63,7 +63,7 @@ export function FileDropzone({ onFiles, accept, validate, multiple = false, titl
           setDragActive(false);
           if (!disabled) handle(e.dataTransfer.files);
         }}
-        className={cn("flex flex-col items-center justify-center gap-4 rounded-[24px] border-2 border-dashed text-center transition-colors", compact ? "px-6 py-6" : "px-6 py-9 sm:py-16", dragActive ? "border-primary bg-primary-soft" : "border-border bg-surface", disabled && "opacity-60")}
+        className={cn("flex flex-col items-center justify-center gap-4 rounded-[24px] border border-dashed text-center shadow-sm transition-[border-color,background-color,box-shadow]", compact ? "px-6 py-6" : "px-6 py-9 sm:py-16", dragActive ? "border-primary bg-primary-soft shadow-md" : "border-primary/40 bg-surface hover:border-primary/70 hover:bg-primary-soft/30", disabled && "opacity-60")}
         data-testid={testId}
       >
         <span className={cn("flex items-center justify-center rounded-[14px] bg-primary-soft text-link", compact ? "size-10" : "size-14")}>

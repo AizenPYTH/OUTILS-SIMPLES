@@ -68,9 +68,50 @@ export const fr = {
     guides: "Guides",
   },
   home: {
-    heroTitle: "Des outils simples pour vos fichiers",
+    heroTitle: "Vos fichiers, vos outils, votre navigateur.",
     heroSubtitle:
-      "PDF, images, numérisation, texte : tout est traité dans votre navigateur, sans envoi sur un serveur et sans inscription.",
+      "66 outils gratuits pour les PDF, les images, la numérisation et le texte. Tout est traité sur votre appareil : rien n'est envoyé, rien n'est stocké, aucun compte à créer.",
+    usagesTitle: "Que voulez-vous faire ?",
+    usagesSubtitle: "Quatre parcours pour les tâches les plus fréquentes.",
+    trustTitle: "Pourquoi OUTILIA",
+    trustItems: [
+      {
+        title: "Traitement local",
+        body: "Vos documents sont ouverts et transformés par votre navigateur. Ils ne quittent jamais votre appareil.",
+      },
+      {
+        title: "Sans compte, sans attente",
+        body: "Aucune inscription, aucune file d'attente, aucune limite d'essai : l'outil s'ouvre et travaille.",
+      },
+      {
+        title: "Bibliothèques ouvertes",
+        body: "pdf.js, pdf-lib, Tesseract : des logiciels open source éprouvés, hébergés par le site, sans service tiers.",
+      },
+    ],
+    guidesTitle: "Guides pratiques",
+    faqTitle: "Questions fréquentes",
+    faq: [
+      {
+        question: "Mes fichiers sont-ils envoyés sur un serveur ?",
+        answer:
+          "Non. Les outils fonctionnent dans votre navigateur : le fichier est lu sur votre appareil, transformé par du code exécuté localement, et le résultat est généré au même endroit. Vous pouvez le vérifier dans l'onglet Réseau de votre navigateur.",
+      },
+      {
+        question: "Faut-il créer un compte ou installer quelque chose ?",
+        answer:
+          "Non. Aucune inscription, aucune extension, aucune application. Une page web suffit, y compris sur téléphone.",
+      },
+      {
+        question: "Quelles sont les limites de taille ?",
+        answer:
+          "Les limites dépendent de la mémoire de votre appareil plus que du site : jusqu'à 100 Mo et 1 000 pages par PDF, 50 Mo par image. Chaque page d'outil indique ses limites et ses formats acceptés.",
+      },
+      {
+        question: "OUTILIA est-il vraiment gratuit ?",
+        answer:
+          "Oui, tous les outils publiés sont gratuits et sans filigrane. Le site peut afficher de la publicité contextuelle, jamais basée sur le contenu de vos fichiers.",
+      },
+    ],
     heroCta: "Voir tous les outils",
     searchPlaceholder: (n: number) =>
       `Rechercher parmi ${n} outils (ex. fusionner, signer, compresser)…`,

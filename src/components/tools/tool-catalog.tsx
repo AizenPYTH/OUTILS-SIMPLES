@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Search, X } from "lucide-react";
+import { Search, SearchX, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolIcon } from "@/components/tools/tool-icon";
 import { ToolCard } from "@/components/tools/tool-card";
@@ -17,13 +17,14 @@ import {
   type ToolCategory,
   type ToolDefinition,
 } from "@/lib/tools";
+import { categoryTone, getToolGroups } from "@/lib/tools/groups";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const publishedTools = getPublishedTools();
 const activeCategories = toolCategories.filter((c) => getToolsByCategory(c.id).length > 0);
 const plannedCategories = toolCategories.filter((c) => getToolsByCategory(c.id).length === 0);
-const SECTION_LIMIT = 8;
+const popularTools = publishedTools.filter((x) => x.featured).slice(0, 8);
 
 /** Suggest tools for a query that matched nothing, searching planned tools as a hint only. */
 function suggestAlternatives(query: string): ToolDefinition[] {
@@ -38,6 +39,25 @@ function suggestAlternatives(query: string): ToolDefinition[] {
   return merged.filter((tool, i) => merged.findIndex((x) => x.id === tool.id) === i).slice(0, 4);
 }
 
+/** Tools of a category split into its sub-groups; ungrouped tools fall into "Autres". */
+function groupsOf(category: ToolCategory, tools: ToolDefinition[]) {
+  const groups = getToolGroups(category.id);
+  if (groups.length === 0) return [{ name: null, tools }];
+  const used = new Set<string>();
+  const out = groups
+    .map((g) => {
+      const members = g.ids
+        .map((id) => tools.find((x) => x.id === id))
+        .filter((x): x is ToolDefinition => !!x);
+      members.forEach((m) => used.add(m.id));
+      return { name: g.name as string | null, tools: members };
+    })
+    .filter((g) => g.tools.length > 0);
+  const rest = tools.filter((x) => !used.has(x.id));
+  if (rest.length) out.push({ name: "Autres", tools: rest });
+  return out;
+}
+
 export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategory["id"] }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -46,7 +66,6 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
   const [query, setQuery] = React.useState(urlQuery);
   const [lastUrlQuery, setLastUrlQuery] = React.useState(urlQuery);
   const [category, setCategory] = React.useState<string>(initialCategory ?? "all");
-  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
   const inputRef = React.useRef<HTMLInputElement>(null);
   const resultsId = React.useId();
 
@@ -88,32 +107,46 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
   const countFor = (id: string) =>
     id === "all" ? publishedTools.length : publishedTools.filter((x) => x.category === id).length;
 
-  const categoryButton = (id: string, label: string, icon?: ToolCategory["icon"]) => (
-    <button
-      key={id}
-      type="button"
-      onClick={() => setCategory(id)}
-      aria-pressed={category === id}
-      className={cn(
-        "flex h-10 shrink-0 items-center gap-2 rounded-full border px-3.5 text-sm font-medium transition-colors lg:w-full lg:rounded-[10px] lg:border-transparent lg:px-3",
-        category === id
-          ? "border-primary bg-primary text-primary-foreground lg:bg-primary-soft lg:text-accent-foreground"
-          : "border-border bg-surface text-foreground hover:bg-muted lg:bg-transparent",
-      )}
-      data-testid={`category-chip-${id}`}
-    >
-      {icon ? <ToolIcon name={icon} className="size-4 opacity-80" /> : null}
-      <span className="flex-1 text-left">{label}</span>
-      <span
+  const categoryButton = (id: string, label: string, icon?: ToolCategory["icon"]) => {
+    const tone = id === "all" ? null : categoryTone[id as ToolCategory["id"]];
+    const active = category === id;
+    return (
+      <button
+        key={id}
+        type="button"
+        onClick={() => setCategory(id)}
+        aria-pressed={active}
         className={cn(
-          "rounded-full px-1.5 text-[11px] tabular-nums",
-          category === id ? "bg-white/20 lg:bg-primary/15" : "bg-muted text-muted-foreground",
+          "flex h-10 shrink-0 items-center gap-2 rounded-full border px-3.5 text-sm font-medium transition-colors lg:h-11 lg:w-full lg:rounded-[10px] lg:border-transparent lg:px-2.5",
+          active
+            ? "border-primary bg-primary text-primary-foreground lg:bg-primary-soft lg:text-accent-foreground"
+            : "border-border bg-surface text-foreground hover:bg-muted lg:bg-transparent",
         )}
+        data-testid={`category-chip-${id}`}
       >
-        {countFor(id)}
-      </span>
-    </button>
-  );
+        {icon ? (
+          <span
+            className={cn(
+              "hidden size-7 items-center justify-center rounded-[8px] lg:flex",
+              tone?.tile,
+            )}
+          >
+            <ToolIcon name={icon} className="size-4" />
+          </span>
+        ) : null}
+        {icon ? <ToolIcon name={icon} className="size-4 opacity-80 lg:hidden" /> : null}
+        <span className="flex-1 text-left">{label}</span>
+        <span
+          className={cn(
+            "rounded-full px-1.5 text-[11px] tabular-nums",
+            active ? "bg-white/20 lg:bg-primary/15" : "bg-muted text-muted-foreground",
+          )}
+        >
+          {countFor(id)}
+        </span>
+      </button>
+    );
+  };
 
   return (
     <div className="space-y-8" id="outils">
@@ -155,25 +188,24 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
         </Button>
       </form>
 
-      <div className="grid min-w-0 gap-6 lg:grid-cols-[210px_1fr]">
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[230px_1fr]">
         <nav
           aria-label={t.nav.categories}
           className="min-w-0 lg:sticky lg:top-[calc(var(--header-height)+16px)] lg:self-start"
         >
-          <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 lg:mx-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:px-0 lg:pb-0">
+          <p className="section-label mb-2 hidden px-2.5 lg:block">{t.nav.categories}</p>
+          <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 lg:mx-0 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:px-0 lg:pb-0">
             {categoryButton("all", t.directory.filterAll)}
             {activeCategories.map((c) => categoryButton(c.id, c.shortName, c.icon))}
           </div>
           {plannedCategories.length ? (
             <div className="mt-6 hidden lg:block">
-              <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {t.directory.plannedTitle}
-              </p>
+              <p className="section-label mb-2 px-2.5">{t.directory.plannedTitle}</p>
               <ul className="space-y-1">
                 {plannedCategories.map((c) => (
                   <li
                     key={c.id}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground"
+                    className="flex items-center gap-2 px-2.5 py-1.5 text-sm text-muted-foreground"
                   >
                     <ToolIcon name={c.icon} className="size-4 opacity-60" />
                     <span className="flex-1">{c.shortName}</span>
@@ -187,12 +219,12 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
           ) : null}
         </nav>
 
-        <div id={resultsId} className="min-w-0 space-y-9" aria-live="polite">
+        <div id={resultsId} className="min-w-0 space-y-10" aria-live="polite">
           {isFiltering ? (
             results.length > 0 ? (
               <section aria-labelledby="results-heading">
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <h2 id="results-heading" className="text-lg">
+                  <h2 id="results-heading" className="text-xl">
                     {trimmed
                       ? `Résultats pour « ${trimmed} »`
                       : (activeCategories.find((c) => c.id === category)?.name ??
@@ -202,14 +234,24 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
                     {t.directory.resultsCount(results.length)}
                   </span>
                 </div>
-                <ToolGrid tools={results} />
+                {trimmed ? (
+                  <ToolGrid tools={results} />
+                ) : (
+                  <GroupedCategory
+                    category={activeCategories.find((c) => c.id === category)!}
+                    tools={results}
+                  />
+                )}
               </section>
             ) : (
               <div
-                className="rounded-[20px] border border-dashed border-border p-10 text-center"
+                className="rounded-[20px] border border-dashed border-border bg-surface p-10 text-center"
                 data-testid="no-results"
               >
-                <h2 className="text-lg">{t.directory.noResultsTitle}</h2>
+                <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                  <SearchX className="size-6" aria-hidden="true" />
+                </span>
+                <h2 className="mt-4 text-lg">{t.directory.noResultsTitle}</h2>
                 <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
                   {alternatives.length ? t.directory.noResultsBody : t.directory.noResultsEmpty}
                 </p>
@@ -225,14 +267,28 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
             )
           ) : (
             <>
+              <section aria-labelledby="popular-heading">
+                <div className="mb-4 flex items-baseline justify-between gap-3">
+                  <h2 id="popular-heading" className="text-xl">
+                    {t.home.featuredTitle}
+                  </h2>
+                </div>
+                <ToolGrid tools={popularTools} />
+              </section>
               {activeCategories.map((c) => {
                 const tools = publishedTools.filter((x) => x.category === c.id);
-                const isExpanded = expanded[c.id] ?? false;
-                const visible = isExpanded ? tools : tools.slice(0, SECTION_LIMIT);
                 return (
                   <section key={c.id} aria-labelledby={`cat-${c.id}`}>
                     <div className="mb-4 flex items-baseline justify-between gap-3">
-                      <h2 id={`cat-${c.id}`} className="text-lg">
+                      <h2 id={`cat-${c.id}`} className="flex items-center gap-2 text-xl">
+                        <span
+                          className={cn(
+                            "flex size-8 items-center justify-center rounded-[8px]",
+                            categoryTone[c.id].tile,
+                          )}
+                        >
+                          <ToolIcon name={c.icon} className="size-4" />
+                        </span>
                         <Link href={`/${c.slug}/`} className="hover:text-link">
                           {c.name}
                         </Link>
@@ -241,17 +297,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
                         {t.directory.resultsCount(tools.length)}
                       </span>
                     </div>
-                    <ToolGrid tools={visible} />
-                    {tools.length > SECTION_LIMIT ? (
-                      <Button
-                        variant="link"
-                        className="mt-2 px-0"
-                        onClick={() => setExpanded((s) => ({ ...s, [c.id]: !isExpanded }))}
-                        aria-expanded={isExpanded}
-                      >
-                        {isExpanded ? "Réduire" : `Voir les ${tools.length}`}
-                      </Button>
-                    ) : null}
+                    <GroupedCategory category={c} tools={tools} />
                   </section>
                 );
               })}
@@ -264,10 +310,25 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
   );
 }
 
+function GroupedCategory({ category, tools }: { category: ToolCategory; tools: ToolDefinition[] }) {
+  const groups = groupsOf(category, tools);
+  if (groups.length === 1) return <ToolGrid tools={groups[0]!.tools} />;
+  return (
+    <div className="space-y-6">
+      {groups.map((group) => (
+        <div key={group.name ?? "all"}>
+          <h3 className="section-label mb-2.5">{group.name}</h3>
+          <ToolGrid tools={group.tools} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ToolGrid({ tools }: { tools: ToolDefinition[] }) {
   return (
     <ul
-      className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"
+      className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(250px,1fr))]"
       data-testid="tool-grid"
     >
       {tools.map((tool) => (
