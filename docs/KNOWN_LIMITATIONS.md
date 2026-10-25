@@ -43,9 +43,14 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
 
 ## Numérisation et OCR
 
-- Tesseract 5 LSTM en WebAssembly : 2 à 15 s par page ; qualité dépendante du document (texte imprimé net
-  à 200–300 dpi recommandé) ; écriture manuscrite, polices fantaisie, photos floues et tableaux mal
-  reconnus ; mots de confiance < 30 ignorés dans le PDF recherchable ; 200 pages maximum.
+- Tesseract 5 LSTM en WebAssembly : 2 à 15 s par page **par passe** ; en mode automatique, une page
+  dont une partie reste illisible déclenche une passe à 180° puis, si besoin, à 90° et 270° (jusqu'à
+  quatre reconnaissances). Pas de détection d'orientation native (pas de modèle OSD) : les
+  orientations sont trouvées par ces passes et par la ligne de base de chaque ligne.
+- Qualité dépendante du document (texte imprimé net à 200–300 dpi recommandé) ; écriture manuscrite,
+  polices fantaisie, photos floues et tableaux mal reconnus ; mots de confiance < 30 ignorés dans le
+  PDF recherchable, < 60 signalés en rouge ; inclinaison corrigée jusqu'à ± 6° seulement ; 200 pages
+  maximum. Détails : `docs/OCR_ORIENTATIONS.md`.
 - Langues : français et anglais (modèles auto-hébergés, ≈ 6,3 Mo et 10,9 Mo compressés, téléchargés une
   fois par session ; pas encore de mise en cache persistante).
 - Scanner : la photo d'origine est conservée et affichée sans filtre ; recadrage rectangulaire ou
@@ -101,7 +106,7 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
 
 ## Qualité / tests
 
-- 146 tests Vitest ; 95 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
+- 169 tests Vitest ; 97 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
   fichiers produits, de la confidentialité réseau, de l'accessibilité (axe-core), de la caméra (périphérique
   factice Chromium) et des gros fichiers (60 Mo traité, 101 Mo et 1 001 pages refusés). Non couverts
   automatiquement : glisser-déposer tactile de dnd-kit, pad de signature dessiné, caméra physique,

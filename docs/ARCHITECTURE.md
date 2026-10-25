@@ -95,6 +95,14 @@ possible, sinon police standard pour ce seul passage), `src/components/pdf/works
 (couche cliquable + champ en place). L'aperçu est rendu à partir du document réellement modifié.
 Détails et limites : `docs/EDITION_TEXTE.md`.
 
+## OCR
+
+`src/lib/ocr/engine.ts` (Tesseract.js, passes par orientation, fusion), `orientation.ts` (rotations,
+inclinaison, direction par baseline, inverse des boîtes, colonnes), `preprocess.ts` (copie de travail),
+`searchable-pdf.ts` (couche invisible dans le sens du texte). Les tests Node utilisent le moteur réel
+avec les fichiers de `public/ocr/lang` et des images synthétiques (`@napi-rs/canvas`, dépendance de
+développement). Détails : `docs/OCR_ORIENTATIONS.md`.
+
 ## Frontières de sécurité
 
 - **CSP statique** (`src/config/security.ts`) : `default-src 'self'`, `object-src 'none'`,

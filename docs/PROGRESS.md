@@ -52,6 +52,15 @@
       compteur, erreurs explicites, Redresser (quatre coins)
 - [x] Rapport : `docs/RAPPORT_CORRECTIONS.md`
 
+## Mission qualité produit, OCR, édition et refonte ✅
+
+- [x] OCR : orientations multiples (passes + baseline), inclinaison, colonnes, prétraitement sur copie,
+      couche de texte tournée ; suite synthétique mesurée (Tesseract réel en Node) ; étiquette e2e
+- [x] Éditeur : passages tournés, fragments fusionnés, ligatures ; fidélité sur 7 PDF de producteurs différents
+- [x] Refonte design v2 : identité, accueil 10 sections, catalogue structuré, en-tête/pied de page,
+      rail d'éditeur par tâche, caméra plein écran mobile
+- [x] Matrice des 66 outils (`docs/MATRICE_OUTILS.md`), procédure appareil réel, rapport `docs/RAPPORT_MISSION.md`
+
 ## Reste à faire
 
 - [ ] Identité légale, domaine, `NEXT_PUBLIC_SITE_URL`, Search Console (propriétaire)
