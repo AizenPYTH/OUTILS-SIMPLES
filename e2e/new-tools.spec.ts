@@ -384,3 +384,121 @@ test.describe("lot 2 : liens, images, comparaison, caviardage, Markdown", () => 
     await expect(page.getByTestId("done-panel")).toContainText("1 page", { timeout: 60_000 });
   });
 });
+
+test.describe("lot 3 : développeur, calculatrices, codes, documents", () => {
+  test("uuid, password, hash, regex and timestamp tools", async ({ page }) => {
+    await page.goto("/developpeur/generateur-uuid/");
+    const first = await page.getByTestId("uuid-output-output").inputValue();
+    expect(first.split("\n")).toHaveLength(5);
+    expect(first.split("\n")[0]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    await page.getByTestId("uuid-regenerate").click();
+    expect(await page.getByTestId("uuid-output-output").inputValue()).not.toBe(first);
+
+    await page.goto("/developpeur/generateur-de-mot-de-passe/");
+    await expect(page.getByTestId("pw-item")).toHaveCount(5);
+    expect((await page.getByTestId("pw-item").first().textContent())!.length).toBe(16);
+
+    await page.goto("/developpeur/calculer-hash-sha256/");
+    await page.getByTestId("hash-input-input").fill("abc");
+    await expect(page.getByTestId("hash-text-sha-256")).toHaveText("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+    await page.getByTestId("hash-expected").fill("BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD");
+    await expect(page.getByText("correspond", { exact: true })).toBeVisible();
+
+    await page.goto("/developpeur/testeur-regex/");
+    await expect(page.getByTestId("regex-results")).toContainText("2 correspondances");
+    await page.getByTestId("regex-pattern").fill("(");
+    await expect(page.getByTestId("regex-error")).toBeVisible();
+
+    await page.goto("/developpeur/convertisseur-timestamp/");
+    await page.getByTestId("ts-input").fill("1700000000");
+    await expect(page.getByTestId("ts-results")).toContainText("2023-11-14T22:13:20.000Z");
+  });
+
+  test("percentage, VAT, dates and unit calculators", async ({ page }) => {
+    await page.goto("/calculatrices/pourcentage/");
+    await expect(page.getByTestId("pct-a-result")).toHaveText("30,00");
+    await page.getByTestId("pct-c-to").fill("60");
+    await expect(page.getByTestId("pct-c-result")).toHaveText("-25,00 %");
+
+    await page.goto("/calculatrices/tva/");
+    await page.getByTestId("vat-amount").fill("1 000");
+    await expect(page.getByTestId("vat-ttc")).toContainText("200,00 €");
+    await expect(page.getByTestId("vat-tva")).toContainText("200,00 €");
+
+    await page.goto("/calculatrices/jours-entre-deux-dates/");
+    await page.getByTestId("dates-from").fill("2026-05-01");
+    await page.getByTestId("dates-to").fill("2026-05-31");
+    await expect(page.getByTestId("stat-grid")).toContainText("Jours ouvrés17");
+    await expect(page.getByTestId("dates-detail")).toContainText("Ascension");
+
+    await page.goto("/calculatrices/convertisseur-unites/");
+    await page.getByTestId("units-value").fill("10");
+    await expect(page.getByTestId("units-result")).toContainText("10 000 mm");
+  });
+
+  test("barcode, colour, palette and QR reader", async ({ page }) => {
+    await page.goto("/codes/generateur-code-barres/");
+    await expect(page.getByTestId("bc-preview").locator("svg")).toBeVisible();
+    await expect(page.getByTestId("bc-preview")).toContainText("4006381333931");
+    await page.getByTestId("bc-value").fill("4006381333930");
+    await expect(page.getByTestId("bc-error")).toContainText("attendue 1");
+    await page.getByTestId("bc-value").fill("4006381333931");
+    const svg = page.waitForEvent("download");
+    await page.getByTestId("bc-download-svg").click();
+    expect(Buffer.from(await readDownload(await svg)).toString("utf8")).toContain("<svg");
+    const png = page.waitForEvent("download");
+    await page.getByTestId("bc-download-png").click();
+    expect((await png).suggestedFilename()).toBe("code-barres-ean13.png");
+
+    await page.goto("/codes/convertisseur-couleurs/");
+    await page.getByTestId("color-input").fill("tomato");
+    await expect(page.getByTestId("color-rgb")).toHaveText("rgb(255, 99, 71)");
+    await expect(page.getByTestId("color-hsl")).toHaveText("hsl(9, 100%, 64%)");
+    await expect(page.getByTestId("color-contrast")).toContainText("AA grand texte (≥ 3) : insuffisant");
+    await page.getByTestId("color-bg").fill("#000000");
+    await expect(page.getByTestId("color-contrast")).toContainText("AA texte normal (≥ 4,5) : conforme");
+
+    await page.goto("/codes/palette-couleurs-image/");
+    await page.setInputFiles('[data-testid="palette-dropzone-input"]', fixture("logo-alpha.png"));
+    await expect(page.getByTestId("palette-list").locator("li").first()).toBeVisible({ timeout: 30_000 });
+    expect(await page.getByTestId("palette-list").locator("li").count()).toBeGreaterThanOrEqual(2);
+    await expect(page.getByTestId("palette-css-output")).toHaveValue(/--couleur-1: #[0-9a-f]{6};/);
+
+    await page.goto("/codes/lire-un-qr-code/");
+    await page.setInputFiles('[data-testid="qr-dropzone-input"]', fixture("qr-outilia.png"));
+    await expect(page.getByTestId("qr-text")).toHaveText("https://outilia.fr/aide", { timeout: 30_000 });
+    await expect(page.getByTestId("qr-result")).toContainText("Lien web");
+    await page.setInputFiles('[data-testid="qr-dropzone-input"]', fixture("photo-800x600.jpg"));
+    await expect(page.getByTestId("qr-result")).toContainText("Aucun QR code lisible", { timeout: 30_000 });
+  });
+
+  test("printable paper, calendar and cover page PDFs", async ({ page }) => {
+    await page.goto("/documents/feuilles-a-imprimer/");
+    await page.getByTestId("segmented-seyes").click();
+    let download = page.waitForEvent("download");
+    await page.getByTestId("paper-run").click();
+    await expect(page.getByTestId("done-panel")).toBeVisible({ timeout: 60_000 });
+    await page.getByTestId("download-button").click();
+    await expectValidPdf(await readDownload(await download), 1);
+
+    await page.goto("/documents/calendrier-a-imprimer/");
+    await page.getByTestId("cal-year").fill("2027");
+    download = page.waitForEvent("download");
+    await page.getByTestId("cal-run").click();
+    await expect(page.getByTestId("done-panel")).toBeVisible({ timeout: 60_000 });
+    await page.getByTestId("download-button").click();
+    const cal = await readDownload(await download);
+    await expectValidPdf(cal, 1);
+    expect((await extractPageText(cal, 0)).join(" ")).toContain("2027");
+
+    await page.goto("/documents/page-de-garde/");
+    await expect(page.getByTestId("cover-run")).toBeDisabled();
+    await page.getByTestId("cover-title").fill("Rapport annuel");
+    download = page.waitForEvent("download");
+    await page.getByTestId("cover-run").click();
+    await expect(page.getByTestId("done-panel")).toBeVisible({ timeout: 60_000 });
+    await page.getByTestId("download-button").click();
+    const cover = await readDownload(await download);
+    expect((await extractPageText(cover, 0)).join(" ")).toContain("Rapport annuel");
+  });
+});

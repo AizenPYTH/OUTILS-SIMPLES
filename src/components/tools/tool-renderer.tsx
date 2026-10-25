@@ -66,6 +66,20 @@ const components = {
   "dev-base64": dynamic(() => import("@/components/dev/encoder-tool").then((m) => m.Base64Tool), { ssr: false, loading }),
   "dev-url-encode": dynamic(() => import("@/components/dev/encoder-tool").then((m) => m.UrlEncodeTool), { ssr: false, loading }),
   "dev-html-entities": dynamic(() => import("@/components/dev/encoder-tool").then((m) => m.HtmlEntitiesTool), { ssr: false, loading }),
+  "dev-uuid": dynamic(() => import("@/components/dev/uuid-tool").then((m) => m.UuidTool), { ssr: false, loading }),
+  "dev-password": dynamic(() => import("@/components/dev/password-tool").then((m) => m.PasswordTool), { ssr: false, loading }),
+  "dev-hash": dynamic(() => import("@/components/dev/hash-tool").then((m) => m.HashTool), { ssr: false, loading }),
+  "dev-regex": dynamic(() => import("@/components/dev/regex-tool").then((m) => m.RegexTool), { ssr: false, loading }),
+  "dev-timestamp": dynamic(() => import("@/components/dev/timestamp-tool").then((m) => m.TimestampTool), { ssr: false, loading }),
+  "qr-read": dynamic(() => import("@/components/codes/qr-reader-tool").then((m) => m.QrReaderTool), { ssr: false, loading }),
+  "barcode-generate": dynamic(() => import("@/components/codes/barcode-tool").then((m) => m.BarcodeTool), { ssr: false, loading }),
+  "color-convert": dynamic(() => import("@/components/codes/color-tool").then((m) => m.ColorTool), { ssr: false, loading }),
+  "image-palette": dynamic(() => import("@/components/codes/color-tool").then((m) => m.ImagePaletteTool), { ssr: false, loading }),
+  // ---------------------------------------------------------------- Calculatrices
+  "calc-percent": dynamic(() => import("@/components/calc/percent-tool").then((m) => m.PercentTool), { ssr: false, loading }),
+  "calc-vat": dynamic(() => import("@/components/calc/percent-tool").then((m) => m.VatTool), { ssr: false, loading }),
+  "calc-dates": dynamic(() => import("@/components/calc/dates-tool").then((m) => m.DatesTool), { ssr: false, loading }),
+  "calc-units": dynamic(() => import("@/components/calc/units-tool").then((m) => m.UnitsTool), { ssr: false, loading }),
   // ---------------------------------------------------------------- Texte
   "text-word-counter": dynamic(() => import("@/components/text/word-counter-tool").then((m) => m.WordCounterTool), { ssr: false, loading }),
   "text-case": dynamic(() => import("@/components/text/case-converter-tool").then((m) => m.CaseConverterTool), { ssr: false, loading }),
@@ -75,6 +89,9 @@ const components = {
   // ---------------------------------------------------------------- Documents
   "doc-markdown-pdf": dynamic(() => import("@/components/documents/markdown-pdf-tool").then((m) => m.MarkdownPdfTool), { ssr: false, loading }),
   "doc-text-pdf": dynamic(() => import("@/components/documents/markdown-pdf-tool").then((m) => m.TextPdfTool), { ssr: false, loading }),
+  "doc-paper": dynamic(() => import("@/components/documents/printables-tool").then((m) => m.PaperTool), { ssr: false, loading }),
+  "doc-calendar": dynamic(() => import("@/components/documents/printables-tool").then((m) => m.CalendarTool), { ssr: false, loading }),
+  "doc-cover": dynamic(() => import("@/components/documents/printables-tool").then((m) => m.CoverPageTool), { ssr: false, loading }),
 } as const;
 
 export type ImplementedToolId = keyof typeof components;

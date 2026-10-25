@@ -98,7 +98,8 @@ describe("sitemap", () => {
     expect(urls).toContain("http://localhost:3000/numerisation/corriger-un-document-photographie/");
     expect(urls).toContain("http://localhost:3000/documents/markdown-vers-pdf/");
     // Categories without a published tool are not exposed.
-    expect(urls.some((u) => u.includes("/calculatrices/") || u.includes("/conversion/"))).toBe(false);
+    expect(urls).toContain("http://localhost:3000/calculatrices/tva/");
+    expect(urls.some((u) => u.includes("/conversion/"))).toBe(false);
     expect(new Set(urls).size).toBe(urls.length);
   });
 });

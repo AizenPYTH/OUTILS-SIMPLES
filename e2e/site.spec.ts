@@ -14,7 +14,6 @@ test.describe("site", () => {
     const cards = page.getByTestId("tool-card");
     expect(await cards.count()).toBeGreaterThanOrEqual(13);
     // Categories without a published tool are not linked.
-    await expect(page.locator('a[href*="/calculatrices/"]')).toHaveCount(0);
     await expect(page.locator('a[href*="/conversion/"]')).toHaveCount(0);
     await expect(page.getByTestId("consent-banner")).toHaveCount(0);
     const jsonLd = await page.locator('script[type="application/ld+json"]').first().textContent();
@@ -121,7 +120,8 @@ test.describe("site", () => {
     expect(sitemap).toContain("/images/compresser/");
     expect(sitemap).toContain("/numerisation/corriger-un-document-photographie/");
     expect(sitemap).toContain("/documents/markdown-vers-pdf/");
-    expect(sitemap).not.toContain("/calculatrices/");
+    expect(sitemap).toContain("/calculatrices/tva/");
+    expect(sitemap).not.toContain("/conversion/");
     expect(sitemap).not.toContain("/outils/");
     const robots = await (await request.get("/robots.txt")).text();
     expect(robots).toContain("Sitemap:");
