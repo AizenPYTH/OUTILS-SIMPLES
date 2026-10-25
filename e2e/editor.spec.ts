@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   expectValidPdf,
   extractPageText,
+  extractTextItems,
   pageContentOps,
   readDownload,
   uploadPdf,
@@ -123,6 +124,41 @@ test.describe("editor", () => {
     expect(ops).not.toContain("1 1 1 rg");
     // Other pages are untouched.
     expect((await extractPageText(bytes, 1)).join(" ")).toContain("Page 2 / 3");
+  });
+
+  test("edit a 90° run on the label: the field follows the text direction and the export keeps it", async ({
+    page,
+  }) => {
+    await page.goto("/pdf/modifier/");
+    await uploadPdf(page, "label-mixed-orientation.pdf");
+    await page.getByTestId("tool-editText").filter({ visible: true }).click();
+    const run = page.locator('[data-testid="text-run"][aria-label*="EXPEDITEUR"]');
+    await expect(run).toHaveCount(1, { timeout: 20_000 });
+    const box = (await run.boundingBox())!;
+    expect(box.height).toBeGreaterThan(box.width * 3); // a vertical box, on the right-hand panel
+    const pageBox = (await page.getByTestId("editor-page").boundingBox())!;
+    expect(box.x).toBeGreaterThan(pageBox.x + pageBox.width * 0.7);
+    await run.click();
+    const editor = page.getByTestId("text-run-editor");
+    await expect(editor).toHaveValue("EXPEDITEUR BOUTIQUE DES ARTS");
+    const rotation = await editor.evaluate((el) => getComputedStyle(el).transform);
+    expect(rotation).not.toBe("none"); // rotated field, not a horizontal one
+    await editor.fill("EXPEDITEUR ATELIER DES ARTS");
+    await editor.press("Enter");
+    await expect(page.locator('[data-testid="text-run"][data-edited="true"]')).toHaveCount(1, {
+      timeout: 20_000,
+    });
+    await page.getByTestId("editor-download").click();
+    const downloadPromise = page.waitForEvent("download");
+    await page.getByTestId("export-download").click({ timeout: 30_000 });
+    const bytes = await readDownload(await downloadPromise);
+    const items = await extractTextItems(bytes, 0);
+    const item = items.find((i) => i.str.includes("ATELIER"))!;
+    expect(item).toBeTruthy();
+    expect(Math.round((Math.atan2(item.transform[1]!, item.transform[0]!) * 180) / Math.PI)).toBe(
+      90,
+    );
+    expect(items.some((i) => i.str.includes("BOUTIQUE"))).toBe(false);
   });
 
   test("edit text on a scanned page: honest message and link to OCR", async ({ page }) => {

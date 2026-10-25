@@ -176,6 +176,7 @@ export function AnnotationWorkspace({
       : {
           pageIndex: run.pageIndex,
           opIndex: run.opIndex,
+          removeOps: run.extraOps,
           text,
           original: run.original,
           fallback: run.fallback,

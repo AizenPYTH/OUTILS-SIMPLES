@@ -15,7 +15,7 @@
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { loadPdfJs } from "../browser/pdfjs";
 import type { FontFamily } from "../fonts";
-import { collectTextOps } from "./apply";
+import { collectTextOps, expandLigatures } from "./apply";
 import { glyphNameToUnicode } from "./glyph-names";
 import type { FallbackFontHint, OriginalEncoding, PageTextStatus, TextRun } from "./types";
 
@@ -291,6 +291,7 @@ export async function extractTextRuns(
           id: `run-${pageIndex}-${opIndex}`,
           pageIndex,
           opIndex,
+          extraOps: [],
           text: str,
           x: origin[4],
           y: origin[5],
@@ -326,5 +327,55 @@ export async function extractTextRuns(
   }
   if (runs.length === 0)
     return hasImages ? { kind: "scanned", runs: [] } : { kind: "empty", runs: [] };
-  return { kind: "ok", runs };
+  const merged = mergeFragments(
+    runs,
+    rawOps.map((r) => r.nextIsPositioned),
+  );
+  return { kind: "ok", runs: merged };
+}
+
+/**
+ * Producers split one line into many operators (kerning pairs, ligatures,
+ * font-hinting runs). Consecutive runs sharing font, size, direction and
+ * baseline, with no positioning operator between them, are merged into one
+ * editable run; the extra operators are removed when the run is edited.
+ */
+export function mergeFragments(runs: TextRun[], nextIsPositioned: boolean[]): TextRun[] {
+  const out: TextRun[] = [];
+  for (const run of runs) {
+    const prev = out[out.length - 1];
+    if (prev && canMerge(prev, run) && !nextIsPositioned[prev.opIndex + prev.extraOps.length]) {
+      const rad = (prev.angle * Math.PI) / 180;
+      const d = { x: Math.cos(rad), y: Math.sin(rad) };
+      const along = (run.x - prev.x) * d.x + (run.y - prev.y) * d.y;
+      const gap = along - prev.width;
+      const space =
+        gap > prev.fontSize * 0.12 && !prev.text.endsWith(" ") && !run.text.startsWith(" ")
+          ? " "
+          : "";
+      prev.text = expandLigatures(prev.text + space + run.text);
+      prev.width = Math.max(prev.width, along + run.width);
+      prev.extraOps.push(run.opIndex);
+      prev.editable = prev.editable && run.editable;
+      prev.reason = prev.reason ?? run.reason;
+      continue;
+    }
+    out.push({ ...run, text: expandLigatures(run.text), extraOps: [...run.extraOps] });
+  }
+  return out;
+}
+
+function canMerge(a: TextRun, b: TextRun): boolean {
+  if (b.opIndex !== a.opIndex + a.extraOps.length + 1) return false;
+  if (a.original !== b.original) return false; // same font object
+  if (Math.abs(a.fontSize - b.fontSize) > 0.05 * a.fontSize) return false;
+  if (Math.abs(a.angle - b.angle) > 0.5) return false;
+  const rad = (a.angle * Math.PI) / 180;
+  const n = { x: -Math.sin(rad), y: Math.cos(rad) };
+  const d = { x: Math.cos(rad), y: Math.sin(rad) };
+  const across = (b.x - a.x) * n.x + (b.y - a.y) * n.y;
+  if (Math.abs(across) > 0.15 * a.fontSize) return false;
+  const along = (b.x - a.x) * d.x + (b.y - a.y) * d.y;
+  const gap = along - a.width;
+  return gap > -0.5 * a.fontSize && gap < 1.2 * a.fontSize;
 }

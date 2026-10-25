@@ -23,6 +23,8 @@ export interface TextEdit {
   pageIndex: number;
   /** Index among the page-level text-showing operators (Tj, TJ, ', ") of the page. */
   opIndex: number;
+  /** Further operators of the same run (kerning or ligature fragments) removed with the edit. */
+  removeOps?: number[];
   text: string;
   original: OriginalEncoding;
   fallback: FallbackFontHint;
@@ -42,6 +44,8 @@ export interface TextRun {
   id: string;
   pageIndex: number;
   opIndex: number;
+  /** Operators merged into this run after the first one (same line, font and size). */
+  extraOps: number[];
   text: string;
   /** Baseline origin. */
   x: number;

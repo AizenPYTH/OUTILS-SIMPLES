@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Loader2, RotateCcw } from "lucide-react";
-import { pdfRectToViewport, viewportScale, type ViewportLike } from "@/lib/pdf/coordinates";
+import { pdfToViewport, viewportScale, type ViewportLike } from "@/lib/pdf/coordinates";
 import { fontFamilies } from "@/lib/pdf/fonts";
 import type { PageTextStatus, TextEdit, TextRun } from "@/lib/pdf/text-edit/types";
 import { cn } from "@/lib/utils";
@@ -39,13 +39,47 @@ export function TextEditLayer({
   const editedOps = React.useMemo(() => new Set(edits.map((e) => e.opIndex)), [edits]);
   const scale = viewportScale(viewport);
 
-  const boxFor = (run: TextRun) =>
-    pdfRectToViewport(viewport, {
-      x: run.x,
-      y: run.y - run.height * 0.25,
-      width: run.width,
-      height: run.height * 1.2,
-    });
+  // Glyph box of a run in PDF space follows its baseline direction (rotated
+  // text included): 0.25 × height below the baseline, 0.95 × height above.
+  const geometryFor = (run: TextRun) => {
+    const rad = (run.angle * Math.PI) / 180;
+    const d = { x: Math.cos(rad), y: Math.sin(rad) };
+    const n = { x: -Math.sin(rad), y: Math.cos(rad) };
+    const below = 0.25 * run.height;
+    const above = 0.95 * run.height;
+    const corner = (along: number, across: number) =>
+      pdfToViewport(viewport, {
+        x: run.x + d.x * along + n.x * across,
+        y: run.y + d.y * along + n.y * across,
+      });
+    const corners = [
+      corner(0, -below),
+      corner(run.width, -below),
+      corner(0, above),
+      corner(run.width, above),
+    ];
+    const xs = corners.map((c) => c.x);
+    const ys = corners.map((c) => c.y);
+    const box = {
+      x: Math.min(...xs),
+      y: Math.min(...ys),
+      width: Math.max(...xs) - Math.min(...xs),
+      height: Math.max(...ys) - Math.min(...ys),
+    };
+    // Screen direction of the baseline (CSS rotate is clockwise, y down).
+    const [a, b, c, dd] = viewport.transform as number[];
+    const sx = a! * d.x + c! * d.y;
+    const sy = b! * d.x + dd! * d.y;
+    const screenAngle = (Math.atan2(sy, sx) * 180) / Math.PI;
+    return {
+      box,
+      topLeft: corner(0, above),
+      screenAngle,
+      along: run.width * scale,
+      across: run.height * 1.2 * scale,
+    };
+  };
+  const boxFor = (run: TextRun) => geometryFor(run).box;
 
   const commit = () => {
     if (!active) return;
@@ -101,7 +135,7 @@ export function TextEditLayer({
         <ActiveEditor
           run={active.run}
           value={active.value}
-          box={boxFor(active.run)}
+          geometry={geometryFor(active.run)}
           scale={scale}
           pageRotation={pageRotation}
           edited={editedOps.has(active.run.opIndex)}
@@ -124,7 +158,7 @@ export function TextEditLayer({
 function ActiveEditor({
   run,
   value,
-  box,
+  geometry,
   scale,
   pageRotation,
   edited,
@@ -135,7 +169,13 @@ function ActiveEditor({
 }: {
   run: TextRun;
   value: string;
-  box: { x: number; y: number; width: number; height: number };
+  geometry: {
+    box: { x: number; y: number; width: number; height: number };
+    topLeft: { x: number; y: number };
+    screenAngle: number;
+    along: number;
+    across: number;
+  };
   scale: number;
   pageRotation: number;
   edited: boolean;
@@ -146,9 +186,14 @@ function ActiveEditor({
 }) {
   const family = fontFamilies.find((f) => f.id === run.fallback.family)?.css ?? "sans-serif";
   const fontPx = run.fontSize * scale;
-  const width = Math.max(box.width + 24, 160);
+  const { box, topLeft, screenAngle, along, across } = geometry;
+  const width = Math.max(along + 24, 160);
+  void pageRotation; // the viewport transform already carries the page rotation
   return (
-    <div className="absolute" style={{ left: box.x, top: box.y }}>
+    <div
+      className="absolute"
+      style={{ left: box.x, top: box.y, width: box.width, height: box.height }}
+    >
       <input
         autoFocus
         type="text"
@@ -175,19 +220,23 @@ function ActiveEditor({
         aria-label="Nouveau texte"
         className="block rounded-[3px] border-2 border-primary bg-white px-1 text-black shadow-md outline-none"
         style={{
+          position: "absolute",
+          left: topLeft.x - box.x,
+          top: topLeft.y - box.y,
           width,
-          height: Math.max(box.height, fontPx * 1.3),
+          height: Math.max(across, fontPx * 1.3),
           fontSize: fontPx,
           fontFamily: family,
           fontWeight: run.fallback.bold ? 700 : 400,
           fontStyle: run.fallback.italic ? "italic" : "normal",
-          transform: `rotate(${-pageRotation}deg)`,
+          transform: `rotate(${screenAngle}deg)`,
           transformOrigin: "top left",
         }}
         data-testid="text-run-editor"
       />
       <div
-        className="mt-1 flex items-center gap-2 whitespace-nowrap rounded-md border border-border bg-surface px-2 py-1 text-xs text-muted-foreground shadow-md"
+        className="absolute left-0 flex items-center gap-2 whitespace-nowrap rounded-md border border-border bg-surface px-2 py-1 text-xs text-muted-foreground shadow-md"
+        style={{ top: box.height + 6 }}
         data-text-edit-toolbar=""
       >
         <span>

@@ -45,6 +45,11 @@ export interface RawTextOp {
   stringBytes: number;
   /** Number of string operands (TJ arrays have several). */
   stringCount: number;
+  /**
+   * A positioning operator (Td, TD, Tm, T*, ET…) follows before the next
+   * text-showing operator: removing this operator cannot shift later text.
+   */
+  nextIsPositioned: boolean;
 }
 
 /** Decoded, concatenated content of a page (streams joined by a newline). */
@@ -76,7 +81,13 @@ export function collectTextOps(content: Uint8Array): RawTextOp[] {
   const result: RawTextOp[] = [];
   let font: { name: string | null; size: number | null } = { name: null, size: null };
   const stack: (typeof font)[] = [];
+  let lastText: RawTextOp | null = null;
+  const positioning = new Set(["Td", "TD", "Tm", "T*", "ET", "BT", "q", "Q", "cm"]);
   for (const op of ops) {
+    if (positioning.has(op.op) && lastText) {
+      lastText.nextIsPositioned = true;
+      lastText = null;
+    }
     switch (op.op) {
       case "q":
         stack.push(font);
@@ -103,18 +114,41 @@ export function collectTextOps(content: Uint8Array): RawTextOp[] {
             } else if (operand.type === "array") operand.items.forEach(visit);
           };
           op.operands.forEach(visit);
-          result.push({
+          const raw: RawTextOp = {
             index: result.length,
             op,
             fontName: font.name,
             fontSize: font.size,
             stringBytes,
             stringCount,
-          });
+            nextIsPositioned: false,
+          };
+          result.push(raw);
+          lastText = raw;
         }
     }
   }
+  if (lastText) lastText.nextIsPositioned = true;
   return result;
+}
+
+/** Pairs that fonts often draw as one ligature glyph. */
+export const LIGATURES: Record<string, string> = {
+  ff: "\ufb00",
+  fi: "\ufb01",
+  fl: "\ufb02",
+  ffi: "\ufb03",
+  ffl: "\ufb04",
+};
+
+/** Ligature glyphs shown as their letters when editing. */
+export function expandLigatures(text: string): string {
+  return text
+    .replace(/\ufb03/g, "ffi")
+    .replace(/\ufb04/g, "ffl")
+    .replace(/\ufb00/g, "ff")
+    .replace(/\ufb01/g, "fi")
+    .replace(/\ufb02/g, "fl");
 }
 
 function hex(bytes: number[]): string {
@@ -137,7 +171,24 @@ export function encodeWithOriginal(
     if (current.length) segments.push(hex(current));
     current = [];
   };
-  for (const ch of Array.from(text)) {
+  const chars = Array.from(text);
+  for (let i = 0; i < chars.length; i += 1) {
+    let ch = chars[i]!;
+    // Prefer a ligature glyph the font already uses for the pair (subset fonts often lack the single letters).
+    for (const length of [3, 2]) {
+      const group = chars.slice(i, i + length).join("");
+      const ligature = LIGATURES[group];
+      if (
+        group.length === length &&
+        ligature &&
+        encoding.codes[ligature] !== undefined &&
+        encoding.codes[ch] === undefined
+      ) {
+        ch = ligature;
+        i += length - 1;
+        break;
+      }
+    }
     const code = encoding.codes[ch];
     if (code === undefined) {
       if (ch === " ") {
@@ -220,6 +271,13 @@ export async function applyTextEdits(
     const fontKeys = new Map<string, string>();
     const seen = new Set<number>();
     for (const edit of pageEdits) {
+      // Fragments merged into this run disappear with it (their advance only mattered inside the line).
+      for (const extra of edit.removeOps ?? []) {
+        const raw = textOps[extra];
+        if (!raw || seen.has(extra)) continue;
+        seen.add(extra);
+        replacements.push({ start: raw.op.start, end: raw.op.end, bytes: new Uint8Array() });
+      }
       if (seen.has(edit.opIndex)) {
         report.skipped.push({ pageIndex, opIndex: edit.opIndex, reason: "modification en double" });
         continue;
