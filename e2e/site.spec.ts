@@ -13,9 +13,9 @@ test.describe("site", () => {
     );
     const cards = page.getByTestId("tool-card");
     expect(await cards.count()).toBeGreaterThanOrEqual(13);
-    // No planned tool is linked as operational.
-    await expect(page.locator('a[href*="/corriger-un-document-photographie/"]')).toHaveCount(0);
-    await expect(page.locator('a[href*="/documents/"]')).toHaveCount(0);
+    // Categories without a published tool are not linked.
+    await expect(page.locator('a[href*="/calculatrices/"]')).toHaveCount(0);
+    await expect(page.locator('a[href*="/conversion/"]')).toHaveCount(0);
     await expect(page.getByTestId("consent-banner")).toHaveCount(0);
     const jsonLd = await page.locator('script[type="application/ld+json"]').first().textContent();
     expect(jsonLd).toContain("WebSite");
@@ -48,6 +48,31 @@ test.describe("site", () => {
         widths = await measure();
         expect(widths.scroll, `viewport ${width}`).toBeLessThanOrEqual(widths.inner);
       }
+    }
+  });
+
+  test("tool pages never overflow horizontally on mobile", async ({ page, isMobile }) => {
+    test.skip(!isMobile, "mobile layout check");
+    const paths = ["/pdf/fusionner/", "/pdf/caviarder/", "/pdf/comparer-deux-pdf/", "/numerisation/scanner-un-document/", "/numerisation/ocr/", "/images/compresser/", "/images/filigrane/", "/texte/comparer-deux-textes/", "/developpeur/formater-valider-json/", "/documents/markdown-vers-pdf/", "/codes/generateur-qr-code/", "/outils/", "/guides/"];
+    for (const path of paths) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      const wide = await page.evaluate(() => {
+        const max = document.documentElement.clientWidth + 1;
+        const inScroller = (el: Element) => {
+          for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+            if (/(auto|scroll|hidden|clip)/.test(getComputedStyle(node).overflowX)) return true;
+          }
+          return false;
+        };
+        return Array.from(document.querySelectorAll("body *"))
+          .filter((el) => getComputedStyle(el).position !== "fixed" && !inScroller(el))
+          .map((el) => ({ el, rect: el.getBoundingClientRect() }))
+          .filter(({ rect }) => rect.width > 20 && rect.right > max)
+          .slice(0, 3)
+          .map(({ el, rect }) => `${el.tagName}.${el.className.toString().slice(0, 60)} right=${Math.round(rect.right)}`);
+      });
+      expect(wide, path).toEqual([]);
     }
   });
 
@@ -94,7 +119,9 @@ test.describe("site", () => {
     expect(sitemap).toContain("/pdf/fusionner/");
     expect(sitemap).toContain("/pdf/modifier/");
     expect(sitemap).toContain("/images/compresser/");
-    expect(sitemap).not.toContain("/corriger-un-document-photographie/");
+    expect(sitemap).toContain("/numerisation/corriger-un-document-photographie/");
+    expect(sitemap).toContain("/documents/markdown-vers-pdf/");
+    expect(sitemap).not.toContain("/calculatrices/");
     expect(sitemap).not.toContain("/outils/");
     const robots = await (await request.get("/robots.txt")).text();
     expect(robots).toContain("Sitemap:");

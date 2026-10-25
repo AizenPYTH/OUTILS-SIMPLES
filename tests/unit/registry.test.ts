@@ -52,7 +52,8 @@ describe("tool registry", () => {
     expect(getToolPath(getToolByPath("pdf", "modifier")!)).toBe("/pdf/modifier/");
     expect(getToolByPath("images", "compresser")?.status).toBe("published");
     expect(getToolByPath("numerisation", "ocr")?.status).toBe("published");
-    expect(getToolByPath("numerisation", "corriger-un-document-photographie")?.status).toBe("planned");
+    expect(getToolByPath("numerisation", "corriger-un-document-photographie")?.status).toBe("published");
+    expect(getToolByPath("documents", "markdown-vers-pdf")?.status).toBe("published");
     expect(getActiveCategories().map((c) => c.id)).toEqual(expect.arrayContaining(["pdf", "images", "texte", "developpeur", "codes"]));
   });
 
@@ -94,8 +95,10 @@ describe("sitemap", () => {
     expect(urls).toContain("http://localhost:3000/pdf/");
     expect(urls).toContain("http://localhost:3000/images/");
     expect(urls).toContain("http://localhost:3000/numerisation/ocr/");
-    expect(urls.some((u) => u.includes("/corriger-un-document-photographie/"))).toBe(false);
-    expect(urls.some((u) => u.includes("/documents/"))).toBe(false);
+    expect(urls).toContain("http://localhost:3000/numerisation/corriger-un-document-photographie/");
+    expect(urls).toContain("http://localhost:3000/documents/markdown-vers-pdf/");
+    // Categories without a published tool are not exposed.
+    expect(urls.some((u) => u.includes("/calculatrices/") || u.includes("/conversion/"))).toBe(false);
     expect(new Set(urls).size).toBe(urls.length);
   });
 });

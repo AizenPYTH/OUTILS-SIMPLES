@@ -58,4 +58,58 @@ export const developerTools: readonly ToolDefinition[] = [
       faq: [],
     },
   }),
+  devTool({
+    id: "dev-base64",
+    slug: "encoder-decoder-base64",
+    name: "Encoder et décoder en Base64",
+    shortDescription: "Convertissez du texte (UTF-8) ou un fichier en Base64, et décodez une chaîne Base64, variante URL-safe comprise.",
+    description:
+      "Encodez un texte en Base64 (accents et emoji compris grâce à l'UTF-8) ou décodez une chaîne Base64 reçue dans une API, un e-mail ou un fichier de configuration. Convertissez aussi un fichier (image, police, PDF) en Data URI prêt à coller dans du HTML ou du CSS. La variante URL-safe et le découpage en lignes de 76 caractères sont pris en charge.",
+    icon: "binary",
+    keywords: ["base64", "encoder base64", "décoder base64", "base64 en ligne", "base64 decode", "base64 encode", "image en base64", "data uri", "base64 url safe"],
+    seo: { title: "Encoder et décoder en Base64 en ligne (texte, fichier, Data URI)", description: "Encodez ou décodez du Base64 (UTF-8, URL-safe, lignes MIME) et convertissez un fichier en Data URI. Gratuit, instantané, traitement local." },
+    related: ["dev-url-encode", "dev-html-entities", "dev-json"],
+    featured: true,
+    content: {
+      steps: ["Choisissez encoder ou décoder.", "Collez le texte (ou déposez un fichier pour obtenir une Data URI).", "Copiez le résultat."],
+      limitations: ["Le Base64 n'est pas un chiffrement : il ne protège rien, il transporte des octets sous forme de texte.", "Fichiers jusqu'à 5 Mo pour la conversion en Data URI (le résultat est 33 % plus volumineux que l'original)."],
+      faq: [],
+    },
+  }),
+  devTool({
+    id: "dev-url-encode",
+    slug: "encoder-decoder-url",
+    name: "Encoder et décoder une URL",
+    shortDescription: "Convertissez les caractères spéciaux d'un texte en %XX (percent-encoding) et décodez une URL encodée.",
+    description:
+      "Encodez un paramètre de requête ou une URL complète selon la RFC 3986 (espaces, accents, &, =, ? …) et décodez une adresse encodée pour la lire en clair. Le mode « composant » encode tout sauf les caractères non réservés ; le mode « URL complète » conserve la structure (/, ?, &, =, #).",
+    icon: "link",
+    keywords: ["url encode", "url decode", "encoder url", "décoder url", "percent encoding", "encodeURIComponent", "caractères spéciaux url", "%20"],
+    seo: { title: "Encoder et décoder une URL en ligne (percent-encoding %XX)", description: "Encodez les caractères spéciaux d'un paramètre ou d'une URL complète et décodez une adresse encodée. UTF-8, RFC 3986, traitement local." },
+    related: ["dev-base64", "text-slug", "dev-html-entities"],
+    content: {
+      steps: ["Choisissez encoder ou décoder.", "Collez le texte ou l'URL ; pour une adresse complète, cochez « URL complète ».", "Copiez le résultat."],
+      limitations: ["Le décodage d'une séquence %XX invalide est signalé comme une erreur.", "Les « + » sont interprétés comme des espaces au décodage (convention des formulaires)."],
+      faq: [],
+    },
+  }),
+  devTool({
+    id: "dev-html-entities",
+    slug: "caracteres-html",
+    name: "Échapper et déséchapper du HTML",
+    shortDescription: "Convertissez <, >, &, guillemets en entités HTML (&lt;, &amp;…) et inversement.",
+    description:
+      "Préparez un extrait de code ou un texte à afficher dans une page HTML en remplaçant les caractères spéciaux par leurs entités, ou retrouvez le texte lisible d'un contenu rempli d'entités (&eacute;, &#233;, &nbsp;…). Utile pour les blogs, les CMS, les e-mails HTML et le débogage.",
+    icon: "file-code",
+    keywords: ["entités html", "échapper html", "html escape", "html unescape", "&amp;", "&lt;", "caractères spéciaux html", "convertir html en texte", "html entities"],
+    seo: { title: "Échapper et déséchapper des caractères HTML en ligne (entités)", description: "Convertissez <, >, &, guillemets et accents en entités HTML et inversement, instantanément et sans envoi de données." },
+    related: ["dev-base64", "dev-url-encode", "text-clean"],
+    inputFormats: ["text/html", "text/plain"],
+    outputFormats: ["text/html", "text/plain"],
+    content: {
+      steps: ["Choisissez échapper ou déséchapper.", "Collez le texte.", "Copiez le résultat."],
+      limitations: ["Le déséchappement convertit les entités numériques (&#233;, &#xE9;) et les entités nommées courantes ; les balises HTML ne sont pas supprimées.", "L'échappement couvre & < > \" ' ; les accents sont conservés tels quels (UTF-8 étant la norme)."],
+      faq: [],
+    },
+  }),
 ];
