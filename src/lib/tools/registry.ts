@@ -46,7 +46,7 @@ export const toolRegistry: readonly ToolDefinition[] = [
     seo: {
       title: "Modifier un PDF en ligne gratuitement : texte, annotations, signature",
       description:
-        "Éditeur PDF gratuit : ajoutez du texte, des surlignages, des formes, des images et une signature sur vos pages. Traitement 100 % local dans votre navigateur, sans inscription.",
+        "Éditeur PDF gratuit : ajoutez texte, surlignages, formes, images et signature sur vos pages. Traitement 100 % local dans le navigateur, sans inscription.",
     },
     status: "published",
     indexable: true,
@@ -108,7 +108,7 @@ export const toolRegistry: readonly ToolDefinition[] = [
     seo: {
       title: "Fusionner des PDF en ligne gratuitement et sans envoi de fichiers",
       description:
-        "Fusionnez plusieurs fichiers PDF en un seul document en quelques secondes. Réorganisez l'ordre par glisser-déposer. Traitement local dans votre navigateur, gratuit et sans inscription.",
+        "Fusionnez plusieurs PDF en un seul document en quelques secondes, dans l'ordre de votre choix. Traitement local dans le navigateur, gratuit et sans inscription.",
     },
     status: "published",
     indexable: true,
@@ -170,7 +170,7 @@ export const toolRegistry: readonly ToolDefinition[] = [
     seo: {
       title: "Diviser un PDF en ligne : séparer un PDF en plusieurs fichiers",
       description:
-        "Découpez un PDF en plusieurs documents à partir de plages de pages. Aperçu des pages, validation des plages, téléchargement individuel ou en ZIP. 100 % local, gratuit.",
+        "Découpez un PDF en plusieurs documents à partir de plages de pages, avec aperçu et validation. Téléchargement individuel ou en ZIP. 100 % local, gratuit.",
     },
     status: "published",
     indexable: true,
@@ -225,7 +225,7 @@ export const toolRegistry: readonly ToolDefinition[] = [
     seo: {
       title: "Compresser un PDF en ligne : réduire la taille d'un fichier PDF",
       description:
-        "Réduisez le poids de vos PDF dans votre navigateur : nettoyage de la structure et recompression des images avec choix de la qualité. Taille avant / après affichée. Gratuit, sans envoi de fichier.",
+        "Réduisez le poids d'un PDF dans votre navigateur : nettoyage de la structure et recompression des images au choix. Taille avant / après affichée. Gratuit.",
     },
     status: "published",
     indexable: true,
@@ -466,7 +466,7 @@ export const toolRegistry: readonly ToolDefinition[] = [
     seo: {
       title: "Annoter un PDF en ligne : surligner, dessiner, commenter",
       description:
-        "Annotez un PDF gratuitement : surlignage, soulignement, dessin libre, commentaires et formes. Suppression et annulation faciles. Traitement local dans votre navigateur.",
+        "Annotez un PDF gratuitement : surlignage, soulignement, dessin libre, commentaires et formes. Annulation facile, traitement local dans le navigateur.",
     },
     status: "published",
     indexable: true,
@@ -519,7 +519,7 @@ export const toolRegistry: readonly ToolDefinition[] = [
     seo: {
       title: "Signer un PDF en ligne gratuitement : signature manuscrite ou image",
       description:
-        "Signez un PDF : dessinez votre signature ou importez une image, placez-la sur la page et téléchargez. Signature visuelle traitée localement, jamais envoyée sur un serveur.",
+        "Signez un PDF : dessinez votre signature ou importez une image, placez-la sur la page et téléchargez. Signature visuelle traitée localement, jamais envoyée.",
     },
     status: "published",
     indexable: true,
@@ -620,7 +620,7 @@ export const toolRegistry: readonly ToolDefinition[] = [
     seo: {
       title: "Gérer ou retirer un filigrane PDF (filigranes OUTILIA et annotations)",
       description:
-        "Analysez un PDF et retirez les filigranes ajoutés avec OUTILIA ou les annotations de type filigrane, lorsque c'est techniquement possible. Diagnostic honnête, traitement local.",
+        "Analysez un PDF et retirez les filigranes ajoutés avec OUTILIA ou les annotations de type filigrane quand c'est possible. Diagnostic honnête, traitement local.",
     },
     status: "published",
     indexable: true,
@@ -672,7 +672,7 @@ export const toolRegistry: readonly ToolDefinition[] = [
     seo: {
       title: "Remplir un formulaire PDF en ligne gratuitement",
       description:
-        "Remplissez les champs d'un formulaire PDF interactif (texte, cases, listes) dans votre navigateur et téléchargez le résultat, avec option d'aplatissement. Sans envoi de fichier.",
+        "Remplissez les champs d'un formulaire PDF interactif (texte, cases, listes) dans votre navigateur et téléchargez le résultat, aplati ou non. Sans envoi de fichier.",
     },
     status: "published",
     indexable: true,
