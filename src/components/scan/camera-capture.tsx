@@ -165,7 +165,7 @@ export function CameraCapture({
       <DialogContent
         size="lg"
         showCloseButton={false}
-        className="gap-2 bg-black p-2 text-white sm:rounded-[20px]"
+        className="gap-2 bg-black p-2 text-white sm:rounded-[20px] max-sm:inset-0 max-sm:left-0 max-sm:top-0 max-sm:flex max-sm:h-dvh max-sm:max-h-none max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:flex-col max-sm:rounded-none max-sm:border-0"
       >
         <DialogTitle className="sr-only">Prendre une photo</DialogTitle>
         <DialogDescription className="sr-only">
@@ -190,7 +190,7 @@ export function CameraCapture({
             {total > 0 ? "Terminer" : "Fermer"}
           </Button>
         </div>
-        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[12px] bg-black sm:aspect-[4/3]">
+        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[12px] bg-black max-sm:aspect-auto max-sm:min-h-0 max-sm:flex-1 sm:aspect-[4/3]">
           <video
             ref={videoRef}
             playsInline
@@ -261,7 +261,7 @@ export function CameraCapture({
               onClick={shoot}
               disabled={!ready || capturing}
               aria-label="Prendre la photo"
-              className="flex size-16 items-center justify-center rounded-full border-4 border-white bg-white/20 disabled:opacity-40"
+              className="flex size-[72px] items-center justify-center rounded-full border-4 border-white bg-white/20 transition-transform active:scale-95 disabled:opacity-40"
               data-testid="camera-shutter"
             >
               <Camera className="size-7" aria-hidden="true" />
