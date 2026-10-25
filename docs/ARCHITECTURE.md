@@ -103,7 +103,8 @@ Variantes du flux pour les autres familles :
   tiers n'est contacté. `fs` et `path` sont aliasés vers un module vide pour la glue Emscripten de qpdf
   (`next.config.ts`).
 - **Caméra** : `getUserMedia` demandé uniquement au clic, flux arrêté à la fermeture du dialogue ; les
-  photos ne sont jamais envoyées.
+  photos ne sont jamais envoyées. L'en-tête `Permissions-Policy` autorise `camera=(self)` (le scanner et le
+  lecteur de QR en dépendent) et interdit microphone, géolocalisation, paiement et USB.
 - Autres en-têtes : HSTS (prod), `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`,
   `Permissions-Policy`, COOP.
 - Fichiers : vérification de signature (`%PDF`, PNG, JPEG), limites de taille/nombre/pages

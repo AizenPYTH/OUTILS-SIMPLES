@@ -3,6 +3,8 @@
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Segmented } from "@/components/pdf/shared/segmented";
+import * as React from "react";
+import { supportsWebpEncoding } from "@/lib/images/canvas";
 import { outputFormatLabels, supportsTransparency, type ImageOutputFormat } from "@/lib/images/types";
 
 export interface FormatSettings {
@@ -22,6 +24,7 @@ interface FormatOptionsProps {
 
 export function FormatOptions({ value, onChange, allowSame = true, idPrefix }: FormatOptionsProps) {
   const lossy = value.format === "image/jpeg" || value.format === "image/webp" || value.format === "same";
+  const [webp] = React.useState(() => (typeof document === "undefined" ? true : supportsWebpEncoding()));
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
@@ -35,7 +38,7 @@ export function FormatOptions({ value, onChange, allowSame = true, idPrefix }: F
             ...(allowSame ? [{ value: "same" as const, label: "Identique", description: "Conserve le format d'origine" }] : []),
             { value: "image/jpeg" as const, label: outputFormatLabels["image/jpeg"], description: "Photos, sans transparence" },
             { value: "image/png" as const, label: outputFormatLabels["image/png"], description: "Sans perte, transparence" },
-            { value: "image/webp" as const, label: outputFormatLabels["image/webp"], description: "Léger, transparence" },
+            { value: "image/webp" as const, label: outputFormatLabels["image/webp"], description: webp ? "Léger, transparence" : "Non pris en charge par ce navigateur", disabled: !webp },
           ]}
         />
       </div>
@@ -59,7 +62,9 @@ export function FormatOptions({ value, onChange, allowSame = true, idPrefix }: F
 
 export function resolveFormat(settings: FormatSettings, sourceType: string): ImageOutputFormat {
   if (settings.format !== "same") return settings.format;
-  if (sourceType === "image/png" || sourceType === "image/webp" || sourceType === "image/jpeg") return sourceType;
+  // "Same format" for a WebP source needs a WebP encoder; PNG is the lossless fallback.
+  if (sourceType === "image/webp") return supportsWebpEncoding() ? "image/webp" : "image/png";
+  if (sourceType === "image/png" || sourceType === "image/jpeg") return sourceType;
   // GIF/BMP/SVG/AVIF sources: PNG keeps quality and transparency.
   return "image/png";
 }

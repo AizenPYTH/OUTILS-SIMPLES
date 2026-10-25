@@ -90,8 +90,8 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
 
 ## Qualité / tests
 
-- 133 tests Vitest ; 77 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
-  fichiers produits, de la confidentialité réseau et de l'accessibilité (axe-core). Non couverts
-  automatiquement : glisser-déposer tactile de dnd-kit, pad de signature dessiné, capture caméra réelle,
-  Safari/Firefox, fichiers de 100 Mo de bout en bout, performances sur mobile bas de gamme. Voir
-  `docs/AUDIT_QUALITE.md`.
+- 136 tests Vitest ; 92 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
+  fichiers produits, de la confidentialité réseau, de l'accessibilité (axe-core), de la caméra (périphérique
+  factice Chromium) et des gros fichiers (60 Mo traité, 101 Mo et 1 001 pages refusés). Non couverts
+  automatiquement : glisser-déposer tactile de dnd-kit, pad de signature dessiné, caméra physique,
+  Safari/Firefox, performances sur mobile bas de gamme. Voir `docs/AUDIT_QUALITE.md` (procédure manuelle).

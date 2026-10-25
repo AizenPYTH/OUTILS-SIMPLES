@@ -113,7 +113,8 @@ export function buildSecurityHeaders(
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     {
       key: "Permissions-Policy",
-      value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
+      // The scanner and the QR reader use getUserMedia on this origin only; everything else stays off.
+      value: "camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
     },
     { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
     ...(options.isDev

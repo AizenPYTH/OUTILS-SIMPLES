@@ -105,6 +105,22 @@ export function putRgba(img: RgbaImage): HTMLCanvasElement {
   return canvas;
 }
 
+let webpEncoding: boolean | null = null;
+
+/** Whether this browser can encode WebP (Safari cannot: canvas falls back to PNG). Cached. */
+export function supportsWebpEncoding(): boolean {
+  if (webpEncoding !== null) return webpEncoding;
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    webpEncoding = canvas.toDataURL("image/webp").startsWith("data:image/webp");
+  } catch {
+    webpEncoding = false;
+  }
+  return webpEncoding;
+}
+
 export interface EncodeResult {
   blob: Blob;
   bytes: number;

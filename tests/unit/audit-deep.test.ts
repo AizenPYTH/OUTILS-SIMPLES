@@ -200,3 +200,48 @@ describe("audit — limites et fichiers invalides", () => {
     await expect(loadPdfDocument(await empty.save({ addDefaultPage: false }))).rejects.toMatchObject({ code: "EMPTY" });
   });
 });
+
+describe("audit — feuilles à imprimer : géométrie des tracés", () => {
+  it("draws a 5 mm grid with exact spacing inside the margins, on every page", async () => {
+    const { paperPdf } = await import("@/lib/pdf/operations/printables");
+    const { PDFArray, PDFRawStream, decodePDFRawStream } = await import("pdf-lib");
+    const bytes = await paperPdf({ kind: "grid", spacingMm: 5, page: "a4", marginMm: 10, color: "#000000", pages: 2 });
+    const doc = await openPdf(bytes);
+    expect(doc.getPageCount()).toBe(2);
+    const mm = 72 / 25.4;
+    for (const page of doc.getPages()) {
+      const { width, height } = page.getSize();
+      const contents = page.node.Contents();
+      const streams = contents instanceof PDFArray ? contents.asArray().map((r) => doc.context.lookup(r)) : [contents];
+      const ops = streams.map((s) => (s instanceof PDFRawStream ? Buffer.from(decodePDFRawStream(s).decode()).toString("latin1") : "")).join("\n");
+      const lines = Array.from(ops.matchAll(/([\d.]+) ([\d.]+) m\s+([\d.]+) ([\d.]+) l/g)).map((m) => m.slice(1, 5).map(Number));
+      const ys = lines.filter(([, y1, , y2]) => Math.abs(y1! - y2!) < 0.01).map(([, y]) => y!).sort((a, b) => b - a);
+      const xs = lines.filter(([x1, , x2]) => Math.abs(x1! - x2!) < 0.01).map(([x]) => x!).sort((a, b) => a - b);
+      expect(ys).toHaveLength(Math.floor((height - 20 * mm + 0.01) / (5 * mm)) + 1);
+      expect(xs).toHaveLength(Math.floor((width - 20 * mm + 0.01) / (5 * mm)) + 1);
+      for (let i = 1; i < ys.length; i += 1) expect(ys[i - 1]! - ys[i]!).toBeCloseTo(5 * mm, 2);
+      for (let i = 1; i < xs.length; i += 1) expect(xs[i]! - xs[i - 1]!).toBeCloseTo(5 * mm, 2);
+      expect(xs[0]).toBeCloseTo(10 * mm, 2);
+      expect(xs[xs.length - 1]).toBeLessThanOrEqual(width - 10 * mm + 0.01);
+      expect(ys[0]).toBeCloseTo(height - 10 * mm, 2);
+    }
+  });
+
+  it("lined paper only draws horizontals and dotted paper only circles", async () => {
+    const { paperPdf } = await import("@/lib/pdf/operations/printables");
+    const { PDFArray, PDFRawStream, decodePDFRawStream } = await import("pdf-lib");
+    const read = async (bytes: Uint8Array) => {
+      const doc = await openPdf(bytes);
+      const contents = doc.getPage(0).node.Contents();
+      const streams = contents instanceof PDFArray ? contents.asArray().map((r) => doc.context.lookup(r)) : [contents];
+      return streams.map((s) => (s instanceof PDFRawStream ? Buffer.from(decodePDFRawStream(s).decode()).toString("latin1") : "")).join("\n");
+    };
+    const lined = await read(await paperPdf({ kind: "lines", spacingMm: 8, page: "a4", marginMm: 15, color: "#000", pages: 1 }));
+    const linedLines = Array.from(lined.matchAll(/([\d.]+) ([\d.]+) m\s+([\d.]+) ([\d.]+) l/g)).map((m) => m.slice(1, 5).map(Number));
+    expect(linedLines.length).toBeGreaterThan(20);
+    expect(linedLines.every(([, y1, , y2]) => Math.abs(y1! - y2!) < 0.01)).toBe(true);
+    const dotted = await read(await paperPdf({ kind: "dots", spacingMm: 5, page: "a5", marginMm: 10, color: "#000", pages: 1 }));
+    expect(dotted).not.toMatch(/ l\b/);
+    expect((dotted.match(/ c\b/g) ?? []).length).toBeGreaterThan(500); // Bézier arcs of the dots
+  });
+});

@@ -155,17 +155,20 @@ de nom de fichier.
 
 ## Tests
 
-- `pnpm test` : 133 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
+- `pnpm test` : 136 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
   sur fixtures réelles, permissions de chiffrement relues par pdf.js, géométrie/détection du scanner, OCR →
   PDF recherchable, métadonnées d'images, encodeur PNG, extraction d'images et de liens, comparaison,
   caviardage (y compris pages pivotées), Markdown → PDF, regex, dates et jours fériés, TVA, unités,
   codes-barres, couleurs, décodage QR, documents imprimables, limites et fichiers invalides).
-- `pnpm build && pnpm test:e2e` : 77 parcours Playwright exécutés sur desktop et mobile (Pixel 7) :
+- `pnpm build && pnpm test:e2e` : 92 parcours Playwright exécutés sur desktop et mobile (Pixel 7) :
   catalogue, recherche, navigation, 404, métadonnées, sitemap/robots/CSP, thème, absence de débordement
   horizontal, et pour chacun des 66 outils un parcours avec fichiers téléchargés vérifiés (pdf-lib, pdf.js,
   en-têtes d'images, ZIP, EXIF), dont OCR sur image et sur PDF scanné, protection AES-128/256 et caviardage.
-  Deux suites dédiées vérifient la confidentialité (aucune requête hors origine ni avec corps, aucun stockage)
-  et l'accessibilité (axe-core, clavier, menu mobile, états annoncés).
+  Des suites dédiées vérifient la confidentialité (aucune requête hors origine ni avec corps, aucun stockage),
+  l'accessibilité (axe-core, clavier, menu mobile, états annoncés), la caméra avec le périphérique factice de
+  Chromium, les gros fichiers (60 Mo traité, 101 Mo et 1 001 pages refusés) et les replis de compatibilité
+  (navigateur sans encodeur WebP, variantes SIMD du moteur OCR). Safari et Firefox ne sont pas exécutés : voir
+  la procédure manuelle dans `docs/AUDIT_QUALITE.md`.
 
 ## Déploiement
 
