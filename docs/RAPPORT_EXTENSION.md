@@ -109,8 +109,9 @@ filtres d'image (Otsu, document, palette), extraction d'images PDF, mise en page
 calendriers et feuilles, calculs de dates et de TVA, conversions de couleurs et d'unités.
 
 Poids servis (dossier `public/`, copié au `postinstall`) : pdf.js 5,2 Mo ; Tesseract 3 variantes de
-moteur (≈ 2,9 Mo de wasm + 3,9 Mo de chargeur chacune, une seule est téléchargée par l'utilisateur
-selon son processeur) ; modèles fra 6,3 Mo et eng 10,9 Mo compressés ; qpdf 1,3 Mo. Tout est chargé
+moteur autonome `*.wasm.js` (≈ 3,9 Mo chacune, une seule est téléchargée par l'utilisateur selon son
+processeur ; les fichiers `.js`/`.wasm` séparés, jamais chargés, ne sont plus copiés depuis l'audit) ;
+modèles fra 6,3 Mo et eng 10,9 Mo compressés ; qpdf 1,3 Mo. Tout est chargé
 à la demande, uniquement sur la page de l'outil concerné.
 
 ## 6. Limites de l'OCR, du scanner et des conversions
@@ -154,6 +155,15 @@ Aucune API payante n'est utilisée et aucune ne l'est par défaut.
 
 Total minimal : le prix du domaine, soit environ 1 €/mois ; configuration confortable avec hébergement
 Pro et Plausible : environ 30 €/mois.
+
+## Audit postérieur
+
+Un audit de qualité a été mené après la fin de l'extension (`docs/AUDIT_QUALITE.md`) : il a confirmé et
+corrigé deux défauts fonctionnels (chiffrement AES-128 inopérant, PDF chiffré présenté comme endommagé par
+l'outil de vérification), une limite non appliquée (500 pages en comparaison) et quatre défauts
+d'accessibilité sérieux, et porté la couverture à un parcours Playwright par outil avec vérification des
+fichiers produits. Les chiffres de la section 4 sont ceux de la fin de l'extension ; ceux de l'audit sont dans
+son rapport (133 tests unitaires, 77 parcours × 2 projets).
 
 ## 8. Améliorations recommandées (par ordre de priorité)
 

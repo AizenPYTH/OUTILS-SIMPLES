@@ -80,7 +80,8 @@ Il n'y a aucun secret côté serveur : le site n'a ni base de données ni API.
 | Documents (5)        | Markdown → PDF, texte → PDF, feuilles à imprimer, calendrier, page de garde                                                                                                                                                                                                                                                                              |
 
 Le rapport détaillé de l'extension (outils, limites, licences, coûts, prochaines étapes) est dans
-`docs/RAPPORT_EXTENSION.md`.
+`docs/RAPPORT_EXTENSION.md` ; la matrice d'audit de qualité des 66 outils (tests par outil, risques, corrections)
+dans `docs/AUDIT_QUALITE.md`.
 
 ## Architecture (résumé)
 
@@ -154,15 +155,17 @@ de nom de fichier.
 
 ## Tests
 
-- `pnpm test` : 121 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
-  sur fixtures réelles, géométrie/détection du scanner, OCR → PDF recherchable, métadonnées d'images,
-  encodeur PNG, extraction d'images et de liens, comparaison, caviardage, Markdown → PDF, regex, dates et
-  jours fériés, TVA, unités, codes-barres, couleurs, décodage QR, documents imprimables).
-- `pnpm build && pnpm test:e2e` : 56 parcours Playwright exécutés sur desktop et mobile (Pixel 7) :
+- `pnpm test` : 133 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
+  sur fixtures réelles, permissions de chiffrement relues par pdf.js, géométrie/détection du scanner, OCR →
+  PDF recherchable, métadonnées d'images, encodeur PNG, extraction d'images et de liens, comparaison,
+  caviardage (y compris pages pivotées), Markdown → PDF, regex, dates et jours fériés, TVA, unités,
+  codes-barres, couleurs, décodage QR, documents imprimables, limites et fichiers invalides).
+- `pnpm build && pnpm test:e2e` : 77 parcours Playwright exécutés sur desktop et mobile (Pixel 7) :
   catalogue, recherche, navigation, 404, métadonnées, sitemap/robots/CSP, thème, absence de débordement
-  horizontal sur mobile, et pour chaque famille d'outils un parcours complet avec fichiers téléchargés
-  vérifiés par pdf-lib / pdf.js (y compris OCR sur une image de texte français et caviardage vérifié par
-  disparition du texte).
+  horizontal, et pour chacun des 66 outils un parcours avec fichiers téléchargés vérifiés (pdf-lib, pdf.js,
+  en-têtes d'images, ZIP, EXIF), dont OCR sur image et sur PDF scanné, protection AES-128/256 et caviardage.
+  Deux suites dédiées vérifient la confidentialité (aucune requête hors origine ni avec corps, aucun stockage)
+  et l'accessibilité (axe-core, clavier, menu mobile, états annoncés).
 
 ## Déploiement
 
@@ -220,3 +223,4 @@ rastérisation des pages marquées, comparaison de PDF textuelle uniquement.
 | dompurify                                   | MPL-2.0 ou Apache-2.0   |
 | lucide-react                                | ISC                     |
 | Polices Bricolage Grotesque, Instrument Sans, Caveat | OFL-1.1        |
+| axe-core (développement uniquement, tests d'accessibilité) | MPL-2.0 |

@@ -17,7 +17,10 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
 - **Fusion / division** : signets et liens internes non conservés.
 - **Protection / déverrouillage** (qpdf WebAssembly) : le déverrouillage exige le mot de passe ; aucune
   attaque par force brute. Les permissions (impression, copie) sont indicatives : un lecteur peut les
-  ignorer.
+  ignorer. AES-128 est produit avec `--use-aes=y` (qpdf ≥ 11 refuse RC4).
+- **Vérifier / réparer** : la glue WebAssembly de qpdf n'expose pas sa sortie texte ; les messages sont
+  capturés via la console du navigateur, et le chiffrement / la linéarisation sont aussi détectés par
+  heuristiques sur les octets. Dans Node (tests), seuls les codes de sortie sont disponibles.
 - **Extraction d'images** : CCITT fax et JBIG2 non décodés (renvoi vers « PDF vers images ») ; JPEG 2000
   fourni en .jp2 ; masque de transparence d'un JPEG non conservé.
 - **Extraction de liens** : liens internes comptés mais non listés ; URL coupées sur deux lignes
@@ -79,13 +82,16 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
   déjà leurs propres workers.
 - CSP : `'unsafe-inline'` (hydratation statique Next.js) et `'wasm-unsafe-eval'` (Tesseract, qpdf,
   décodeurs pdf.js) dans `script-src` ; pas d'`'unsafe-eval'`.
-- Les actifs lourds (pdf.js 5,2 Mo, Tesseract ≈ 6,8 Mo par variante, modèles OCR, qpdf 1,3 Mo) sont
-  servis par le site lui-même et téléchargés uniquement sur la page qui les utilise.
+- Les actifs lourds (pdf.js 5,2 Mo, Tesseract ≈ 3,9 Mo pour la variante téléchargée, modèles OCR 6,3 et
+  10,9 Mo, qpdf 1,3 Mo) sont servis par le site lui-même et téléchargés uniquement sur la page qui les
+  utilise, après action de l'utilisateur pour l'OCR et qpdf.
 - La bannière de consentement interne n'est pas une CMP certifiée Google : obligatoire avant AdSense en EEE.
 - Pas d'image Open Graph dédiée.
 
 ## Qualité / tests
 
-- 121 tests Vitest ; 56 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
-  fichiers produits. Non couverts automatiquement : glisser-déposer tactile de dnd-kit, pad de signature
-  dessiné, capture caméra réelle (nécessite un périphérique), performances sur mobile bas de gamme.
+- 133 tests Vitest ; 77 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
+  fichiers produits, de la confidentialité réseau et de l'accessibilité (axe-core). Non couverts
+  automatiquement : glisser-déposer tactile de dnd-kit, pad de signature dessiné, capture caméra réelle,
+  Safari/Firefox, fichiers de 100 Mo de bout en bout, performances sur mobile bas de gamme. Voir
+  `docs/AUDIT_QUALITE.md`.

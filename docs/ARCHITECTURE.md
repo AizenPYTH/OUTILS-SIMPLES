@@ -94,6 +94,10 @@ Variantes du flux pour les autres familles :
   `'unsafe-eval'`. Nous avons privilégié des pages statiques (coût, cache CDN, SEO) à une CSP à nonce qui
   imposerait un rendu dynamique de chaque page. Les hôtes publicitaires / analytics ne sont ajoutés que
   lorsque la fonctionnalité est activée.
+- **qpdf** : la glue Emscripten ignore `print`/`printErr` ; le wrapper (`src/lib/pdf/qpdf.ts`) capture
+  `console.log`/`console.error` pendant `callMain` (synchrone) pour récupérer les messages dans le navigateur,
+  et complète par des heuristiques sur les octets (`/Encrypt`, `/Linearized`, en-tête de version) qui
+  fonctionnent aussi dans Node.
 - **Actifs WebAssembly et modèles** : copiés depuis `node_modules` dans `public/` par
   `scripts/copy-pdfjs-assets.mjs` (`postinstall`, `prebuild`) et servis par le site lui-même ; aucun CDN
   tiers n'est contacté. `fs` et `path` sont aliasés vers un module vide pour la glue Emscripten de qpdf
