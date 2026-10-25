@@ -4,7 +4,7 @@
  * nothing is fetched from a CDN and no image leaves the browser.
  *
  * Approximate download sizes (first use, then cached by the browser):
- *   worker ≈ 0.1 MB · core (WASM, SIMD) ≈ 2.9 MB · fra ≈ 6.3 MB · eng ≈ 4 MB (gzip).
+ *   worker ≈ 0.1 MB · core (single-file .wasm.js, SIMD) ≈ 3.9 MB · fra ≈ 6.3 MB · eng ≈ 10.9 MB (gzip).
  */
 import type { OcrLanguage, OcrLine, OcrPageResult, OcrWord } from "./types";
 

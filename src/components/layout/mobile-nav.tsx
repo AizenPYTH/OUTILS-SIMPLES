@@ -19,6 +19,7 @@ interface MobileNavProps {
 
 export function MobileNav({ categories, editorPath }: MobileNavProps) {
   const [open, setOpen] = React.useState(false);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const [lastPathname, setLastPathname] = React.useState(pathname);
   // Close the drawer after a navigation (state adjusted during render, no effect needed).
@@ -37,6 +38,7 @@ export function MobileNav({ categories, editorPath }: MobileNavProps) {
   return (
     <div className="lg:hidden">
       <Button
+        ref={triggerRef}
         variant="ghost"
         size="icon"
         onClick={() => setOpen(true)}
@@ -49,6 +51,10 @@ export function MobileNav({ categories, editorPath }: MobileNavProps) {
         <DialogContent
           size="sm"
           className="left-auto right-0 top-0 h-dvh max-h-none w-[min(20rem,calc(100%-2rem))] translate-x-0 translate-y-0 rounded-none border-l p-5 pt-14"
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            triggerRef.current?.focus();
+          }}
         >
           <DialogTitle className="sr-only">{t.common.menu}</DialogTitle>
           <DialogDescription className="sr-only">{t.nav.categories}</DialogDescription>

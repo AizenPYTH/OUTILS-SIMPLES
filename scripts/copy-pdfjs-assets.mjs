@@ -48,7 +48,9 @@ async function fresh(dir) {
   // tesseract.js (legacyCore: false) loads an LSTM-only core variant chosen at runtime from the
   // CPU features (relaxed SIMD → SIMD → plain). Each variant is a .wasm.js loader plus its .wasm.
   const { readdir } = await import("node:fs/promises");
-  const coreFiles = (await readdir(core)).filter((f) => /^tesseract-core-.*lstm.*\.(js|wasm)$/.test(f));
+  // Only the single-file "*.wasm.js" builds are ever requested by the worker (the wasm is embedded);
+  // the separate .js/.wasm pairs would be dead weight in public/.
+  const coreFiles = (await readdir(core)).filter((f) => /^tesseract-core-.*lstm.*\.wasm\.js$/.test(f));
   for (const file of coreFiles) await cp(path.join(core, file), path.join(target, "core", file));
   await mkdir(path.join(target, "lang"), { recursive: true });
   for (const lang of ["fra", "eng"]) {

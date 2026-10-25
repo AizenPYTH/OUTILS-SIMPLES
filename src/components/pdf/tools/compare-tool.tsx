@@ -11,6 +11,7 @@ import { Segmented } from "@/components/pdf/shared/segmented";
 import { DownloadTextButton } from "@/components/tools/shared/download-text-button";
 import { ToolPanel, StatGrid } from "@/components/tools/shared/tool-panel";
 import { readPdfFile } from "@/lib/pdf/browser/read-file";
+import { assertPageCount } from "@/lib/files/validation";
 import { openPdf } from "@/lib/pdf/browser/pdfjs";
 import { extractText } from "@/lib/pdf/operations/extract-text";
 import { comparePageTexts, compareReport, type CompareResult } from "@/lib/pdf/operations/compare";
@@ -32,10 +33,11 @@ interface Loaded {
   modified: string;
 }
 
-async function loadForCompare(file: File, maxBytes: number): Promise<Loaded> {
+async function loadForCompare(file: File, maxBytes: number, maxPages: number): Promise<Loaded> {
   const bytes = await readPdfFile(file, maxBytes);
   const opened = await openPdf(bytes);
   try {
+    assertPageCount(opened.pageCount, maxPages);
     const text = await extractText(opened.doc);
     const meta = await readMetadata(bytes).catch(() => null);
     return { file, pageCount: opened.pageCount, texts: text.pages.map((p) => p.text), producer: meta?.producer ?? "", modified: meta?.modificationDate ?? "" };
@@ -47,6 +49,7 @@ async function loadForCompare(file: File, maxBytes: number): Promise<Loaded> {
 export function ComparePdfTool() {
   const tool = getToolById(TOOL_ID);
   const maxBytes = tool?.limits.maxFileSizeBytes ?? 100 * 1024 * 1024;
+  const maxPages = tool?.limits.maxPageCount ?? 500;
   const [a, setA] = React.useState<Loaded | null>(null);
   const [b, setB] = React.useState<Loaded | null>(null);
   const [loading, setLoading] = React.useState<"a" | "b" | null>(null);
@@ -58,7 +61,7 @@ export function ComparePdfTool() {
     setLoading(slot);
     setError(null);
     try {
-      const loaded = await loadForCompare(file, maxBytes);
+      const loaded = await loadForCompare(file, maxBytes, maxPages);
       if (slot === "a") setA(loaded);
       else setB(loaded);
       track("tool_start", { tool: TOOL_ID });

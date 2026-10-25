@@ -43,11 +43,21 @@ export function createQpdfRunner(createModule: CreateModule, wasmUrl: string): Q
       });
       qpdfModule.FS.writeFile("/in.pdf", input);
       let code = 0;
+      // The Emscripten glue ignores `print`/`printErr` and writes to console.log /
+      // console.error (browser) or directly to the process fds (Node). Hooking the
+      // console while callMain runs (synchronously) captures qpdf's messages in the browser.
+      const originalLog = console.log;
+      const originalError = console.error;
+      console.log = (...parts: unknown[]) => (stdout += `${parts.join(" ")}\n`);
+      console.error = (...parts: unknown[]) => (stderr += `${parts.join(" ")}\n`);
       try {
         code = qpdfModule.callMain([...args.map((a) => a.replace("{in}", "/in.pdf").replace("{out}", "/out.pdf"))]);
       } catch (error) {
         code = typeof error === "number" ? error : -1;
         stderr += String(error);
+      } finally {
+        console.log = originalLog;
+        console.error = originalError;
       }
       let output: Uint8Array | null = null;
       try {
@@ -85,6 +95,8 @@ export interface ProtectOptions {
 export function buildEncryptArgs(options: ProtectOptions): string[] {
   const owner = options.ownerPassword || options.userPassword;
   const bits = options.level === "aes-256" ? "256" : "128";
+  // 128-bit keys default to RC4, which qpdf ≥ 11 refuses without --allow-weak-crypto: force AES.
+  const aes = options.level === "aes-256" ? [] : ["--use-aes=y"];
   const perms = [
     `--print=${options.allowPrinting ? "full" : "none"}`,
     `--modify=${options.allowModification ? "all" : "none"}`,
@@ -92,7 +104,7 @@ export function buildEncryptArgs(options: ProtectOptions): string[] {
     `--annotate=${options.allowAnnotations ? "y" : "n"}`,
   ];
   // qpdf ≥ 11 syntax: --encrypt user owner bits [perms] --
-  return ["--encrypt", options.userPassword, owner, bits, ...perms, "--", "{in}", "{out}"];
+  return ["--encrypt", options.userPassword, owner, bits, ...aes, ...perms, "--", "{in}", "{out}"];
 }
 
 export async function protectPdf(runner: QpdfRunner, bytes: Uint8Array, options: ProtectOptions): Promise<Uint8Array> {
@@ -140,8 +152,9 @@ export async function checkPdf(runner: QpdfRunner, bytes: Uint8Array): Promise<P
   const lines = `${run.stdout}\n${run.stderr}`.split("\n").map((l) => l.trim()).filter(Boolean);
   const headerText = new TextDecoder("latin1").decode(bytes.subarray(0, 1024));
   const version = /%PDF-(\d\.\d)/.exec(headerText)?.[1] ?? lines.find((l) => l.startsWith("PDF Version:"))?.replace("PDF Version:", "").trim() ?? "?";
-  const encrypted = lines.some((l) => /^File is encrypted/i.test(l));
-  const linearized = lines.some((l) => /^File is linearized/i.test(l));
+  // Messages may be unavailable (Node, or a glue that bypasses the console): fall back to byte heuristics.
+  const encrypted = lines.some((l) => /^File is encrypted/i.test(l)) || isEncryptedPdf(bytes);
+  const linearized = lines.some((l) => /^File is linearized/i.test(l)) || /\/Linearized\b/.test(headerText);
   const warnings = lines.filter((l) => /WARNING/i.test(l));
   const errors = lines.filter((l) => !/WARNING/i.test(l) && /error|can't find|unable|invalid|damaged|not a pdf/i.test(l));
   if (run.code !== 0 && errors.length === 0 && warnings.length === 0) {

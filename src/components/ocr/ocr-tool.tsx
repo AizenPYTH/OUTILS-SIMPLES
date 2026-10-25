@@ -226,7 +226,7 @@ export function OcrTool() {
       <div className="space-y-4">
         <FileDropzone onFiles={(f) => f[0] && void load(f[0])} accept="application/pdf,image/jpeg,image/png,image/webp" validate={(f) => (f.size === 0 ? "fichier vide" : f.size > pdfLimits.maxFileSizeBytes ? "fichier trop volumineux" : null)} title="Déposez un PDF scanné ou une image" hint={`PDF, JPG, PNG, WebP · ${formatBytes(pdfLimits.maxFileSizeBytes)} max · ${MAX_OCR_PAGES} pages max`} buttonLabel="Choisir un fichier" testId="ocr-dropzone" />
         <Alert variant="info" title="Premier lancement : téléchargement du moteur">
-          Le moteur Tesseract (≈ 3 Mo) et le modèle de langue (≈ 6 Mo pour le français) sont téléchargés depuis ce site puis gardés en cache par votre navigateur. La reconnaissance prend quelques secondes par page selon votre appareil.
+          Le moteur Tesseract (≈ 4 Mo) et le modèle de langue (≈ 6 Mo pour le français, ≈ 11 Mo pour l&apos;anglais) sont téléchargés depuis ce site puis gardés en cache par votre navigateur. La reconnaissance prend quelques secondes par page selon votre appareil.
         </Alert>
       </div>
     );

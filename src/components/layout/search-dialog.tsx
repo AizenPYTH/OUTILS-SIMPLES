@@ -68,12 +68,11 @@ export function SearchDialog({ variant = "field" }: { variant?: "field" | "icon"
           type="button"
           onClick={() => setOpen(true)}
           className="hidden h-10 min-w-0 flex-1 basis-28 max-w-sm items-center gap-2 rounded-md border border-input bg-surface px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted md:flex"
-          aria-label={t.nav.search}
           data-testid="search-trigger"
         >
           <Search className="size-4" aria-hidden="true" />
           <span className="flex-1 truncate text-left">{t.nav.search}</span>
-          <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground lg:inline">
+          <kbd aria-hidden="true" className="hidden rounded border border-border bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground lg:inline">
             {t.nav.searchShortcutHint}
           </kbd>
         </button>

@@ -51,7 +51,7 @@ export function Segmented<V extends string>({
           >
             <span className="font-medium">{option.label}</span>
             {option.description ? (
-              <span className="text-xs text-muted-foreground">{option.description}</span>
+              <span className={cn("text-xs", active ? "text-foreground/80" : "text-muted-foreground")}>{option.description}</span>
             ) : null}
           </button>
         );
