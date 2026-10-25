@@ -1,0 +1,212 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* -------------------------------------------------------------------------
+   Design tokens — the single source of truth for colors, radii, shadows.
+   Semantic names (background, foreground, primary…) are mapped to Tailwind
+   utilities through @theme inline below.
+   ------------------------------------------------------------------------- */
+:root {
+  /* Design handoff tokens (OUTILIA — Refonte outils et recherche) */
+  --background: #f8f9fc;          /* --bg  */
+  --foreground: #15172b;          /* --tx  */
+  --muted: #f0f1f8;               /* --bg2 */
+  --muted-foreground: #696d82;    /* --mu  (4.9:1 on white) */
+  --surface: #ffffff;             /* --sf  */
+  --surface-foreground: #15172b;
+  --border: #e5e7f0;              /* --bd  */
+  --input: #e5e7f0;
+  --ring: #ededfd;                /* --soft focus ring (3px) */
+
+  --primary: #5146e5;             /* --btn */
+  --primary-hover: #4338ca;       /* --btnh */
+  --primary-foreground: #ffffff;
+  --primary-soft: #edebfd;        /* --soft */
+  --link: #5146e5;                /* --pr  */
+  --accent: #7958f5;              /* --ac  */
+  --accent-soft: #edebfd;
+  --accent-foreground: #3b32b0;
+
+  --success: #12805c;             /* --ok  */
+  --success-soft: #e3f6ee;        /* --okb */
+  --success-foreground: #0f6a4c;
+  --warning: #b7791f;
+  --warning-soft: #fdf3dd;
+  --warning-foreground: #7a4f0a;
+  --destructive: #c0392b;         /* --er  */
+  --destructive-soft: #fceae7;    /* --erb */
+  --destructive-foreground: #ffffff;
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --shadow-sm: 0 1px 2px rgba(21, 23, 43, 0.05), 0 8px 24px -8px rgba(21, 23, 43, 0.1);
+  --shadow-md: 0 1px 2px rgba(21, 23, 43, 0.05), 0 8px 24px -8px rgba(21, 23, 43, 0.1);
+  --shadow-lg: 0 24px 60px -20px rgba(81, 70, 229, 0.28), 0 2px 6px rgba(21, 23, 43, 0.06);
+
+  --header-height: 68px;
+}
+
+.dark {
+  --background: #0d0f1b;
+  --foreground: #ecedf7;
+  --muted: #1c2034;
+  --muted-foreground: #9da1bc;
+  --surface: #161929;
+  --surface-foreground: #ecedf7;
+  --border: #2a2f4a;
+  --input: #2a2f4a;
+  --ring: #26285a;
+
+  --primary: #5146e5;
+  --primary-hover: #6359f0;
+  --primary-foreground: #ffffff;
+  --primary-soft: #26285a;
+  --link: #a9a3ff;
+  --accent: #9b82ff;
+  --accent-soft: #26285a;
+  --accent-foreground: #c9c4ff;
+
+  --success: #4ade9f;
+  --success-soft: #12332a;
+  --success-foreground: #7fe9bd;
+  --warning: #f0b35a;
+  --warning-soft: #3a2d12;
+  --warning-foreground: #f5cf8e;
+  --destructive: #ff8a7a;
+  --destructive-soft: #3a1b19;
+  --destructive-foreground: #15172b;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 24px 60px -20px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-link: var(--link);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-heading), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-signature: var(--font-signature), "Segoe Script", cursive;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --animate-fade-in: fade-in 0.2s ease-out;
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(2px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--header-height) + 1rem);
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px var(--ring);
+  }
+  h1, h2, h3, .font-heading {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+  h1 { font-weight: 800; letter-spacing: -0.025em; }
+  h2, h3 { font-weight: 700; }
+  ::selection {
+    background: var(--primary-soft);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .container-page {
+    width: 100%;
+    margin-inline: auto;
+    max-width: calc(1200px + 2 * 20px);
+    padding-inline: 20px;
+  }
+  @media (min-width: 760px) {
+    .container-page {
+      max-width: calc(1200px + 2 * 40px);
+      padding-inline: 40px;
+    }
+  }
+  .prose-tool {
+    max-width: 68ch;
+  }
+  .prose-tool p + p { margin-top: 0.75rem; }
+  .checkerboard {
+    background-color: var(--muted);
+    background-image:
+      linear-gradient(45deg, var(--border) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--border) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--border) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--border) 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  }
+  .touch-none-important { touch-action: none; }
+}
