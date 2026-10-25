@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ToolPageLayout } from "@/components/tools/tool-page-layout";
-import { ToolRenderer } from "@/components/pdf/tool-renderer";
+import { ToolRenderer } from "@/components/tools/tool-renderer";
 import { getCategoryBySlug, getOperationalTools, getToolByPath, getToolPath } from "@/lib/tools";
 import { buildToolMetadata } from "@/lib/seo";
 

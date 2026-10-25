@@ -67,7 +67,7 @@ export function SearchDialog({ variant = "field" }: { variant?: "field" | "icon"
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="hidden h-10 w-full max-w-sm items-center gap-2 rounded-md border border-input bg-surface px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted md:flex"
+          className="hidden h-10 min-w-0 flex-1 basis-28 max-w-sm items-center gap-2 rounded-md border border-input bg-surface px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted md:flex"
           aria-label={t.nav.search}
           data-testid="search-trigger"
         >

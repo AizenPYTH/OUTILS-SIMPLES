@@ -49,7 +49,8 @@ export function buildContentSecurityPolicy(options: SecurityHeaderOptions): stri
   const adsEnabled = process.env.NEXT_PUBLIC_ADS_ENABLED === "true";
   const analytics = process.env.NEXT_PUBLIC_ANALYTICS_PROVIDER ?? "none";
 
-  const scriptSrc = ["'self'", "'unsafe-inline'", ...(options.scriptSrc ?? [])];
+  // 'wasm-unsafe-eval' lets pdf.js decoders, Tesseract (OCR) and qpdf run as WebAssembly without allowing JS eval.
+  const scriptSrc = ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", ...(options.scriptSrc ?? [])];
   const connectSrc = ["'self'", ...(options.connectSrc ?? [])];
   const frameSrc = ["'none'", ...(options.frameSrc ?? [])];
   const imgSrc = ["'self'", "blob:", "data:", ...(options.imgSrc ?? [])];

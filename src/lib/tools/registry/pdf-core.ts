@@ -1,5 +1,5 @@
 import { pdfLimits } from "@/config/limits";
-import type { ToolDefinition } from "./types";
+import type { ToolDefinition } from "../types";
 
 const PDF_IN = ["application/pdf"];
 const PDF_OUT = ["application/pdf"];
@@ -13,15 +13,9 @@ const singlePdfLimits = {
 const CLIENT_PRIVACY_NOTE =
   "Votre fichier est lu et transformé directement dans votre navigateur grâce à des bibliothèques open source (pdf.js et pdf-lib). Il n'est jamais envoyé sur nos serveurs, ni stocké, ni analysé.";
 
-/**
- * Registry of every tool known to the platform.
- *
- * A tool only becomes public (navigation, directory, sitemap) when
- * `status === "published"`. "planned" entries exist so that search can
- * suggest honest alternatives and so the roadmap is explicit, but they are
- * never rendered as pages.
- */
-export const toolRegistry: readonly ToolDefinition[] = [
+/** Core PDF suite (first release). Shared constants are exported for the other PDF registries. */
+export { PDF_IN, PDF_OUT, singlePdfLimits, CLIENT_PRIVACY_NOTE };
+export const pdfCoreTools: readonly ToolDefinition[] = [
   // ---------------------------------------------------------------- PDF
   {
     id: "pdf-edit",
@@ -712,112 +706,5 @@ export const toolRegistry: readonly ToolDefinition[] = [
       ],
       privacyNote: CLIENT_PRIVACY_NOTE,
     },
-  },
-
-  // ---------------------------------------------------------- Planned (not published)
-  {
-    id: "image-compress",
-    slug: "compresser",
-    category: "images",
-    name: "Compresser une image",
-    shortDescription: "Réduire le poids d'une image JPEG, PNG ou WebP.",
-    description: "",
-    icon: "image",
-    keywords: ["compresser image", "réduire taille photo", "alléger image", "compress image"],
-    seo: { title: "Compresser une image en ligne", description: "" },
-    status: "planned",
-    indexable: false,
-    inputFormats: ["image/jpeg", "image/png", "image/webp"],
-    outputFormats: ["image/jpeg", "image/png", "image/webp"],
-    processing: "client",
-    limits: { maxFileSizeBytes: 50 * 1024 * 1024, maxFileCount: 20 },
-    featureFlags: [],
-    related: [],
-    premium: false,
-    content: { steps: [], limitations: [], faq: [] },
-  },
-  {
-    id: "image-resize",
-    slug: "redimensionner",
-    category: "images",
-    name: "Redimensionner une image",
-    shortDescription: "Changer les dimensions d'une image en conservant les proportions.",
-    description: "",
-    icon: "image",
-    keywords: ["redimensionner image", "resize image", "changer taille image"],
-    seo: { title: "Redimensionner une image en ligne", description: "" },
-    status: "planned",
-    indexable: false,
-    inputFormats: ["image/jpeg", "image/png", "image/webp"],
-    outputFormats: ["image/jpeg", "image/png", "image/webp"],
-    processing: "client",
-    limits: { maxFileSizeBytes: 50 * 1024 * 1024, maxFileCount: 20 },
-    featureFlags: [],
-    related: [],
-    premium: false,
-    content: { steps: [], limitations: [], faq: [] },
-  },
-  {
-    id: "image-convert",
-    slug: "convertir",
-    category: "images",
-    name: "Convertir une image",
-    shortDescription: "Convertir entre JPEG, PNG et WebP.",
-    description: "",
-    icon: "arrow-right-left",
-    keywords: ["convertir image", "png en jpg", "jpg en webp", "convert image"],
-    seo: { title: "Convertir une image en ligne", description: "" },
-    status: "planned",
-    indexable: false,
-    inputFormats: ["image/jpeg", "image/png", "image/webp"],
-    outputFormats: ["image/jpeg", "image/png", "image/webp"],
-    processing: "client",
-    limits: { maxFileSizeBytes: 50 * 1024 * 1024, maxFileCount: 20 },
-    featureFlags: [],
-    related: [],
-    premium: false,
-    content: { steps: [], limitations: [], faq: [] },
-  },
-  {
-    id: "qr-generate",
-    slug: "generer",
-    category: "qr-code",
-    name: "Générer un QR code",
-    shortDescription: "Créer un QR code à partir d'un lien ou d'un texte.",
-    description: "",
-    icon: "qr-code",
-    keywords: ["qr code", "générer qr code", "créer qr code", "qr code gratuit"],
-    seo: { title: "Générer un QR code", description: "" },
-    status: "planned",
-    indexable: false,
-    inputFormats: ["text/plain"],
-    outputFormats: ["image/png", "image/svg+xml"],
-    processing: "client",
-    limits: { maxFileSizeBytes: 0, maxFileCount: 0 },
-    featureFlags: [],
-    related: [],
-    premium: false,
-    content: { steps: [], limitations: [], faq: [] },
-  },
-  {
-    id: "text-count",
-    slug: "compteur-de-mots",
-    category: "texte",
-    name: "Compteur de mots",
-    shortDescription: "Compter les mots, caractères et phrases d'un texte.",
-    description: "",
-    icon: "type",
-    keywords: ["compteur de mots", "nombre de caractères", "word count"],
-    seo: { title: "Compteur de mots en ligne", description: "" },
-    status: "planned",
-    indexable: false,
-    inputFormats: ["text/plain"],
-    outputFormats: [],
-    processing: "client",
-    limits: { maxFileSizeBytes: 0, maxFileCount: 0 },
-    featureFlags: [],
-    related: [],
-    premium: false,
-    content: { steps: [], limitations: [], faq: [] },
   },
 ];

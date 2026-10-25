@@ -260,8 +260,8 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                     data-testid="wm-image-input"
                   />
                 </label>
-                {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
                 {image ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- object URL preview
                   <img
                     src={image.url}
                     alt="Aperçu de l'image du filigrane"

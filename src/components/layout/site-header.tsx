@@ -18,7 +18,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
       <div className="container-page flex h-[var(--header-height)] items-center gap-3">
         <Logo />
-        <nav aria-label="Navigation principale" className="hidden items-center gap-1 lg:flex">
+        <nav aria-label="Navigation principale" className="hidden shrink-0 items-center gap-1 lg:flex">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/outils/">{t.nav.tools}</Link>
           </Button>
@@ -28,17 +28,17 @@ export function SiteHeader() {
             </Button>
           ))}
         </nav>
-        <div className="ml-auto flex flex-1 items-center justify-end gap-1 sm:gap-2">
+        <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2">
           <SearchDialog variant="field" />
           {editorPath ? (
-            <Button size="sm" asChild className="hidden sm:inline-flex">
+            <Button size="sm" asChild className="hidden shrink-0 sm:inline-flex lg:hidden xl:inline-flex">
               <Link href={editorPath}>
                 <SquarePen aria-hidden="true" />
                 {t.nav.pdfEditor}
               </Link>
             </Button>
           ) : null}
-          <div className="hidden items-center lg:flex">
+          <div className="hidden shrink-0 items-center lg:flex">
             <LanguageSelector />
             <ThemeToggle />
           </div>

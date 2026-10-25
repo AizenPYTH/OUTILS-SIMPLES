@@ -15,9 +15,11 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: `pnpm start -p ${port}`,
+    // Run the Next binary directly: through `pnpm start` the server survives the
+    // test run as an orphan and then serves a stale build on the next run.
+    command: `node node_modules/next/dist/bin/next start -p ${port}`,
     url: baseURL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
   },
   projects: [

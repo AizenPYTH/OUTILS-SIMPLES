@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "test-results/**",
     "coverage/**",
     "public/pdfjs/**",
+    "public/ocr/**",
+    "public/qpdf/**",
   ]),
 ]);
 

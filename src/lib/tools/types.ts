@@ -6,14 +6,14 @@
 
 export type ToolCategoryId =
   | "pdf"
+  | "numerisation"
   | "images"
-  | "texte"
-  | "calculatrices"
   | "conversion"
-  | "qr-code"
-  | "productivite"
-  | "ia"
-  | "pro";
+  | "texte"
+  | "developpeur"
+  | "calculatrices"
+  | "codes"
+  | "documents";
 
 export type ToolStatus =
   /** Fully implemented, tested and indexable. */
@@ -47,7 +47,47 @@ export type ToolIconName =
   | "briefcase"
   | "sparkles"
   | "arrow-right-left"
-  | "list-checks";
+  | "list-checks"
+  | "scan"
+  | "camera"
+  | "scan-text"
+  | "file-search"
+  | "images"
+  | "crop"
+  | "hash"
+  | "lock"
+  | "unlock"
+  | "info"
+  | "flip"
+  | "braces"
+  | "diff"
+  | "text-cursor"
+  | "case"
+  | "broom"
+  | "key"
+  | "palette"
+  | "ruler"
+  | "percent"
+  | "calendar"
+  | "link"
+  | "file-code"
+  | "printer"
+  | "grid"
+  | "binary"
+  | "regex"
+  | "clock"
+  | "barcode"
+  | "contrast"
+  | "sun"
+  | "search"
+  | "shield"
+  | "file-check"
+  | "table"
+  | "shuffle"
+  | "list-ordered"
+  | "pilcrow"
+  | "stamp"
+  | "layers";
 
 export interface ToolFaqEntry {
   question: string;

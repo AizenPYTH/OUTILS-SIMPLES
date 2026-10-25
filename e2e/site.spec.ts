@@ -14,7 +14,8 @@ test.describe("site", () => {
     const cards = page.getByTestId("tool-card");
     expect(await cards.count()).toBeGreaterThanOrEqual(13);
     // No planned tool is linked as operational.
-    await expect(page.locator('a[href*="/images/"]')).toHaveCount(0);
+    await expect(page.locator('a[href*="/corriger-un-document-photographie/"]')).toHaveCount(0);
+    await expect(page.locator('a[href*="/documents/"]')).toHaveCount(0);
     await expect(page.getByTestId("consent-banner")).toHaveCount(0);
     const jsonLd = await page.locator('script[type="application/ld+json"]').first().textContent();
     expect(jsonLd).toContain("WebSite");
@@ -23,7 +24,8 @@ test.describe("site", () => {
   test("category chips filter and search finds synonyms", async ({ page }) => {
     await page.goto("/");
     await page.getByTestId("category-chip-pdf").click();
-    await expect(page.getByTestId("tool-grid").first().getByTestId("tool-card")).toHaveCount(13);
+    expect(await page.getByTestId("tool-grid").first().getByTestId("tool-card").count()).toBeGreaterThanOrEqual(13);
+    await expect(page.getByTestId("tool-grid").first()).not.toContainText("Compresser une image");
     const search = page.getByTestId("catalog-search");
     await search.fill("assembler");
     await expect(page.getByTestId("tool-grid").first().getByTestId("tool-card")).toHaveCount(1);
@@ -32,6 +34,21 @@ test.describe("site", () => {
     await expect(page.getByTestId("no-results")).toBeVisible();
     await page.getByRole("button", { name: "Réinitialiser la recherche" }).click();
     await expect(page.getByTestId("no-results")).toHaveCount(0);
+  });
+
+  test("home page has no horizontal overflow", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await page.getByTestId("tool-card").first().waitFor();
+    const measure = () => page.evaluate(() => ({ inner: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+    let widths = await measure();
+    expect(widths.scroll).toBeLessThanOrEqual(widths.inner);
+    if (!isMobile) {
+      for (const width of [1024, 1280, 1440]) {
+        await page.setViewportSize({ width, height: 800 });
+        widths = await measure();
+        expect(widths.scroll, `viewport ${width}`).toBeLessThanOrEqual(widths.inner);
+      }
+    }
   });
 
   test("header search dialog is keyboard accessible", async ({ page, isMobile }) => {
@@ -76,7 +93,8 @@ test.describe("site", () => {
     const sitemap = await (await request.get("/sitemap.xml")).text();
     expect(sitemap).toContain("/pdf/fusionner/");
     expect(sitemap).toContain("/pdf/modifier/");
-    expect(sitemap).not.toContain("/images/");
+    expect(sitemap).toContain("/images/compresser/");
+    expect(sitemap).not.toContain("/corriger-un-document-photographie/");
     expect(sitemap).not.toContain("/outils/");
     const robots = await (await request.get("/robots.txt")).text();
     expect(robots).toContain("Sitemap:");

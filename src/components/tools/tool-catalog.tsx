@@ -154,10 +154,10 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
         </Button>
       </form>
 
-      <div className="grid gap-6 lg:grid-cols-[210px_1fr]">
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[210px_1fr]">
         <nav
           aria-label={t.nav.categories}
-          className="lg:sticky lg:top-[calc(var(--header-height)+16px)] lg:self-start"
+          className="min-w-0 lg:sticky lg:top-[calc(var(--header-height)+16px)] lg:self-start"
         >
           <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 lg:mx-0 lg:flex-col lg:gap-1 lg:overflow-visible lg:px-0 lg:pb-0">
             {categoryButton("all", t.directory.filterAll)}

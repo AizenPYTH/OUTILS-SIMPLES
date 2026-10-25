@@ -11,7 +11,8 @@ describe("security headers", () => {
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("worker-src 'self' blob:");
-    expect(csp).not.toContain("unsafe-eval");
+    expect(csp).toContain("'wasm-unsafe-eval'");
+    expect(csp).not.toContain(" 'unsafe-eval'");
     expect(csp).toContain("upgrade-insecure-requests");
     const headers = buildSecurityHeaders({ isDev: false }).map((h) => h.key);
     expect(headers).toContain("Strict-Transport-Security");

@@ -21,9 +21,11 @@ describe("tool registry", () => {
     expect(issues, JSON.stringify(issues, null, 2)).toEqual([]);
   });
 
-  it("publishes the 13 PDF tools and nothing unfinished", () => {
+  it("publishes the core PDF tools and nothing unfinished", () => {
     const published = getPublishedTools();
-    expect(published.map((t) => t.id).sort()).toEqual(
+    const ids = published.map((t) => t.id);
+    expect(ids.length).toBeGreaterThanOrEqual(30);
+    expect(ids).toEqual(expect.arrayContaining(
       [
         "pdf-add-text",
         "pdf-annotate",
@@ -38,7 +40,7 @@ describe("tool registry", () => {
         "pdf-sign",
         "pdf-split",
         "pdf-watermark",
-      ].sort(),
+      ]),
     );
     expect(
       toolRegistry.filter((t) => t.status === "planned").every((t) => !isToolIndexable(t)),
@@ -48,8 +50,10 @@ describe("tool registry", () => {
   it("builds the documented URL structure", () => {
     expect(getToolPath(getToolByPath("pdf", "fusionner")!)).toBe("/pdf/fusionner/");
     expect(getToolPath(getToolByPath("pdf", "modifier")!)).toBe("/pdf/modifier/");
-    expect(getToolByPath("images", "compresser")?.status).toBe("planned");
-    expect(getActiveCategories().map((c) => c.id)).toEqual(["pdf"]);
+    expect(getToolByPath("images", "compresser")?.status).toBe("published");
+    expect(getToolByPath("numerisation", "ocr")?.status).toBe("published");
+    expect(getToolByPath("numerisation", "corriger-un-document-photographie")?.status).toBe("planned");
+    expect(getActiveCategories().map((c) => c.id)).toEqual(expect.arrayContaining(["pdf", "images", "texte", "developpeur", "codes"]));
   });
 
   it("resolves related tools to published ones only", () => {
@@ -88,7 +92,10 @@ describe("sitemap", () => {
     }
     expect(urls).toContain("http://localhost:3000/");
     expect(urls).toContain("http://localhost:3000/pdf/");
-    expect(urls.some((u) => u.includes("/images/"))).toBe(false);
+    expect(urls).toContain("http://localhost:3000/images/");
+    expect(urls).toContain("http://localhost:3000/numerisation/ocr/");
+    expect(urls.some((u) => u.includes("/corriger-un-document-photographie/"))).toBe(false);
+    expect(urls.some((u) => u.includes("/documents/"))).toBe(false);
     expect(new Set(urls).size).toBe(urls.length);
   });
 });
