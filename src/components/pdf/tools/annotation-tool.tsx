@@ -29,7 +29,7 @@ function makeTool(toolId: string, mode: WorkspaceMode, notice?: string) {
 export const EditorTool = makeTool(
   "pdf-edit",
   "editor",
-  "Les ajouts (texte, dessins, images, signature) sont superposés au document : le texte d'origine n'est pas modifié. L'éditeur s'ouvre en plein écran dès qu'un fichier est chargé.",
+  "« Modifier le texte » remplace un passage existant dans la page quand la police le permet ; les autres outils ajoutent des éléments par-dessus. L'éditeur s'ouvre en plein écran dès qu'un fichier est chargé.",
 );
 export const AnnotateTool = makeTool(
   "pdf-annotate",

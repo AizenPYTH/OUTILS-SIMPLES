@@ -315,3 +315,21 @@ Procédure manuelle (à exécuter sur l'hébergement HTTPS, pas en local HTTP) :
 - Caméra physique, orientation EXIF des photos de téléphone, performance sur mobile bas de gamme.
 - Impression réelle des feuilles (échelle 100 %) et lecture des codes-barres par une douchette.
 - Mémoire et durée sur des documents de 100 Mo riches en images, OCR sur 200 pages.
+
+## 9. Corrections ciblées et simplification du design (après la clôture)
+
+Rapport complet : `docs/RAPPORT_CORRECTIONS.md` ; principes : `docs/DESIGN_PRINCIPES.md` ; édition
+du texte : `docs/EDITION_TEXTE.md`.
+
+| Sujet | Cause réelle trouvée | Correction | Vérification |
+| --- | --- | --- | --- |
+| Éditeur : document flou (écrans haute densité) | Taille CSS du canvas arrondie → rapport pixels/CSS non entier (2,6236 pour 2,625) | Taille CSS = pixels entiers / ratio ; rendu à zoom × densité, plafond 16 Mpx | Mesure Chromium Pixel 7 : 2,6249983 ; tests éditeur |
+| Éditeur : document trop petit | Ajustement à la hauteur | Ajustement à la largeur, plafond 1,3 × hauteur visible, zoom 400 % | 457 → 654 px de large sur 1 366 px ; mobile pleine largeur |
+| Éditeur : texte d'origine non modifiable | Fonction absente | Remplacement de l'opérateur de texte dans le flux (police d'origine ou standard), aperçu depuis le fichier modifié | 10 tests unitaires, 2 parcours e2e |
+| Scanner : page « dégradée N&B » | Filtre « Document » (gris) appliqué par défaut à toute photo | Filtre « Couleur » par défaut, photo d'origine conservée | e2e : pixel vert conservé après capture |
+| Scanner : déclencheur « sans effet » | Page ajoutée derrière le dialogue, sans retour visuel | Aperçu Garder / Reprendre, compteur, Terminer, erreurs explicites | e2e caméra factice desktop + mobile |
+| Accueil / navigation surchargés | En-tête débordant, catalogue complet en accueil | Accueil simplifié, `/outils/` = catalogue, en-tête court, menu tactile | e2e site, a11y, débordement horizontal |
+
+Non testé ici, inchangé par rapport à la section 8 : téléphone réel et caméra physique, Safari et
+Firefox. Les sites de référence demandés pour l'étude de design étaient inaccessibles depuis
+l'environnement (proxy réseau) : aucune analyse de leurs interfaces n'a été inventée.

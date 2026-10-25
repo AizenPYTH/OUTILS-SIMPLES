@@ -4,7 +4,15 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
 
 ## PDF
 
-- **Éditeur** : les ajouts sont superposés ; le texte d'origine n'est ni modifié ni reformaté.
+- **Éditeur, texte existant** (`docs/EDITION_TEXTE.md`) : un passage = un opérateur de texte de la
+  page ; remplacé en place avec la police d'origine quand elle contient les caractères, sinon police
+  standard pour ce passage (signalé). Pas de reflux : le texte qui suit n'est pas décalé. Non
+  modifiables : scans (renvoi OCR), texte invisible, polices Type 3, écriture verticale, texte des
+  XObjects de formulaire / annotations / champs. L'aperçu recharge le document à chaque validation
+  (temps proportionnel à la taille du fichier). Annuler/Rétablir ne couvrent pas ces modifications
+  (retour passage par passage).
+- **Éditeur, ajouts** : superposés au contenu ; rendu à zoom × densité de pixels avec un plafond de
+  16 Mpx par page (au-delà, la densité est réduite : très fort zoom un peu moins net sur écran 3×).
 - **Polices** : 14 polices standard PDF (WinAnsi) pour tout texte dessiné (éditeur, numérotation,
   Markdown/texte → PDF, page de garde). Caractères non latins et emojis remplacés par « ? » avec
   avertissement. Intégration de polices Unicode (fontkit) prévue.
@@ -40,8 +48,11 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
   reconnus ; mots de confiance < 30 ignorés dans le PDF recherchable ; 200 pages maximum.
 - Langues : français et anglais (modèles auto-hébergés, ≈ 6,3 Mo et 10,9 Mo compressés, téléchargés une
   fois par session ; pas encore de mise en cache persistante).
-- Scanner : recadrage rectangulaire ; pour une photo de biais, l'outil de perspective ; résolution de
-  sortie plafonnée (2400 px) ; capture caméra uniquement en HTTPS avec un navigateur récent.
+- Scanner : la photo d'origine est conservée et affichée sans filtre ; recadrage rectangulaire ou
+  redressement par quatre coins (détection automatique supposant une feuille plus claire que le
+  fond) ; résolution de sortie plafonnée (2400 px) ; capture caméra uniquement en HTTPS avec un
+  navigateur récent ; aucune caméra physique ni téléphone réel n'a pu être testé ici (périphérique
+  factice Chromium seulement, procédure manuelle dans `docs/AUDIT_QUALITE.md`).
 - Perspective : détection des coins supposant une feuille plus claire que le fond ; documents pliés ou
   courbés non corrigés localement ; 3000 px maximum ; une page à la fois.
 
@@ -90,7 +101,7 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
 
 ## Qualité / tests
 
-- 136 tests Vitest ; 92 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
+- 146 tests Vitest ; 95 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
   fichiers produits, de la confidentialité réseau, de l'accessibilité (axe-core), de la caméra (périphérique
   factice Chromium) et des gros fichiers (60 Mo traité, 101 Mo et 1 001 pages refusés). Non couverts
   automatiquement : glisser-déposer tactile de dnd-kit, pad de signature dessiné, caméra physique,

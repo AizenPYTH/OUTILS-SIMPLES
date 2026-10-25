@@ -3,8 +3,8 @@ import { PDFDocument } from "pdf-lib";
 import { expectValidPdf, extractPageText, fixture, readDownload, uploadPdf } from "./helpers";
 
 test.describe("catalogue with the extended registry", () => {
-  test("home lists several categories and search understands intents", async ({ page }) => {
-    await page.goto("/");
+  test("catalogue lists several categories and search understands intents", async ({ page }) => {
+    await page.goto("/outils/");
     await expect(page.getByTestId("category-chip-images")).toBeVisible();
     await expect(page.getByTestId("category-chip-numerisation")).toBeVisible();
     const search = page.getByTestId("catalog-search");
@@ -21,7 +21,9 @@ test.describe("PDF extras", () => {
   test("extract text and search", async ({ page }) => {
     await page.goto("/pdf/extraire-le-texte/");
     await uploadPdf(page, "simple-5-pages.pdf");
-    await expect(page.getByTestId("pdf-text-output")).toHaveValue(/Page 3 \/ 5/, { timeout: 30_000 });
+    await expect(page.getByTestId("pdf-text-output")).toHaveValue(/Page 3 \/ 5/, {
+      timeout: 30_000,
+    });
     await page.getByLabel("Rechercher un mot ou une expression").fill("page 4");
     await expect(page.getByTestId("pdf-search")).toContainText("1 occurrence(s)");
   });
@@ -40,7 +42,10 @@ test.describe("PDF extras", () => {
 
   test("images to pdf builds a multipage document", async ({ page }) => {
     await page.goto("/pdf/images-en-pdf/");
-    await page.setInputFiles('[data-testid="image-dropzone-input"]', [fixture("photo-800x600.jpg"), fixture("logo-alpha.png")]);
+    await page.setInputFiles('[data-testid="image-dropzone-input"]', [
+      fixture("photo-800x600.jpg"),
+      fixture("logo-alpha.png"),
+    ]);
     await expect(page.getByTestId("images-item")).toHaveCount(2);
     const download = page.waitForEvent("download");
     await page.getByTestId("images-to-pdf-run").click();
@@ -86,11 +91,17 @@ test.describe("PDF extras", () => {
     await expect(PDFDocument.load(locked)).rejects.toThrow();
 
     await page.goto("/pdf/deverrouiller/");
-    await page.setInputFiles('[data-testid="pdf-input"]', { name: "locked.pdf", mimeType: "application/pdf", buffer: Buffer.from(locked) });
+    await page.setInputFiles('[data-testid="pdf-input"]', {
+      name: "locked.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.from(locked),
+    });
     await page.getByTestId("unlock-pw").fill("wrong");
     await page.getByTestId("unlock-auth").click();
     await page.getByTestId("unlock-run").click();
-    await expect(page.getByTestId("error-panel")).toContainText("Mot de passe incorrect", { timeout: 90_000 });
+    await expect(page.getByTestId("error-panel")).toContainText("Mot de passe incorrect", {
+      timeout: 90_000,
+    });
     await page.getByRole("button", { name: "Réessayer" }).click();
     await page.getByTestId("unlock-pw").fill("secret1");
     const unlockedDownload = page.waitForEvent("download");
@@ -116,11 +127,16 @@ test.describe("PDF extras", () => {
 test.describe("images", () => {
   test("compress a batch and download a zip", async ({ page }) => {
     await page.goto("/images/compresser/");
-    await page.setInputFiles('[data-testid="image-dropzone-input"]', [fixture("photo-800x600.jpg"), fixture("logo-alpha.png")]);
+    await page.setInputFiles('[data-testid="image-dropzone-input"]', [
+      fixture("photo-800x600.jpg"),
+      fixture("logo-alpha.png"),
+    ]);
     await expect(page.getByTestId("batch-item")).toHaveCount(2);
     await page.getByTestId("segmented-image/webp").click();
     await page.getByTestId("batch-run").click();
-    await expect(page.getByTestId("batch-item").nth(1)).toHaveAttribute("data-status", "done", { timeout: 30_000 });
+    await expect(page.getByTestId("batch-item").nth(1)).toHaveAttribute("data-status", "done", {
+      timeout: 30_000,
+    });
     await expect(page.getByTestId("batch-summary")).toContainText("→");
     const download = page.waitForEvent("download");
     await page.getByTestId("batch-download-all").click();
@@ -143,7 +159,9 @@ test.describe("images", () => {
     await page.setInputFiles('[data-testid="image-dropzone-input"]', fixture("logo-alpha.png"));
     await page.getByTestId("segmented-image/jpeg").click();
     await page.getByTestId("batch-run").click();
-    await expect(page.getByTestId("batch-item")).toContainText("transparence aplatie", { timeout: 30_000 });
+    await expect(page.getByTestId("batch-item")).toContainText("transparence aplatie", {
+      timeout: 30_000,
+    });
     const download = page.waitForEvent("download");
     await page.getByTestId("batch-download-all").click();
     expect((await download).suggestedFilename()).toMatch(/\.jpg$/);
@@ -169,7 +187,10 @@ test.describe("images", () => {
 test.describe("scanner and OCR", () => {
   test("scanner builds a PDF from imported photos", async ({ page }) => {
     await page.goto("/numerisation/scanner-un-document/");
-    await page.setInputFiles('[data-testid="scan-dropzone-input"]', [fixture("sheet-perspective.jpg"), fixture("text-french.png")]);
+    await page.setInputFiles('[data-testid="scan-dropzone-input"]', [
+      fixture("sheet-perspective.jpg"),
+      fixture("text-french.png"),
+    ]);
     await expect(page.getByTestId("scan-thumb")).toHaveCount(2);
     await page.getByTestId("scan-rotate").click();
     await page.getByTestId("segmented-bw").click();
@@ -222,7 +243,9 @@ test.describe("text, QR and developer tools", () => {
     await expect(page.getByTestId("json-error")).toContainText("ligne 1, colonne 9");
     await page.getByTestId("json-input-input").fill('{"b":1,"a":[1,2]}');
     await expect(page.getByTestId("json-valid")).toContainText("objet avec 2 clé(s)");
-    await expect(page.getByTestId("json-output-output")).toHaveValue('{\n  "b": 1,\n  "a": [\n    1,\n    2\n  ]\n}');
+    await expect(page.getByTestId("json-output-output")).toHaveValue(
+      '{\n  "b": 1,\n  "a": [\n    1,\n    2\n  ]\n}',
+    );
   });
 
   test("QR generator produces PNG and SVG downloads", async ({ page }) => {
@@ -242,7 +265,10 @@ test.describe("text, QR and developer tools", () => {
 test.describe("lot 2 : perspective, EXIF, filigrane, slug, encodeurs", () => {
   test("perspective tool detects corners and exports a straightened JPG", async ({ page }) => {
     await page.goto("/numerisation/corriger-un-document-photographie/");
-    await page.setInputFiles('[data-testid="perspective-dropzone-input"]', fixture("sheet-perspective.jpg"));
+    await page.setInputFiles(
+      '[data-testid="perspective-dropzone-input"]',
+      fixture("sheet-perspective.jpg"),
+    );
     await expect(page.getByTestId("quad-editor")).toBeVisible();
     await expect(page.getByText(/coins détectés/)).toBeVisible();
     await page.getByTestId("perspective-rotate").click();
@@ -258,7 +284,9 @@ test.describe("lot 2 : perspective, EXIF, filigrane, slug, encodeurs", () => {
     await page.setInputFiles('[data-testid="exif-dropzone-input"]', fixture("photo-800x600.jpg"));
     await expect(page.getByTestId("exif-table")).toBeVisible();
     await page.getByTestId("exif-strip").click();
-    await expect(page.getByTestId("exif-cleaned")).toContainText("Plus aucune métadonnée", { timeout: 30_000 });
+    await expect(page.getByTestId("exif-cleaned")).toContainText("Plus aucune métadonnée", {
+      timeout: 30_000,
+    });
     const download = page.waitForEvent("download");
     await page.getByTestId("exif-download").click();
     expect((await download).suggestedFilename()).toMatch(/sans-metadonnees\.jpg$/);
@@ -266,11 +294,16 @@ test.describe("lot 2 : perspective, EXIF, filigrane, slug, encodeurs", () => {
 
   test("watermark is applied to a batch", async ({ page }) => {
     await page.goto("/images/filigrane/");
-    await page.setInputFiles('[data-testid="image-dropzone-input"]', [fixture("photo-800x600.jpg"), fixture("logo-alpha.png")]);
+    await page.setInputFiles('[data-testid="image-dropzone-input"]', [
+      fixture("photo-800x600.jpg"),
+      fixture("logo-alpha.png"),
+    ]);
     await expect(page.getByTestId("batch-run")).toBeDisabled();
     await page.getByTestId("wm-text").fill("© Test");
     await page.getByTestId("batch-run").click();
-    await expect(page.getByTestId("batch-item").nth(1)).toHaveAttribute("data-status", "done", { timeout: 30_000 });
+    await expect(page.getByTestId("batch-item").nth(1)).toHaveAttribute("data-status", "done", {
+      timeout: 30_000,
+    });
     const download = page.waitForEvent("download");
     await page.getByTestId("batch-download-all").click();
     expect((await download).suggestedFilename()).toMatch(/\.zip$/);
@@ -278,8 +311,12 @@ test.describe("lot 2 : perspective, EXIF, filigrane, slug, encodeurs", () => {
 
   test("slug and encoders work instantly", async ({ page }) => {
     await page.goto("/texte/generateur-de-slug/");
-    await page.getByTestId("slug-input-input").fill("Été 2026 : les 10 meilleurs outils PDF !\nDeuxième ligne");
-    await expect(page.getByTestId("slug-output-output")).toHaveValue("ete-2026-les-10-meilleurs-outils-pdf\ndeuxieme-ligne");
+    await page
+      .getByTestId("slug-input-input")
+      .fill("Été 2026 : les 10 meilleurs outils PDF !\nDeuxième ligne");
+    await expect(page.getByTestId("slug-output-output")).toHaveValue(
+      "ete-2026-les-10-meilleurs-outils-pdf\ndeuxieme-ligne",
+    );
     await page.goto("/developpeur/encoder-decoder-base64/");
     await page.getByTestId("base64-input-input").fill("Café ☕");
     await expect(page.getByTestId("base64-output-output")).toHaveValue("Q2Fmw6kg4piV");
@@ -290,7 +327,9 @@ test.describe("lot 2 : perspective, EXIF, filigrane, slug, encodeurs", () => {
     await expect(page.getByTestId("base64-error")).toBeVisible();
     await page.goto("/developpeur/caracteres-html/");
     await page.getByTestId("html-input-input").fill('<a href="x">Tom & Jerry</a>');
-    await expect(page.getByTestId("html-output-output")).toHaveValue("&lt;a href=&quot;x&quot;&gt;Tom &amp; Jerry&lt;/a&gt;");
+    await expect(page.getByTestId("html-output-output")).toHaveValue(
+      "&lt;a href=&quot;x&quot;&gt;Tom &amp; Jerry&lt;/a&gt;",
+    );
     await page.goto("/developpeur/encoder-decoder-url/");
     await page.getByTestId("url-input-input").fill("été & co");
     await expect(page.getByTestId("url-output-output")).toHaveValue("%C3%A9t%C3%A9%20%26%20co");
@@ -324,9 +363,13 @@ test.describe("lot 2 : liens, images, comparaison, caviardage, Markdown", () => 
 
   test("compare highlights page differences", async ({ page }) => {
     await page.goto("/pdf/comparer-deux-pdf/");
-    await page.locator('[data-testid="compare-a"] [data-testid="pdf-input"]').setInputFiles(fixture("simple-3-pages.pdf"));
+    await page
+      .locator('[data-testid="compare-a"] [data-testid="pdf-input"]')
+      .setInputFiles(fixture("simple-3-pages.pdf"));
     await expect(page.getByTestId("compare-a")).toContainText("texte lu", { timeout: 30_000 });
-    await page.locator('[data-testid="compare-b"] [data-testid="pdf-input"]').setInputFiles(fixture("simple-5-pages.pdf"));
+    await page
+      .locator('[data-testid="compare-b"] [data-testid="pdf-input"]')
+      .setInputFiles(fixture("simple-5-pages.pdf"));
     await expect(page.getByTestId("compare-pages")).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId("stat-grid")).toContainText("Pages comparées5");
     const pages = page.getByTestId("compare-page");
@@ -367,7 +410,9 @@ test.describe("lot 2 : liens, images, comparaison, caviardage, Markdown", () => 
     await page.goto("/documents/markdown-vers-pdf/");
     await page.getByTestId("md-sample").click();
     await page.getByRole("tab", { name: "Aperçu" }).click();
-    await expect(page.getByTestId("md-preview").locator("h1")).toHaveText("Compte rendu de réunion");
+    await expect(page.getByTestId("md-preview").locator("h1")).toHaveText(
+      "Compte rendu de réunion",
+    );
     await page.getByRole("tab", { name: "Markdown" }).click();
     const download = page.waitForEvent("download");
     await page.getByTestId("doc-run").click();
@@ -379,7 +424,9 @@ test.describe("lot 2 : liens, images, comparaison, caviardage, Markdown", () => 
     expect(text).toContain("Compte rendu de réunion");
     expect(text).toContain("Responsable");
     await page.goto("/documents/texte-vers-pdf/");
-    await page.getByTestId("txt-input-input").fill("Première ligne\nDeuxième ligne\n\nNouveau paragraphe");
+    await page
+      .getByTestId("txt-input-input")
+      .fill("Première ligne\nDeuxième ligne\n\nNouveau paragraphe");
     await page.getByTestId("doc-run").click();
     await expect(page.getByTestId("done-panel")).toContainText("1 page", { timeout: 60_000 });
   });
@@ -390,7 +437,9 @@ test.describe("lot 3 : développeur, calculatrices, codes, documents", () => {
     await page.goto("/developpeur/generateur-uuid/");
     const first = await page.getByTestId("uuid-output-output").inputValue();
     expect(first.split("\n")).toHaveLength(5);
-    expect(first.split("\n")[0]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    expect(first.split("\n")[0]).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    );
     await page.getByTestId("uuid-regenerate").click();
     expect(await page.getByTestId("uuid-output-output").inputValue()).not.toBe(first);
 
@@ -400,8 +449,12 @@ test.describe("lot 3 : développeur, calculatrices, codes, documents", () => {
 
     await page.goto("/developpeur/calculer-hash-sha256/");
     await page.getByTestId("hash-input-input").fill("abc");
-    await expect(page.getByTestId("hash-text-sha-256")).toHaveText("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
-    await page.getByTestId("hash-expected").fill("BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD");
+    await expect(page.getByTestId("hash-text-sha-256")).toHaveText(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    );
+    await page
+      .getByTestId("hash-expected")
+      .fill("BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD");
     await expect(page.getByText("correspond", { exact: true })).toBeVisible();
 
     await page.goto("/developpeur/testeur-regex/");
@@ -454,22 +507,32 @@ test.describe("lot 3 : développeur, calculatrices, codes, documents", () => {
     await page.getByTestId("color-input").fill("tomato");
     await expect(page.getByTestId("color-rgb")).toHaveText("rgb(255, 99, 71)");
     await expect(page.getByTestId("color-hsl")).toHaveText("hsl(9, 100%, 64%)");
-    await expect(page.getByTestId("color-contrast")).toContainText("AA grand texte (≥ 3) : insuffisant");
+    await expect(page.getByTestId("color-contrast")).toContainText(
+      "AA grand texte (≥ 3) : insuffisant",
+    );
     await page.getByTestId("color-bg").fill("#000000");
-    await expect(page.getByTestId("color-contrast")).toContainText("AA texte normal (≥ 4,5) : conforme");
+    await expect(page.getByTestId("color-contrast")).toContainText(
+      "AA texte normal (≥ 4,5) : conforme",
+    );
 
     await page.goto("/codes/palette-couleurs-image/");
     await page.setInputFiles('[data-testid="palette-dropzone-input"]', fixture("logo-alpha.png"));
-    await expect(page.getByTestId("palette-list").locator("li").first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("palette-list").locator("li").first()).toBeVisible({
+      timeout: 30_000,
+    });
     expect(await page.getByTestId("palette-list").locator("li").count()).toBeGreaterThanOrEqual(2);
     await expect(page.getByTestId("palette-css-output")).toHaveValue(/--couleur-1: #[0-9a-f]{6};/);
 
     await page.goto("/codes/lire-un-qr-code/");
     await page.setInputFiles('[data-testid="qr-dropzone-input"]', fixture("qr-outilia.png"));
-    await expect(page.getByTestId("qr-text")).toHaveText("https://outilia.fr/aide", { timeout: 30_000 });
+    await expect(page.getByTestId("qr-text")).toHaveText("https://outilia.fr/aide", {
+      timeout: 30_000,
+    });
     await expect(page.getByTestId("qr-result")).toContainText("Lien web");
     await page.setInputFiles('[data-testid="qr-dropzone-input"]', fixture("photo-800x600.jpg"));
-    await expect(page.getByTestId("qr-result")).toContainText("Aucun QR code lisible", { timeout: 30_000 });
+    await expect(page.getByTestId("qr-result")).toContainText("Aucun QR code lisible", {
+      timeout: 30_000,
+    });
   });
 
   test("printable paper, calendar and cover page PDFs", async ({ page }) => {

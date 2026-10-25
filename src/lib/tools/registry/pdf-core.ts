@@ -23,9 +23,9 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
     category: "pdf",
     name: "Modifier un PDF",
     shortDescription:
-      "Ajoutez du texte, des annotations, des formes, des images et une signature sur vos pages PDF.",
+      "Modifiez le texte existant, ajoutez du texte, des annotations, des formes, des images et une signature.",
     description:
-      "L'éditeur PDF d'OUTILIA vous permet d'ajouter du texte, de dessiner à main levée, de surligner, de tracer des formes, d'insérer des images et d'apposer une signature sur n'importe quelle page de votre document. Chaque élément peut être déplacé, redimensionné ou supprimé avant l'export, et le PDF obtenu s'ouvre dans n'importe quel lecteur.",
+      "L'éditeur PDF d'OUTILIA modifie le texte d'origine de vos pages quand le fichier le permet (texte réel, police connue), et vous permet d'ajouter du texte, de dessiner à main levée, de surligner, de tracer des formes, d'insérer des images et d'apposer une signature. Chaque ajout peut être déplacé, redimensionné ou supprimé avant l'export, et le PDF obtenu s'ouvre dans n'importe quel lecteur.",
     icon: "square-pen",
     keywords: [
       "éditer pdf",
@@ -55,21 +55,22 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
     content: {
       steps: [
         "Déposez votre PDF ou cliquez pour le sélectionner.",
-        "Choisissez un outil dans la barre (texte, dessin, surlignage, forme, image, signature) et cliquez sur la page.",
-        "Déplacez, redimensionnez ou supprimez vos ajouts ; utilisez Annuler / Rétablir si besoin.",
+        "Pour corriger un texte existant : outil « Modifier le texte », cliquez sur le passage, tapez le nouveau texte, Entrée. La page est réaffichée à partir du fichier réellement modifié.",
+        "Pour ajouter des éléments : choisissez un outil (ajouter du texte, dessin, surlignage, forme, image, signature) et cliquez sur la page ; déplacez, redimensionnez ou supprimez vos ajouts, Annuler / Rétablir si besoin.",
         "Cliquez sur « Télécharger le PDF » : le fichier est généré localement.",
       ],
       limitations: [
-        "Les ajouts sont superposés au contenu existant. L'éditeur ne modifie pas le texte d'origine du document (il ne le remplace ni ne le reformate) : pour masquer un passage, vous pouvez le couvrir d'un rectangle, mais le texte sous-jacent reste présent dans le fichier.",
-        "Les documents scannés sont traités comme des images : aucune reconnaissance de caractères (OCR) n'est effectuée.",
-        "Les polices disponibles sont les polices standard PDF (Helvetica, Times, Courier). Les caractères latins accentués sont pris en charge ; les alphabets non latins et les emojis ne le sont pas.",
+        "Modification du texte existant : elle remplace le passage (l'opérateur de texte) dans le contenu de la page, sans rectangle blanc. Le passage est réécrit avec sa police d'origine lorsque tous les caractères y existent ; sinon une police standard proche est utilisée pour ce passage (apparence différente). Le texte qui suit sur la même ligne n'est pas décalé : un texte plus long peut chevaucher la suite.",
+        "Un passage correspond à un bloc tel que le producteur du PDF l'a écrit : parfois un mot, parfois une ligne. Les polices Type 3, l'écriture verticale et le texte invisible (couche OCR) ne sont pas modifiables ; le texte des formulaires et des annotations non plus.",
+        "Les documents scannés sont des images : rien à modifier sans reconnaissance de caractères. L'éditeur le signale et renvoie vers l'outil OCR.",
+        "Les polices disponibles pour le texte ajouté sont les polices standard PDF (Helvetica, Times, Courier). Les caractères latins accentués sont pris en charge ; les alphabets non latins et les emojis ne le sont pas.",
         "Les fichiers protégés par mot de passe doivent être déverrouillés avant utilisation.",
       ],
       faq: [
         {
           question: "Puis-je modifier le texte existant d'un PDF ?",
           answer:
-            "Non. Un PDF ne stocke pas le texte comme un traitement de texte : modifier fidèlement le texte d'origine en conservant la mise en page nécessite un moteur spécialisé. OUTILIA ajoute de nouveaux éléments par-dessus le document et vous indique clairement cette limite plutôt que de prétendre remplacer le texte.",
+            "Oui, dans les cas pris en charge : le texte doit être du vrai texte (pas un scan) avec une police lisible par le navigateur. L'éditeur remplace alors le passage dans le contenu de la page, avec la même police quand elle contient tous les caractères saisis, puis réaffiche la page à partir du fichier modifié. Il ne reformate pas le paragraphe : le texte qui suit ne bouge pas, et un passage plus long peut chevaucher la suite. Pour un document scanné, passez d'abord par l'outil OCR.",
         },
         {
           question: "Le PDF modifié est-il compatible avec tous les lecteurs ?",

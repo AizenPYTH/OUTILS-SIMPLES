@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolIcon } from "@/components/tools/tool-icon";
@@ -40,6 +40,7 @@ function suggestAlternatives(query: string): ToolDefinition[] {
 
 export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategory["id"] }) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const urlQuery = searchParams.get("q") ?? "";
   const [query, setQuery] = React.useState(urlQuery);
@@ -74,13 +75,13 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
     e.preventDefault();
     const params = new URLSearchParams();
     if (trimmed) params.set("q", trimmed);
-    router.replace(trimmed ? `/?${params.toString()}` : "/", { scroll: false });
+    router.replace(trimmed ? `${pathname}?${params.toString()}` : pathname, { scroll: false });
   };
 
   const reset = () => {
     setQuery("");
     setCategory("all");
-    router.replace("/", { scroll: false });
+    router.replace(pathname, { scroll: false });
     inputRef.current?.focus();
   };
 
@@ -130,8 +131,8 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={`Rechercher parmi ${publishedTools.length} outils (ex. fusionner, signer, compresser)…`}
-          className="h-[52px] w-full rounded-[16px] border border-border bg-surface pl-12 pr-24 text-base shadow-lg outline-hidden transition-colors placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-ring"
+          placeholder={t.home.searchPlaceholder(publishedTools.length)}
+          className="h-[52px] w-full rounded-[16px] border border-border bg-surface pl-12 pr-[116px] text-base shadow-md outline-hidden transition-colors placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-ring"
           autoComplete="off"
           aria-controls={resultsId}
           data-testid="catalog-search"
@@ -141,7 +142,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
             type="button"
             onClick={() => setQuery("")}
             aria-label="Effacer la recherche"
-            className="absolute right-[88px] top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted"
+            className="absolute right-[100px] top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted"
           >
             <X className="size-4" aria-hidden="true" />
           </button>
@@ -150,7 +151,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
           type="submit"
           className="absolute right-1.5 top-1/2 h-10 -translate-y-1/2 rounded-[12px] px-4"
         >
-          Rechercher
+          {t.home.searchButton}
         </Button>
       </form>
 
@@ -186,7 +187,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
           ) : null}
         </nav>
 
-        <div id={resultsId} className="min-w-0 space-y-10" aria-live="polite">
+        <div id={resultsId} className="min-w-0 space-y-9" aria-live="polite">
           {isFiltering ? (
             results.length > 0 ? (
               <section aria-labelledby="results-heading">
@@ -224,18 +225,6 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
             )
           ) : (
             <>
-              <section aria-labelledby="popular-heading">
-                <h2 id="popular-heading" className="mb-4 text-lg">
-                  {t.home.featuredTitle}
-                </h2>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {publishedTools
-                    .filter((x) => x.featured)
-                    .map((tool) => (
-                      <ToolCard key={tool.id} tool={tool} featured />
-                    ))}
-                </div>
-              </section>
               {activeCategories.map((c) => {
                 const tools = publishedTools.filter((x) => x.category === c.id);
                 const isExpanded = expanded[c.id] ?? false;
@@ -278,12 +267,12 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
 function ToolGrid({ tools }: { tools: ToolDefinition[] }) {
   return (
     <ul
-      className="grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"
+      className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"
       data-testid="tool-grid"
     >
       {tools.map((tool) => (
         <li key={tool.id}>
-          <ToolCard tool={tool} compact />
+          <ToolCard tool={tool} />
         </li>
       ))}
     </ul>

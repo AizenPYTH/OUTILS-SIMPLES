@@ -8,42 +8,29 @@ import { ToolIcon } from "./tool-icon";
 interface ToolCardProps {
   tool: ToolDefinition;
   className?: string;
-  /** Compact list card (icon 40, padding 16) — default. */
+  /** Kept for callers; every card now shares the same layout (docs/DESIGN_PRINCIPES.md §3.4). */
   compact?: boolean;
-  /** Popular card (icon 46, padding 20, filled primary icon). */
   featured?: boolean;
 }
 
-export function ToolCard({ tool, className, featured = false }: ToolCardProps) {
+/** The single card model: icon tile, name, two-line description. */
+export function ToolCard({ tool, className }: ToolCardProps) {
   return (
     <Link
       href={getToolPath(tool)}
       className={cn(
-        "group relative flex h-full gap-3.5 border border-border bg-surface transition-[transform,border-color,box-shadow] duration-200 hover:-translate-y-[3px] hover:border-primary hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary focus-visible:ring-[3px] focus-visible:ring-ring motion-reduce:hover:translate-y-0",
-        featured ? "flex-col rounded-[16px] p-5" : "items-start rounded-[14px] p-4",
+        "group relative flex h-full items-start gap-3.5 rounded-[14px] border border-border bg-surface p-4 transition-[border-color,box-shadow] duration-150 hover:border-primary hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
         className,
       )}
       data-testid="tool-card"
       data-tool-id={tool.id}
     >
-      <span
-        className={cn(
-          "flex shrink-0 items-center justify-center rounded-[10px]",
-          featured
-            ? "size-12 bg-primary text-primary-foreground"
-            : "size-10 bg-primary-soft text-link",
-        )}
-      >
-        <ToolIcon name={tool.icon} className={featured ? "size-6" : "size-5"} strokeWidth={1.7} />
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-primary-soft text-link">
+        <ToolIcon name={tool.icon} className="size-5" strokeWidth={1.7} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
-          <span
-            className={cn(
-              "font-semibold leading-snug text-foreground",
-              featured ? "text-base" : "text-[15px]",
-            )}
-          >
+          <span className="text-[15px] font-semibold leading-snug text-foreground">
             {tool.name}
           </span>
           {tool.status === "beta" ? <Badge variant="warning">{t.tool.betaBadge}</Badge> : null}

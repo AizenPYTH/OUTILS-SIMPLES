@@ -3,10 +3,10 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, SquarePen } from "lucide-react";
+import { LayoutGrid, Menu, SquarePen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { getCategoryPath, type ToolCategory } from "@/lib/tools";
+import { getCategoryPath, getToolsByCategory, type ToolCategory } from "@/lib/tools";
 import { t } from "@/lib/i18n";
 import { ToolIcon } from "@/components/tools/tool-icon";
 import { LanguageSelector } from "./language-selector";
@@ -17,6 +17,7 @@ interface MobileNavProps {
   editorPath: string | null;
 }
 
+/** Touch menu: 44px rows, the categories with their tool count, then the site links. */
 export function MobileNav({ categories, editorPath }: MobileNavProps) {
   const [open, setOpen] = React.useState(false);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
@@ -29,14 +30,15 @@ export function MobileNav({ categories, editorPath }: MobileNavProps) {
   }
 
   const links = [
-    { href: "/outils/", label: t.nav.tools },
     { href: "/guides/", label: t.nav.guides },
     { href: "/a-propos/", label: t.nav.about },
     { href: "/contact/", label: t.nav.contact },
   ];
+  const row =
+    "flex min-h-11 items-center gap-3 rounded-md px-2 py-2 text-[15px] font-medium hover:bg-muted";
 
   return (
-    <div className="lg:hidden">
+    <div className="md:hidden">
       <Button
         ref={triggerRef}
         variant="ghost"
@@ -50,7 +52,7 @@ export function MobileNav({ categories, editorPath }: MobileNavProps) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           size="sm"
-          className="left-auto right-0 top-0 h-dvh max-h-none w-[min(20rem,calc(100%-2rem))] translate-x-0 translate-y-0 rounded-none border-l p-5 pt-14"
+          className="left-auto right-0 top-0 h-dvh max-h-none w-[min(20rem,calc(100%-2rem))] translate-x-0 translate-y-0 overflow-y-auto rounded-none border-l p-5 pt-14"
           onCloseAutoFocus={(event) => {
             event.preventDefault();
             triggerRef.current?.focus();
@@ -58,40 +60,45 @@ export function MobileNav({ categories, editorPath }: MobileNavProps) {
         >
           <DialogTitle className="sr-only">{t.common.menu}</DialogTitle>
           <DialogDescription className="sr-only">{t.nav.categories}</DialogDescription>
-          <nav aria-label={t.common.menu} className="flex flex-col gap-6">
-            {editorPath ? (
-              <Button asChild size="lg" className="w-full">
-                <Link href={editorPath}>
-                  <SquarePen aria-hidden="true" />
-                  {t.nav.pdfEditor}
+          <nav aria-label={t.common.menu} className="flex flex-col gap-5">
+            <ul className="flex flex-col">
+              <li>
+                <Link href="/outils/" className={row} data-testid="mobile-nav-all-tools">
+                  <LayoutGrid className="size-4 text-muted-foreground" aria-hidden="true" />
+                  {t.nav.tools}
                 </Link>
-              </Button>
-            ) : null}
+              </li>
+              {editorPath ? (
+                <li>
+                  <Link href={editorPath} className={row}>
+                    <SquarePen className="size-4 text-muted-foreground" aria-hidden="true" />
+                    {t.nav.pdfEditor}
+                  </Link>
+                </li>
+              ) : null}
+            </ul>
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {t.nav.categories}
               </p>
               <ul className="flex flex-col">
                 {categories.map((category) => (
                   <li key={category.id}>
-                    <Link
-                      href={getCategoryPath(category)}
-                      className="flex items-center gap-3 rounded-md px-2 py-2.5 text-sm font-medium hover:bg-muted"
-                    >
+                    <Link href={getCategoryPath(category)} className={row}>
                       <ToolIcon name={category.icon} className="size-4 text-muted-foreground" />
-                      {category.name}
+                      <span className="flex-1">{category.shortName}</span>
+                      <span className="rounded-full bg-muted px-1.5 text-[11px] tabular-nums text-muted-foreground">
+                        {getToolsByCategory(category.id).length}
+                      </span>
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
-            <ul className="flex flex-col border-t border-border pt-4">
+            <ul className="flex flex-col border-t border-border pt-3">
               {links.map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="block rounded-md px-2 py-2.5 text-sm font-medium hover:bg-muted"
-                  >
+                  <Link href={link.href} className={row}>
                     {link.label}
                   </Link>
                 </li>

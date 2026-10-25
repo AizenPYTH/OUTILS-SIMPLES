@@ -10,6 +10,7 @@ import {
   PenLine,
   Pencil,
   Square,
+  TextCursorInput,
   Type,
   Underline,
 } from "lucide-react";
@@ -18,6 +19,7 @@ import { toolLabels, type WorkspaceTool } from "./types";
 
 const icons: Record<WorkspaceTool, React.ComponentType<{ className?: string }>> = {
   select: MousePointer2,
+  editText: TextCursorInput,
   text: Type,
   comment: MessageSquare,
   pen: Pencil,

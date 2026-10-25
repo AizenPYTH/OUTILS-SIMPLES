@@ -85,6 +85,16 @@ Variantes du flux pour les autres familles :
 - Export : `applyAnnotations` → nouveau PDF ; les annotations sont aplaties dans le contenu (pas d'objets
   `/Annot` natifs), ce qui est documenté sur les pages concernées.
 
+## Édition du texte existant
+
+`src/lib/pdf/content/tokenizer.ts` (tokenizer de flux de contenu avec plages d'octets, pur),
+`src/lib/pdf/text-edit/extract-runs.ts` (rejoue la liste d'opérateurs pdf.js pour localiser chaque
+opérateur de texte de la page et reconstituer la table caractère → code de sa police),
+`src/lib/pdf/text-edit/apply.ts` (remplace l'opérateur en place avec pdf-lib : police d'origine si
+possible, sinon police standard pour ce seul passage), `src/components/pdf/workspace/text-edit-layer.tsx`
+(couche cliquable + champ en place). L'aperçu est rendu à partir du document réellement modifié.
+Détails et limites : `docs/EDITION_TEXTE.md`.
+
 ## Frontières de sécurité
 
 - **CSP statique** (`src/config/security.ts`) : `default-src 'self'`, `object-src 'none'`,

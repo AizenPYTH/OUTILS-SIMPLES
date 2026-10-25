@@ -39,6 +39,19 @@
 - [x] `pnpm typecheck` · `pnpm lint` · `pnpm test` (121) · `pnpm build` (96 pages) · `pnpm test:e2e`
       (56 parcours × desktop + mobile)
 
+## Corrections ciblées et simplification du design ✅
+
+- [x] Principes de design écrits avant modification (`docs/DESIGN_PRINCIPES.md`) ; sites de référence
+      inaccessibles depuis l'environnement, signalé sans analyse inventée
+- [x] Accueil simplifié, `/outils/` = catalogue, en-tête court, menu tactile, carte unique, pages d'outil
+      orientées action
+- [x] Éditeur : netteté (ratio exact, zoom × densité), ajustement à la largeur, zoom 400 %
+- [x] Éditeur : « Modifier le texte » (remplacement réel dans le flux, police d'origine ou standard,
+      aperçu depuis le fichier modifié, OCR proposé pour les scans) — `docs/EDITION_TEXTE.md`
+- [x] Scanner : photo d'origine conservée (filtre Couleur par défaut), aperçu Garder / Reprendre,
+      compteur, erreurs explicites, Redresser (quatre coins)
+- [x] Rapport : `docs/RAPPORT_CORRECTIONS.md`
+
 ## Reste à faire
 
 - [ ] Identité légale, domaine, `NEXT_PUBLIC_SITE_URL`, Search Console (propriétaire)

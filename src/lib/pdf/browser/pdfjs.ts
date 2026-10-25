@@ -52,6 +52,8 @@ export async function openPdf(bytes: Uint8Array): Promise<OpenedPdf> {
     iccUrl: `${PDFJS_ASSET_BASE}iccs/`,
     disableAutoFetch: true,
     verbosity: 0,
+    // Exposes each simple font's encoding (glyph names by code) to the text editor.
+    fontExtraProperties: true,
   });
   let doc: PDFDocumentProxy;
   try {
@@ -90,10 +92,53 @@ export interface RenderOptions {
   /** Extra rotation added to the page's own /Rotate (thumbnails previewing a rotation). */
   extraRotation?: number;
   signal?: AbortSignal;
+  /**
+   * Upper bound on the backing-store pixel count. Above it the device pixel
+   * ratio is reduced (never below 1) so a 400 % zoom on a 3× screen cannot
+   * allocate hundreds of megabytes. 16 Mpx is below every browser's canvas limit.
+   */
+  maxPixels?: number;
 }
 
 export interface RenderOutcome {
   viewport: PageViewport;
+  /** Backing-store pixels per CSS pixel actually used. */
+  pixelRatio: number;
+}
+
+export const DEFAULT_MAX_RENDER_PIXELS = 16_000_000;
+
+/**
+ * Backing-store ratio for a CSS-pixel viewport: the device pixel ratio, capped
+ * so the canvas stays under `maxPixels`, never below 1.
+ */
+export function effectivePixelRatio(
+  cssWidth: number,
+  cssHeight: number,
+  devicePixelRatio: number,
+  maxPixels = DEFAULT_MAX_RENDER_PIXELS,
+): number {
+  const dpr = Math.max(1, devicePixelRatio || 1);
+  const area = cssWidth * cssHeight;
+  if (area <= 0) return dpr;
+  return Math.max(1, Math.min(dpr, Math.sqrt(maxPixels / area)));
+}
+
+/**
+ * Size of the canvas for a CSS viewport: the backing store is a whole number
+ * of pixels and the CSS size is derived from it (`backing / ratio`), so the
+ * browser scales by an exact factor. Rounding the CSS size instead (the
+ * previous behaviour) gave ratios such as 913/348 = 2.6236 on a 2.625× screen,
+ * i.e. a resampling pass that blurred every glyph.
+ */
+export function canvasSizeFor(
+  cssWidth: number,
+  cssHeight: number,
+  ratio: number,
+): { width: number; height: number; cssWidth: number; cssHeight: number } {
+  const width = Math.max(1, Math.round(cssWidth * ratio));
+  const height = Math.max(1, Math.round(cssHeight * ratio));
+  return { width, height, cssWidth: width / ratio, cssHeight: height / ratio };
 }
 
 /**
@@ -114,14 +159,29 @@ export async function renderPageToCanvas(
   }
   const rotation = (page.rotate + (options.extraRotation ?? 0) + 360) % 360;
   const viewport = page.getViewport({ scale: options.scale, rotation });
-  const ratio = Math.min(typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1, 3);
-  canvas.width = Math.floor(viewport.width * ratio);
-  canvas.height = Math.floor(viewport.height * ratio);
-  canvas.style.width = `${Math.floor(viewport.width)}px`;
-  canvas.style.height = `${Math.floor(viewport.height)}px`;
-  const renderViewport =
-    ratio === 1 ? viewport : page.getViewport({ scale: options.scale * ratio, rotation });
-  const task = page.render({ canvas, viewport: renderViewport, intent: "display" });
+  const ratio = effectivePixelRatio(
+    viewport.width,
+    viewport.height,
+    typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1,
+    options.maxPixels,
+  );
+  const size = canvasSizeFor(viewport.width, viewport.height, ratio);
+  canvas.width = size.width;
+  canvas.height = size.height;
+  canvas.style.width = `${size.cssWidth}px`;
+  canvas.style.height = `${size.cssHeight}px`;
+  // Render exactly into the backing store (the viewport scaled by the ratio
+  // differs from it by less than a pixel; the transform absorbs that).
+  const renderViewport = page.getViewport({
+    scale: options.scale * ratio,
+    rotation,
+  });
+  const task = page.render({
+    canvas,
+    viewport: renderViewport,
+    intent: "display",
+    background: "#ffffff",
+  });
   const onAbort = () => task.cancel();
   options.signal?.addEventListener("abort", onAbort, { once: true });
   try {
@@ -131,13 +191,13 @@ export async function renderPageToCanvas(
       options.signal?.aborted ||
       (error instanceof Error && error.name === "RenderingCancelledException")
     ) {
-      return { viewport };
+      return { viewport, pixelRatio: ratio };
     }
     throw toPdfError(error, "RENDER_FAILED");
   } finally {
     options.signal?.removeEventListener("abort", onAbort);
   }
-  return { viewport };
+  return { viewport, pixelRatio: ratio };
 }
 
 /** Scale that fits a page of (w, h) points into a box of (maxW, maxH) CSS px. */

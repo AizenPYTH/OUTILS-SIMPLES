@@ -19,9 +19,10 @@ interface ToolPageLayoutProps {
 }
 
 /**
- * Server-rendered template for every tool page: breadcrumb, H1, description,
- * the functional tool (children), steps, limitations, privacy, FAQ, related
- * tools. Content comes from the registry so each page is unique.
+ * Server-rendered template for every tool page. The action comes first:
+ * breadcrumb, a compact H1 and one-line summary, then the tool itself. The
+ * full description, steps, limitations, privacy, FAQ and related tools follow
+ * (docs/DESIGN_PRINCIPES.md §4, "Pages d'outil"). Content comes from the registry.
  */
 export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps) {
   const related = getRelatedTools(tool);
@@ -29,7 +30,7 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
   const faqJsonLd = buildFaqJsonLd(tool);
 
   return (
-    <div className="container-page py-6 sm:py-8">
+    <div className="container-page py-5 sm:py-7">
       <JsonLd data={buildToolJsonLd(tool)} />
       {faqJsonLd ? <JsonLd data={faqJsonLd} /> : null}
       <Breadcrumbs
@@ -39,25 +40,34 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
           { name: tool.name, path: getToolPath(tool) },
         ]}
       />
-      <div className="mx-auto mt-6 max-w-3xl text-center">
-        <div className="mb-3 flex flex-wrap items-center justify-center gap-2">
-          <Badge variant="success">
-            <ShieldCheck aria-hidden="true" />{" "}
-            {tool.processing === "client" ? t.tool.processingLocal : t.tool.processingServer}
-          </Badge>
-          <Badge variant="neutral">{t.tool.freeBadge}</Badge>
-          {tool.status === "beta" ? <Badge variant="warning">{t.tool.betaBadge}</Badge> : null}
-        </div>
-        <h1 className="text-[clamp(32px,4.4vw,52px)] leading-[1.05]">{tool.name}</h1>
-        <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground sm:text-lg">
-          {tool.description}
+      <div className="mt-4 max-w-3xl">
+        <h1 className="text-[clamp(26px,3.4vw,38px)] leading-[1.1]">{tool.name}</h1>
+        <p className="mt-2 text-[15px] text-muted-foreground sm:text-base">
+          {tool.shortDescription}
         </p>
       </div>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="mt-5 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
         <div className="min-w-0 space-y-12">
           <section aria-label={tool.name} data-testid="tool-workspace">
             {children}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Badge variant="success">
+                <ShieldCheck aria-hidden="true" />{" "}
+                {tool.processing === "client" ? t.tool.processingLocal : t.tool.processingServer}
+              </Badge>
+              <Badge variant="neutral">{t.tool.freeBadge}</Badge>
+              {tool.status === "beta" ? <Badge variant="warning">{t.tool.betaBadge}</Badge> : null}
+            </div>
+          </section>
+
+          <section aria-labelledby="about-heading" className="prose-tool">
+            <h2 id="about-heading" className="text-2xl">
+              {t.tool.about}
+            </h2>
+            <p className="mt-3 text-[15px] leading-relaxed text-foreground/90">
+              {tool.description}
+            </p>
           </section>
 
           <section aria-labelledby="howto-heading" className="prose-tool">
@@ -157,7 +167,7 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
               <ul className="space-y-2.5">
                 {related.map((r) => (
                   <li key={r.id}>
-                    <ToolCard tool={r} compact />
+                    <ToolCard tool={r} />
                   </li>
                 ))}
               </ul>

@@ -2,7 +2,7 @@
  * Generates synthetic test PDFs (no personal data) into tests/fixtures.
  * Run with: pnpm fixtures
  */
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { PDFDocument, StandardFonts, rgb, degrees, PDFName } from "pdf-lib";
@@ -166,6 +166,13 @@ async function main() {
       "base64",
     ),
   );
+  // Image-only page (what a scanner app produces): no text operator at all.
+  {
+    const doc = await PDFDocument.create();
+    const png = await doc.embedPng(await readFile(path.join(outDir, "logo-alpha.png")));
+    doc.addPage([595, 842]).drawImage(png, { x: 40, y: 60, width: 515, height: 720 });
+    files["scan-image-only.pdf"] = await doc.save();
+  }
   for (const [name, bytes] of Object.entries(files)) {
     await writeFile(path.join(outDir, name), bytes);
     console.log(`wrote ${name} (${bytes.byteLength} bytes)`);

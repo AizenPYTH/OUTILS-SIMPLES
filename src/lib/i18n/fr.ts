@@ -68,12 +68,16 @@ export const fr = {
     guides: "Guides",
   },
   home: {
-    heroTitle: "Des outils en ligne simples, qui respectent vos fichiers.",
+    heroTitle: "Des outils simples pour vos fichiers",
     heroSubtitle:
-      "Fusionnez, divisez, compressez, annotez et signez vos PDF directement dans votre navigateur. Rien n'est envoyé sur un serveur.",
+      "PDF, images, numérisation, texte : tout est traité dans votre navigateur, sans envoi sur un serveur et sans inscription.",
     heroCta: "Voir tous les outils",
+    searchPlaceholder: (n: number) =>
+      `Rechercher parmi ${n} outils (ex. fusionner, signer, compresser)…`,
+    searchButton: "Rechercher",
+    allToolsLink: (n: number) => `Voir les ${n} outils`,
     heroSecondaryCta: "Ouvrir l'éditeur PDF",
-    featuredTitle: "Outils les plus utilisés",
+    featuredTitle: "Outils populaires",
     categoriesTitle: "Par catégorie",
     categoriesSubtitle:
       "La suite PDF est disponible dès aujourd'hui. Les autres catégories sont en préparation.",
@@ -95,6 +99,11 @@ export const fr = {
   directory: {
     title: "Tous les outils",
     subtitle: "Recherchez par nom, besoin ou mot-clé, ou filtrez par catégorie.",
+    subtitleWithCount: (n: number) =>
+      `${n} outils gratuits, traités dans votre navigateur. Recherchez par nom ou besoin, ou filtrez par catégorie.`,
+    seoTitle: "Tous les outils en ligne gratuits : PDF, images, OCR, texte",
+    seoDescription:
+      "Le catalogue complet d'OUTILIA : outils PDF, images, numérisation et OCR, texte, développeur, calculatrices, codes et documents. Traitement local, sans inscription.",
     filterAll: "Tous",
     resultsCount: (n: number) => (n === 1 ? "1 outil" : `${n} outils`),
     noResultsTitle: "Aucun outil ne correspond à votre recherche",
@@ -107,6 +116,7 @@ export const fr = {
     categoryToolsTitle: (name: string) => `Outils ${name}`,
   },
   tool: {
+    about: "À propos de cet outil",
     howTo: "Comment utiliser cet outil",
     limitations: "Limites à connaître",
     privacy: "Confidentialité et traitement des fichiers",

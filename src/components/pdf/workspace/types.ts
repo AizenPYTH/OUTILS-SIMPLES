@@ -5,6 +5,7 @@ export type WorkspaceMode = "editor" | "annotate" | "text" | "sign";
 
 export type WorkspaceTool =
   | "select"
+  | "editText"
   | "text"
   | "comment"
   | "pen"
@@ -17,7 +18,18 @@ export type WorkspaceTool =
   | "signature";
 
 export const modeTools: Record<WorkspaceMode, WorkspaceTool[]> = {
-  editor: ["select", "text", "pen", "highlight", "rect", "ellipse", "arrow", "image", "signature"],
+  editor: [
+    "select",
+    "editText",
+    "text",
+    "pen",
+    "highlight",
+    "rect",
+    "ellipse",
+    "arrow",
+    "image",
+    "signature",
+  ],
   annotate: ["select", "highlight", "underline", "pen", "comment", "rect", "ellipse", "arrow"],
   text: ["select", "text"],
   sign: ["select", "signature", "text"],
@@ -52,7 +64,8 @@ export const COMMENT_BACKGROUND: RgbColor = { r: 1, g: 0.97, b: 0.75 };
 
 export const toolLabels: Record<WorkspaceTool, string> = {
   select: "Sélection",
-  text: "Texte",
+  editText: "Modifier le texte",
+  text: "Ajouter du texte",
   comment: "Commentaire",
   pen: "Dessin",
   highlight: "Surligner",
@@ -66,6 +79,8 @@ export const toolLabels: Record<WorkspaceTool, string> = {
 
 export const toolHints: Record<WorkspaceTool, string> = {
   select: "Cliquez sur un élément pour le déplacer, le redimensionner ou le supprimer.",
+  editText:
+    "Cliquez sur un passage du document pour remplacer son texte (même police quand c'est possible).",
   text: "Cliquez sur la page à l'endroit où placer le texte, puis saisissez-le.",
   comment: "Cliquez sur la page pour ajouter une note sur fond jaune.",
   pen: "Dessinez à main levée sur la page.",

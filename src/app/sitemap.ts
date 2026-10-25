@@ -5,6 +5,7 @@ import { guides } from "@/lib/content/guides";
 
 export const staticPublicPaths = [
   "/",
+  "/outils/",
   "/guides/",
   "/a-propos/",
   "/contact/",
@@ -21,8 +22,8 @@ export function buildSitemapEntries(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = staticPublicPaths.map((path) => ({
     url: absoluteUrl(path),
     lastModified,
-    changeFrequency: path === "/" ? "weekly" : "monthly",
-    priority: path === "/" ? 1 : 0.4,
+    changeFrequency: path === "/" || path === "/outils/" ? "weekly" : "monthly",
+    priority: path === "/" ? 1 : path === "/outils/" ? 0.9 : 0.4,
   }));
   for (const category of getActiveCategories()) {
     entries.push({

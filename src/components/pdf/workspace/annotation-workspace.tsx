@@ -27,7 +27,17 @@ import { LogoMark } from "@/components/layout/logo";
 import type { LoadedPdf } from "@/components/pdf/hooks/use-pdf-document";
 import { useOperation } from "@/components/pdf/hooks/use-operation";
 import { downloadPdf } from "@/components/pdf/shared/result-utils";
-import { fitScale, renderPageToCanvas, visualSize } from "@/lib/pdf/browser/pdfjs";
+import {
+  fitScale,
+  openPdf,
+  renderPageToCanvas,
+  visualSize,
+  type OpenedPdf,
+} from "@/lib/pdf/browser/pdfjs";
+import { applyTextEdits } from "@/lib/pdf/text-edit/apply";
+import { extractTextRuns } from "@/lib/pdf/text-edit/extract-runs";
+import { getPageContent } from "@/lib/pdf/text-edit/page-content";
+import type { PageTextStatus, TextEdit, TextRun } from "@/lib/pdf/text-edit/types";
 import { measureImage, readImageFile } from "@/lib/pdf/browser/read-file";
 import { applyAnnotations, type AnnotateResult } from "@/lib/pdf/operations/annotate";
 import {
@@ -44,6 +54,7 @@ import { clamp, uid } from "@/lib/utils";
 import { AnnotationOverlay } from "./overlay";
 import { ContextBar } from "./context-bar";
 import { SignatureDialog, type SignatureAsset } from "./signature-dialog";
+import { TextEditLayer } from "./text-edit-layer";
 import { ThumbnailRail } from "./thumbnail-rail";
 import { Toolbar } from "./toolbar";
 import {
@@ -64,7 +75,9 @@ interface AnnotationWorkspaceProps {
   onClose: () => void;
 }
 
-const ZOOM_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const ZOOM_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4];
+/** Largest "fit" scale: an A4 page at 2× is 1 190 CSS px wide, enough on any screen. */
+const MAX_FIT_SCALE = 2;
 
 /**
  * Full-screen editing shell (handoff: 56px top bar, 76px tool rail, 150px
@@ -97,6 +110,109 @@ export function AnnotationWorkspace({
   const exportOp = useOperation<AnnotateResult>(toolId);
   const page = pdf.pages[pageIndex] ?? pdf.pages[0]!;
 
+  // --- Existing-text edits: applied to the real content stream, previewed from the result.
+  const [textEdits, setTextEdits] = React.useState<TextEdit[]>([]);
+  const [preview, setPreview] = React.useState<{
+    bytes: Uint8Array;
+    opened: OpenedPdf;
+    version: number;
+  } | null>(null);
+  const [previewBusy, setPreviewBusy] = React.useState(false);
+  const [pageText, setPageText] = React.useState<{ key: string; status: PageTextStatus } | null>(
+    null,
+  );
+  const previewRequest = React.useRef(0);
+  const previewRef = React.useRef<typeof preview>(null);
+  React.useEffect(() => {
+    previewRef.current = preview;
+  }, [preview]);
+  React.useEffect(() => () => void previewRef.current?.opened.destroy(), []);
+  const displayDoc = preview?.opened.doc ?? pdf.opened.doc;
+  const displayBytes = preview?.bytes ?? pdf.bytes;
+  const textKey = `${page.index}:${preview?.version ?? 0}`;
+
+  const rebuildPreview = async (next: TextEdit[]) => {
+    const request = (previewRequest.current += 1);
+    setPreviewBusy(true);
+    try {
+      if (next.length === 0) {
+        setPreview((current) => {
+          void current?.opened.destroy();
+          return null;
+        });
+        return;
+      }
+      const { bytes, report } = await applyTextEdits(pdf.bytes, next);
+      const opened = await openPdf(bytes);
+      if (request !== previewRequest.current) {
+        void opened.destroy();
+        return;
+      }
+      setPreview((current) => {
+        void current?.opened.destroy();
+        return { bytes, opened, version: request };
+      });
+      if (report.skipped.length)
+        toast.error(
+          `${report.skipped.length} modification(s) impossible(s) : ${report.skipped.map((s) => s.reason).join(", ")}.`,
+        );
+      if (report.fontReplaced)
+        toast.info(
+          "Un caractère est absent de la police d'origine : ce passage utilise une police standard proche.",
+        );
+    } catch (error) {
+      toast.error(isPdfError(error) ? error.message : "La modification du texte a échoué.");
+    } finally {
+      if (request === previewRequest.current) setPreviewBusy(false);
+    }
+  };
+
+  const commitTextEdit = (run: TextRun, text: string) => {
+    const existing = textEdits.find(
+      (e) => e.pageIndex === run.pageIndex && e.opIndex === run.opIndex,
+    );
+    const edit: TextEdit = existing
+      ? { ...existing, text }
+      : {
+          pageIndex: run.pageIndex,
+          opIndex: run.opIndex,
+          text,
+          original: run.original,
+          fallback: run.fallback,
+        };
+    const next = [...textEdits.filter((e) => e !== existing), edit];
+    setTextEdits(next);
+    void rebuildPreview(next);
+  };
+
+  const revertTextEdit = (run: TextRun) => {
+    const next = textEdits.filter(
+      (e) => !(e.pageIndex === run.pageIndex && e.opIndex === run.opIndex),
+    );
+    setTextEdits(next);
+    void rebuildPreview(next);
+  };
+
+  // Analyse the page's text runs while the text tool is active.
+  React.useEffect(() => {
+    if (tool !== "editText") return;
+    let cancelled = false;
+    (async () => {
+      const content = await getPageContent(displayBytes, page.index);
+      const status = await extractTextRuns(displayDoc, page.index, content);
+      if (!cancelled) setPageText({ key: textKey, status });
+    })().catch(() => {
+      if (!cancelled)
+        setPageText({
+          key: textKey,
+          status: { kind: "mismatch", runs: [], detail: "analyse impossible" },
+        });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [tool, displayBytes, displayDoc, page.index, textKey]);
+
   // Lock the document scroll while the editor is full-screen.
   React.useEffect(() => {
     const previous = document.body.style.overflow;
@@ -119,15 +235,14 @@ export function AnnotationWorkspace({
     return () => observer.disconnect();
   }, []);
 
+  // "Fit" fills the available width, but never makes the page taller than
+  // 1.3 × the visible height: readable text and most of the page on screen at
+  // once; the zoom goes further. contentRect already excludes the 16px padding.
   const baseScale = React.useMemo(() => {
     const size = visualSize(page);
-    const fit = fitScale(
-      size.width,
-      size.height,
-      Math.max(200, containerSize.width - 32),
-      Math.max(200, containerSize.height - 32),
-    );
-    return Math.min(fit, 2);
+    const width = Math.max(200, containerSize.width - 2);
+    const height = Math.max(200, containerSize.height) * 1.3;
+    return Math.min(fitScale(size.width, size.height, width, height), MAX_FIT_SCALE);
   }, [page, containerSize]);
   const scale = baseScale * zoom;
 
@@ -137,14 +252,14 @@ export function AnnotationWorkspace({
     if (!canvas) return;
     const controller = new AbortController();
     setRenderError(false);
-    renderPageToCanvas(pdf.opened.doc, page.index, canvas, { scale, signal: controller.signal })
+    renderPageToCanvas(displayDoc, page.index, canvas, { scale, signal: controller.signal })
       .then(({ viewport: vp }) => {
         if (!controller.signal.aborted)
           setViewport({ width: vp.width, height: vp.height, transform: vp.transform });
       })
       .catch(() => !controller.signal.aborted && setRenderError(true));
     return () => controller.abort();
-  }, [pdf.opened.doc, page, scale]);
+  }, [displayDoc, page, scale]);
 
   // Revoke image preview URLs on unmount.
   const urlsRef = React.useRef<Set<string>>(new Set());
@@ -345,7 +460,12 @@ export function AnnotationWorkspace({
     const annotations: Annotation[] = history.annotations.filter(
       (a) => a.type !== "text" || a.text.trim().length > 0,
     );
-    void exportOp.run(() => applyAnnotations(pdf.bytes, annotations));
+    void exportOp.run(async () => {
+      const base = textEdits.length
+        ? (await applyTextEdits(pdf.bytes, textEdits)).bytes
+        : pdf.bytes;
+      return applyAnnotations(base, annotations);
+    });
   };
 
   const suffix =
@@ -374,6 +494,9 @@ export function AnnotationWorkspace({
         </div>
         <span className="hidden text-xs text-muted-foreground sm:block" aria-live="polite">
           {history.annotations.length} élément{history.annotations.length > 1 ? "s" : ""}
+          {textEdits.length
+            ? ` · ${textEdits.length} texte${textEdits.length > 1 ? "s" : ""} modifié${textEdits.length > 1 ? "s" : ""}`
+            : ""}
         </span>
         <Button
           type="button"
@@ -447,6 +570,7 @@ export function AnnotationWorkspace({
           <div
             className="relative m-auto shadow-lg"
             style={viewport ? { width: viewport.width, height: viewport.height } : undefined}
+            data-testid="editor-page"
           >
             <canvas
               ref={canvasRef}
@@ -454,22 +578,35 @@ export function AnnotationWorkspace({
               aria-label={t.common.pageOf(pageIndex + 1, pdf.pageCount)}
             />
             {viewport ? (
-              <AnnotationOverlay
+              <div className={tool === "editText" ? "pointer-events-none" : undefined}>
+                <AnnotationOverlay
+                  viewport={viewport}
+                  pageIndex={pageIndex}
+                  pageRotation={page.rotation}
+                  annotations={history.annotations}
+                  tool={tool}
+                  settings={settings}
+                  selectedId={selectedId}
+                  editingId={editingId}
+                  onSelect={setSelectedId}
+                  onEdit={setEditingId}
+                  onLiveChange={history.replaceLive}
+                  onBeginInteraction={() => history.beginLive(history.annotations)}
+                  onEndInteraction={history.endLive}
+                  onCommit={history.commit}
+                  onPlaceAt={onPlaceAt}
+                />
+              </div>
+            ) : null}
+            {viewport && tool === "editText" ? (
+              <TextEditLayer
                 viewport={viewport}
-                pageIndex={pageIndex}
                 pageRotation={page.rotation}
-                annotations={history.annotations}
-                tool={tool}
-                settings={settings}
-                selectedId={selectedId}
-                editingId={editingId}
-                onSelect={setSelectedId}
-                onEdit={setEditingId}
-                onLiveChange={history.replaceLive}
-                onBeginInteraction={() => history.beginLive(history.annotations)}
-                onEndInteraction={history.endLive}
-                onCommit={history.commit}
-                onPlaceAt={onPlaceAt}
+                status={pageText?.key === textKey ? pageText.status : null}
+                busy={previewBusy}
+                edits={textEdits.filter((e) => e.pageIndex === page.index)}
+                onCommit={commitTextEdit}
+                onRevert={revertTextEdit}
               />
             ) : null}
             {renderError ? (

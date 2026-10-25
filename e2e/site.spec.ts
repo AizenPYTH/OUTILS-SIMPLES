@@ -1,18 +1,23 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("site", () => {
-  test("home page shows the catalogue, featured tools and unique metadata", async ({ page }) => {
+  test("home page shows the search, popular tools, categories and unique metadata", async ({
+    page,
+  }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/OUTILIA/);
     await expect(page.locator("h1")).toHaveCount(1);
-    await expect(page.locator("h1")).toHaveText("Tous les outils");
+    await expect(page.locator("h1")).toHaveText("Des outils simples pour vos fichiers");
+    await expect(page.getByTestId("home-search")).toBeVisible();
+    await expect(page.getByTestId("home-categories").getByRole("link")).toHaveCount(8);
+    await expect(page.getByTestId("home-all-tools")).toHaveAttribute("href", "/outils/");
     await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /PDF/);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
       /^https?:\/\/[^/]+\/?$/,
     );
     const cards = page.getByTestId("tool-card");
-    expect(await cards.count()).toBeGreaterThanOrEqual(13);
+    expect(await cards.count()).toBe(9);
     // Categories without a published tool are not linked.
     await expect(page.locator('a[href*="/conversion/"]')).toHaveCount(0);
     await expect(page.getByTestId("consent-banner")).toHaveCount(0);
@@ -20,10 +25,25 @@ test.describe("site", () => {
     expect(jsonLd).toContain("WebSite");
   });
 
-  test("category chips filter and search finds synonyms", async ({ page }) => {
+  test("home search leads to the catalogue with the query", async ({ page }) => {
     await page.goto("/");
+    await page.getByTestId("home-search").fill("fusionner");
+    await page.getByRole("button", { name: "Rechercher", exact: true }).click();
+    await expect(page).toHaveURL(/\/outils\/\?q=fusionner$/);
+    await expect(page.locator("h1")).toHaveText("Tous les outils");
+    await expect(page.getByTestId("tool-grid").first()).toContainText("Fusionner des PDF");
+  });
+
+  test("category chips filter and search finds synonyms", async ({ page }) => {
+    await page.goto("/outils/");
+    await expect(page.locator("h1")).toHaveText("Tous les outils");
+    // Every category is listed (long ones folded to 8 cards behind « Voir les N »).
+    expect(await page.getByTestId("tool-card").count()).toBeGreaterThanOrEqual(40);
+    await expect(page.getByRole("button", { name: "Voir les 27" })).toBeVisible();
     await page.getByTestId("category-chip-pdf").click();
-    expect(await page.getByTestId("tool-grid").first().getByTestId("tool-card").count()).toBeGreaterThanOrEqual(13);
+    expect(
+      await page.getByTestId("tool-grid").first().getByTestId("tool-card").count(),
+    ).toBeGreaterThanOrEqual(13);
     await expect(page.getByTestId("tool-grid").first()).not.toContainText("Compresser une image");
     const search = page.getByTestId("catalog-search");
     await search.fill("assembler");
@@ -38,7 +58,11 @@ test.describe("site", () => {
   test("home page has no horizontal overflow", async ({ page, isMobile }) => {
     await page.goto("/");
     await page.getByTestId("tool-card").first().waitFor();
-    const measure = () => page.evaluate(() => ({ inner: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+    const measure = () =>
+      page.evaluate(() => ({
+        inner: document.documentElement.clientWidth,
+        scroll: document.documentElement.scrollWidth,
+      }));
     let widths = await measure();
     expect(widths.scroll).toBeLessThanOrEqual(widths.inner);
     if (!isMobile) {
@@ -52,14 +76,32 @@ test.describe("site", () => {
 
   test("tool pages never overflow horizontally on mobile", async ({ page, isMobile }) => {
     test.skip(!isMobile, "mobile layout check");
-    const paths = ["/pdf/fusionner/", "/pdf/caviarder/", "/pdf/comparer-deux-pdf/", "/numerisation/scanner-un-document/", "/numerisation/ocr/", "/images/compresser/", "/images/filigrane/", "/texte/comparer-deux-textes/", "/developpeur/formater-valider-json/", "/documents/markdown-vers-pdf/", "/codes/generateur-qr-code/", "/outils/", "/guides/"];
+    const paths = [
+      "/pdf/fusionner/",
+      "/pdf/caviarder/",
+      "/pdf/comparer-deux-pdf/",
+      "/numerisation/scanner-un-document/",
+      "/numerisation/ocr/",
+      "/images/compresser/",
+      "/images/filigrane/",
+      "/texte/comparer-deux-textes/",
+      "/developpeur/formater-valider-json/",
+      "/documents/markdown-vers-pdf/",
+      "/codes/generateur-qr-code/",
+      "/outils/",
+      "/guides/",
+    ];
     for (const path of paths) {
       await page.goto(path);
       await page.waitForLoadState("networkidle");
       const wide = await page.evaluate(() => {
         const max = document.documentElement.clientWidth + 1;
         const inScroller = (el: Element) => {
-          for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+          for (
+            let node = el.parentElement;
+            node && node !== document.body;
+            node = node.parentElement
+          ) {
             if (/(auto|scroll|hidden|clip)/.test(getComputedStyle(node).overflowX)) return true;
           }
           return false;
@@ -69,7 +111,10 @@ test.describe("site", () => {
           .map((el) => ({ el, rect: el.getBoundingClientRect() }))
           .filter(({ rect }) => rect.width > 20 && rect.right > max)
           .slice(0, 3)
-          .map(({ el, rect }) => `${el.tagName}.${el.className.toString().slice(0, 60)} right=${Math.round(rect.right)}`);
+          .map(
+            ({ el, rect }) =>
+              `${el.tagName}.${el.className.toString().slice(0, 60)} right=${Math.round(rect.right)}`,
+          );
       });
       expect(wide, path).toEqual([]);
     }
@@ -94,13 +139,11 @@ test.describe("site", () => {
       await page.getByTestId("mobile-menu-trigger").click();
       await page
         .getByRole("navigation", { name: "Menu" })
-        .getByRole("link", { name: "Outils PDF" })
+        .getByRole("link", { name: /^PDF/ })
         .click();
     } else {
-      await page
-        .getByRole("navigation", { name: "Navigation principale" })
-        .getByRole("link", { name: "PDF" })
-        .click();
+      // Categories left the header (docs/DESIGN_PRINCIPES.md §3.5): the home cards lead to them.
+      await page.getByTestId("home-categories").getByRole("link", { name: /^PDF/ }).click();
     }
     await expect(page).toHaveURL(/\/pdf\/$/);
     await expect(page.locator("h1")).toHaveText("Outils PDF");
@@ -122,7 +165,7 @@ test.describe("site", () => {
     expect(sitemap).toContain("/documents/markdown-vers-pdf/");
     expect(sitemap).toContain("/calculatrices/tva/");
     expect(sitemap).not.toContain("/conversion/");
-    expect(sitemap).not.toContain("/outils/");
+    expect(sitemap).toContain("/outils/");
     const robots = await (await request.get("/robots.txt")).text();
     expect(robots).toContain("Sitemap:");
     const headers = (await request.get("/")).headers();
