@@ -24,6 +24,7 @@ const PANEL_TITLES: Record<EditorPanel, string> = {
   document: "Document",
   history: "Historique",
   shortcuts: "Raccourcis clavier",
+  search: "Rechercher dans le document",
 };
 
 /** Shell of the right-hand panels: one at a time, closable, full width on small screens. */
@@ -359,5 +360,153 @@ export function ShortcutsPanel() {
         </div>
       ))}
     </dl>
+  );
+}
+
+interface SearchPanelProps {
+  query: string;
+  onQuery: (q: string) => void;
+  replacement: string;
+  onReplacement: (r: string) => void;
+  searching: boolean;
+  progress: { done: number; total: number } | null;
+  results: import("@/lib/pdf/browser/search").SearchMatch[];
+  current: number | null;
+  onSelect: (index: number) => void;
+  onReplaceOne: (index: number) => void;
+  onReplaceAll: () => void;
+  /** Whether the replacement feature is available (editor mode with the text tool). */
+  canReplace: boolean;
+}
+
+export function SearchPanel({
+  query,
+  onQuery,
+  replacement,
+  onReplacement,
+  searching,
+  progress,
+  results,
+  current,
+  onSelect,
+  onReplaceOne,
+  onReplaceAll,
+  canReplace,
+}: SearchPanelProps) {
+  const byPage = new Map<number, number[]>();
+  results.forEach((r, i) => {
+    const list = byPage.get(r.pageIndex) ?? [];
+    list.push(i);
+    byPage.set(r.pageIndex, list);
+  });
+  return (
+    <div className="space-y-3" data-testid="search-panel">
+      <div className="space-y-1.5">
+        <Label htmlFor="editor-search">Rechercher</Label>
+        <input
+          id="editor-search"
+          type="search"
+          value={query}
+          onChange={(e) => onQuery(e.target.value)}
+          placeholder="Mot ou expression"
+          autoFocus
+          className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+          data-testid="search-input"
+        />
+      </div>
+      {canReplace ? (
+        <div className="space-y-1.5">
+          <Label htmlFor="editor-replace">Remplacer par</Label>
+          <input
+            id="editor-replace"
+            type="text"
+            value={replacement}
+            onChange={(e) => onReplacement(e.target.value)}
+            className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+            data-testid="replace-input"
+          />
+          <p className="text-xs text-muted-foreground">
+            Le remplacement réécrit le passage dans la page comme « Modifier le texte » (même police
+            quand c&apos;est possible, sans reflux). Les passages scannés ou non modifiables sont
+            signalés.
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={onReplaceAll}
+            disabled={results.length === 0 || replacement.length === 0}
+            data-testid="replace-all"
+          >
+            Remplacer partout ({results.length})
+          </Button>
+        </div>
+      ) : null}
+      <p
+        className="text-xs text-muted-foreground"
+        role="status"
+        aria-live="polite"
+        data-testid="search-status"
+      >
+        {searching
+          ? `Recherche… ${progress ? `page ${progress.done} / ${progress.total}` : ""}`
+          : query.trim().length === 0
+            ? "Saisissez un texte à chercher. La recherche ignore la casse et les accents ; un mot coupé entre deux fragments n'est pas trouvé."
+            : `${results.length} résultat${results.length > 1 ? "s" : ""}${results.length >= 500 ? " (affichage limité)" : ""}`}
+      </p>
+      <ol className="space-y-1" data-testid="search-results">
+        {[...byPage.entries()].map(([pageIndex, indices]) => (
+          <li key={pageIndex}>
+            <p className="px-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Page {pageIndex + 1}
+            </p>
+            <ul className="space-y-0.5">
+              {indices.map((i) => {
+                const r = results[i]!;
+                const before = r.text.slice(Math.max(0, r.offset - 24), r.offset);
+                const hit = r.text.slice(r.offset, r.offset + Math.max(1, query.trim().length));
+                const after = r.text.slice(
+                  r.offset + Math.max(1, query.trim().length),
+                  r.offset + query.trim().length + 32,
+                );
+                return (
+                  <li
+                    key={i}
+                    className={cn(
+                      "flex items-center gap-1 rounded-md",
+                      i === current && "bg-primary-soft",
+                    )}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onSelect(i)}
+                      className="min-w-0 flex-1 truncate px-2 py-1 text-left text-xs hover:bg-muted"
+                      aria-current={i === current ? "true" : undefined}
+                      data-testid="search-result"
+                    >
+                      {before}
+                      <mark className="rounded bg-warning-soft px-0.5">{hit}</mark>
+                      {after}
+                    </button>
+                    {canReplace ? (
+                      <button
+                        type="button"
+                        onClick={() => onReplaceOne(i)}
+                        disabled={replacement.length === 0}
+                        className="shrink-0 rounded-md px-1.5 py-1 text-[11px] text-link hover:bg-muted disabled:opacity-40"
+                        title="Remplacer ce passage"
+                        data-testid="replace-one"
+                      >
+                        Remplacer
+                      </button>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }

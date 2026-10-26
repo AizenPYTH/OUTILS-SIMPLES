@@ -28,7 +28,7 @@ import { formatBytes } from "@/lib/files/format";
 import { fitScale, renderPageToCanvas, visualSize } from "@/lib/pdf/browser/pdfjs";
 import { measureImage, readImageFile } from "@/lib/pdf/browser/read-file";
 import { hexToRgb, rgbToCss, rgbToHex } from "@/lib/pdf/annotations/types";
-import { fontFamilies, type FontFamily } from "@/lib/pdf/fonts";
+import { standardFontFamilies as fontFamilies, type FontFamily } from "@/lib/pdf/fonts";
 import { isPdfError } from "@/lib/pdf/errors";
 import { pdfRectToViewport } from "@/lib/pdf/coordinates";
 import type { ParsedRanges } from "@/lib/pdf/page-ranges";

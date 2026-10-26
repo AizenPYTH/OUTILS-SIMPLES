@@ -15,7 +15,8 @@ function magic(bytes: Uint8Array, sig: number[], offset = 0): boolean {
 }
 const isJpeg = (b: Uint8Array) => magic(b, [0xff, 0xd8, 0xff]);
 const isPng = (b: Uint8Array) => magic(b, [0x89, 0x50, 0x4e, 0x47]);
-const isWebp = (b: Uint8Array) => magic(b, [0x52, 0x49, 0x46, 0x46]) && magic(b, [0x57, 0x45, 0x42, 0x50], 8);
+const isWebp = (b: Uint8Array) =>
+  magic(b, [0x52, 0x49, 0x46, 0x46]) && magic(b, [0x57, 0x45, 0x42, 0x50], 8);
 
 /** PNG IHDR dimensions. */
 function pngSize(b: Uint8Array): { width: number; height: number } {
@@ -41,18 +42,40 @@ test.describe("audit — implémentations partagées et modes restreints", () =>
   test("annotation workspace exposes only the tools of each mode", async ({ page, isMobile }) => {
     test.skip(isMobile, "toolbar layout checked on desktop");
     const expectations: Record<string, { present: string[]; absent: string[] }> = {
-      "/pdf/ajouter-texte/": { present: ["tool-select", "tool-text"], absent: ["tool-pen", "tool-signature", "tool-highlight", "tool-image"] },
-      "/pdf/signer/": { present: ["tool-signature", "tool-text"], absent: ["tool-pen", "tool-highlight", "tool-image"] },
-      "/pdf/annoter/": { present: ["tool-highlight", "tool-pen", "tool-comment"], absent: ["tool-signature", "tool-image", "tool-text"] },
-      "/pdf/modifier/": { present: ["tool-text", "tool-pen", "tool-image", "tool-signature"], absent: ["tool-comment", "tool-underline"] },
+      "/pdf/ajouter-texte/": {
+        present: ["tool-select", "tool-text"],
+        absent: ["tool-pen", "tool-signature", "tool-highlight", "tool-image"],
+      },
+      "/pdf/signer/": {
+        present: ["tool-signature", "tool-text"],
+        absent: ["tool-pen", "tool-highlight", "tool-image"],
+      },
+      "/pdf/annoter/": {
+        present: ["tool-highlight", "tool-pen", "tool-comment"],
+        absent: ["tool-signature", "tool-image", "tool-text"],
+      },
+      "/pdf/modifier/": {
+        present: [
+          "tool-text",
+          "tool-pen",
+          "tool-image",
+          "tool-signature",
+          "tool-rect",
+          "tool-line",
+          "tool-mask",
+        ],
+        absent: [],
+      },
     };
     for (const [path, rule] of Object.entries(expectations)) {
       await page.goto(path);
       await uploadPdf(page, "simple-3-pages.pdf");
       const toolbar = page.getByRole("toolbar", { name: "Outils d'édition" }).first();
       await expect(toolbar).toBeVisible({ timeout: 30_000 });
-      for (const id of rule.present) await expect(toolbar.getByTestId(id), `${path} should offer ${id}`).toBeVisible();
-      for (const id of rule.absent) await expect(toolbar.getByTestId(id), `${path} must not offer ${id}`).toHaveCount(0);
+      for (const id of rule.present)
+        await expect(toolbar.getByTestId(id), `${path} should offer ${id}`).toBeVisible();
+      for (const id of rule.absent)
+        await expect(toolbar.getByTestId(id), `${path} must not offer ${id}`).toHaveCount(0);
     }
   });
 
@@ -66,17 +89,32 @@ test.describe("audit — implémentations partagées et modes restreints", () =>
     await expect(page.getByTestId("pdf-search")).toContainText("Aucune occurrence");
   });
 
-  test("pdf-check reports a clean file, a damaged file and an encrypted file honestly", async ({ page }) => {
+  test("pdf-check reports a clean file, a damaged file and an encrypted file honestly", async ({
+    page,
+  }) => {
     await page.goto("/pdf/verifier-reparer/");
     await uploadPdf(page, "simple-3-pages.pdf");
-    await expect(page.getByTestId("check-report")).toContainText("Aucune erreur de structure détectée", { timeout: 60_000 });
+    await expect(page.getByTestId("check-report")).toContainText(
+      "Aucune erreur de structure détectée",
+      { timeout: 60_000 },
+    );
     await expect(page.getByTestId("check-report")).toContainText("1.7");
-    await page.getByRole("button", { name: /autre fichier|changer/i }).first().click();
+    await page
+      .getByRole("button", { name: /autre fichier|changer/i })
+      .first()
+      .click();
     await uploadPdf(page, "corrupted.pdf");
-    await expect(page.getByTestId("check-report")).toContainText("Problèmes détectés", { timeout: 60_000 });
-    await page.getByRole("button", { name: /autre fichier|changer/i }).first().click();
+    await expect(page.getByTestId("check-report")).toContainText("Problèmes détectés", {
+      timeout: 60_000,
+    });
+    await page
+      .getByRole("button", { name: /autre fichier|changer/i })
+      .first()
+      .click();
     await uploadPdf(page, "encrypted-flag.pdf");
-    await expect(page.getByTestId("check-report")).toContainText("Document chiffré", { timeout: 60_000 });
+    await expect(page.getByTestId("check-report")).toContainText("Document chiffré", {
+      timeout: 60_000,
+    });
     await expect(page.getByTestId("check-report")).toContainText("ChiffrementOui");
     await expect(page.getByTestId("check-report")).not.toContainText("copie réparée");
     await expect(page.getByTestId("check-report")).not.toContainText("trop endommagée");
@@ -91,7 +129,7 @@ test.describe("audit — implémentations partagées et modes restreints", () =>
     await expect(page.getByTestId("case-output-output")).toHaveValue("bonjour-le-monde-ca-va");
     await page.goto("/developpeur/csv-vers-json/");
     const input = page.locator("textarea").first();
-    await input.fill("nom;age;actif\nAna;31;true\n\"Dupont, Jean\";45;false");
+    await input.fill('nom;age;actif\nAna;31;true\n"Dupont, Jean";45;false');
     const output = page.locator("textarea").nth(1);
     await expect(output).toHaveValue(/"nom": "Ana"/);
     await expect(output).toHaveValue(/"age": 31/);
@@ -127,7 +165,9 @@ test.describe("audit — fidélité des fichiers produits", () => {
     await page.setInputFiles('[data-testid="image-dropzone-input"]', fixture("photo-800x600.jpg"));
     await page.getByTestId("segmented-image/webp").click();
     await page.getByTestId("batch-run").click();
-    await expect(page.getByTestId("batch-item")).toHaveAttribute("data-status", "done", { timeout: 30_000 });
+    await expect(page.getByTestId("batch-item")).toHaveAttribute("data-status", "done", {
+      timeout: 30_000,
+    });
     const download = page.waitForEvent("download");
     await page.getByTestId("batch-download-all").click();
     const bytes = await readDownload(await download);
@@ -135,12 +175,16 @@ test.describe("audit — fidélité des fichiers produits", () => {
     expect(bytes.length).toBeLessThan(original.length);
   });
 
-  test("image convert to JPG and rotate 90° give the right format and dimensions", async ({ page }) => {
+  test("image convert to JPG and rotate 90° give the right format and dimensions", async ({
+    page,
+  }) => {
     await page.goto("/images/convertir/");
     await page.setInputFiles('[data-testid="image-dropzone-input"]', fixture("logo-alpha.png"));
     await page.getByTestId("segmented-image/jpeg").click();
     await page.getByTestId("batch-run").click();
-    await expect(page.getByTestId("batch-item")).toHaveAttribute("data-status", "done", { timeout: 30_000 });
+    await expect(page.getByTestId("batch-item")).toHaveAttribute("data-status", "done", {
+      timeout: 30_000,
+    });
     let download = page.waitForEvent("download");
     await page.getByTestId("batch-download-all").click();
     const jpg = await readDownload(await download);
@@ -149,7 +193,9 @@ test.describe("audit — fidélité des fichiers produits", () => {
     await page.goto("/images/pivoter-retourner/");
     await page.setInputFiles('[data-testid="image-dropzone-input"]', fixture("photo-800x600.jpg"));
     await page.getByTestId("batch-run").click();
-    await expect(page.getByTestId("batch-item")).toHaveAttribute("data-status", "done", { timeout: 30_000 });
+    await expect(page.getByTestId("batch-item")).toHaveAttribute("data-status", "done", {
+      timeout: 30_000,
+    });
     download = page.waitForEvent("download");
     await page.getByTestId("batch-download-all").click();
     const rotated = await readDownload(await download);
@@ -172,10 +218,16 @@ test.describe("audit — fidélité des fichiers produits", () => {
     const len = 2 + header.length + tiff.length;
     const app1 = Buffer.concat([Buffer.from([0xff, 0xe1, len >> 8, len & 0xff]), header, tiff]);
     const withExif = Buffer.concat([photo.subarray(0, 2), app1, photo.subarray(2)]);
-    expect(((await exifr.parse(withExif, { tiff: true })) as { Make?: string })?.Make).toBe("AUDIT");
+    expect(((await exifr.parse(withExif, { tiff: true })) as { Make?: string })?.Make).toBe(
+      "AUDIT",
+    );
 
     await page.goto("/images/metadonnees-exif/");
-    await page.setInputFiles('[data-testid="exif-dropzone-input"]', { name: "avec-exif.jpg", mimeType: "image/jpeg", buffer: withExif });
+    await page.setInputFiles('[data-testid="exif-dropzone-input"]', {
+      name: "avec-exif.jpg",
+      mimeType: "image/jpeg",
+      buffer: withExif,
+    });
     await expect(page.getByTestId("exif-table")).toContainText("AUDIT");
     await expect(page.getByTestId("exif-table")).toContainText("sensible");
     await page.getByTestId("exif-strip").click();
@@ -188,13 +240,17 @@ test.describe("audit — fidélité des fichiers produits", () => {
     expect(jpegSize(cleaned)).toEqual({ width: 800, height: 600 });
   });
 
-  test("watermark changes the pixels but keeps the size; perspective output is a straightened JPG", async ({ page }) => {
+  test("watermark changes the pixels but keeps the size; perspective output is a straightened JPG", async ({
+    page,
+  }) => {
     await page.goto("/images/filigrane/");
     await page.setInputFiles('[data-testid="image-dropzone-input"]', fixture("logo-alpha.png"));
     await page.getByTestId("wm-text").fill("AUDIT");
     await page.getByTestId("segmented-image/png").click();
     await page.getByTestId("batch-run").click();
-    await expect(page.getByTestId("batch-item")).toHaveAttribute("data-status", "done", { timeout: 30_000 });
+    await expect(page.getByTestId("batch-item")).toHaveAttribute("data-status", "done", {
+      timeout: 30_000,
+    });
     let download = page.waitForEvent("download");
     await page.getByTestId("batch-download-all").click();
     const marked = await readDownload(await download);
@@ -204,7 +260,10 @@ test.describe("audit — fidélité des fichiers produits", () => {
     expect(Buffer.compare(Buffer.from(marked), Buffer.from(original))).not.toBe(0);
 
     await page.goto("/numerisation/corriger-un-document-photographie/");
-    await page.setInputFiles('[data-testid="perspective-dropzone-input"]', fixture("sheet-perspective.jpg"));
+    await page.setInputFiles(
+      '[data-testid="perspective-dropzone-input"]',
+      fixture("sheet-perspective.jpg"),
+    );
     await expect(page.getByTestId("quad-editor")).toBeVisible();
     download = page.waitForEvent("download");
     await page.getByTestId("perspective-run").click();
@@ -220,7 +279,9 @@ test.describe("audit — fidélité des fichiers produits", () => {
     expect(size.width * size.height).toBeLessThan(source.width * source.height);
   });
 
-  test("scanner respects the chosen filter: black and white output has only two tones", async ({ page }) => {
+  test("scanner respects the chosen filter: black and white output has only two tones", async ({
+    page,
+  }) => {
     await page.goto("/numerisation/scanner-un-document/");
     await page.setInputFiles('[data-testid="scan-dropzone-input"]', fixture("text-french.png"));
     await expect(page.getByTestId("scan-thumb")).toHaveCount(1);
@@ -254,19 +315,30 @@ test.describe("audit — fidélité des fichiers produits", () => {
 });
 
 test.describe("audit — OCR sur PDF scanné et protection AES-128", () => {
-  test("a scanned PDF (image only) is OCRed page by page and exported as a searchable PDF", async ({ page }) => {
+  test("a scanned PDF (image only) is OCRed page by page and exported as a searchable PDF", async ({
+    page,
+  }) => {
     test.setTimeout(300_000);
     // Build a "scan": one page containing only the French text image.
     const doc = await PDFDocument.create();
     const png = await doc.embedPng(await readFile(fixture("text-french.png")));
     const pageA4 = doc.addPage([595.28, 841.89]);
     const scale = Math.min(500 / png.width, 700 / png.height);
-    pageA4.drawImage(png, { x: 40, y: 841.89 - 60 - png.height * scale, width: png.width * scale, height: png.height * scale });
+    pageA4.drawImage(png, {
+      x: 40,
+      y: 841.89 - 60 - png.height * scale,
+      width: png.width * scale,
+      height: png.height * scale,
+    });
     const scanned = Buffer.from(await doc.save());
     expect(await extractPageText(new Uint8Array(scanned), 0)).toHaveLength(0);
 
     await page.goto("/numerisation/ocr/");
-    await page.setInputFiles('[data-testid="ocr-dropzone-input"]', { name: "scan.pdf", mimeType: "application/pdf", buffer: scanned });
+    await page.setInputFiles('[data-testid="ocr-dropzone-input"]', {
+      name: "scan.pdf",
+      mimeType: "application/pdf",
+      buffer: scanned,
+    });
     await page.getByTestId("ocr-run").click();
     await expect(page.getByTestId("ocr-page-text")).toHaveValue(/Facture/, { timeout: 240_000 });
     await page.getByRole("tab", { name: "PDF recherchable" }).click();
@@ -279,7 +351,9 @@ test.describe("audit — OCR sur PDF scanné et protection AES-128", () => {
     expect(text).toMatch(/2026/);
   });
 
-  test("AES-128 protection produces an encrypted file that pdf-lib cannot open", async ({ page }) => {
+  test("AES-128 protection produces an encrypted file that pdf-lib cannot open", async ({
+    page,
+  }) => {
     await page.goto("/pdf/proteger-par-mot-de-passe/");
     await uploadPdf(page, "simple-3-pages.pdf");
     await page.getByTestId("pw-user").fill("cle128");
@@ -298,16 +372,26 @@ test.describe("audit — OCR sur PDF scanné et protection AES-128", () => {
 });
 
 test.describe("audit — fichiers invalides et limites", () => {
-  test("empty, encrypted and non-PDF uploads are refused with a clear message", async ({ page }) => {
+  test("empty, encrypted and non-PDF uploads are refused with a clear message", async ({
+    page,
+  }) => {
     await page.goto("/pdf/diviser/");
-    await page.setInputFiles('[data-testid="pdf-input"]', { name: "vide.pdf", mimeType: "application/pdf", buffer: Buffer.alloc(0) });
+    await page.setInputFiles('[data-testid="pdf-input"]', {
+      name: "vide.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.alloc(0),
+    });
     await expect(page.getByRole("alert").first()).toContainText("PDF");
     await page.goto("/pdf/fusionner/");
     await uploadPdf(page, "encrypted-flag.pdf", "simple-3-pages.pdf");
     await expect(page.getByText(/mot de passe/).first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId("merge-file-row")).toHaveCount(1);
     await page.goto("/images/compresser/");
-    await page.setInputFiles('[data-testid="image-dropzone-input"]', { name: "vide.png", mimeType: "image/png", buffer: Buffer.alloc(0) });
+    await page.setInputFiles('[data-testid="image-dropzone-input"]', {
+      name: "vide.png",
+      mimeType: "image/png",
+      buffer: Buffer.alloc(0),
+    });
     await expect(page.getByRole("alert").first()).toContainText("fichier vide");
     await page.goto("/numerisation/ocr/");
     await page.setInputFiles('[data-testid="ocr-dropzone-input"]', fixture("not-a-pdf.txt"));
@@ -316,7 +400,11 @@ test.describe("audit — fichiers invalides et limites", () => {
 
   test("a PDF declared as PDF but with a wrong body is caught after reading", async ({ page }) => {
     await page.goto("/pdf/rotation/");
-    await page.setInputFiles('[data-testid="pdf-input"]', { name: "faux.pdf", mimeType: "application/pdf", buffer: Buffer.from("ceci n'est pas un pdf") });
+    await page.setInputFiles('[data-testid="pdf-input"]', {
+      name: "faux.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.from("ceci n'est pas un pdf"),
+    });
     await expect(page.getByTestId("error-panel")).toContainText("PDF", { timeout: 30_000 });
   });
 

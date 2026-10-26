@@ -1,16 +1,9 @@
 "use client";
 
-import { AlignCenter, AlignLeft, AlignRight, Bold, Italic } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { fontFamilies, type FontFamily } from "@/lib/pdf/fonts";
-import { hexToRgb, rgbToHex } from "@/lib/pdf/annotations/types";
+import { AlignCenter, AlignLeft, AlignRight, Bold, Italic, Underline } from "lucide-react";
+import { fontFamilies, hasStyle, type FontFamily } from "@/lib/pdf/fonts";
+import { ensureFontFace } from "@/lib/pdf/fonts-embed";
+import { hexToRgb, rgbToHex, type DashStyle } from "@/lib/pdf/annotations/types";
 import { cn } from "@/lib/utils";
 import { toolHints, type ToolSettings, type WorkspaceTool } from "./types";
 
@@ -18,8 +11,6 @@ interface ContextBarProps {
   tool: WorkspaceTool;
   settings: ToolSettings;
   onChange: (patch: Partial<ToolSettings>) => void;
-  /** True when a text annotation is selected: show text controls even in select mode. */
-  textSelected: boolean;
   hasSelection: boolean;
   /** "Modifier le texte": show every editable zone instead of only on hover. */
   showRuns?: boolean;
@@ -30,34 +21,42 @@ interface ContextBarProps {
 
 const sizes = [8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 40, 48];
 
+/**
+ * Top row: the style new objects will get with the active tool, and the
+ * tool's hint. A selected object is edited in the floating bar next to it.
+ * Always rendered at the same height so the page never jumps.
+ */
 export function ContextBar({
   tool,
   settings,
   onChange,
-  textSelected,
   hasSelection,
   showRuns = false,
   onToggleRuns,
   textInfo = null,
 }: ContextBarProps) {
-  const showText = tool === "text" || tool === "comment" || textSelected;
+  const showText = tool === "text" || tool === "comment";
   const showStroke =
     tool === "pen" ||
     tool === "rect" ||
     tool === "ellipse" ||
+    tool === "line" ||
     tool === "arrow" ||
     tool === "underline";
   const showFill = tool === "rect" || tool === "ellipse";
-  const showColor =
-    tool !== "select" || hasSelection
-      ? tool !== "image" && tool !== "signature" && tool !== "editText"
-      : false;
+  const showColor = showStroke || tool === "highlight" || tool === "mask" || showText;
   const showOpacity =
-    tool === "pen" || tool === "highlight" || tool === "rect" || tool === "ellipse";
+    tool === "pen" ||
+    tool === "highlight" ||
+    tool === "rect" ||
+    tool === "ellipse" ||
+    tool === "line" ||
+    tool === "arrow";
+  const showDefaults = showColor || showStroke;
 
   return (
     <div
-      className="flex min-h-12 items-center gap-3 overflow-x-auto border-b border-border bg-surface px-3 py-1.5 text-sm"
+      className="flex h-12 items-center gap-3 overflow-x-auto border-b border-border bg-surface px-3 text-sm"
       data-testid="context-bar"
     >
       {tool === "editText" ? (
@@ -76,9 +75,16 @@ export function ContextBar({
           ) : null}
         </>
       ) : null}
-      {showColor ? (
+      {showDefaults && !hasSelection ? (
+        <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          Style par défaut
+        </span>
+      ) : null}
+      {showColor && !hasSelection ? (
         <label className="flex shrink-0 items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">Couleur</span>
+          <span className="text-xs text-muted-foreground">
+            {tool === "mask" ? "Masque" : showText ? "Texte" : "Couleur"}
+          </span>
           <input
             type="color"
             value={rgbToHex(settings.color)}
@@ -89,55 +95,64 @@ export function ContextBar({
           />
         </label>
       ) : null}
-      {showText ? (
+      {showText && !hasSelection ? (
         <>
-          <div className="flex shrink-0 items-center gap-1.5">
-            <Label htmlFor="ctx-font" className="text-xs text-muted-foreground">
-              Police
-            </Label>
-            <Select
+          <label className="flex shrink-0 items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Police</span>
+            <select
               value={settings.fontFamily}
-              onValueChange={(v) => onChange({ fontFamily: v as FontFamily })}
+              onChange={(e) => {
+                const family = e.target.value as FontFamily;
+                void ensureFontFace(family);
+                onChange({ fontFamily: family });
+              }}
+              className="h-8 max-w-48 rounded-md border border-input bg-background px-1.5 text-xs"
+              aria-label="Police"
+              data-testid="font-family-select"
             >
-              <SelectTrigger id="ctx-font" className="h-8 w-40 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {fontFamilies.map((f) => (
-                  <SelectItem key={f.id} value={f.id}>
-                    {f.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex shrink-0 items-center gap-1.5">
-            <Label htmlFor="ctx-size" className="text-xs text-muted-foreground">
-              Taille
-            </Label>
-            <Select
+              {(["sans", "serif", "mono"] as const).map((category) => (
+                <optgroup
+                  key={category}
+                  label={
+                    category === "sans"
+                      ? "Sans-serif"
+                      : category === "serif"
+                        ? "Serif"
+                        : "Monospace"
+                  }
+                >
+                  {fontFamilies
+                    .filter((f) => f.category === category)
+                    .map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.label}
+                        {f.note ? ` — ${f.note}` : ""}
+                      </option>
+                    ))}
+                </optgroup>
+              ))}
+            </select>
+          </label>
+          <label className="flex shrink-0 items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Taille</span>
+            <select
               value={String(settings.fontSize)}
-              onValueChange={(v) => onChange({ fontSize: Number(v) })}
+              onChange={(e) => onChange({ fontSize: Number(e.target.value) })}
+              className="h-8 w-20 rounded-md border border-input bg-background px-1.5 text-xs"
+              aria-label="Taille"
+              data-testid="font-size-select"
             >
-              <SelectTrigger
-                id="ctx-size"
-                className="h-8 w-20 text-xs"
-                data-testid="font-size-select"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {sizes.map((s) => (
-                  <SelectItem key={s} value={String(s)}>
-                    {s} pt
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              {sizes.map((s) => (
+                <option key={s} value={String(s)}>
+                  {s} pt
+                </option>
+              ))}
+            </select>
+          </label>
           <div className="flex shrink-0 items-center gap-0.5">
             <Toggle
               pressed={settings.bold}
+              disabled={!hasStyle(settings.fontFamily, { bold: true, italic: settings.italic })}
               onClick={() => onChange({ bold: !settings.bold })}
               label="Gras"
             >
@@ -145,10 +160,18 @@ export function ContextBar({
             </Toggle>
             <Toggle
               pressed={settings.italic}
+              disabled={!hasStyle(settings.fontFamily, { bold: settings.bold, italic: true })}
               onClick={() => onChange({ italic: !settings.italic })}
               label="Italique"
             >
               <Italic className="size-4" />
+            </Toggle>
+            <Toggle
+              pressed={settings.underline}
+              onClick={() => onChange({ underline: !settings.underline })}
+              label="Souligné"
+            >
+              <Underline className="size-4" />
             </Toggle>
           </div>
           <div
@@ -178,27 +201,82 @@ export function ContextBar({
               <AlignRight className="size-4" />
             </Toggle>
           </div>
+          <label className="flex shrink-0 items-center gap-1.5">
+            <Toggle
+              pressed={!!settings.background}
+              onClick={() =>
+                onChange({ background: settings.background ? null : { r: 1, g: 0.97, b: 0.75 } })
+              }
+              label="Fond du texte"
+            >
+              <span className="px-1 text-xs">Fond</span>
+            </Toggle>
+            {settings.background ? (
+              <input
+                type="color"
+                value={rgbToHex(settings.background)}
+                onChange={(e) => onChange({ background: hexToRgb(e.target.value) })}
+                className="size-8 cursor-pointer rounded-md border border-input bg-background p-0.5"
+                aria-label="Couleur de fond"
+              />
+            ) : null}
+          </label>
         </>
       ) : null}
-      {showStroke ? (
-        <label className="flex shrink-0 items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">Épaisseur</span>
-          <input
-            type="range"
-            min={1}
-            max={16}
-            step={1}
-            value={settings.strokeWidth}
-            onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })}
-            className="w-24 accent-primary"
-            aria-label="Épaisseur du trait"
-          />
-          <span className="w-6 text-xs tabular-nums text-muted-foreground">
-            {settings.strokeWidth}
-          </span>
-        </label>
+      {showStroke && !hasSelection ? (
+        <>
+          <label className="flex shrink-0 items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Épaisseur</span>
+            <input
+              type="range"
+              min={0.5}
+              max={16}
+              step={0.5}
+              value={settings.strokeWidth}
+              onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })}
+              className="w-24 accent-primary"
+              aria-label="Épaisseur du trait"
+            />
+            <span className="w-7 text-xs tabular-nums text-muted-foreground">
+              {settings.strokeWidth}
+            </span>
+          </label>
+          <label className="flex shrink-0 items-center gap-1.5">
+            <span className="text-xs text-muted-foreground">Trait</span>
+            <select
+              value={settings.dash}
+              onChange={(e) => onChange({ dash: e.target.value as DashStyle })}
+              className="h-8 rounded-md border border-input bg-background px-1.5 text-xs"
+              aria-label="Style du trait"
+            >
+              <option value="solid">Continu</option>
+              <option value="dashed">Tireté</option>
+              <option value="dotted">Pointillé</option>
+            </select>
+          </label>
+        </>
       ) : null}
-      {showOpacity ? (
+      {showFill && !hasSelection ? (
+        <div className="flex shrink-0 items-center gap-1">
+          <Toggle
+            pressed={settings.fill}
+            onClick={() => onChange({ fill: !settings.fill })}
+            label="Remplir la forme"
+          >
+            <span className="px-1 text-xs">Remplissage</span>
+          </Toggle>
+          {settings.fill ? (
+            <input
+              type="color"
+              value={rgbToHex(settings.fillColor)}
+              onChange={(e) => onChange({ fillColor: hexToRgb(e.target.value) })}
+              className="size-8 cursor-pointer rounded-md border border-input bg-background p-0.5"
+              aria-label="Couleur de remplissage"
+            />
+          ) : null}
+        </div>
+      ) : null}
+      {showOpacity && !hasSelection ? (
         <label className="flex shrink-0 items-center gap-1.5">
           <span className="text-xs text-muted-foreground">Opacité</span>
           <input
@@ -208,7 +286,7 @@ export function ContextBar({
             step={5}
             value={Math.round(settings.opacity * 100)}
             onChange={(e) => onChange({ opacity: Number(e.target.value) / 100 })}
-            className="w-24 accent-primary"
+            className="w-20 accent-primary"
             aria-label="Opacité"
           />
           <span className="w-8 text-xs tabular-nums text-muted-foreground">
@@ -216,17 +294,13 @@ export function ContextBar({
           </span>
         </label>
       ) : null}
-      {showFill ? (
-        <Toggle
-          pressed={settings.fill}
-          onClick={() => onChange({ fill: !settings.fill })}
-          label="Remplir la forme"
-        >
-          <span className="px-1 text-xs">Remplissage</span>
-        </Toggle>
-      ) : null}
-      <p className="ml-auto hidden shrink-0 text-xs text-muted-foreground lg:block">
-        {toolHints[tool]}
+      <p
+        className="ml-auto hidden shrink-0 text-xs text-muted-foreground lg:block"
+        data-testid="tool-hint"
+      >
+        {hasSelection
+          ? "Élément sélectionné : propriétés dans la barre flottante · glisser pour déplacer · Suppr pour supprimer · Ctrl + D pour dupliquer."
+          : toolHints[tool]}
       </p>
     </div>
   );
@@ -236,11 +310,13 @@ function Toggle({
   pressed,
   onClick,
   label,
+  disabled,
   children,
 }: {
   pressed: boolean;
   onClick: () => void;
   label: string;
+  disabled?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -250,8 +326,9 @@ function Toggle({
       aria-label={label}
       title={label}
       onClick={onClick}
+      disabled={disabled}
       className={cn(
-        "flex h-8 min-w-8 items-center justify-center rounded-md px-1 transition-colors",
+        "flex h-8 min-w-8 items-center justify-center rounded-md px-1 transition-colors disabled:opacity-40",
         pressed ? "bg-primary-soft text-link" : "text-muted-foreground hover:bg-muted",
       )}
     >

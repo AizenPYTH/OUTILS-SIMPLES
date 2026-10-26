@@ -90,8 +90,25 @@ Variantes du flux pour les autres familles :
   panneau des pages repliable (`pages-panel.tsx`, dnd-kit) ; panneaux latéraux un à la fois
   (`side-panel.tsx` : OCR, document, historique, raccourcis) ; carte de diagnostic à l'import
   (`import-diagnosis.tsx`).
+- Zoom (`lib/pdf/editor/zoom.ts`, pur et testé) : une seule source de vérité, l'échelle absolue en
+  px CSS par point (100 % = 96/72) ; modes « ajuster à la largeur / page » dérivés du conteneur,
+  zoom manuel figé ; molette avec Ctrl ancrée sur le point sous le curseur (`anchoredScroll`) via
+  un ajustement du défilement après le rendu ; conteneur `min-w-full` pour ne jamais rogner.
+- Objets (`overlay.tsx`) : test de collision précis (distance au trait pour lignes et dessins),
+  outils « un tir » qui rendent la main à la sélection, poignées d'angle (texte : échelle de la
+  police) et d'extrémité (lignes), double-clic = édition d'un texte, outil Texte sur un texte
+  existant = édition ; la saisie est « live » et devient une seule étape d'historique à la fermeture.
+- Propriétés (`floating-bar.tsx`) : barre flottante près de l'objet, placée au-dessus ou en dessous
+  et bornée dans la zone ; chaque réglage modifie l'objet (étapes coalescées par contrôle) ; la
+  barre du haut (`context-bar.tsx`) ne montre que le style par défaut de l'outil actif.
+- Polices (`lib/pdf/fonts.ts`, `fonts-embed.ts`, `public/fonts`) : 3 polices standard + 9 familles
+  libres incorporées par fontkit (sous-ensemble) ; mêmes fichiers chargés à l'écran (FontFace) ;
+  contrôle des glyphes par police ; licences dans `public/fonts/LICENSES.md`.
+- Recherche (`lib/pdf/browser/search.ts`) : items de texte pdf.js, sans casse ni accents ;
+  remplacement d'un passage par le mécanisme « Modifier le texte » (`extract-runs` + `apply`).
 - Historique (`use-editor-history.ts`) : un seul réducteur `past/present/future` pour les annotations,
-  les textes modifiés et le plan de pages ; un glissement = une étape, nouvelle action = redo vidé.
+  les textes modifiés et le plan de pages ; un glissement = une étape, nouvelle action = redo vidé ;
+  clé de coalescence pour les curseurs et couleurs.
 - Document de base : l'original, ou l'original + couche OCR (`use-editor-ocr.ts` : rendu de chaque page
   en pixels, moteur Tesseract, `addOcrLayer`) ; l'original n'est jamais modifié, la couche se retire.
 - Plan de pages (`operations/page-plan.ts`) : ordre, rotation, duplication, suppression décrits et

@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Trash2 } from "lucide-react";
 import {
   annotationBounds,
+  dashArrayFor,
   isResizable,
   rgbToCss,
   translateAnnotation,
   type Annotation,
+  type LineAnnotation,
   type PdfPoint,
   type PdfRect,
   type TextAnnotation,
@@ -20,10 +21,10 @@ import {
   viewportToPdf,
   type ViewportLike,
 } from "@/lib/pdf/coordinates";
-import { fontFamilies } from "@/lib/pdf/fonts";
-import { uid } from "@/lib/utils";
-import { COMMENT_BACKGROUND, type ToolSettings, type WorkspaceTool } from "./types";
-import { t } from "@/lib/i18n";
+import { fontInfo } from "@/lib/pdf/fonts";
+import { ensureFontFace } from "@/lib/pdf/fonts-embed";
+import { clamp, uid } from "@/lib/utils";
+import { ONE_SHOT_TOOLS, type ToolSettings, type WorkspaceTool } from "./types";
 
 export interface OverlayProps {
   viewport: ViewportLike;
@@ -36,14 +37,16 @@ export interface OverlayProps {
   editingId: string | null;
   onSelect: (id: string | null) => void;
   onEdit: (id: string | null) => void;
-  /** Live (uncommitted) update during a drag. */
+  /** Live (uncommitted) update during a drag or while typing. */
   onLiveChange: (next: Annotation[]) => void;
   onBeginInteraction: () => void;
-  onEndInteraction: (next: Annotation[]) => void;
-  /** Committed change (create, delete, text edit). */
-  onCommit: (next: Annotation[]) => void;
+  onEndInteraction: (next: Annotation[], label?: string) => void;
+  /** Committed change (create, delete). */
+  onCommit: (next: Annotation[], label?: string) => void;
   /** Image / signature tools: the user clicked the page. */
   onPlaceAt?: (point: PdfPoint) => void;
+  /** A one-shot tool finished drawing: hand back to the selection tool. */
+  onToolChange?: (tool: WorkspaceTool) => void;
 }
 
 type Draft =
@@ -51,7 +54,7 @@ type Draft =
   | { kind: "box"; start: PdfPoint; current: PdfPoint } // viewport space
   | { kind: "line"; start: PdfPoint; current: PdfPoint } // viewport space
   | { kind: "place"; point: PdfPoint } // viewport space, text/comment placement on pointer up
-  | { kind: "move"; id: string; origin: Annotation; startPdf: PdfPoint }
+  | { kind: "move"; id: string; origin: Annotation; startPdf: PdfPoint; moved: boolean }
   | {
       kind: "resize";
       id: string;
@@ -59,7 +62,8 @@ type Draft =
       handle: Corner;
       startBox: PdfRect;
       keepRatio: boolean;
-    };
+    }
+  | { kind: "endpoint"; id: string; origin: LineAnnotation; which: "start" | "end" };
 
 type Corner = "nw" | "ne" | "sw" | "se";
 
@@ -67,7 +71,7 @@ const MIN_SIZE_PX = 10;
 const measureCanvas = typeof document !== "undefined" ? document.createElement("canvas") : null;
 
 export function fontCssFor(a: TextAnnotation): string {
-  return fontFamilies.find((f) => f.id === a.fontFamily)?.css ?? "sans-serif";
+  return fontInfo(a.fontFamily).css;
 }
 
 export function measureTextWidth(text: string, fontPx: number, a: TextAnnotation): number {
@@ -88,7 +92,7 @@ export function visualTextSize(
     : { width: a.width, height: a.height };
 }
 
-/** Recomputes a text box so it hugs its content (used while typing). */
+/** Recomputes a text box so it hugs its content (used while typing and after style changes). */
 export function autosizeText(
   a: TextAnnotation,
   viewport: ViewportLike,
@@ -100,18 +104,49 @@ export function autosizeText(
   const lines = Math.max(1, a.text.split("\n").length);
   const heightPt = lines * a.fontSize * 1.2 + padding * 2;
   const box = pdfRectToViewport(viewport, a);
-  const visual = visualTextSize(a, rotation);
-  const newWidth = Math.max(
-    widthPt,
-    visual.width > widthPt && a.text.length > 0 ? visual.width : widthPt,
-  );
   const next = viewportRectToPdf(viewport, {
     x: box.x,
     y: box.y,
-    width: newWidth * scale,
+    width: widthPt * scale,
     height: heightPt * scale,
   });
+  void rotation;
   return { ...a, x: next.x, y: next.y, width: next.width, height: next.height };
+}
+
+/** Distance from a point to a segment, in the same unit as the points. */
+export function distanceToSegment(p: PdfPoint, a: PdfPoint, b: PdfPoint): number {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 === 0 ? 0 : clamp(((p.x - a.x) * dx + (p.y - a.y) * dy) / len2, 0, 1);
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+}
+
+/**
+ * Whether a PDF-space point hits an annotation: lines and strokes within a
+ * tolerance of the stroke itself, boxes (text, images, shapes, highlights)
+ * anywhere inside their bounds.
+ */
+export function hitsAnnotation(a: Annotation, p: PdfPoint, tolerance: number): boolean {
+  if (a.type === "line")
+    return (
+      distanceToSegment(p, a.start, a.end) <= Math.max(tolerance, a.strokeWidth / 2 + tolerance / 2)
+    );
+  if (a.type === "path") {
+    const tol = Math.max(tolerance, a.strokeWidth / 2 + tolerance / 2);
+    if (a.points.length === 1) return Math.hypot(p.x - a.points[0]!.x, p.y - a.points[0]!.y) <= tol;
+    for (let i = 1; i < a.points.length; i += 1)
+      if (distanceToSegment(p, a.points[i - 1]!, a.points[i]!) <= tol) return true;
+    return false;
+  }
+  const b = annotationBounds(a);
+  return (
+    p.x >= b.x - tolerance &&
+    p.x <= b.x + b.width + tolerance &&
+    p.y >= b.y - tolerance &&
+    p.y <= b.y + b.height + tolerance
+  );
 }
 
 export function AnnotationOverlay(props: OverlayProps) {
@@ -131,6 +166,7 @@ export function AnnotationOverlay(props: OverlayProps) {
     onEndInteraction,
     onCommit,
     onPlaceAt,
+    onToolChange,
   } = props;
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [draft, setDraft] = React.useState<Draft | null>(null);
@@ -148,25 +184,24 @@ export function AnnotationOverlay(props: OverlayProps) {
     setDraft(d);
   };
 
-  const toViewport = (e: React.PointerEvent): PdfPoint => {
+  const toViewport = (e: { clientX: number; clientY: number }): PdfPoint => {
     const rect = rootRef.current!.getBoundingClientRect();
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   };
 
   const hitTest = (pdfPoint: PdfPoint): Annotation | null => {
+    const tolerance = 4 / scale;
     for (let i = pageAnnotations.length - 1; i >= 0; i -= 1) {
       const a = pageAnnotations[i]!;
-      const b = annotationBounds(a);
-      const pad = 4 / scale;
-      if (
-        pdfPoint.x >= b.x - pad &&
-        pdfPoint.x <= b.x + b.width + pad &&
-        pdfPoint.y >= b.y - pad &&
-        pdfPoint.y <= b.y + b.height + pad
-      )
-        return a;
+      if (hitsAnnotation(a, pdfPoint, tolerance)) return a;
     }
     return null;
+  };
+
+  const startEditing = (id: string) => {
+    onSelect(id);
+    onBeginInteraction();
+    onEdit(id);
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -184,7 +219,7 @@ export function AnnotationOverlay(props: OverlayProps) {
       }
       onSelect(hit.id);
       onBeginInteraction();
-      setDraftBoth({ kind: "move", id: hit.id, origin: hit, startPdf: pdf });
+      setDraftBoth({ kind: "move", id: hit.id, origin: hit, startPdf: pdf, moved: false });
       return;
     }
     if (tool === "image" || tool === "signature") {
@@ -192,6 +227,13 @@ export function AnnotationOverlay(props: OverlayProps) {
       return;
     }
     if (tool === "text" || tool === "comment") {
+      // Clicking an existing text block edits it instead of stacking a new one.
+      const hit = hitTest(pdf);
+      if (hit && hit.type === "text") {
+        e.preventDefault();
+        startEditing(hit.id);
+        return;
+      }
       // Prevent the compatibility mousedown from stealing focus from the textarea created on pointer up.
       e.preventDefault();
       setDraftBoth({ kind: "place", point: vp });
@@ -199,7 +241,7 @@ export function AnnotationOverlay(props: OverlayProps) {
     }
     onSelect(null);
     if (tool === "pen") setDraftBoth({ kind: "path", points: [pdf] });
-    else if (tool === "arrow" || tool === "underline")
+    else if (tool === "arrow" || tool === "line" || tool === "underline")
       setDraftBoth({ kind: "line", start: vp, current: vp });
     else setDraftBoth({ kind: "box", start: vp, current: vp });
   };
@@ -223,17 +265,41 @@ export function AnnotationOverlay(props: OverlayProps) {
       case "place":
         return;
       case "move": {
-        const moved = translateAnnotation(d.origin, pdf.x - d.startPdf.x, pdf.y - d.startPdf.y);
+        const dx = pdf.x - d.startPdf.x;
+        const dy = pdf.y - d.startPdf.y;
+        if (!d.moved && Math.hypot(dx, dy) * scale < 2) return; // a click is not a move
+        if (!d.moved) draftRef.current = { ...d, moved: true };
+        const moved = translateAnnotation(d.origin, dx, dy);
         onLiveChange(liveRef.current.map((a) => (a.id === d.id ? moved : a)));
         return;
       }
       case "resize": {
         const box = resizeBox(d.startBox, d.handle, vp, d.keepRatio);
+        if (d.origin.type === "text") {
+          // Corner handles scale the text: the box always follows the font metrics.
+          const ratio = box.width / Math.max(1, d.startBox.width);
+          const fontSize = clamp(d.origin.fontSize * ratio, 4, 300);
+          const rect = viewportRectToPdf(viewport, box);
+          const next = autosizeText({ ...d.origin, ...rect, fontSize }, viewport, pageRotation);
+          onLiveChange(liveRef.current.map((a) => (a.id === d.id ? next : a)));
+          return;
+        }
         const rect = viewportRectToPdf(viewport, box);
         onLiveChange(liveRef.current.map((a) => (a.id === d.id ? { ...a, ...rect } : a)));
         return;
       }
+      case "endpoint": {
+        const next: LineAnnotation = { ...d.origin, [d.which]: pdf };
+        onLiveChange(liveRef.current.map((a) => (a.id === d.id ? next : a)));
+        return;
+      }
     }
+  };
+
+  const finishShape = (annotation: Annotation, label: string) => {
+    onCommit([...annotations, annotation], label);
+    onSelect(annotation.id);
+    if (ONE_SHOT_TOOLS.includes(tool)) onToolChange?.("select");
   };
 
   const onPointerUp = () => {
@@ -243,7 +309,11 @@ export function AnnotationOverlay(props: OverlayProps) {
     switch (d.kind) {
       case "place": {
         const fontSize = settings.fontSize;
-        const padding = tool === "comment" ? 4 : 0;
+        const background =
+          tool === "comment"
+            ? (settings.background ?? undefined)
+            : (settings.background ?? undefined);
+        const padding = background ? 4 : 0;
         const widthPt = 24 + padding * 2;
         const heightPt = fontSize * 1.2 + padding * 2;
         const rect = viewportRectToPdf(viewport, {
@@ -262,36 +332,42 @@ export function AnnotationOverlay(props: OverlayProps) {
           fontSize,
           bold: settings.bold,
           italic: settings.italic,
+          underline: settings.underline,
           color: settings.color,
           align: settings.align,
-          background: tool === "comment" ? COMMENT_BACKGROUND : undefined,
+          background,
         };
-        onCommit([...annotations, annotation]);
+        // Creation and typing form one history step, committed when the field closes.
+        onBeginInteraction();
+        onLiveChange([...liveRef.current, annotation]);
         onSelect(annotation.id);
         onEdit(annotation.id);
         return;
       }
       case "path": {
         if (d.points.length === 0) return;
-        onCommit([
-          ...annotations,
-          {
-            id: uid("path"),
-            type: "path",
-            pageIndex,
-            points: d.points,
-            strokeWidth: settings.strokeWidth,
-            color: settings.color,
-            opacity: settings.opacity,
-          },
-        ]);
+        onCommit(
+          [
+            ...annotations,
+            {
+              id: uid("path"),
+              type: "path",
+              pageIndex,
+              points: d.points,
+              strokeWidth: settings.strokeWidth,
+              color: settings.color,
+              opacity: settings.opacity,
+              dash: settings.dash,
+            },
+          ],
+          "Dessin ajouté",
+        );
         return;
       }
       case "line": {
         const dist = Math.hypot(d.current.x - d.start.x, d.current.y - d.start.y);
         if (dist < 4) return;
-        onCommit([
-          ...annotations,
+        finishShape(
           {
             id: uid("line"),
             type: "line",
@@ -303,8 +379,14 @@ export function AnnotationOverlay(props: OverlayProps) {
             color: settings.color,
             opacity: settings.opacity,
             arrow: tool === "arrow",
+            dash: settings.dash,
           },
-        ]);
+          tool === "arrow"
+            ? "Flèche ajoutée"
+            : tool === "underline"
+              ? "Soulignement ajouté"
+              : "Ligne ajoutée",
+        );
         return;
       }
       case "box": {
@@ -312,8 +394,7 @@ export function AnnotationOverlay(props: OverlayProps) {
         if (box.width < MIN_SIZE_PX || box.height < MIN_SIZE_PX) return;
         const rect = viewportRectToPdf(viewport, box);
         if (tool === "highlight") {
-          onCommit([
-            ...annotations,
+          finishShape(
             {
               id: uid("hl"),
               type: "highlight",
@@ -322,42 +403,62 @@ export function AnnotationOverlay(props: OverlayProps) {
               color: settings.color,
               opacity: Math.min(settings.opacity, 0.5),
             },
-          ]);
-        } else if (tool === "rect") {
-          onCommit([
-            ...annotations,
+            "Surlignage ajouté",
+          );
+        } else if (tool === "mask") {
+          finishShape(
             {
-              id: uid("rect"),
+              id: uid("mask"),
               type: "rect",
               pageIndex,
               ...rect,
-              strokeWidth: settings.strokeWidth,
-              strokeColor: settings.color,
-              fillColor: settings.fill ? settings.color : null,
-              opacity: settings.opacity,
+              strokeWidth: 0,
+              strokeColor: null,
+              fillColor: settings.color,
+              opacity: 1,
+              mask: true,
             },
-          ]);
-        } else if (tool === "ellipse") {
-          onCommit([
-            ...annotations,
+            "Masque ajouté",
+          );
+        } else if (tool === "rect" || tool === "ellipse") {
+          finishShape(
             {
-              id: uid("ell"),
-              type: "ellipse",
+              id: uid(tool === "rect" ? "rect" : "ell"),
+              type: tool,
               pageIndex,
               ...rect,
               strokeWidth: settings.strokeWidth,
               strokeColor: settings.color,
-              fillColor: settings.fill ? settings.color : null,
+              fillColor: settings.fill ? settings.fillColor : null,
               opacity: settings.opacity,
+              dash: settings.dash,
             },
-          ]);
+            tool === "rect" ? "Rectangle ajouté" : "Ellipse ajoutée",
+          );
         }
         return;
       }
       case "move":
-      case "resize":
-        onEndInteraction(liveRef.current);
+        onEndInteraction(liveRef.current, "Élément déplacé");
         return;
+      case "resize":
+        onEndInteraction(
+          liveRef.current,
+          d.origin.type === "text" ? "Taille du texte" : "Élément redimensionné",
+        );
+        return;
+      case "endpoint":
+        onEndInteraction(liveRef.current, "Extrémité déplacée");
+        return;
+    }
+  };
+
+  const onDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (editingId || tool !== "select") return;
+    const hit = hitTest(viewportToPdf(viewport, toViewport(e)));
+    if (hit && hit.type === "text") {
+      e.preventDefault();
+      startEditing(hit.id);
     }
   };
 
@@ -373,19 +474,24 @@ export function AnnotationOverlay(props: OverlayProps) {
       origin: selected,
       handle,
       startBox: pdfRectToViewport(viewport, annotationBounds(selected)),
-      keepRatio: selected.type === "image",
+      keepRatio: selected.type === "image" || selected.type === "text",
     });
   };
 
-  const deleteSelected = () => {
-    if (!selected) return;
-    onCommit(annotations.filter((a) => a.id !== selected.id));
-    onSelect(null);
+  const startEndpoint = (e: React.PointerEvent, which: "start" | "end") => {
+    if (!selected || selected.type !== "line") return;
+    e.stopPropagation();
+    e.preventDefault();
+    rootRef.current?.setPointerCapture(e.pointerId);
+    onBeginInteraction();
+    setDraftBoth({ kind: "endpoint", id: selected.id, origin: selected, which });
   };
 
   const cursor =
     tool === "select"
-      ? "default"
+      ? draft?.kind === "move" && draft.moved
+        ? "grabbing"
+        : "default"
       : tool === "pen"
         ? "crosshair"
         : tool === "text" || tool === "comment"
@@ -406,6 +512,7 @@ export function AnnotationOverlay(props: OverlayProps) {
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onDoubleClick={onDoubleClick}
       data-testid="annotation-overlay"
       role="application"
       aria-label="Zone d'annotation de la page"
@@ -438,6 +545,7 @@ export function AnnotationOverlay(props: OverlayProps) {
             viewport={viewport}
             color={rgbToCss(settings.color, settings.opacity)}
             width={settings.strokeWidth * scale}
+            dash={dashCss(settings.dash, settings.strokeWidth * scale)}
           />
         ) : null}
         {draft?.kind === "box" ? (
@@ -457,6 +565,7 @@ export function AnnotationOverlay(props: OverlayProps) {
             stroke={rgbToCss(settings.color, settings.opacity)}
             strokeWidth={settings.strokeWidth * scale}
             strokeLinecap="round"
+            strokeDasharray={dashCss(settings.dash, settings.strokeWidth * scale)}
             markerEnd={tool === "arrow" ? "url(#arrow-head)" : undefined}
           />
         ) : null}
@@ -472,11 +581,19 @@ export function AnnotationOverlay(props: OverlayProps) {
               scale={scale}
               rotation={pageRotation}
               editing={editingId === a.id}
-              selected={selectedId === a.id}
-              onCommit={onCommit}
-              annotations={annotations}
-              onEdit={onEdit}
-              onSelect={onSelect}
+              onLiveChange={(next) =>
+                onLiveChange(liveRef.current.map((x) => (x.id === a.id ? next : x)))
+              }
+              onFinish={(final) => {
+                onEdit(null);
+                if (final.text.trim().length === 0) {
+                  onEndInteraction(
+                    liveRef.current.filter((x) => x.id !== a.id),
+                    "Texte vide retiré",
+                  );
+                  onSelect(null);
+                } else onEndInteraction(liveRef.current, "Texte saisi");
+              }}
             />
           );
         if (a.type === "image") {
@@ -503,14 +620,13 @@ export function AnnotationOverlay(props: OverlayProps) {
         return null;
       })}
 
-      {selected && tool === "select" ? (
+      {selected && tool === "select" && editingId !== selected.id ? (
         <SelectionFrame
           annotation={selected}
           viewport={viewport}
           onResizeStart={startResize}
-          onDelete={deleteSelected}
+          onEndpointStart={startEndpoint}
           resizable={isResizable(selected)}
-          onDoubleClick={() => selected.type === "text" && onEdit(selected.id)}
         />
       ) : null}
     </div>
@@ -526,7 +642,12 @@ function normalizeBox(a: PdfPoint, b: PdfPoint): PdfRect {
   };
 }
 
-function resizeBox(start: PdfRect, handle: Corner, pointer: PdfPoint, keepRatio: boolean): PdfRect {
+export function resizeBox(
+  start: PdfRect,
+  handle: Corner,
+  pointer: PdfPoint,
+  keepRatio: boolean,
+): PdfRect {
   const right = start.x + start.width;
   const bottom = start.y + start.height;
   let x = start.x,
@@ -556,16 +677,27 @@ function resizeBox(start: PdfRect, handle: Corner, pointer: PdfPoint, keepRatio:
   return { x, y, width: w, height: h };
 }
 
+/** SVG dash pattern matching the exported one (points → viewport px). */
+export function dashCss(
+  dash: "solid" | "dashed" | "dotted" | undefined,
+  strokePx: number,
+): string | undefined {
+  const arr = dashArrayFor(dash, strokePx);
+  return arr ? arr.map((v) => Math.max(0.1, v)).join(" ") : undefined;
+}
+
 function PathView({
   points,
   viewport,
   color,
   width,
+  dash,
 }: {
   points: PdfPoint[];
   viewport: ViewportLike;
   color: string;
   width: number;
+  dash?: string;
 }) {
   if (points.length === 0) return null;
   const vp = points.map((p) => pdfToViewport(viewport, p));
@@ -578,6 +710,7 @@ function PathView({
       strokeWidth={width}
       strokeLinecap="round"
       strokeLinejoin="round"
+      strokeDasharray={dash}
     />
   );
 }
@@ -599,6 +732,7 @@ function ShapeView({
           viewport={viewport}
           color={rgbToCss(a.color, a.opacity)}
           width={a.strokeWidth * scale}
+          dash={dashCss(a.dash, a.strokeWidth * scale)}
         />
       );
     case "highlight": {
@@ -623,8 +757,9 @@ function ShapeView({
           width={b.width}
           height={b.height}
           fill={a.fillColor ? rgbToCss(a.fillColor, a.opacity) : "none"}
-          stroke={a.strokeColor ? rgbToCss(a.strokeColor, a.opacity) : "none"}
+          stroke={a.strokeColor && a.strokeWidth > 0 ? rgbToCss(a.strokeColor, a.opacity) : "none"}
           strokeWidth={a.strokeWidth * scale}
+          strokeDasharray={dashCss(a.dash, a.strokeWidth * scale)}
         />
       );
     }
@@ -637,8 +772,9 @@ function ShapeView({
           rx={b.width / 2}
           ry={b.height / 2}
           fill={a.fillColor ? rgbToCss(a.fillColor, a.opacity) : "none"}
-          stroke={a.strokeColor ? rgbToCss(a.strokeColor, a.opacity) : "none"}
+          stroke={a.strokeColor && a.strokeWidth > 0 ? rgbToCss(a.strokeColor, a.opacity) : "none"}
           strokeWidth={a.strokeWidth * scale}
+          strokeDasharray={dashCss(a.dash, a.strokeWidth * scale)}
         />
       );
     }
@@ -654,6 +790,7 @@ function ShapeView({
           stroke={rgbToCss(a.color, a.opacity)}
           strokeWidth={a.strokeWidth * scale}
           strokeLinecap="round"
+          strokeDasharray={dashCss(a.dash, a.strokeWidth * scale)}
           markerEnd={a.arrow ? "url(#arrow-head)" : undefined}
         />
       );
@@ -675,6 +812,7 @@ function DraftBox({
   scale: number;
 }) {
   const stroke = rgbToCss(settings.color, settings.opacity);
+  const dash = dashCss(settings.dash, settings.strokeWidth * scale);
   if (tool === "highlight")
     return (
       <rect
@@ -686,6 +824,16 @@ function DraftBox({
         style={{ mixBlendMode: "multiply" }}
       />
     );
+  if (tool === "mask")
+    return (
+      <rect
+        x={box.x}
+        y={box.y}
+        width={box.width}
+        height={box.height}
+        fill={rgbToCss(settings.color, 0.85)}
+      />
+    );
   if (tool === "ellipse")
     return (
       <ellipse
@@ -693,9 +841,10 @@ function DraftBox({
         cy={box.y + box.height / 2}
         rx={box.width / 2}
         ry={box.height / 2}
-        fill={settings.fill ? rgbToCss(settings.color, settings.opacity) : "none"}
+        fill={settings.fill ? rgbToCss(settings.fillColor, settings.opacity) : "none"}
         stroke={stroke}
         strokeWidth={settings.strokeWidth * scale}
+        strokeDasharray={dash}
       />
     );
   return (
@@ -704,10 +853,10 @@ function DraftBox({
       y={box.y}
       width={box.width}
       height={box.height}
-      fill={settings.fill ? rgbToCss(settings.color, settings.opacity) : "none"}
+      fill={settings.fill ? rgbToCss(settings.fillColor, settings.opacity) : "none"}
       stroke={stroke}
       strokeWidth={settings.strokeWidth * scale}
-      strokeDasharray={tool === "rect" ? undefined : "4 3"}
+      strokeDasharray={dash}
     />
   );
 }
@@ -718,11 +867,8 @@ interface TextViewProps {
   scale: number;
   rotation: number;
   editing: boolean;
-  selected: boolean;
-  annotations: Annotation[];
-  onCommit: (next: Annotation[]) => void;
-  onEdit: (id: string | null) => void;
-  onSelect: (id: string | null) => void;
+  onLiveChange: (next: TextAnnotation) => void;
+  onFinish: (final: TextAnnotation) => void;
 }
 
 function TextView({
@@ -731,13 +877,16 @@ function TextView({
   scale,
   rotation,
   editing,
-  annotations,
-  onCommit,
-  onEdit,
+  onLiveChange,
+  onFinish,
 }: TextViewProps) {
   const box = pdfRectToViewport(viewport, a);
   const fontPx = a.fontSize * scale;
   const padding = a.background ? 4 * scale : 0;
+  // Make sure the face is available on screen (no-op for standard fonts).
+  React.useEffect(() => {
+    void ensureFontFace(a.fontFamily);
+  }, [a.fontFamily]);
   const style: React.CSSProperties = {
     left: box.x,
     top: box.y,
@@ -748,6 +897,7 @@ function TextView({
     fontFamily: fontCssFor(a),
     fontWeight: a.bold ? 700 : 400,
     fontStyle: a.italic ? "italic" : "normal",
+    textDecoration: a.underline ? "underline" : "none",
     color: rgbToCss(a.color),
     textAlign: a.align,
     background: a.background ? rgbToCss(a.background) : "transparent",
@@ -764,18 +914,15 @@ function TextView({
         className="absolute resize-none overflow-hidden rounded-none border border-primary bg-transparent outline-hidden"
         style={{
           ...style,
+          userSelect: "text",
           background: a.background ? rgbToCss(a.background) : "rgba(255,255,255,0.6)",
         }}
         value={a.text}
         rows={Math.max(1, a.text.split("\n").length)}
-        onChange={(e) => {
-          const next = autosizeText({ ...a, text: e.target.value }, viewport, rotation);
-          onCommit(annotations.map((x) => (x.id === a.id ? next : x)));
-        }}
-        onBlur={() => {
-          onEdit(null);
-          if (a.text.trim().length === 0) onCommit(annotations.filter((x) => x.id !== a.id));
-        }}
+        onChange={(e) =>
+          onLiveChange(autosizeText({ ...a, text: e.target.value }, viewport, rotation))
+        }
+        onBlur={() => onFinish(a)}
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             e.preventDefault();
@@ -784,6 +931,7 @@ function TextView({
           e.stopPropagation();
         }}
         onPointerDown={(e) => e.stopPropagation()}
+        onDoubleClick={(e) => e.stopPropagation()}
         data-testid="text-annotation-editor"
       />
     );
@@ -800,17 +948,52 @@ function SelectionFrame({
   annotation,
   viewport,
   onResizeStart,
-  onDelete,
+  onEndpointStart,
   resizable,
-  onDoubleClick,
 }: {
   annotation: Annotation;
   viewport: ViewportLike;
   onResizeStart: (e: React.PointerEvent, handle: Corner) => void;
-  onDelete: () => void;
+  onEndpointStart: (e: React.PointerEvent, which: "start" | "end") => void;
   resizable: boolean;
-  onDoubleClick: () => void;
 }) {
+  const handleClass =
+    "absolute size-4 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full border-2 border-primary bg-surface shadow-sm sm:size-3.5";
+  if (annotation.type === "line") {
+    const s = pdfToViewport(viewport, annotation.start);
+    const e = pdfToViewport(viewport, annotation.end);
+    return (
+      <>
+        <div
+          className="absolute"
+          style={{
+            left: Math.min(s.x, e.x) - 6,
+            top: Math.min(s.y, e.y) - 6,
+            width: Math.abs(e.x - s.x) + 12,
+            height: Math.abs(e.y - s.y) + 12,
+            pointerEvents: "none",
+          }}
+          data-testid="selection-frame"
+        />
+        <button
+          type="button"
+          aria-label="Déplacer le début de la ligne"
+          className={handleClass}
+          style={{ left: s.x, top: s.y, cursor: "move" }}
+          onPointerDown={(ev) => onEndpointStart(ev, "start")}
+          data-testid="handle-start"
+        />
+        <button
+          type="button"
+          aria-label="Déplacer la fin de la ligne"
+          className={handleClass}
+          style={{ left: e.x, top: e.y, cursor: "move" }}
+          onPointerDown={(ev) => onEndpointStart(ev, "end")}
+          data-testid="handle-end"
+        />
+      </>
+    );
+  }
   const box = pdfRectToViewport(viewport, annotationBounds(annotation));
   const handles: { id: Corner; x: number; y: number; cursor: string }[] = [
     { id: "nw", x: box.x, y: box.y, cursor: "nwse-resize" },
@@ -829,7 +1012,6 @@ function SelectionFrame({
           height: box.height + 4,
           pointerEvents: "none",
         }}
-        onDoubleClick={onDoubleClick}
         data-testid="selection-frame"
       />
       {resizable
@@ -838,27 +1020,13 @@ function SelectionFrame({
               key={h.id}
               type="button"
               aria-label={`Redimensionner (${h.id})`}
-              className="absolute size-4 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full border-2 border-primary bg-surface shadow-sm sm:size-3.5"
+              className={handleClass}
               style={{ left: h.x, top: h.y, cursor: h.cursor }}
               onPointerDown={(e) => onResizeStart(e, h.id)}
+              data-testid={`handle-${h.id}`}
             />
           ))
         : null}
-      <button
-        type="button"
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={onDelete}
-        aria-label={t.common.delete}
-        className="absolute flex h-8 items-center gap-1 rounded-full bg-foreground px-2.5 text-xs font-medium text-background shadow-md"
-        style={{
-          left: box.x + box.width / 2,
-          top: Math.max(4, box.y - 40),
-          transform: "translateX(-50%)",
-        }}
-        data-testid="delete-annotation"
-      >
-        <Trash2 className="size-3.5" aria-hidden="true" /> {t.common.delete}
-      </button>
     </>
   );
 }

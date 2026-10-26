@@ -48,8 +48,12 @@ test.describe("editor", () => {
       await page.getByTestId("thumb-0").click();
       await expect(page.getByTestId("page-indicator")).toHaveText("Page 1 sur 3");
     }
+    // Zoom in from the fitted level goes to the next documented step above it.
+    const before = Number((await page.getByTestId("zoom-level").textContent())!.replace(/\D/g, ""));
     await page.getByRole("button", { name: "Zoom avant" }).click();
-    await expect(page.getByTestId("zoom-level")).toHaveText("125 %");
+    const steps = [25, 50, 75, 100, 125, 150, 200, 300, 400];
+    const expected = steps.find((s) => s > before + 0.5) ?? 400;
+    await expect(page.getByTestId("zoom-level")).toHaveText(`${expected} %`);
 
     await page.getByTestId("editor-download").click();
     const downloadPromise = page.waitForEvent("download");

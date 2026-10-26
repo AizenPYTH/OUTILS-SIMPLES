@@ -8,14 +8,16 @@ import {
   type PDFFont,
   type PDFImage,
 } from "pdf-lib";
-import { resolveStandardFont, sanitizeForStandardFont } from "../fonts";
+import { styleFor } from "../fonts";
+import { embedFamilyFont, sanitizeForFamily } from "../fonts-embed";
 import { toPdfError } from "../errors";
-import type {
-  Annotation,
-  ImageAnnotation,
-  LineAnnotation,
-  PathAnnotation,
-  TextAnnotation,
+import {
+  dashArrayFor,
+  type Annotation,
+  type ImageAnnotation,
+  type LineAnnotation,
+  type PathAnnotation,
+  type TextAnnotation,
 } from "./types";
 
 export interface DrawReport {
@@ -43,12 +45,11 @@ export async function drawAnnotations(
   const pages = doc.getPages();
 
   const getFont = async (a: TextAnnotation): Promise<PDFFont> => {
-    const key = `${a.fontFamily}-${a.bold}-${a.italic}`;
+    const style = styleFor(a.fontFamily, { bold: a.bold, italic: a.italic });
+    const key = `${a.fontFamily}-${style.bold}-${style.italic}`;
     let font = fontCache.get(key);
     if (!font) {
-      font = await doc.embedFont(
-        resolveStandardFont(a.fontFamily, { bold: a.bold, italic: a.italic }),
-      );
+      font = await embedFamilyFont(doc, a.fontFamily, style);
       fontCache.set(key, font);
     }
     return font;
@@ -72,7 +73,11 @@ export async function drawAnnotations(
       switch (annotation.type) {
         case "text": {
           const font = await getFont(annotation);
-          const { text, replaced } = sanitizeForStandardFont(annotation.text);
+          const { text, replaced } = await sanitizeForFamily(
+            annotation.text,
+            annotation.fontFamily,
+            styleFor(annotation.fontFamily, { bold: annotation.bold, italic: annotation.italic }),
+          );
           if (replaced) report.replacedCharacters += 1;
           drawTextBlock(page, { ...annotation, text }, font, rotation);
           break;
@@ -95,6 +100,7 @@ export async function drawAnnotations(
               : undefined,
             opacity: annotation.opacity,
             borderOpacity: annotation.opacity,
+            borderDashArray: dashArrayFor(annotation.dash, annotation.strokeWidth),
           });
           break;
         case "ellipse":
@@ -112,6 +118,7 @@ export async function drawAnnotations(
               : undefined,
             opacity: annotation.opacity,
             borderOpacity: annotation.opacity,
+            borderDashArray: dashArrayFor(annotation.dash, annotation.strokeWidth),
           });
           break;
         case "line":
@@ -199,6 +206,17 @@ function drawTextBlock(page: PDFPage, a: TextAnnotation, font: PDFFont, rotation
       color: rgb(a.color.r, a.color.g, a.color.b),
       rotate: degrees(rot),
     });
+    if (a.underline && line.length > 0) {
+      // Underline 12 % of the size below the baseline, 6 % thick (common typographic defaults).
+      const start = localToUser(anchor, offsetX, offsetY - a.fontSize * 0.12, rot);
+      const end = localToUser(anchor, offsetX + textWidth, offsetY - a.fontSize * 0.12, rot);
+      page.drawLine({
+        start,
+        end,
+        thickness: Math.max(0.5, a.fontSize * 0.06),
+        color: rgb(a.color.r, a.color.g, a.color.b),
+      });
+    }
   });
 }
 
@@ -263,6 +281,7 @@ function drawPath(page: PDFPage, a: PathAnnotation): void {
     borderWidth: a.strokeWidth,
     borderOpacity: a.opacity,
     borderLineCap: LineCapStyle.Round,
+    borderDashArray: dashArrayFor(a.dash, a.strokeWidth),
     color: undefined,
   });
 }
@@ -276,6 +295,7 @@ function drawLine(page: PDFPage, a: LineAnnotation): void {
     color,
     opacity: a.opacity,
     lineCap: LineCapStyle.Round,
+    dashArray: dashArrayFor(a.dash, a.strokeWidth),
   });
   if (a.arrow) {
     const angle = Math.atan2(a.end.y - a.start.y, a.end.x - a.start.x);

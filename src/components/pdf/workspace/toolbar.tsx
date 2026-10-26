@@ -3,9 +3,11 @@
 import {
   ArrowUpRight,
   Circle,
+  EyeOff,
   Highlighter,
   ImageIcon,
   MessageSquare,
+  Minus,
   MousePointer2,
   PenLine,
   Pencil,
@@ -27,7 +29,9 @@ const icons: Record<WorkspaceTool, React.ComponentType<{ className?: string }>> 
   underline: Underline,
   rect: Square,
   ellipse: Circle,
+  line: Minus,
   arrow: ArrowUpRight,
+  mask: EyeOff,
   image: ImageIcon,
   signature: PenLine,
 };

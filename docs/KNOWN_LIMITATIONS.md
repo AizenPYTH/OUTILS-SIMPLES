@@ -16,6 +16,18 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
   police du scan. Qualité estimée affichée ; pas de reconstruction de mise en page. L'OCR repart
   toujours du document d'origine (relancer remplace la couche). Le diagnostic à l'import analyse
   toutes les pages jusqu'à 80, puis un échantillon.
+- **Éditeur, zoom** : 100 % = taille réelle (96 dpi) ; paliers 25–400 % ; une page plus petite
+  que la zone reste centrée, donc le zoom « autour du curseur » n'est exact que lorsque la page
+  déborde ; en mode « ajuster », un panneau qui s'ouvre réajuste la page (en zoom manuel, rien ne
+  bouge) ; au-delà de 16 Mpx de rendu, la densité de pixels est réduite (très fort zoom sur écran 3×).
+- **Éditeur, formes et texte ajouté** : pas de rotation libre des objets (ils suivent la rotation
+  de la page) ; pas de sélection multiple ; le redimensionnement d'un texte change sa taille de
+  police (pas de reflux) ; l'italique n'existe pas pour DejaVu Sans ; les polices incorporées sont
+  sous-ensemblisées à l'export (fichier léger) ; un caractère absent d'une police est remplacé par
+  « ? » et signalé ; le masque visuel ne supprime pas les données (outil Caviarder pour cela).
+- **Éditeur, recherche** : un mot coupé entre deux fragments de texte (ligatures, césure, deux
+  opérateurs) n'est pas trouvé ; le remplacement ne concerne que les passages modifiables par
+  « Modifier le texte » (pas de reflux, même police si possible).
 - **Éditeur, pages** : réordonner, pivoter, dupliquer, supprimer sont appliqués à l'export (le
   document affiché reste l'original) ; pas de recadrage de page ni d'insertion de pages d'un autre
   fichier (outils dédiés).
@@ -116,7 +128,7 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
 
 ## Qualité / tests
 
-- 186 tests Vitest ; 102 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
+- 197 tests Vitest ; 110 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
   fichiers produits, de la confidentialité réseau, de l'accessibilité (axe-core), de la caméra (périphérique
   factice Chromium) et des gros fichiers (60 Mo traité, 101 Mo et 1 001 pages refusés). Non couverts
   automatiquement : glisser-déposer tactile de dnd-kit, pad de signature dessiné, caméra physique,

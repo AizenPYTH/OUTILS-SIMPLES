@@ -155,12 +155,13 @@ de nom de fichier.
 
 ## Tests
 
-- `pnpm test` : 186 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
+- `pnpm test` : 197 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
   sur fixtures réelles, permissions de chiffrement relues par pdf.js, géométrie/détection du scanner, OCR →
   PDF recherchable, métadonnées d'images, encodeur PNG, extraction d'images et de liens, comparaison,
   caviardage (y compris pages pivotées), Markdown → PDF, regex, dates et jours fériés, TVA, unités,
   codes-barres, couleurs, décodage QR, documents imprimables, limites et fichiers invalides, fondations
-  de l'éditeur : diagnostic d'import, mot de passe, couche OCR, plan de pages, passages OCR).
+  de l'éditeur : diagnostic d'import, mot de passe, couche OCR, plan de pages, passages OCR, modèle de
+  zoom, palette de polices incorporées).
 - `pnpm build && pnpm test:e2e` : 97 parcours Playwright exécutés sur desktop et mobile (Pixel 7) :
   catalogue, recherche, navigation, 404, métadonnées, sitemap/robots/CSP, thème, absence de débordement
   horizontal, et pour chacun des 66 outils un parcours avec fichiers téléchargés vérifiés (pdf-lib, pdf.js,

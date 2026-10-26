@@ -35,11 +35,15 @@ export interface TextAnnotation extends AnnotationBase, PdfRect {
   fontSize: number;
   bold: boolean;
   italic: boolean;
+  underline?: boolean;
   color: RgbColor;
   align: "left" | "center" | "right";
-  /** Optional opaque background (used by "comment" notes). */
+  /** Optional opaque background (used by "comment" notes and the text background option). */
   background?: RgbColor;
 }
+
+/** Stroke pattern of shapes and lines. */
+export type DashStyle = "solid" | "dashed" | "dotted";
 
 export interface PathAnnotation extends AnnotationBase {
   type: "path";
@@ -47,6 +51,7 @@ export interface PathAnnotation extends AnnotationBase {
   strokeWidth: number;
   color: RgbColor;
   opacity: number;
+  dash?: DashStyle;
 }
 
 export interface RectAnnotation extends AnnotationBase, PdfRect {
@@ -55,6 +60,9 @@ export interface RectAnnotation extends AnnotationBase, PdfRect {
   strokeColor: RgbColor | null;
   fillColor: RgbColor | null;
   opacity: number;
+  dash?: DashStyle;
+  /** Visual mask: an opaque box meant to hide content (it does not remove data). */
+  mask?: boolean;
 }
 
 export interface EllipseAnnotation extends AnnotationBase, PdfRect {
@@ -63,6 +71,7 @@ export interface EllipseAnnotation extends AnnotationBase, PdfRect {
   strokeColor: RgbColor | null;
   fillColor: RgbColor | null;
   opacity: number;
+  dash?: DashStyle;
 }
 
 export interface LineAnnotation extends AnnotationBase {
@@ -73,6 +82,29 @@ export interface LineAnnotation extends AnnotationBase {
   color: RgbColor;
   opacity: number;
   arrow: boolean;
+  dash?: DashStyle;
+}
+
+/** Dash array (in points) for a stroke width, matching the on-screen pattern. */
+export function dashArrayFor(
+  dash: DashStyle | undefined,
+  strokeWidth: number,
+): number[] | undefined {
+  const w = Math.max(1, strokeWidth);
+  const r = (v: number) => Math.round(v * 100) / 100;
+  if (dash === "dashed") return [r(w * 4), r(w * 2.5)];
+  if (dash === "dotted") return [r(w * 0.1), r(w * 2)];
+  return undefined;
+}
+
+/** Copy of an annotation with a new id, shifted so it does not overlap the original. */
+export function duplicateAnnotation<T extends Annotation>(
+  annotation: T,
+  id: string,
+  offset = 12,
+): T {
+  const moved = translateAnnotation(annotation, offset, -offset);
+  return { ...moved, id };
 }
 
 /** Translucent rectangle multiplied over the content. */
