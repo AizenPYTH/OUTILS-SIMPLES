@@ -60,6 +60,8 @@ export type ToolIconName =
   | "info"
   | "flip"
   | "braces"
+  | "file-type"
+  | "file-spreadsheet"
   | "diff"
   | "text-cursor"
   | "case"

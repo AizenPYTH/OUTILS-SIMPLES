@@ -9,7 +9,7 @@ test.describe("site", () => {
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("h1")).toHaveText("Vos fichiers, vos outils, votre navigateur.");
     await expect(page.getByTestId("home-search")).toBeVisible();
-    await expect(page.getByTestId("home-categories").getByRole("link")).toHaveCount(8);
+    await expect(page.getByTestId("home-categories").getByRole("link")).toHaveCount(9);
     await expect(page.getByTestId("home-all-tools")).toHaveAttribute("href", "/outils/");
     await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /PDF/);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
@@ -20,8 +20,8 @@ test.describe("site", () => {
     expect(await cards.count()).toBe(8); // popular tools only, never the whole catalogue
     await expect(page.getByTestId("home-journeys").getByRole("listitem")).toHaveCount(4);
     await expect(page.getByTestId("home-faq").locator("dt")).toHaveCount(4);
-    // Categories without a published tool are not linked.
-    await expect(page.locator('a[href*="/conversion/"]')).toHaveCount(0);
+    // Every active family is linked (conversion became active with the Office tools).
+    expect(await page.locator('a[href="/conversion/"]').count()).toBeGreaterThanOrEqual(1);
     await expect(page.getByTestId("consent-banner")).toHaveCount(0);
     const jsonLd = await page.locator('script[type="application/ld+json"]').first().textContent();
     expect(jsonLd).toContain("WebSite");
@@ -167,7 +167,7 @@ test.describe("site", () => {
     expect(sitemap).toContain("/numerisation/corriger-un-document-photographie/");
     expect(sitemap).toContain("/documents/markdown-vers-pdf/");
     expect(sitemap).toContain("/calculatrices/tva/");
-    expect(sitemap).not.toContain("/conversion/");
+    expect(sitemap).toContain("/conversion/word-vers-pdf/");
     expect(sitemap).toContain("/outils/");
     const robots = await (await request.get("/robots.txt")).text();
     expect(robots).toContain("Sitemap:");

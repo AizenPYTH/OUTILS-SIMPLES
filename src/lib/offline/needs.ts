@@ -15,6 +15,8 @@ const FONT_TOOLS = new Set(["pdf-edit", "pdf-annotate", "pdf-add-text", "pdf-sig
 const OCR_TOOLS = new Set(["scan-ocr"]);
 /** Categories whose tools render or write PDF pages (pdf.js worker, standard fonts, qpdf). */
 const PDF_CATEGORIES = new Set<ToolCategoryId>(["pdf", "numerisation", "documents"]);
+/** Tools outside those categories that still open PDFs with pdf.js. */
+const PDF_TOOLS = new Set(["conv-pdf-docx"]);
 
 /**
  * Which engine groups a tool needs beyond its own page and scripts (those are
@@ -22,7 +24,7 @@ const PDF_CATEGORIES = new Set<ToolCategoryId>(["pdf", "numerisation", "document
  */
 export function offlineGroupsFor(tool: { id: string; category: ToolCategoryId }): OfflineGroup[] {
   const groups: OfflineGroup[] = [];
-  if (PDF_CATEGORIES.has(tool.category)) groups.push("pdf");
+  if (PDF_CATEGORIES.has(tool.category) || PDF_TOOLS.has(tool.id)) groups.push("pdf");
   if (OCR_TOOLS.has(tool.id)) groups.push("ocr");
   if (FONT_TOOLS.has(tool.id)) groups.push("fonts");
   return groups;

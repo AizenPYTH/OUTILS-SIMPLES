@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   getIndexableTools,
+  getPlannedCategories,
   getPublishedTools,
   getRelatedTools,
   getToolByPath,
@@ -102,9 +103,12 @@ describe("sitemap", () => {
     expect(urls).toContain("http://localhost:3000/numerisation/ocr/");
     expect(urls).toContain("http://localhost:3000/numerisation/corriger-un-document-photographie/");
     expect(urls).toContain("http://localhost:3000/documents/markdown-vers-pdf/");
-    // Categories without a published tool are not exposed.
     expect(urls).toContain("http://localhost:3000/calculatrices/tva/");
-    expect(urls.some((u) => u.includes("/conversion/"))).toBe(false);
+    expect(urls).toContain("http://localhost:3000/conversion/word-vers-pdf/");
+    // Categories without a published tool are not exposed.
+    for (const category of getPlannedCategories()) {
+      expect(urls.some((u) => u.includes(`/${category.slug}/`))).toBe(false);
+    }
     expect(new Set(urls).size).toBe(urls.length);
   });
 });

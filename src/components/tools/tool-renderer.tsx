@@ -17,6 +17,19 @@ const loading = () => (
  * before hydration.
  */
 const components = {
+  // ---------------------------------------------------------------- Conversion
+  "conv-docx-pdf": dynamic(
+    () => import("@/components/conversion/office-to-pdf-tool").then((m) => m.DocxPdfTool),
+    { ssr: false, loading },
+  ),
+  "conv-sheet-pdf": dynamic(
+    () => import("@/components/conversion/office-to-pdf-tool").then((m) => m.SheetPdfTool),
+    { ssr: false, loading },
+  ),
+  "conv-pdf-docx": dynamic(
+    () => import("@/components/conversion/pdf-to-docx-tool").then((m) => m.PdfToDocxTool),
+    { ssr: false, loading },
+  ),
   // ---------------------------------------------------------------- PDF (core)
   "pdf-merge": dynamic(() => import("@/components/pdf/tools/merge-tool").then((m) => m.MergeTool), {
     ssr: false,

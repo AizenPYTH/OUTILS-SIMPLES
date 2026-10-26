@@ -1,5 +1,13 @@
 import { Lexer, type Token, type Tokens } from "marked";
-import { PDFString, PageSizes, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import {
+  PDFString,
+  PageSizes,
+  StandardFonts,
+  rgb,
+  type PDFFont,
+  type PDFImage,
+  type PDFPage,
+} from "pdf-lib";
 import { PdfError, toPdfError } from "../errors";
 import { createPdfDocument, savePdfDocument } from "../load";
 import { resolveStandardFont, sanitizeForStandardFont, type FontFamily } from "../fonts";
@@ -13,6 +21,8 @@ export interface TextToPdfOptions {
   /** Body font size in points. */
   fontSize: number;
   pageSize: "a4" | "letter";
+  /** Page orientation (default portrait). */
+  orientation?: "portrait" | "landscape";
   /** Margin in points. */
   margin: number;
   pageNumbers: boolean;
@@ -32,8 +42,10 @@ export interface TextToPdfResult {
   pageCount: number;
   /** Some characters (emoji, non-Latin scripts) were replaced by "?". */
   replacedCharacters: boolean;
-  /** Elements that cannot be rendered with the standard fonts (images, raw HTML). */
+  /** Elements that cannot be rendered (remote images, raw HTML…). */
   skipped: string[];
+  /** Embedded images (PNG/JPEG data URIs) drawn in the document. */
+  imageCount: number;
 }
 
 interface Run {
@@ -97,8 +109,11 @@ export async function textToPdf(
   const layout = new Layout(doc, fonts, options);
   if (options.title?.trim()) layout.heading([{ ...plainRun(options.title.trim()), bold: true }], 1);
   try {
-    if (options.markdown) layout.blocks(new Lexer({ gfm: true, breaks: false }).lex(source), 0);
-    else layout.plainText(source);
+    if (options.markdown) {
+      const tokens = new Lexer({ gfm: true, breaks: false }).lex(source);
+      await layout.embedImages(tokens);
+      layout.blocks(tokens, 0);
+    } else layout.plainText(source);
     layout.finish();
   } catch (error) {
     throw toPdfError(error, "PROCESSING_FAILED");
@@ -109,7 +124,36 @@ export async function textToPdf(
     pageCount: doc.getPageCount(),
     replacedCharacters: layout.replaced,
     skipped: layout.skipped,
+    imageCount: layout.imageCount,
   };
+}
+
+const DATA_IMAGE = /^data:image\/(png|jpe?g);base64,([A-Za-z0-9+/=\s]+)$/i;
+
+function decodeBase64(data: string): Uint8Array {
+  const binary = atob(data.replace(/\s+/g, ""));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+/** Every image token of a marked token tree (paragraphs, lists, tables, quotes). */
+function collectImageTokens(tokens: Token[], out: Tokens.Image[] = []): Tokens.Image[] {
+  for (const token of tokens) {
+    if (token.type === "image") out.push(token as Tokens.Image);
+    const t = token as {
+      tokens?: Token[];
+      items?: Tokens.ListItem[];
+      header?: Tokens.TableCell[];
+      rows?: Tokens.TableCell[][];
+    };
+    if (Array.isArray(t.tokens)) collectImageTokens(t.tokens, out);
+    if (Array.isArray(t.items)) for (const item of t.items) collectImageTokens(item.tokens, out);
+    if (Array.isArray(t.header)) for (const cell of t.header) collectImageTokens(cell.tokens, out);
+    if (Array.isArray(t.rows))
+      for (const row of t.rows) for (const cell of row) collectImageTokens(cell.tokens, out);
+  }
+  return out;
 }
 
 function plainRun(text: string): Run {
@@ -124,15 +168,18 @@ class Layout {
   private page!: PDFPage;
   private y = 0;
   private quoteDepth = 0;
+  private readonly images = new Map<string, PDFImage>();
   replaced = false;
   skipped: string[] = [];
+  imageCount = 0;
 
   constructor(
     private readonly doc: Awaited<ReturnType<typeof createPdfDocument>>,
     private readonly fonts: Fonts,
     private readonly options: TextToPdfOptions,
   ) {
-    const [w, h] = options.pageSize === "letter" ? PageSizes.Letter : PageSizes.A4;
+    const [pw, ph] = options.pageSize === "letter" ? PageSizes.Letter : PageSizes.A4;
+    const [w, h] = options.orientation === "landscape" ? [ph, pw] : [pw, ph];
     this.pageWidth = w;
     this.pageHeight = h;
     this.margin = Math.max(24, Math.min(options.margin, Math.min(w, h) / 4));
@@ -167,6 +214,65 @@ class Layout {
     return result.text;
   }
 
+  /** Decodes PNG/JPEG data URIs once (pdf-lib embedding is asynchronous; layout is not). */
+  async embedImages(tokens: Token[]): Promise<void> {
+    for (const token of collectImageTokens(tokens)) {
+      const match = DATA_IMAGE.exec(token.href);
+      if (!match || this.images.has(token.href)) continue;
+      try {
+        const bytes = decodeBase64(match[2]!);
+        const image =
+          match[1]!.toLowerCase() === "png"
+            ? await this.doc.embedPng(bytes)
+            : await this.doc.embedJpg(bytes);
+        this.images.set(token.href, image);
+      } catch {
+        this.skipped.push(`Image illisible ignorée${token.text ? ` : ${token.text}` : ""}`);
+      }
+    }
+  }
+
+  /** Draws an embedded image as a block, scaled to the content width (1 px = 0.75 pt). */
+  private drawImage(image: PDFImage, indent: number): void {
+    const maxWidth = this.contentWidth - indent;
+    const maxHeight = this.pageHeight - this.margin * 2 - this.size * 2;
+    let width = image.width * 0.75;
+    let height = image.height * 0.75;
+    const scale = Math.min(1, maxWidth / width, maxHeight / height);
+    width *= scale;
+    height *= scale;
+    this.ensure(height + this.size * 0.5);
+    this.page.drawImage(image, {
+      x: this.margin + indent,
+      y: this.y - height,
+      width,
+      height,
+    });
+    this.y -= height + this.size * 0.6;
+    this.imageCount += 1;
+  }
+
+  /** Paragraph whose inline tokens include embedded images: text segments and images alternate as blocks. */
+  private paragraphWithImages(tokens: Token[], indent: number): boolean {
+    if (!tokens.some((t) => t.type === "image" && this.images.has((t as Tokens.Image).href)))
+      return false;
+    let buffer: Token[] = [];
+    const flush = () => {
+      const runs = this.inline(buffer).filter((r) => r.text.trim().length > 0 || r.text === "\n");
+      if (runs.some((r) => r.text.trim())) this.paragraph(runs, indent);
+      buffer = [];
+    };
+    for (const token of tokens) {
+      const image = token.type === "image" ? this.images.get((token as Tokens.Image).href) : null;
+      if (image) {
+        flush();
+        this.drawImage(image, indent);
+      } else buffer.push(token);
+    }
+    flush();
+    return true;
+  }
+
   // ----------------------------------------------------------------- blocks
   blocks(tokens: Token[], indent: number): void {
     for (let i = 0; i < tokens.length; i += 1) this.block(tokens[i]!, indent);
@@ -182,7 +288,8 @@ class Layout {
         );
         break;
       case "paragraph":
-        this.paragraph(this.inline((token as Tokens.Paragraph).tokens), indent);
+        if (!this.paragraphWithImages((token as Tokens.Paragraph).tokens, indent))
+          this.paragraph(this.inline((token as Tokens.Paragraph).tokens), indent);
         break;
       case "text": {
         const t = token as Tokens.Text;
@@ -474,13 +581,17 @@ class Layout {
           out.push(...this.inline(link.tokens, { ...style, link: href }));
           break;
         }
-        case "image":
-          this.skipped.push(
-            `Image ignorée : ${(token as Tokens.Image).text || (token as Tokens.Image).href}`,
-          );
-          if ((token as Tokens.Image).text)
-            out.push({ ...plainRun(`[${(token as Tokens.Image).text}]`), ...style, italic: true });
+        case "image": {
+          const image = token as Tokens.Image;
+          if (!this.images.has(image.href)) {
+            const label = DATA_IMAGE.test(image.href) ? "" : image.href.slice(0, 80);
+            this.skipped.push(
+              `Image ignorée${image.text || label ? ` : ${image.text || label}` : ""}`,
+            );
+          } else this.skipped.push("Image dans un tableau ou une liste remplacée par son texte");
+          if (image.text) out.push({ ...plainRun(`[${image.text}]`), ...style, italic: true });
           break;
+        }
         case "br":
           out.push({ ...plainRun("\n"), ...style });
           break;

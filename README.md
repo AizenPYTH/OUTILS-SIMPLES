@@ -1,6 +1,6 @@
 # OUTILIA — outils en ligne simples, rapides et privés
 
-OUTILIA est une plateforme de **66 outils en ligne traités intégralement dans le navigateur** : une suite
+OUTILIA est une plateforme de **69 outils en ligne traités intégralement dans le navigateur** : une suite
 PDF complète (fusion, division, compression, édition, signature, protection, OCR, caviardage…), un scanner
 de documents pour mobile, des outils images, texte, développeur, des calculatrices, des générateurs de
 QR codes et codes-barres et des documents à imprimer. Aucun fichier ne quitte l'appareil de l'utilisateur :
@@ -66,7 +66,7 @@ Toutes sont publiques (`NEXT_PUBLIC_*`), validées par Zod dans `src/config/env.
 
 Il n'y a aucun secret côté serveur : le site n'a ni base de données ni API.
 
-## Catalogue (66 outils, 8 catégories actives)
+## Catalogue (69 outils, 9 catégories actives)
 
 | Catégorie            | Outils                                                                                                                                                                                                                                                                                                                                                             |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -78,6 +78,7 @@ Il n'y a aucun secret côté serveur : le site n'a ni base de données ni API.
 | Calculatrices (4)    | Pourcentage, TVA, jours entre deux dates / jours ouvrés, unités                                                                                                                                                                                                                                                                                                    |
 | Codes & couleurs (5) | QR code (générer, lire), codes-barres, convertisseur de couleurs + contraste WCAG, palette d'image                                                                                                                                                                                                                                                                 |
 | Documents (5)        | Markdown → PDF, texte → PDF, feuilles à imprimer, calendrier, page de garde                                                                                                                                                                                                                                                                                        |
+| Conversion (3)       | Word (.docx) → PDF, Excel (.xlsx) / CSV → PDF, PDF → Word (.docx) — mise en page simplifiée et annoncée comme telle ; PowerPoint et PDF/A ne sont pas proposés                                                                                                                                                                                                     |
 
 Le rapport détaillé de l'extension (outils, limites, licences, coûts, prochaines étapes) est dans
 `docs/RAPPORT_EXTENSION.md` ; la matrice d'audit de qualité des 66 outils (tests par outil, risques, corrections)

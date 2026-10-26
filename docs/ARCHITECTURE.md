@@ -163,6 +163,24 @@ développement). Détails : `docs/OCR_ORIENTATIONS.md`.
   serveur devra vivre sous `/api/` (déjà `disallow` dans robots) avec ses propres contrôles.
 - JSON-LD sérialisé avec `<` échappé.
 
+## Conversions Office
+
+- `src/lib/conversion/docx.ts` : .docx → HTML sémantique (mammoth, chargé à la demande) →
+  Markdown (`html-to-markdown.ts`, analyseur sans DOM : titres, styles, liens, listes imbriquées,
+  tableaux, images en data URI) → `textToPdf`. Le moteur `text-to-pdf.ts` incorpore désormais les
+  images PNG/JPEG en data URI (pré-incorporation asynchrone avant la mise en page synchrone) et
+  accepte l'orientation paysage.
+- `src/lib/conversion/sheet.ts` : .xlsx (exceljs) ou CSV (`parseCsv`) → tableaux de chaînes
+  (`cellText` : résultats de formules, dates, texte enrichi, formats de nombre approximés, espaces
+  fines remplacées pour les polices standard) → Markdown GFM (une section par feuille) → PDF.
+- `src/lib/conversion/pdf-to-docx.ts` : items texte pdf.js (position, taille, nom de police) →
+  lignes → paragraphes (`itemsToParagraphs` : écarts verticaux, changements de taille, titres par
+  ratio à la taille médiane, centrage approximatif, gras/italique d'après le nom de police) →
+  `docx` (Paragraph/TextRun/ImageRun/PageBreak), images reprises via `extractImages`. Pages sans
+  texte (scans) : image conservée, avertissement OCR.
+- Tous les avertissements sont remontés à l'interface (`warnings`) : rien n'est abandonné en
+  silence.
+
 ## Mode hors ligne
 
 - `src/sw/service-worker.js` : source du worker ; `scripts/build-sw.mjs` injecte une version (paquet,
