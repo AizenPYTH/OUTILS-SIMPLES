@@ -193,7 +193,7 @@ grille ; bandeau d'état masquant les premières zones sur mobile → traversabl
 
 ## 10. Commit final et état du dépôt
 
-Un seul commit sur `claude/festive-turing-f4fmzh` (après `af5dd15`) : fondations (diagnostic, mot
+Commit `af3aab6` sur `claude/festive-turing-f4fmzh` (après `af5dd15`), poussé : fondations (diagnostic, mot
 de passe, couche OCR, plan de pages, passages OCR), interface en quatre zones, tests, fixtures,
 captures, documentation. Arbre propre après commit ; aucun déploiement, aucune configuration
 sensible touchée, aucune dépendance ajoutée. `pnpm typecheck`, `pnpm lint`, `pnpm build`,
