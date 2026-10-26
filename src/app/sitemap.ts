@@ -10,6 +10,7 @@ export const staticPublicPaths = [
   "/a-propos/",
   "/contact/",
   "/confidentialite/",
+  "/verifiez-le/",
   "/conditions-utilisation/",
   "/gestion-cookies/",
   "/mentions-legales/",

@@ -181,6 +181,33 @@ développement). Détails : `docs/OCR_ORIENTATIONS.md`.
 - Tous les avertissements sont remontés à l'interface (`warnings`) : rien n'est abandonné en
   silence.
 
+## Accueil : dépôt universel et transfert de fichier
+
+- `src/lib/files/detect.ts` : type reconnu sur les 64 premiers Kio (signatures PDF, PNG, JPEG, GIF,
+  WebP, BMP, TIFF, HEIF `ftyp`, ZIP avec noms de membres `word/`, `xl/`, `ppt/`, heuristiques texte
+  CSV/Markdown), table `KIND_TOOLS` (outils proposés par type, modificateur en tête pour un PDF) et
+  `KIND_NOTES` (réponses honnêtes : PowerPoint, ZIP, inconnu).
+- `src/lib/files/handoff.ts` : le fichier déposé sur l'accueil est gardé en mémoire (une minute) et
+  consommé au montage par `PdfDropzone` / `FileDropzone` de l'outil choisi ; rien n'est persisté.
+
+## Images HEIC
+
+- `src/lib/images/heic.ts` : détection du conteneur HEIF, décodage par libheif (WebAssembly,
+  `public/heif/libheif.wasm` copié par `scripts/copy-pdfjs-assets.mjs`, binaire récupéré par
+  `fetch` puis passé en `wasmBinary` car ce build charge le wasm de façon synchrone). Branché dans
+  `decodeImage` : tous les outils images acceptent donc les photos iPhone.
+
+## Comparaison visuelle, lots et insertion de pages
+
+- `src/lib/pdf/operations/visual-diff.ts` (pur) + `src/lib/pdf/browser/visual-compare.ts` : rendu
+  des deux pages à la même taille, différence pixel par pixel avec tolérance, superposition rouge,
+  résumé toutes pages à basse résolution.
+- `compress-batch-tool.tsx` : plusieurs PDF compressés en série, ZIP (fflate) ou fichier par fichier.
+- Modificateur : `appendDocument` (pdf-lib, pages ajoutées à la fin pour ne pas déplacer les
+  index des annotations) + `insertPlanned` (placement dans le plan). Le workspace garde sa propre
+  copie du document chargé (`setPdf`) et détruit les documents pdf.js qu'il ouvre ; une couche OCR
+  existante est fondue dans le document au moment de l'insertion.
+
 ## Mode hors ligne
 
 - `src/sw/service-worker.js` : source du worker ; `scripts/build-sw.mjs` injecte une version (paquet,

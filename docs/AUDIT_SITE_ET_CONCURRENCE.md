@@ -1,5 +1,7 @@
 # OUTILIA — Audit complet du site et analyse concurrentielle (26 octobre 2026)
 
+> **Suites données** : les actions menées à partir de cet audit (mise en ligne, hors ligne, conversions Office, accueil, compléments, contenu) et ce qui reste à faire sont consignés dans `docs/RAPPORT_AUDIT_ACTIONS.md`.
+
 Ce document dit ce qui existe (mesuré), ce que font les concurrents (sources citées), ce qui
 manque, ce qu'il faut changer et ce qu'il faut ajouter, avec un ordre de priorité et une
 estimation de faisabilité **sans API payante ni serveur de traitement** (contrainte du produit).

@@ -296,6 +296,9 @@ export default function HomePage() {
             <Link href="/confidentialite/" className="underline-offset-4 hover:underline">
               {t.home.privacyLink}
             </Link>
+            <Link href="/verifiez-le/" className="underline-offset-4 hover:underline">
+              Vérifiez-le vous-même
+            </Link>
             <Link href="/hors-ligne/" className="underline-offset-4 hover:underline">
               Fonctionne aussi hors connexion
             </Link>

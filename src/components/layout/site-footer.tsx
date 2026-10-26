@@ -66,6 +66,11 @@ export function SiteFooter() {
                 {t.nav.privacy}
               </Link>
             </li>
+            <li>
+              <Link href="/verifiez-le/" className={linkClass}>
+                Vérifiez-le vous-même
+              </Link>
+            </li>
           </ul>
         </div>
         <div>

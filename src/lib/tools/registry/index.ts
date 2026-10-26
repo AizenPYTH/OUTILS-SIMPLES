@@ -9,6 +9,7 @@ import { developerTools } from "./developer";
 import { calculatorTools } from "./calculators";
 import { codeTools } from "./codes";
 import { documentTools } from "./documents";
+import { faqAdditions } from "./faq-additions";
 
 /**
  * Registry of every tool known to the platform, assembled per category.
@@ -29,4 +30,8 @@ export const toolRegistry: readonly ToolDefinition[] = [
   ...calculatorTools,
   ...codeTools,
   ...documentTools,
-];
+].map((tool) =>
+  tool.content.faq.length === 0 && faqAdditions[tool.id]
+    ? { ...tool, content: { ...tool.content, faq: faqAdditions[tool.id]! } }
+    : tool,
+);

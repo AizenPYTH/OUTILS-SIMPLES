@@ -204,6 +204,151 @@ export const guides: readonly Guide[] = [
       },
     ],
   },
+  {
+    slug: "convertir-un-document-word-en-pdf-sans-logiciel",
+    title: "Convertir un document Word en PDF sans logiciel ni envoi",
+    seoTitle: "Convertir un Word (DOCX) en PDF sans logiciel : méthode et limites",
+    description:
+      "Transformer un fichier .docx en PDF directement dans le navigateur, comprendre ce qui est conservé (structure, images) et ce qui ne l'est pas (mise en page exacte).",
+    toolId: "conv-docx-pdf",
+    publishedAt: "2026-10-26",
+    updatedAt: "2026-10-26",
+    intro:
+      "Vous devez envoyer un document en PDF, mais Word n'est pas installé sur cet ordinateur, ou vous ne voulez pas déposer un contrat sur un convertisseur en ligne inconnu. Voici comment faire la conversion localement, et comment juger si le résultat convient à votre usage.",
+    sections: [
+      {
+        heading: "Quand la conversion locale suffit",
+        paragraphs: [
+          "Un courrier, un compte rendu, un CV simple, un mémoire : dès que le document est fait de titres, de paragraphes, de listes, de tableaux simples et d'images, la conversion dans le navigateur donne un PDF propre et lisible partout. La structure est conservée ; la mise en page est régularisée (une colonne, polices standard).",
+          "Si le document repose sur une mise en page précise (colonnes multiples, zones de texte, en-têtes élaborés, polices de marque), préférez « Enregistrer au format PDF » dans Word ou LibreOffice : ces logiciels reproduisent la page au pixel près, ce que la conversion locale ne promet pas.",
+        ],
+      },
+      {
+        heading: "Convertir dans le navigateur",
+        paragraphs: ["Avec l'outil Convertir Word en PDF :"],
+        list: [
+          "Déposez le fichier .docx (les anciens .doc doivent d'abord être enregistrés en .docx).",
+          "Choisissez la police, la taille, le format de page, les marges et la numérotation.",
+          "Créez le PDF, lisez les avertissements affichés (éléments ignorés, caractères remplacés) et téléchargez.",
+        ],
+      },
+      {
+        heading: "Ce qu'il faut vérifier",
+        paragraphs: [
+          "Ouvrez le PDF obtenu et parcourez-le : les tableaux ont des colonnes de largeur égale, les images EMF/WMF sont absentes, les en-têtes, pieds de page et notes ne sont pas reproduits. Les avertissements de l'outil listent précisément ce qui a été simplifié : rien n'est abandonné en silence.",
+          "Le fichier ne quitte jamais votre appareil : la lecture du .docx (mammoth) et la génération du PDF (pdf-lib) se font dans le navigateur. Vous pouvez enregistrer l'outil pour l'utiliser hors connexion.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "scanner-un-document-avec-son-telephone",
+    title: "Scanner un document avec son téléphone, sans application",
+    seoTitle: "Scanner un document avec son téléphone sans application (PDF propre)",
+    description:
+      "Photographier un document, le redresser, améliorer le contraste et obtenir un PDF multipage directement depuis le navigateur du téléphone.",
+    toolId: "scan-document",
+    publishedAt: "2026-10-26",
+    updatedAt: "2026-10-26",
+    intro:
+      "Un justificatif à envoyer, un formulaire signé à retourner : le téléphone suffit, à condition de produire un fichier propre et lisible plutôt qu'une photo de travers. Le scanner d'OUTILIA fonctionne dans le navigateur, sans installer d'application ni créer de compte.",
+    sections: [
+      {
+        heading: "Prendre une bonne photo",
+        paragraphs: [
+          "Posez le document sur un fond contrasté (table sombre pour une feuille blanche), éclairez-le de côté pour éviter les reflets et cadrez-le entièrement. La détection des bords fonctionne mieux quand les quatre coins sont visibles.",
+        ],
+      },
+      {
+        heading: "Scanner dans le navigateur",
+        paragraphs: ["Avec l'outil Scanner un document :"],
+        list: [
+          "Autorisez la caméra (le site doit être en HTTPS) et prenez la photo, ou importez une photo existante.",
+          "Vérifiez les coins détectés, ajustez-les si besoin : la page est redressée automatiquement.",
+          "Choisissez un filtre (couleur, niveaux de gris, noir et blanc) ; les filtres ne sont pas destructifs, vous pouvez changer d'avis.",
+          "Ajoutez d'autres pages, puis exportez un PDF multipage ou des images.",
+        ],
+      },
+      {
+        heading: "Et le texte ?",
+        paragraphs: [
+          "Un scan est une image : le texte n'est pas sélectionnable. Si vous devez pouvoir chercher ou copier le contenu, passez le PDF obtenu dans l'outil OCR : une couche de texte invisible est ajoutée, et le document devient recherchable. Sur un téléphone, comptez quelques secondes par page.",
+          "Les photos ne sont jamais envoyées : la détection des bords, le redressement et l'export se font sur l'appareil.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "utiliser-les-outils-hors-connexion",
+    title: "Utiliser les outils sans connexion internet",
+    seoTitle: "Utiliser les outils PDF et images hors connexion (mode hors ligne)",
+    description:
+      "Enregistrer un outil sur son appareil pour l'utiliser dans le train, en déplacement ou sur un réseau instable, et connaître les limites du mode hors connexion.",
+    toolId: "pdf-merge",
+    publishedAt: "2026-10-26",
+    updatedAt: "2026-10-26",
+    intro:
+      "Puisque les outils travaillent dans le navigateur, ils n'ont besoin d'internet que pour se charger. Une fois enregistrés sur l'appareil, ils fonctionnent sans réseau. Voici comment s'y prendre et ce qui reste indisponible.",
+    sections: [
+      {
+        heading: "Enregistrer un outil",
+        paragraphs: ["Quand vous êtes connecté :"],
+        list: [
+          "Ouvrez la page de l'outil (par exemple Fusionner des PDF).",
+          "Sous la zone de travail, appuyez sur « Utiliser hors ligne » : le poids à télécharger est indiqué (moteur PDF 4,7 Mo, OCR 17 Mo, polices de l'éditeur 4,2 Mo).",
+          "Attendez la mention « Disponible hors ligne ». La page hors connexion liste les outils enregistrés et permet de les retirer.",
+        ],
+      },
+      {
+        heading: "Utiliser sans réseau",
+        paragraphs: [
+          "Ouvrez le site comme d'habitude : les pages enregistrées s'affichent, un bandeau signale que vous êtes hors connexion, et les outils traitent vos fichiers normalement. Une page jamais enregistrée renvoie vers la page hors connexion.",
+        ],
+      },
+      {
+        heading: "Limites à connaître",
+        paragraphs: [
+          "La première visite doit se faire en ligne. Le modèle OCR anglais et les polices autres que Liberation ne sont enregistrés qu'après un premier usage connecté. Le navigateur peut supprimer les fichiers s'il manque d'espace, en navigation privée ou après une longue inactivité (Safari est le plus strict). Les mises à jour du site s'appliquent à la visite connectée suivante.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "recuperer-le-texte-d-un-pdf-scanne",
+    title: "Récupérer le texte d'un PDF scanné (OCR)",
+    seoTitle: "Récupérer le texte d'un PDF scanné avec l'OCR, dans le navigateur",
+    description:
+      "Transformer un scan en PDF recherchable ou en texte modifiable, choisir la langue, juger la qualité de la reconnaissance et corriger les erreurs.",
+    toolId: "scan-ocr",
+    publishedAt: "2026-10-26",
+    updatedAt: "2026-10-26",
+    intro:
+      "Un contrat reçu en photo, une archive numérisée, un relevé scanné : le texte y est visible mais ni cherchable ni copiable. La reconnaissance optique de caractères (OCR) rend ce texte exploitable, et elle fonctionne ici entièrement dans le navigateur grâce à Tesseract.",
+    sections: [
+      {
+        heading: "Préparer le document",
+        paragraphs: [
+          "La qualité du résultat dépend de l'image : 300 dpi ou plus, page droite, contraste net. Une photo de téléphone gagne à passer d'abord par « Corriger un document photographié » (redressement, filtre noir et blanc).",
+        ],
+      },
+      {
+        heading: "Lancer la reconnaissance",
+        paragraphs: ["Avec l'outil OCR :"],
+        list: [
+          "Déposez l'image ou le PDF scanné et choisissez la langue (français, anglais) : le modèle correspondant (6 à 11 Mo) est téléchargé une fois puis conservé.",
+          "Lancez la reconnaissance ; l'orientation de chaque page est détectée, même pour des pages pivotées.",
+          "Récupérez le résultat : texte brut à copier, ou PDF recherchable où le texte invisible est aligné sur l'image d'origine.",
+        ],
+      },
+      {
+        heading: "Relire et corriger",
+        paragraphs: [
+          "L'OCR se trompe sur les scans pâles, les polices fantaisie, les tableaux et les chiffres : relisez les passages importants. La confiance moyenne affichée donne un ordre d'idée. Dans le modificateur PDF, l'OCR intégré rend chaque passage reconnu corrigeable directement sur la page.",
+          "Pour obtenir un document Word modifiable, convertissez ensuite le PDF recherchable avec « Convertir un PDF en Word ».",
+        ],
+      },
+    ],
+  },
 ];
 
 export function getGuideBySlug(slug: string): Guide | undefined {

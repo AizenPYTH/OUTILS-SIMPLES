@@ -166,16 +166,34 @@ nécessaires (`src/lib/offline/needs.ts`, poids annoncé avant téléchargement 
 Liberation enregistrés seulement après un premier usage en ligne, tables CMap (polices asiatiques) jamais
 pré-enregistrées, éviction possible par le navigateur. Le worker n'est enregistré qu'en production.
 
+### Conversions Office
+
+Trois outils de la famille « Conversion » : Word (.docx) → PDF (mammoth → Markdown → `textToPdf`),
+Excel (.xlsx) / CSV → PDF (exceljs, une section par feuille) et PDF → Word (.docx, bibliothèque
+`docx`). La mise en page est volontairement simplifiée et chaque outil annonce ses limites et remonte
+les avertissements (éléments ignorés, scans sans texte). PowerPoint et PDF/A ne sont pas proposés.
+
+### Accueil, photos HEIC, compléments
+
+- Accueil : zone de dépôt universelle (type reconnu localement sur les premiers octets, outils
+  proposés, fichier transmis à l'outil choisi sans rechargement), capture réelle du modificateur,
+  quatre raccourcis ; JS initial de la page ≈ 183 Ko gzip (167–176 Ko sur les autres pages, contre
+  ≈ 250 Ko avant l'audit).
+- Photos HEIC/HEIF (iPhone) acceptées par tous les outils images : décodage libheif (WebAssembly,
+  ~1,5 Mo chargé à la demande).
+- Comparaison de PDF en mode visuel (pixels), compression de plusieurs PDF en ZIP, insertion des pages
+  d'un autre PDF dans le modificateur, page « Vérifiez-le vous-même » (`/verifiez-le/`).
+
 ## Tests
 
-- `pnpm test` : 201 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
+- `pnpm test` : 224 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
   sur fixtures réelles, permissions de chiffrement relues par pdf.js, géométrie/détection du scanner, OCR →
   PDF recherchable, métadonnées d'images, encodeur PNG, extraction d'images et de liens, comparaison,
   caviardage (y compris pages pivotées), Markdown → PDF, regex, dates et jours fériés, TVA, unités,
   codes-barres, couleurs, décodage QR, documents imprimables, limites et fichiers invalides, fondations
   de l'éditeur : diagnostic d'import, mot de passe, couche OCR, plan de pages, passages OCR, modèle de
-  zoom, palette de polices incorporées, besoins hors ligne et manifeste du service worker).
-- `pnpm build && pnpm test:e2e` : 97 parcours Playwright exécutés sur desktop et mobile (Pixel 7) :
+  zoom, palette de polices incorporées, besoins hors ligne et manifeste du service worker, conversions Office, détection de type de fichier, décodage HEIC, insertion de pages, différence visuelle).
+- `pnpm build && pnpm test:e2e` : 122 parcours Playwright exécutés sur desktop et mobile (Pixel 7, 244 exécutions dont 13 ignorées par conception) :
   catalogue, recherche, navigation, 404, métadonnées, sitemap/robots/CSP, thème, absence de débordement
   horizontal, et pour chacun des 66 outils un parcours avec fichiers téléchargés vérifiés (pdf-lib, pdf.js,
   en-têtes d'images, ZIP, EXIF), dont OCR sur image et sur PDF scanné, protection AES-128/256 et caviardage.
