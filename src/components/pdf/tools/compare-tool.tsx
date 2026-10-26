@@ -17,6 +17,7 @@ import { extractText } from "@/lib/pdf/operations/extract-text";
 import { comparePageTexts, compareReport, type CompareResult } from "@/lib/pdf/operations/compare";
 import { readMetadata } from "@/lib/pdf/operations/metadata";
 import { toPdfError, type PdfError } from "@/lib/pdf/errors";
+import { VisualCompare } from "./visual-compare";
 import type { DiffMode } from "@/lib/text/diff";
 import { formatBytes } from "@/lib/files/format";
 import { getToolById } from "@/lib/tools";
@@ -27,6 +28,7 @@ const TOOL_ID = "pdf-compare";
 
 interface Loaded {
   file: File;
+  bytes: Uint8Array;
   pageCount: number;
   texts: string[];
   producer: string;
@@ -42,6 +44,7 @@ async function loadForCompare(file: File, maxBytes: number, maxPages: number): P
     const meta = await readMetadata(bytes).catch(() => null);
     return {
       file,
+      bytes,
       pageCount: opened.pageCount,
       texts: text.pages.map((p) => p.text),
       producer: meta?.producer ?? "",
@@ -62,6 +65,7 @@ export function ComparePdfTool() {
   const [error, setError] = React.useState<PdfError | null>(null);
   const [mode, setMode] = React.useState<DiffMode>("words");
   const [onlyChanged, setOnlyChanged] = React.useState(true);
+  const [view, setView] = React.useState<"text" | "visual">("text");
 
   const load = async (slot: "a" | "b", file: File) => {
     setLoading(slot);
@@ -178,7 +182,26 @@ export function ComparePdfTool() {
           mise en page et les polices ne sont pas comparées.
         </Alert>
       ) : null}
-      <ToolPanel className="space-y-4">
+      <Segmented
+        label="Mode de comparaison"
+        value={view}
+        onChange={setView}
+        className="sm:grid-cols-2 sm:w-[420px]"
+        options={[
+          { value: "text", label: "Texte", description: "Mots, lignes ou caractères" },
+          { value: "visual", label: "Visuel", description: "Rendu des pages pixel par pixel" },
+        ]}
+      />
+      {view === "visual" ? (
+        <ToolPanel>
+          <VisualCompare
+            bytesA={a.bytes}
+            bytesB={b.bytes}
+            pageCount={Math.max(a.pageCount, b.pageCount)}
+          />
+        </ToolPanel>
+      ) : null}
+      <ToolPanel className={cn("space-y-4", view !== "text" && "hidden")}>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <Segmented
             label="Granularité"

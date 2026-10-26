@@ -56,7 +56,7 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
       steps: [
         "Déposez votre PDF ou cliquez pour le sélectionner. OUTILIA l'analyse (texte natif, document scanné, mixte) et demande le mot de passe s'il est protégé.",
         "Pour corriger un texte existant : outil « Modifier le texte », cliquez sur le passage, tapez le nouveau texte, Entrée. La page est réaffichée à partir du fichier réellement modifié. Sur un scan, lancez d'abord l'OCR intégré : le texte reconnu devient corrigeable.",
-        "Pour ajouter des éléments : choisissez un outil (texte, rectangle, ellipse, ligne, flèche, dessin, surlignage, commentaire, image, signature, masque) et dessinez sur la page ; l'objet reste sélectionné et sa barre flottante règle contour, trait, remplissage, opacité, police, taille, gras, italique, souligné, alignement, couleurs. Déplacez, redimensionnez, dupliquez (Ctrl + D) ou supprimez. Le panneau des pages pivote, duplique, supprime et réordonne les pages. Annuler / Rétablir couvrent tout.",
+        "Pour ajouter des éléments : choisissez un outil (texte, rectangle, ellipse, ligne, flèche, dessin, surlignage, commentaire, image, signature, masque) et dessinez sur la page ; l'objet reste sélectionné et sa barre flottante règle contour, trait, remplissage, opacité, police, taille, gras, italique, souligné, alignement, couleurs. Déplacez, redimensionnez, dupliquez (Ctrl + D) ou supprimez. Le panneau des pages pivote, duplique, supprime et réordonne les pages, et « Insérer un PDF » ajoute les pages d'un autre document après la page courante. Annuler / Rétablir couvrent tout.",
         "Cliquez sur « Télécharger le PDF modifié » : le fichier est généré localement, puis rouvert pour vérification avant le téléchargement.",
       ],
       limitations: [
@@ -241,7 +241,7 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
     featured: true,
     content: {
       steps: [
-        "Déposez votre PDF.",
+        "Déposez votre PDF, ou passez sur l'onglet « Plusieurs fichiers » pour en compresser jusqu'à 30 d'un coup (résultat en ZIP ou fichier par fichier).",
         "Choisissez un niveau : « Structure seule » (sans perte), « Équilibré » ou « Maximal » (recompression des images).",
         "Lancez la compression et comparez la taille avant / après.",
         "Téléchargez si le résultat vous convient ; sinon, essayez un autre niveau.",

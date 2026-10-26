@@ -25,7 +25,7 @@ export function validateImageFile(file: File): string | null {
     return `fichier trop volumineux (max ${formatBytes(IMAGE_MAX_SIZE)})`;
   const type = file.type.toLowerCase();
   if (type && !(acceptedInputMimeTypes as readonly string[]).includes(type))
-    return "format non pris en charge (JPG, PNG, WebP, GIF, BMP, AVIF, SVG)";
+    return "format non pris en charge (JPG, PNG, WebP, GIF, BMP, AVIF, SVG, HEIC)";
   return null;
 }
 

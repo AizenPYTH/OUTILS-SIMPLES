@@ -20,7 +20,7 @@ const ASSETS = `outilia-assets-${ASSET_KEY}`;
 const KEEP = new Set([SHELL, STATIC, ASSETS]);
 const OFFLINE_URL = "/hors-ligne/";
 const PRECACHE = [OFFLINE_URL, "/offline-manifest.json"];
-const ENGINE_PREFIXES = ["/pdfjs/", "/ocr/", "/qpdf/", "/fonts/"];
+const ENGINE_PREFIXES = ["/pdfjs/", "/ocr/", "/qpdf/", "/fonts/", "/heif/"];
 const SHELL_FILES = new Set([
   "/manifest.webmanifest",
   "/icon.svg",

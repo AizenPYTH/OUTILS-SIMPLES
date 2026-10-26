@@ -4,6 +4,7 @@
  */
 import type { CropRect, ImageOutputFormat } from "./types";
 import type { RgbaImage } from "./pixels";
+import { isHeic } from "./heic";
 
 export interface DecodedImage {
   bitmap: ImageBitmap;
@@ -14,6 +15,19 @@ export interface DecodedImage {
 }
 
 export async function decodeImage(file: Blob): Promise<DecodedImage> {
+  // HEIC/HEIF (iPhone): most browsers cannot decode it; libheif (WebAssembly) does, on demand.
+  const head = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  if (isHeic(head)) {
+    const { decodeHeic } = await import("./heic");
+    const raster = await decodeHeic(new Uint8Array(await file.arrayBuffer()));
+    const imageData = new ImageData(
+      new Uint8ClampedArray(raster.data),
+      raster.width,
+      raster.height,
+    );
+    const bitmap = await createImageBitmap(imageData);
+    return { bitmap, width: bitmap.width, height: bitmap.height, type: "image/heic" };
+  }
   try {
     // Honour the EXIF orientation of phone photos explicitly (browsers differ in their default).
     const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });

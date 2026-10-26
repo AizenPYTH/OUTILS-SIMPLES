@@ -50,7 +50,16 @@ import { getPageContent } from "@/lib/pdf/text-edit/page-content";
 import type { PageTextStatus, TextEdit, TextRun } from "@/lib/pdf/text-edit/types";
 import { measureImage, readImageFile } from "@/lib/pdf/browser/read-file";
 import { applyAnnotations } from "@/lib/pdf/operations/annotate";
-import { applyPagePlan, identityPlan, isIdentityPlan } from "@/lib/pdf/operations/page-plan";
+import {
+  appendDocument,
+  applyPagePlan,
+  identityPlan,
+  insertPlanned,
+  isIdentityPlan,
+} from "@/lib/pdf/operations/page-plan";
+import { readPdfFile } from "@/lib/pdf/browser/read-file";
+import { pdfLimits } from "@/config/limits";
+import { assertPageCount } from "@/lib/files/validation";
 import {
   annotationBounds,
   duplicateAnnotation,
@@ -66,7 +75,7 @@ import {
   viewportScale,
   type ViewportLike,
 } from "@/lib/pdf/coordinates";
-import { isPdfError, PdfError } from "@/lib/pdf/errors";
+import { isPdfError, PdfError, toPdfError } from "@/lib/pdf/errors";
 import type { OcrLanguage } from "@/lib/ocr/types";
 import { t } from "@/lib/i18n";
 import { clamp, uid } from "@/lib/utils";
@@ -119,12 +128,22 @@ const PAGE_PAD = 16;
  * one side panel at a time (OCR, document, history, shortcuts).
  */
 export function AnnotationWorkspace({
-  pdf,
+  pdf: initialPdf,
   mode,
   toolId,
   title,
   onClose,
 }: AnnotationWorkspaceProps) {
+  // The document can grow when the pages of another PDF are inserted (appended at the end,
+  // placed by the plan): the workspace then works on its own copy of the loaded document.
+  const [pdf, setPdf] = React.useState<LoadedPdf>(initialPdf);
+  const ownedDocs = React.useRef<OpenedPdf[]>([]);
+  React.useEffect(() => {
+    const owned = ownedDocs.current;
+    return () => {
+      for (const opened of owned) void opened.destroy();
+    };
+  }, []);
   const tools = modeTools[mode];
   const isEditor = mode === "editor";
   const [tool, setToolState] = React.useState<WorkspaceTool>(tools[1] ?? "select");
@@ -804,6 +823,39 @@ export function AnnotationWorkspace({
     return { r: median(channels[0]!), g: median(channels[1]!), b: median(channels[2]!) };
   };
 
+  // --- Insert the pages of another PDF: appended to the document, placed after the current page.
+  const insertDocument = React.useCallback(
+    async (file: File, afterPosition: number) => {
+      try {
+        const other = await readPdfFile(file, pdfLimits.maxFileSizeBytes);
+        const appended = await appendDocument(baseBytes, other);
+        assertPageCount(appended.firstIndex + appended.count, pdfLimits.maxPageCount);
+        const opened = await openPdf(appended.bytes);
+        ownedDocs.current.push(opened);
+        const sources = Array.from({ length: appended.count }, (_, i) => appended.firstIndex + i);
+        setPdf((prev) => ({
+          ...prev,
+          bytes: appended.bytes,
+          pageCount: opened.pageCount,
+          pages: opened.pages,
+          opened,
+        }));
+        // An OCR text layer, if any, is now part of the document itself.
+        setOcrLayer(null);
+        history.commit(
+          { plan: insertPlanned(plan, afterPosition, sources) },
+          `${appended.count} page${appended.count > 1 ? "s" : ""} insérée${appended.count > 1 ? "s" : ""}`,
+        );
+        toast.success(
+          `${appended.count} page${appended.count > 1 ? "s" : ""} de « ${file.name} » insérée${appended.count > 1 ? "s" : ""} après la page ${afterPosition + 1}.`,
+        );
+      } catch (error) {
+        toast.error(toPdfError(error, "CORRUPTED").message);
+      }
+    },
+    [baseBytes, history, plan],
+  );
+
   // --- Export: text edits → annotations → page plan → verification by reopening.
   const planChanged = !isIdentityPlan(plan, pdf.pageCount);
   const startExport = () => {
@@ -1145,6 +1197,9 @@ export function AnnotationWorkspace({
               onSelect={goTo}
               modifiedSources={modifiedSources}
               onPlanChange={(next, label) => history.commit({ plan: next }, label)}
+              onInsertDocument={
+                mode === "editor" ? (file, after) => void insertDocument(file, after) : undefined
+              }
               onClose={() => setPagesOpen(false)}
             />
           </aside>

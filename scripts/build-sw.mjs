@@ -74,8 +74,9 @@ export async function buildServiceWorker() {
   const pdfjs = await readVersion("pdfjs/VERSION", "unknown");
   const ocr = await readVersion("ocr/VERSION", "unknown");
   const qpdf = await readVersion("qpdf/VERSION", "unknown");
+  const heif = await readVersion("heif/VERSION", "unknown");
   const assetKey = createHash("sha1")
-    .update(`${pdfjs}|${ocr}|${qpdf}|fonts-1`)
+    .update(`${pdfjs}|${ocr}|${qpdf}|${heif}|fonts-1`)
     .digest("hex")
     .slice(0, 10);
   let commit = "dev";

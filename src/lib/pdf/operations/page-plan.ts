@@ -43,6 +43,37 @@ export function duplicatePlanned(plan: PagePlan, position: number): PagePlan {
   return [...plan.slice(0, position + 1), { ...page }, ...plan.slice(position + 1)];
 }
 
+/** Inserts new source pages (already appended to the document) after `afterPosition` (-1 = at the start). */
+export function insertPlanned(plan: PagePlan, afterPosition: number, sources: number[]): PagePlan {
+  const at = Math.max(0, Math.min(plan.length, afterPosition + 1));
+  const inserted: PlannedPage[] = sources.map((source) => ({ source, rotation: 0 }));
+  return [...plan.slice(0, at), ...inserted, ...plan.slice(at)];
+}
+
+export interface AppendedDocument {
+  bytes: Uint8Array;
+  /** Index of the first appended page in the new document. */
+  firstIndex: number;
+  count: number;
+}
+
+/**
+ * Appends every page of another PDF at the END of the document, so that the
+ * existing page indices (annotations, text edits, plan) stay valid; the plan
+ * then decides where the new pages appear (see `insertPlanned`).
+ */
+export async function appendDocument(
+  baseBytes: Uint8Array,
+  otherBytes: Uint8Array,
+): Promise<AppendedDocument> {
+  const base = await loadPdfDocument(baseBytes);
+  const other = await loadPdfDocument(otherBytes);
+  const firstIndex = base.getPageCount();
+  const pages = await base.copyPages(other, other.getPageIndices());
+  for (const page of pages) base.addPage(page);
+  return { bytes: await savePdfDocument(base), firstIndex, count: pages.length };
+}
+
 export function movePlanned(plan: PagePlan, from: number, to: number): PagePlan {
   if (from === to || from < 0 || to < 0 || from >= plan.length || to >= plan.length) return plan;
   const next = [...plan];

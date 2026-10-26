@@ -44,6 +44,7 @@ next-env.d.ts
 /public/pdfjs
 /public/ocr
 /public/qpdf
+/public/heif
 
 # service worker + offline manifest (built by scripts/build-sw.mjs)
 /public/sw.js

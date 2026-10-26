@@ -13,7 +13,7 @@ export const outputExtensions: Record<ImageOutputFormat, string> = {
   "image/webp": "webp",
 };
 
-/** Formats the browser can decode (tested at runtime with createImageBitmap). */
+/** Formats the browser can decode (tested at runtime with createImageBitmap), plus HEIC via libheif. */
 export const acceptedInputMimeTypes = [
   "image/jpeg",
   "image/png",
@@ -22,6 +22,8 @@ export const acceptedInputMimeTypes = [
   "image/bmp",
   "image/avif",
   "image/svg+xml",
+  "image/heic",
+  "image/heif",
 ] as const;
 
 export function supportsTransparency(format: ImageOutputFormat): boolean {

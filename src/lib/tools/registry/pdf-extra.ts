@@ -575,11 +575,11 @@ export const pdfExtraTools: readonly ToolDefinition[] = [
     content: {
       steps: [
         "Déposez le document original, puis le document modifié.",
-        "Choisissez la granularité (mots, lignes, caractères).",
-        "Parcourez les pages modifiées ou téléchargez le rapport.",
+        "Mode « Texte » : choisissez la granularité (mots, lignes, caractères) et parcourez les pages modifiées ou téléchargez le rapport.",
+        "Mode « Visuel » : les deux pages sont rendues à la même taille et comparées pixel par pixel, différences en rouge ; « Analyser toutes les pages » liste le pourcentage de pixels différents par page.",
       ],
       limitations: [
-        "Comparaison du texte uniquement : images, mise en page, polices et couleurs ne sont pas comparées.",
+        "Mode texte : images, mise en page, polices et couleurs ne sont pas comparées. Mode visuel : un décalage d'un pixel ou un anticrénelage différent compte comme une différence ; il signale où regarder, pas quoi a changé.",
         "Les pages sont comparées par numéro : une page insérée décale les suivantes, qui apparaissent alors comme modifiées.",
         "Les documents scannés n'ont pas de texte : passez-les d'abord par l'OCR.",
       ],

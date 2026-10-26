@@ -5,7 +5,7 @@
 import type { OfflineGroup, OfflineManifest } from "./needs";
 
 export const SW_URL = "/sw.js";
-const TRACKED_PREFIXES = ["/_next/static/", "/pdfjs/", "/ocr/", "/qpdf/", "/fonts/"];
+const TRACKED_PREFIXES = ["/_next/static/", "/pdfjs/", "/ocr/", "/qpdf/", "/fonts/", "/heif/"];
 
 export function serviceWorkerSupported(): boolean {
   return typeof window !== "undefined" && "serviceWorker" in navigator && window.isSecureContext;

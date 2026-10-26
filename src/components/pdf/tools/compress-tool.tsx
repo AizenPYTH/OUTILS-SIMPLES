@@ -20,14 +20,30 @@ import {
   type CompressionLevel,
 } from "@/lib/pdf/operations/compress";
 import { t } from "@/lib/i18n";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CompressBatchTool } from "./compress-batch-tool";
+import { compressionLevelOptions } from "./compress-levels";
 
 const TOOL_ID = "pdf-compress";
 
 export function CompressTool() {
   return (
-    <SingleFileTool toolId={TOOL_ID}>
-      {({ pdf, reset }) => <CompressWorkspace pdf={pdf} reset={reset} />}
-    </SingleFileTool>
+    <Tabs defaultValue="single">
+      <TabsList className="mb-3">
+        <TabsTrigger value="single">Un fichier</TabsTrigger>
+        <TabsTrigger value="batch" data-testid="compress-tab-batch">
+          Plusieurs fichiers (ZIP)
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent value="single">
+        <SingleFileTool toolId={TOOL_ID}>
+          {({ pdf, reset }) => <CompressWorkspace pdf={pdf} reset={reset} />}
+        </SingleFileTool>
+      </TabsContent>
+      <TabsContent value="batch">
+        <CompressBatchTool />
+      </TabsContent>
+    </Tabs>
   );
 }
 
@@ -125,23 +141,7 @@ function CompressWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }
         label="Niveau de compression"
         value={level}
         onChange={setLevel}
-        options={[
-          {
-            value: "structure",
-            label: "Structure seule",
-            description: "Sans perte : nettoyage du fichier",
-          },
-          {
-            value: "balanced",
-            label: "Équilibré",
-            description: "Images JPEG qualité 75 %, 1 600 px max",
-          },
-          {
-            value: "strong",
-            label: "Maximal",
-            description: "Images JPEG qualité 50 %, 1 200 px max",
-          },
-        ]}
+        options={compressionLevelOptions}
       />
       {profile.lossy ? (
         <Alert variant="warning" title="Ce niveau réduit la qualité des images">

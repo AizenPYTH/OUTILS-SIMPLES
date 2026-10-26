@@ -27,6 +27,7 @@ import {
   RotateCw,
   Trash2,
   X,
+  FilePlus,
 } from "lucide-react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import { PageThumbnail } from "@/components/pdf/shared/page-thumbnail";
@@ -51,6 +52,8 @@ interface PagesPanelProps {
   /** Source pages carrying annotations or text edits (dot on the thumbnail). */
   modifiedSources: Set<number>;
   onPlanChange: (plan: PagePlan, label: string) => void;
+  /** Inserts the pages of another PDF after the given position (editor only). */
+  onInsertDocument?: (file: File, afterPosition: number) => void;
   onClose: () => void;
 }
 
@@ -77,9 +80,11 @@ export function PagesPanel({
   onSelect,
   modifiedSources,
   onPlanChange,
+  onInsertDocument,
   onClose,
 }: PagesPanelProps) {
   const refs = React.useRef<(HTMLLIElement | null)[]>([]);
+  const insertInputRef = React.useRef<HTMLInputElement>(null);
   const ids = React.useMemo(() => planIds(plan), [plan]);
   React.useEffect(() => {
     refs.current[current]?.scrollIntoView({ block: "nearest" });
@@ -139,6 +144,34 @@ export function PagesPanel({
         <p className="text-xs font-semibold">
           {plan.length} {plan.length > 1 ? t.common.pages : "page"}
         </p>
+        {onInsertDocument ? (
+          <>
+            <input
+              ref={insertInputRef}
+              type="file"
+              accept="application/pdf,.pdf"
+              className="sr-only"
+              tabIndex={-1}
+              aria-label="Fichier PDF dont les pages seront insérées"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) onInsertDocument(file, current);
+                e.target.value = "";
+              }}
+              data-testid="pages-insert-input"
+            />
+            <button
+              type="button"
+              onClick={() => insertInputRef.current?.click()}
+              className="ml-auto mr-1 inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium text-link hover:bg-muted"
+              title={`Insérer les pages d'un autre PDF après la page ${current + 1}`}
+              data-testid="pages-insert"
+            >
+              <FilePlus className="size-3.5" aria-hidden="true" />
+              Insérer un PDF
+            </button>
+          </>
+        ) : null}
         <button
           type="button"
           onClick={onClose}

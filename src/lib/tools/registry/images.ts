@@ -45,7 +45,7 @@ function imageTool(
 }
 
 const FORMAT_LIMIT =
-  "Formats lus : JPG, PNG, WebP, GIF (première image), BMP, AVIF, SVG. HEIC et TIFF ne sont pas pris en charge par les navigateurs.";
+  "Formats lus : JPG, PNG, WebP, GIF (première image), BMP, AVIF, SVG et HEIC/HEIF (photos iPhone, décodées par libheif chargé à la demande, ~1,5 Mo). TIFF n'est pas pris en charge par les navigateurs.";
 const EXIF_LIMIT =
   "Les fichiers produits ne contiennent plus les métadonnées EXIF (orientation, appareil, GPS) : l'orientation est appliquée avant le traitement.";
 
@@ -185,6 +185,9 @@ export const imageTools: readonly ToolDefinition[] = [
     icon: "arrow-right-left",
     keywords: [
       "convertir image",
+      "heic en jpg",
+      "heic en png",
+      "convertir heic",
       "png en jpg",
       "jpg en png",
       "webp en jpg",

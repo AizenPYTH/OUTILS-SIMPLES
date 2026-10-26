@@ -3,6 +3,7 @@
  *  - pdf.js worker, CMaps, standard fonts, WASM decoders, ICC profiles → public/pdfjs
  *  - Tesseract.js worker + core (WASM) + French/English models → public/ocr
  *  - qpdf WASM (password protection / unlock / check) → public/qpdf
+ *  - libheif WASM (HEIC photos) → public/heif
  * Runs automatically after install and before build (see package.json).
  */
 import { cp, mkdir, rm, writeFile } from "node:fs/promises";
@@ -78,4 +79,17 @@ async function fresh(dir) {
   const { version } = require("@neslinesli93/qpdf-wasm/package.json");
   await writeFile(path.join(target, "VERSION"), `${version}\n`);
   console.log(`qpdf-wasm ${version} → public/qpdf`);
+}
+
+// --- libheif (WASM): HEIC/HEIF photos decoded in the browser
+{
+  const target = path.join(publicDir, "heif");
+  await fresh(target);
+  await cp(
+    path.join(pkgDir("libheif-js"), "libheif-wasm/libheif.wasm"),
+    path.join(target, "libheif.wasm"),
+  );
+  const { version } = require("libheif-js/package.json");
+  await writeFile(path.join(target, "VERSION"), `${version}\n`);
+  console.log(`libheif-js ${version} → public/heif`);
 }
