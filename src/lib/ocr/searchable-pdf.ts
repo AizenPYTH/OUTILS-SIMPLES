@@ -9,6 +9,7 @@ import {
   type PDFPage,
 } from "pdf-lib";
 import { sanitizeForStandardFont } from "@/lib/pdf/fonts";
+import { loadPdfDocument, savePdfDocument } from "@/lib/pdf/load";
 import type { OcrLine, OcrPageResult, OcrWord } from "./types";
 
 export interface SearchablePageInput {
@@ -90,7 +91,7 @@ export function wordOrigin(word: OcrWord, line: OcrLine, extent: number): { x: n
   }
 }
 
-function drawInvisibleText(
+export function drawInvisibleText(
   page: PDFPage,
   ocr: OcrPageResult,
   font: PDFFont,
@@ -144,4 +145,127 @@ function drawInvisibleText(
   }
   page.pushOperators(setTextRenderingMode(TextRenderingMode.Fill));
   return { placed, skipped };
+}
+
+export interface OcrLayerPageInput {
+  /** Index of the page in the document. */
+  pageIndex: number;
+  /** Recognition result of the page image rendered at `imageWidth` × `imageHeight` px. */
+  ocr: OcrPageResult;
+  imageWidth: number;
+  imageHeight: number;
+}
+
+/**
+ * Adds an invisible, searchable text layer to the pages of an EXISTING PDF
+ * (the editor's scanned pages) without touching their content: the page keeps
+ * its image, size, rotation and other operators. The layer is placed in the
+ * page's user space from the image rendered for OCR (same visual size).
+ */
+export async function addOcrLayer(
+  bytes: Uint8Array,
+  pages: OcrLayerPageInput[],
+  options: SearchablePdfOptions = defaultSearchablePdfOptions,
+): Promise<{ bytes: Uint8Array; wordsPlaced: number; wordsSkipped: number }> {
+  const doc = await loadPdfDocument(bytes);
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  let wordsPlaced = 0;
+  let wordsSkipped = 0;
+  for (const input of pages) {
+    const page = doc.getPage(input.pageIndex);
+    // The OCR image is the page as displayed (its /Rotate applied): the user space of a
+    // rotated page is itself rotated, so draw in a frame that undoes /Rotate.
+    const rotation = ((page.getRotation().angle % 360) + 360) % 360;
+    const { width, height } = page.getSize();
+    const visualWidth = rotation % 180 === 0 ? width : height;
+    const visualHeight = rotation % 180 === 0 ? height : width;
+    const scaleX = visualWidth / input.imageWidth;
+    const scaleY = visualHeight / input.imageHeight;
+    if (rotation === 0) {
+      const placed = drawInvisibleText(
+        page,
+        input.ocr,
+        font,
+        scaleX,
+        scaleY,
+        options.minConfidence,
+      );
+      wordsPlaced += placed.placed;
+      wordsSkipped += placed.skipped;
+      continue;
+    }
+    // Rotated page: express the OCR result in the unrotated user space by rotating the
+    // boxes back (displayed image → image of the unrotated page), then scale that image
+    // onto the page's own width and height.
+    const rotated = rotateOcrResultIntoUserSpace(
+      input.ocr,
+      rotation,
+      input.imageWidth,
+      input.imageHeight,
+    );
+    const placed = drawInvisibleText(
+      page,
+      rotated,
+      font,
+      width / rotated.width,
+      height / rotated.height,
+      options.minConfidence,
+    );
+    wordsPlaced += placed.placed;
+    wordsSkipped += placed.skipped;
+  }
+  return { bytes: await savePdfDocument(doc), wordsPlaced, wordsSkipped };
+}
+
+/**
+ * Maps an OCR result given in the DISPLAYED image (page /Rotate applied) to
+ * the page's unrotated user space, in pixels of an image of the unrotated
+ * page (width/height swapped for 90° and 270°).
+ */
+export function rotateOcrResultIntoUserSpace(
+  ocr: OcrPageResult,
+  rotation: number,
+  imageWidth: number,
+  imageHeight: number,
+): OcrPageResult {
+  const r = ((rotation % 360) + 360) % 360;
+  if (r === 0) return ocr;
+  const point = (x: number, y: number) => {
+    // Displayed image = unrotated page rotated clockwise by r (PDF /Rotate is clockwise).
+    switch (r) {
+      case 90:
+        return { x: y, y: imageWidth - x };
+      case 180:
+        return { x: imageWidth - x, y: imageHeight - y };
+      default:
+        return { x: imageHeight - y, y: x };
+    }
+  };
+  const box = (b: { x0: number; y0: number; x1: number; y1: number }) => {
+    const a = point(b.x0, b.y0);
+    const c = point(b.x1, b.y1);
+    return {
+      x0: Math.min(a.x, c.x),
+      y0: Math.min(a.y, c.y),
+      x1: Math.max(a.x, c.x),
+      y1: Math.max(a.y, c.y),
+    };
+  };
+  const angleOf = (a: OcrLine["angle"]) => ((((a + r) % 360) + 360) % 360) as OcrLine["angle"];
+  return {
+    ...ocr,
+    width: r % 180 === 0 ? imageWidth : imageHeight,
+    height: r % 180 === 0 ? imageHeight : imageWidth,
+    lines: ocr.lines.map((line) => {
+      const b0 = point(line.baseline.x0, line.baseline.y0);
+      const b1 = point(line.baseline.x1, line.baseline.y1);
+      return {
+        ...line,
+        ...box(line),
+        angle: angleOf(line.angle),
+        baseline: { x0: b0.x, y0: b0.y, x1: b1.x, y1: b1.y },
+        words: line.words.map((w) => ({ ...w, ...box(w) })),
+      };
+    }),
+  };
 }

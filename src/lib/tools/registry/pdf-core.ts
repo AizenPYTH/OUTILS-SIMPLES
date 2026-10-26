@@ -54,23 +54,28 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
     featured: true,
     content: {
       steps: [
-        "Déposez votre PDF ou cliquez pour le sélectionner.",
-        "Pour corriger un texte existant : outil « Modifier le texte », cliquez sur le passage, tapez le nouveau texte, Entrée. La page est réaffichée à partir du fichier réellement modifié.",
-        "Pour ajouter des éléments : choisissez un outil (ajouter du texte, dessin, surlignage, forme, image, signature) et cliquez sur la page ; déplacez, redimensionnez ou supprimez vos ajouts, Annuler / Rétablir si besoin.",
-        "Cliquez sur « Télécharger le PDF » : le fichier est généré localement.",
+        "Déposez votre PDF ou cliquez pour le sélectionner. OUTILIA l'analyse (texte natif, document scanné, mixte) et demande le mot de passe s'il est protégé.",
+        "Pour corriger un texte existant : outil « Modifier le texte », cliquez sur le passage, tapez le nouveau texte, Entrée. La page est réaffichée à partir du fichier réellement modifié. Sur un scan, lancez d'abord l'OCR intégré : le texte reconnu devient corrigeable.",
+        "Pour ajouter des éléments : choisissez un outil (ajouter du texte, dessin, surlignage, forme, image, signature) et cliquez sur la page ; déplacez, redimensionnez ou supprimez vos ajouts. Le panneau des pages permet de pivoter, dupliquer, supprimer et réordonner les pages. Annuler / Rétablir couvrent tout.",
+        "Cliquez sur « Télécharger le PDF modifié » : le fichier est généré localement, puis rouvert pour vérification avant le téléchargement.",
       ],
       limitations: [
         "Modification du texte existant : elle remplace le passage (l'opérateur de texte) dans le contenu de la page, sans rectangle blanc. Le passage est réécrit avec sa police d'origine lorsque tous les caractères y existent ; sinon une police standard proche est utilisée pour ce passage (apparence différente). Le texte qui suit sur la même ligne n'est pas décalé : un texte plus long peut chevaucher la suite.",
-        "Un passage correspond à un bloc tel que le producteur du PDF l'a écrit : parfois un mot, parfois une ligne. Les polices Type 3, l'écriture verticale et le texte invisible (couche OCR) ne sont pas modifiables ; le texte des formulaires et des annotations non plus.",
-        "Les documents scannés sont des images : rien à modifier sans reconnaissance de caractères. L'éditeur le signale et renvoie vers l'outil OCR.",
+        "Un passage correspond à un bloc tel que le producteur du PDF l'a écrit : parfois un mot, parfois une ligne. Les polices Type 3 et l'écriture verticale ne sont pas modifiables ; le texte des formulaires et des annotations non plus.",
+        "Documents scannés : l'OCR intégré (Tesseract, dans le navigateur, quelques secondes par page) ajoute une couche de texte invisible alignée sur l'image. Corriger un passage reconnu modifie cette couche (recherche, copie) ; l'option « réécrire visiblement » repeint la zone avec la couleur de fond et une police standard, sans reproduire la police du scan. La qualité estimée est affichée : relisez le texte reconnu.",
         "Les polices disponibles pour le texte ajouté sont les polices standard PDF (Helvetica, Times, Courier). Les caractères latins accentués sont pris en charge ; les alphabets non latins et les emojis ne le sont pas.",
-        "Les fichiers protégés par mot de passe doivent être déverrouillés avant utilisation.",
+        "Fichiers protégés : le mot de passe d'ouverture est demandé et le document est déverrouillé localement (qpdf) ; le PDF téléchargé n'est plus protégé. Un fichier endommagé ou qui n'est pas un PDF est signalé comme tel.",
       ],
       faq: [
         {
           question: "Puis-je modifier le texte existant d'un PDF ?",
           answer:
-            "Oui, dans les cas pris en charge : le texte doit être du vrai texte (pas un scan) avec une police lisible par le navigateur. L'éditeur remplace alors le passage dans le contenu de la page, avec la même police quand elle contient tous les caractères saisis, puis réaffiche la page à partir du fichier modifié. Il ne reformate pas le paragraphe : le texte qui suit ne bouge pas, et un passage plus long peut chevaucher la suite. Pour un document scanné, passez d'abord par l'outil OCR.",
+            "Oui, dans les cas pris en charge : le texte doit être du vrai texte avec une police lisible par le navigateur. L'éditeur remplace alors le passage dans le contenu de la page, avec la même police quand elle contient tous les caractères saisis, puis réaffiche la page à partir du fichier modifié. Il ne reformate pas le paragraphe : le texte qui suit ne bouge pas, et un passage plus long peut chevaucher la suite. Pour un document scanné, lancez l'OCR intégré : le texte reconnu est ensuite corrigeable (couche de recherche, ou réécriture visible en police standard).",
+        },
+        {
+          question: "Que se passe-t-il avec un PDF scanné ou protégé ?",
+          answer:
+            "Un scan n'est pas refusé : l'éditeur indique que les pages sont des images et propose « Lancer l'OCR » ou « Continuer sans OCR » (annotations, texte ajouté, signature, pages). Un PDF protégé demande son mot de passe, qui reste dans votre navigateur. Le fichier d'origine n'est jamais modifié : le résultat est une nouvelle copie, vérifiée avant le téléchargement.",
         },
         {
           question: "Le PDF modifié est-il compatible avec tous les lecteurs ?",

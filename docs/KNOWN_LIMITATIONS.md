@@ -4,13 +4,23 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
 
 ## PDF
 
-- **Éditeur, texte existant** (`docs/EDITION_TEXTE.md`) : un passage = un opérateur de texte de la
-  page ; remplacé en place avec la police d'origine quand elle contient les caractères, sinon police
-  standard pour ce passage (signalé). Pas de reflux : le texte qui suit n'est pas décalé. Non
-  modifiables : scans (renvoi OCR), texte invisible, polices Type 3, écriture verticale, texte des
-  XObjects de formulaire / annotations / champs. L'aperçu recharge le document à chaque validation
-  (temps proportionnel à la taille du fichier). Annuler/Rétablir ne couvrent pas ces modifications
-  (retour passage par passage).
+- **Éditeur, texte existant** (`docs/EDITION_TEXTE.md`, `docs/RAPPORT_MODIFICATEUR_PDF.md`) : un
+  passage = un opérateur de texte de la page ; remplacé en place avec la police d'origine quand elle
+  contient les caractères, sinon police standard pour ce passage (signalé). Pas de reflux : le texte
+  qui suit n'est pas décalé. Non modifiables : polices Type 3, écriture verticale, texte des XObjects
+  de formulaire / annotations / champs. L'aperçu recharge le document à chaque validation (temps
+  proportionnel à la taille du fichier).
+- **Éditeur, scans et OCR intégré** : l'OCR (Tesseract, navigateur) écrit une couche invisible
+  alignée sur l'image ; corriger un passage reconnu modifie cette couche, et l'option « réécrire
+  visiblement » repeint la zone (couleur de fond échantillonnée, police standard) sans reproduire la
+  police du scan. Qualité estimée affichée ; pas de reconstruction de mise en page. L'OCR repart
+  toujours du document d'origine (relancer remplace la couche). Le diagnostic à l'import analyse
+  toutes les pages jusqu'à 80, puis un échantillon.
+- **Éditeur, pages** : réordonner, pivoter, dupliquer, supprimer sont appliqués à l'export (le
+  document affiché reste l'original) ; pas de recadrage de page ni d'insertion de pages d'un autre
+  fichier (outils dédiés).
+- **Éditeur, protégés** : mot de passe d'ouverture demandé puis déverrouillage local (qpdf) ; le
+  PDF exporté n'est plus chiffré ; les permissions propriétaire ne sont pas réappliquées.
 - **Éditeur, ajouts** : superposés au contenu ; rendu à zoom × densité de pixels avec un plafond de
   16 Mpx par page (au-delà, la densité est réduite : très fort zoom un peu moins net sur écran 3×).
 - **Polices** : 14 polices standard PDF (WinAnsi) pour tout texte dessiné (éditeur, numérotation,
@@ -106,7 +116,7 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
 
 ## Qualité / tests
 
-- 169 tests Vitest ; 97 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
+- 186 tests Vitest ; 102 parcours Playwright exécutés sur desktop et mobile (Pixel 7), avec vérification des
   fichiers produits, de la confidentialité réseau, de l'accessibilité (axe-core), de la caméra (périphérique
   factice Chromium) et des gros fichiers (60 Mo traité, 101 Mo et 1 001 pages refusés). Non couverts
   automatiquement : glisser-déposer tactile de dnd-kit, pad de signature dessiné, caméra physique,

@@ -26,6 +26,16 @@ export interface TextEdit {
   /** Further operators of the same run (kerning or ligature fragments) removed with the edit. */
   removeOps?: number[];
   text: string;
+  /**
+   * For an OCR (invisible) run: paint the box with `fill` and draw the new text
+   * visibly in a standard font. Without it, an OCR edit only corrects the
+   * invisible layer (search and copy), the image stays as it is.
+   */
+  visual?: {
+    /** Four corners of the run's box in PDF user space, painted with `fill` before the text. */
+    polygon: { x: number; y: number }[];
+    fill: { r: number; g: number; b: number };
+  };
   original: OriginalEncoding;
   fallback: FallbackFontHint;
 }
@@ -64,6 +74,8 @@ export interface TextRun {
   fallback: FallbackFontHint;
   /** Whether the original font is Type3, vertical or missing (fallback font forced). */
   fontUsable: boolean;
+  /** "ocr": invisible text (rendering mode 3/7), the layer of a recognised scan. */
+  kind: "native" | "ocr";
 }
 
 export type PageTextStatus =

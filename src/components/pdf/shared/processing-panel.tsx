@@ -11,9 +11,11 @@ import { t } from "@/lib/i18n";
 export function BusyPanel({
   progress,
   onCancel,
+  ...rest
 }: {
   progress: OperationProgress;
   onCancel?: () => void;
+  "data-phase"?: string;
 }) {
   const percent =
     progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : undefined;
@@ -23,6 +25,7 @@ export function BusyPanel({
       role="status"
       aria-live="polite"
       data-testid="busy-panel"
+      {...rest}
     >
       <Loader2 className="size-11 animate-spin text-link" aria-hidden="true" />
       <div>

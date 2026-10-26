@@ -21,13 +21,32 @@ async function runAxe(page: Page): Promise<AxeViolation[]> {
   await page.addScriptTag({ path: axePath });
   const result = await page.evaluate(async () => {
     // @ts-expect-error axe is injected at runtime
-    const r = await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "best-practice"] } });
+    const r = await window.axe.run(document, {
+      runOnly: {
+        type: "tag",
+        values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "best-practice"],
+      },
+    });
     return r.violations as AxeViolation[];
   });
   return result;
 }
 
-const PAGES = ["/", "/outils/", "/pdf/", "/pdf/fusionner/", "/numerisation/ocr/", "/images/compresser/", "/texte/compteur-de-mots/", "/developpeur/formater-valider-json/", "/calculatrices/tva/", "/codes/generateur-qr-code/", "/documents/markdown-vers-pdf/", "/guides/", "/mentions-legales/"];
+const PAGES = [
+  "/",
+  "/outils/",
+  "/pdf/",
+  "/pdf/fusionner/",
+  "/numerisation/ocr/",
+  "/images/compresser/",
+  "/texte/compteur-de-mots/",
+  "/developpeur/formater-valider-json/",
+  "/calculatrices/tva/",
+  "/codes/generateur-qr-code/",
+  "/documents/markdown-vers-pdf/",
+  "/guides/",
+  "/mentions-legales/",
+];
 
 test.describe("audit — accessibilité", () => {
   test("no serious or critical axe violation on key pages", async ({ page, isMobile }) => {
@@ -40,21 +59,72 @@ test.describe("audit — accessibilité", () => {
       const violations = await runAxe(page);
       const blocking = violations.filter((v) => v.impact === "serious" || v.impact === "critical");
       report[url] = violations.map((v) => `${v.impact}:${v.id} (${v.nodes.length})`);
-      expect(blocking.map((v) => `${v.id}: ${v.help} → ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`), url).toEqual([]);
+      expect(
+        blocking.map(
+          (v) => `${v.id}: ${v.help} → ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`,
+        ),
+        url,
+      ).toEqual([]);
     }
     console.log("axe minor/moderate findings:", JSON.stringify(report, null, 1));
   });
 
-  test("a loaded tool page (with dropzone replaced) still passes axe", async ({ page, isMobile }) => {
+  test("a loaded tool page (with dropzone replaced) still passes axe", async ({
+    page,
+    isMobile,
+  }) => {
     test.skip(isMobile, "desktop layout");
     await page.goto("/pdf/diviser/");
     await uploadPdf(page, "simple-5-pages.pdf");
     await expect(page.getByTestId("file-summary")).toBeVisible({ timeout: 30_000 });
-    const blocking = (await runAxe(page)).filter((v) => v.impact === "serious" || v.impact === "critical");
+    const blocking = (await runAxe(page)).filter(
+      (v) => v.impact === "serious" || v.impact === "critical",
+    );
     expect(blocking.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
   });
 
-  test("keyboard: skip link, search dialog, tab order and file chooser", async ({ page, isMobile }) => {
+  test("the PDF editor (header, rail, pages panel, OCR panel, text layer) passes axe", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "desktop layout");
+    await page.goto("/pdf/modifier/");
+    await uploadPdf(page, "mixed-text-scan.pdf");
+    await expect(page.getByTestId("import-diagnosis")).toBeVisible();
+    let blocking = (await runAxe(page)).filter(
+      (v) => v.impact === "serious" || v.impact === "critical",
+    );
+    expect(
+      blocking.map(
+        (v) => `${v.id}: ${v.help} → ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`,
+      ),
+      "diagnosis card",
+    ).toEqual([]);
+    await page.getByTestId("diagnosis-continue").click();
+    await page.getByTestId("tool-editText").filter({ visible: true }).click();
+    await expect(page.getByTestId("text-run").first()).toBeVisible({ timeout: 20_000 });
+    await page.getByTestId("panel-ocr").filter({ visible: true }).click();
+    await expect(page.getByTestId("side-panel-ocr")).toBeVisible();
+    blocking = (await runAxe(page)).filter(
+      (v) => v.impact === "serious" || v.impact === "critical",
+    );
+    expect(
+      blocking.map(
+        (v) => `${v.id}: ${v.help} → ${v.nodes.map((n) => n.target.join(" ")).join(" | ")}`,
+      ),
+      "editor with panels",
+    ).toEqual([]);
+    // Keyboard: Escape closes the panel, "?" opens the shortcuts help, Ctrl+Z is wired.
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("side-panel-ocr")).toHaveCount(0);
+    await page.keyboard.press("?");
+    await expect(page.getByTestId("shortcuts-panel")).toBeVisible();
+  });
+
+  test("keyboard: skip link, search dialog, tab order and file chooser", async ({
+    page,
+    isMobile,
+  }) => {
     test.skip(isMobile, "keyboard flow on desktop");
     await page.goto("/pdf/fusionner/");
     await page.keyboard.press("Tab");
@@ -82,7 +152,9 @@ test.describe("audit — accessibilité", () => {
     const nav = page.getByRole("navigation", { name: "Menu" });
     await expect(nav).toBeVisible();
     await page.keyboard.press("Tab");
-    const inDialog = await page.evaluate(() => !!document.activeElement?.closest('[role="dialog"]'));
+    const inDialog = await page.evaluate(
+      () => !!document.activeElement?.closest('[role="dialog"]'),
+    );
     expect(inDialog).toBe(true);
     await page.keyboard.press("Escape");
     await expect(nav).toHaveCount(0);
@@ -95,7 +167,10 @@ test.describe("audit — accessibilité", () => {
     const error = page.getByTestId("error-panel");
     await expect(error).toBeVisible({ timeout: 30_000 });
     await expect(error).toHaveAttribute("role", "alert");
-    await page.getByRole("button", { name: /autre fichier|recommencer/i }).first().click();
+    await page
+      .getByRole("button", { name: /autre fichier|recommencer/i })
+      .first()
+      .click();
     await expect(page.getByTestId("pdf-input")).toBeAttached();
   });
 });

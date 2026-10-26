@@ -21,6 +21,11 @@ interface ContextBarProps {
   /** True when a text annotation is selected: show text controls even in select mode. */
   textSelected: boolean;
   hasSelection: boolean;
+  /** "Modifier le texte": show every editable zone instead of only on hover. */
+  showRuns?: boolean;
+  onToggleRuns?: () => void;
+  /** Short state of the page for the text tool ("12 passages modifiables", "page scannée"). */
+  textInfo?: string | null;
 }
 
 const sizes = [8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 40, 48];
@@ -31,6 +36,9 @@ export function ContextBar({
   onChange,
   textSelected,
   hasSelection,
+  showRuns = false,
+  onToggleRuns,
+  textInfo = null,
 }: ContextBarProps) {
   const showText = tool === "text" || tool === "comment" || textSelected;
   const showStroke =
@@ -41,7 +49,9 @@ export function ContextBar({
     tool === "underline";
   const showFill = tool === "rect" || tool === "ellipse";
   const showColor =
-    tool !== "select" || hasSelection ? tool !== "image" && tool !== "signature" : false;
+    tool !== "select" || hasSelection
+      ? tool !== "image" && tool !== "signature" && tool !== "editText"
+      : false;
   const showOpacity =
     tool === "pen" || tool === "highlight" || tool === "rect" || tool === "ellipse";
 
@@ -50,6 +60,22 @@ export function ContextBar({
       className="flex min-h-12 items-center gap-3 overflow-x-auto border-b border-border bg-surface px-3 py-1.5 text-sm"
       data-testid="context-bar"
     >
+      {tool === "editText" ? (
+        <>
+          <Toggle
+            pressed={showRuns}
+            onClick={() => onToggleRuns?.()}
+            label="Afficher toutes les zones de texte modifiables"
+          >
+            <span className="px-1 text-xs">Zones de texte</span>
+          </Toggle>
+          {textInfo ? (
+            <span className="shrink-0 text-xs text-muted-foreground" data-testid="text-info">
+              {textInfo}
+            </span>
+          ) : null}
+        </>
+      ) : null}
       {showColor ? (
         <label className="flex shrink-0 items-center gap-1.5">
           <span className="text-xs text-muted-foreground">Couleur</span>

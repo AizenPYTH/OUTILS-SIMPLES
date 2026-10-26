@@ -34,18 +34,18 @@ pnpm dev              # http://localhost:3000
 
 Commandes :
 
-| Commande                    | Rôle                                                                        |
-| --------------------------- | --------------------------------------------------------------------------- |
-| `pnpm dev`                  | serveur de développement                                                    |
-| `pnpm build` / `pnpm start` | build de production et serveur                                              |
-| `pnpm typecheck`            | `next typegen` + `tsc --noEmit`                                             |
-| `pnpm lint`                 | ESLint (config Next core-web-vitals + TypeScript)                           |
-| `pnpm test`                 | tests unitaires et d'intégration Vitest                                     |
-| `pnpm test:e2e`             | Playwright (lance Next sur le port 3100 ; faire `pnpm build` avant)         |
-| `pnpm fixtures`             | régénère les PDF de test synthétiques dans `tests/fixtures`                 |
-| `node scripts/generate-image-fixtures.mjs` | régénère les images de test (Chromium)                       |
-| `node scripts/generate-links-fixture.mjs`, `generate-code-fixtures.mjs` | fixtures PDF liens/images et QR |
-| `pnpm check`                | typecheck + lint + tests + build                                            |
+| Commande                                                                | Rôle                                                                |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `pnpm dev`                                                              | serveur de développement                                            |
+| `pnpm build` / `pnpm start`                                             | build de production et serveur                                      |
+| `pnpm typecheck`                                                        | `next typegen` + `tsc --noEmit`                                     |
+| `pnpm lint`                                                             | ESLint (config Next core-web-vitals + TypeScript)                   |
+| `pnpm test`                                                             | tests unitaires et d'intégration Vitest                             |
+| `pnpm test:e2e`                                                         | Playwright (lance Next sur le port 3100 ; faire `pnpm build` avant) |
+| `pnpm fixtures`                                                         | régénère les PDF de test synthétiques dans `tests/fixtures`         |
+| `node scripts/generate-image-fixtures.mjs`                              | régénère les images de test (Chromium)                              |
+| `node scripts/generate-links-fixture.mjs`, `generate-code-fixtures.mjs` | fixtures PDF liens/images et QR                                     |
+| `pnpm check`                                                            | typecheck + lint + tests + build                                    |
 
 Prérequis : Node ≥ 20.9, pnpm 10.
 
@@ -68,16 +68,16 @@ Il n'y a aucun secret côté serveur : le site n'a ni base de données ni API.
 
 ## Catalogue (66 outils, 8 catégories actives)
 
-| Catégorie            | Outils                                                                                                                                                                                                                                                                                                                                                   |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Catégorie            | Outils                                                                                                                                                                                                                                                                                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | PDF (27)             | Modifier, fusionner, diviser, compresser, organiser, pivoter, extraire des pages, ajouter du texte, annoter, signer, filigrane (ajout, gestion), formulaires, extraire le texte, rechercher, PDF → images, images → PDF, recadrer, numéroter, protéger, déverrouiller, vérifier/réparer, métadonnées, extraire les liens, extraire les images, comparer, caviarder |
-| Numérisation (3)     | Scanner un document (caméra), corriger un document photographié, OCR + PDF recherchable                                                                                                                                                                                                                                                                  |
-| Images (7)           | Compresser, redimensionner, recadrer, convertir, pivoter/retourner, EXIF (lire/supprimer), filigrane — par lot                                                                                                                                                                                                                                             |
-| Texte (5)            | Compteur de mots, casse, nettoyage, comparaison, slug                                                                                                                                                                                                                                                                                                    |
-| Développeur (10)     | JSON, CSV → JSON, Base64, URL, entités HTML, UUID, mots de passe, hash, regex, timestamp                                                                                                                                                                                                                                                                   |
-| Calculatrices (4)    | Pourcentage, TVA, jours entre deux dates / jours ouvrés, unités                                                                                                                                                                                                                                                                                           |
-| Codes & couleurs (5) | QR code (générer, lire), codes-barres, convertisseur de couleurs + contraste WCAG, palette d'image                                                                                                                                                                                                                                                       |
-| Documents (5)        | Markdown → PDF, texte → PDF, feuilles à imprimer, calendrier, page de garde                                                                                                                                                                                                                                                                              |
+| Numérisation (3)     | Scanner un document (caméra), corriger un document photographié, OCR + PDF recherchable                                                                                                                                                                                                                                                                            |
+| Images (7)           | Compresser, redimensionner, recadrer, convertir, pivoter/retourner, EXIF (lire/supprimer), filigrane — par lot                                                                                                                                                                                                                                                     |
+| Texte (5)            | Compteur de mots, casse, nettoyage, comparaison, slug                                                                                                                                                                                                                                                                                                              |
+| Développeur (10)     | JSON, CSV → JSON, Base64, URL, entités HTML, UUID, mots de passe, hash, regex, timestamp                                                                                                                                                                                                                                                                           |
+| Calculatrices (4)    | Pourcentage, TVA, jours entre deux dates / jours ouvrés, unités                                                                                                                                                                                                                                                                                                    |
+| Codes & couleurs (5) | QR code (générer, lire), codes-barres, convertisseur de couleurs + contraste WCAG, palette d'image                                                                                                                                                                                                                                                                 |
+| Documents (5)        | Markdown → PDF, texte → PDF, feuilles à imprimer, calendrier, page de garde                                                                                                                                                                                                                                                                                        |
 
 Le rapport détaillé de l'extension (outils, limites, licences, coûts, prochaines étapes) est dans
 `docs/RAPPORT_EXTENSION.md` ; la matrice d'audit de qualité des 66 outils (tests par outil, risques, corrections)
@@ -155,11 +155,12 @@ de nom de fichier.
 
 ## Tests
 
-- `pnpm test` : 169 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
+- `pnpm test` : 186 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
   sur fixtures réelles, permissions de chiffrement relues par pdf.js, géométrie/détection du scanner, OCR →
   PDF recherchable, métadonnées d'images, encodeur PNG, extraction d'images et de liens, comparaison,
   caviardage (y compris pages pivotées), Markdown → PDF, regex, dates et jours fériés, TVA, unités,
-  codes-barres, couleurs, décodage QR, documents imprimables, limites et fichiers invalides).
+  codes-barres, couleurs, décodage QR, documents imprimables, limites et fichiers invalides, fondations
+  de l'éditeur : diagnostic d'import, mot de passe, couche OCR, plan de pages, passages OCR).
 - `pnpm build && pnpm test:e2e` : 97 parcours Playwright exécutés sur desktop et mobile (Pixel 7) :
   catalogue, recherche, navigation, 404, métadonnées, sitemap/robots/CSP, thème, absence de débordement
   horizontal, et pour chacun des 66 outils un parcours avec fichiers téléchargés vérifiés (pdf-lib, pdf.js,
@@ -217,13 +218,13 @@ rastérisation des pages marquées, comparaison de PDF textuelle uniquement.
 
 ## Licence des dépendances
 
-| Dépendance                                  | Licence                 |
-| ------------------------------------------- | ----------------------- |
-| Next.js, React, Radix UI, dnd-kit, sonner, next-themes, zod, pdf-lib, qrcode, exifr, marked, fflate, tailwind-merge, clsx | MIT |
-| pdf.js (pdfjs-dist), tesseract.js, tesseract.js-core, modèles @tesseract.js-data, jsqr | Apache-2.0 |
-| @neslinesli93/qpdf-wasm                     | ISC (qpdf : Apache-2.0) |
-| diff                                        | BSD-3-Clause            |
-| dompurify                                   | MPL-2.0 ou Apache-2.0   |
-| lucide-react                                | ISC                     |
-| Polices Bricolage Grotesque, Instrument Sans, Caveat | OFL-1.1        |
-| axe-core (développement uniquement, tests d'accessibilité) | MPL-2.0 |
+| Dépendance                                                                                                                | Licence                 |
+| ------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| Next.js, React, Radix UI, dnd-kit, sonner, next-themes, zod, pdf-lib, qrcode, exifr, marked, fflate, tailwind-merge, clsx | MIT                     |
+| pdf.js (pdfjs-dist), tesseract.js, tesseract.js-core, modèles @tesseract.js-data, jsqr                                    | Apache-2.0              |
+| @neslinesli93/qpdf-wasm                                                                                                   | ISC (qpdf : Apache-2.0) |
+| diff                                                                                                                      | BSD-3-Clause            |
+| dompurify                                                                                                                 | MPL-2.0 ou Apache-2.0   |
+| lucide-react                                                                                                              | ISC                     |
+| Polices Bricolage Grotesque, Instrument Sans, Caveat                                                                      | OFL-1.1                 |
+| axe-core (développement uniquement, tests d'accessibilité)                                                                | MPL-2.0                 |

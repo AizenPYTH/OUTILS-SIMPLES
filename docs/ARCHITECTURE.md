@@ -81,9 +81,24 @@ Variantes du flux pour les autres familles :
   donc le dessin à l'écran et l'export utilisent exactement la même transformation, zoom et rotation compris.
 - `drawAnnotations` (pdf-lib) place texte et images avec `rotate` sur les pages pivotées en calculant
   l'ancre visuelle ; les chemins/formes sont convertis point par point.
-- Historique : réducteur `past/present/future`, un glissement = une étape, nouvelle action = redo vidé.
-- Export : `applyAnnotations` → nouveau PDF ; les annotations sont aplaties dans le contenu (pas d'objets
-  `/Annot` natifs), ce qui est documenté sur les pages concernées.
+- Import (`hooks/use-pdf-document.ts`) : lecture → ouverture pdf.js (progression pour les gros
+  fichiers) → mot de passe demandé si `PdfPasswordError` (vérifié par pdf.js, déchiffrement local
+  qpdf, réouverture des octets déchiffrés) → diagnostic `browser/diagnose.ts` (texte natif / scanné /
+  mixte / vide, par page, couche OCR existante détectée) quand l'outil le demande (`analyse`).
+- Espace de travail (`workspace/annotation-workspace.tsx`) en quatre zones : en-tête compact
+  (`editor-header.tsx`), rail d'outils par intention (`toolbar.tsx`, `TOOL_GROUPS`), page centrée,
+  panneau des pages repliable (`pages-panel.tsx`, dnd-kit) ; panneaux latéraux un à la fois
+  (`side-panel.tsx` : OCR, document, historique, raccourcis) ; carte de diagnostic à l'import
+  (`import-diagnosis.tsx`).
+- Historique (`use-editor-history.ts`) : un seul réducteur `past/present/future` pour les annotations,
+  les textes modifiés et le plan de pages ; un glissement = une étape, nouvelle action = redo vidé.
+- Document de base : l'original, ou l'original + couche OCR (`use-editor-ocr.ts` : rendu de chaque page
+  en pixels, moteur Tesseract, `addOcrLayer`) ; l'original n'est jamais modifié, la couche se retire.
+- Plan de pages (`operations/page-plan.ts`) : ordre, rotation, duplication, suppression décrits et
+  appliqués à l'export seulement ; annotations et textes restent indexés par page d'origine.
+- Export (`export-dialog.tsx`) : textes modifiés → `applyAnnotations` → `applyPagePlan` → réouverture
+  pdf.js (nombre de pages vérifié) ; les annotations sont aplaties dans le contenu (pas d'objets
+  `/Annot` natifs), ce qui est écrit dans le dialogue et sur les pages concernées.
 
 ## Édition du texte existant
 

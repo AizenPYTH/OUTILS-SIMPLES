@@ -38,7 +38,22 @@ export interface OpenedPdf {
   destroy: () => Promise<void>;
 }
 
-export async function openPdf(bytes: Uint8Array): Promise<OpenedPdf> {
+export interface OpenPdfOptions {
+  /** User or owner password for an encrypted document. */
+  password?: string;
+  /** Called while page sizes are collected (large documents). */
+  onProgress?: (done: number, total: number) => void;
+}
+
+/** Thrown when pdf.js needs a password (or the given one is wrong). */
+export class PdfPasswordError extends Error {
+  constructor(readonly reason: "required" | "incorrect") {
+    super(reason === "required" ? "password required" : "incorrect password");
+    this.name = "PdfPasswordError";
+  }
+}
+
+export async function openPdf(bytes: Uint8Array, options: OpenPdfOptions = {}): Promise<OpenedPdf> {
   const pdfjs = await loadPdfJs();
   // pdf.js takes ownership of the buffer when transferring to the worker: copy it.
   const copy = new Uint8Array(bytes.byteLength);
@@ -54,15 +69,21 @@ export async function openPdf(bytes: Uint8Array): Promise<OpenedPdf> {
     verbosity: 0,
     // Exposes each simple font's encoding (glyph names by code) to the text editor.
     fontExtraProperties: true,
+    ...(options.password ? { password: options.password } : {}),
   });
   let doc: PDFDocumentProxy;
   try {
     doc = await loadingTask.promise;
   } catch (error) {
+    if (error instanceof Error && error.name === "PasswordException") {
+      const code = (error as { code?: number }).code;
+      throw new PdfPasswordError(code === 2 || options.password ? "incorrect" : "required");
+    }
     throw toPdfError(error, "CORRUPTED");
   }
   const pages: PageInfo[] = [];
   for (let i = 1; i <= doc.numPages; i += 1) {
+    if (i % 25 === 0 || i === doc.numPages) options.onProgress?.(i, doc.numPages);
     const page = await doc.getPage(i);
     const viewport = page.getViewport({ scale: 1, rotation: 0 });
     pages.push({
@@ -198,6 +219,53 @@ export async function renderPageToCanvas(
     options.signal?.removeEventListener("abort", onAbort);
   }
   return { viewport, pixelRatio: ratio };
+}
+
+export interface PageRaster {
+  width: number;
+  height: number;
+  data: Uint8ClampedArray;
+}
+
+/**
+ * Renders a page (as displayed, /Rotate applied) to RGBA pixels for OCR: the
+ * longest side is `maxSide` px at most (≈ 220 dpi for A4 at 2 600 px), the
+ * device pixel ratio is ignored and the canvas is released right away.
+ */
+export async function renderPageToRaster(
+  doc: PDFDocumentProxy,
+  pageIndex: number,
+  maxSide = 2600,
+  signal?: AbortSignal,
+): Promise<PageRaster> {
+  let page: PDFPageProxy;
+  try {
+    page = await doc.getPage(pageIndex + 1);
+  } catch (error) {
+    throw toPdfError(error, "RENDER_FAILED");
+  }
+  const base = page.getViewport({ scale: 1 });
+  const scale = Math.min(maxSide / Math.max(base.width, base.height), 4);
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(viewport.width));
+  canvas.height = Math.max(1, Math.round(viewport.height));
+  const task = page.render({ canvas, viewport, intent: "print", background: "#ffffff" });
+  const onAbort = () => task.cancel();
+  signal?.addEventListener("abort", onAbort, { once: true });
+  try {
+    await task.promise;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) throw new Error("canvas 2d context unavailable");
+    const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    return { width: canvas.width, height: canvas.height, data: image.data };
+  } catch (error) {
+    throw toPdfError(error, "RENDER_FAILED");
+  } finally {
+    signal?.removeEventListener("abort", onAbort);
+    canvas.width = 0;
+    canvas.height = 0;
+  }
 }
 
 /** Scale that fits a page of (w, h) points into a box of (maxW, maxH) CSS px. */

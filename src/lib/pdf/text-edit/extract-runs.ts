@@ -282,8 +282,7 @@ export async function extractTextRuns(
         const invisible = text.renderMode === 3 || text.renderMode === 7;
         let reason: string | undefined;
         if (!raw) reason = "désynchronisation avec le flux de contenu";
-        else if (invisible)
-          reason = "Texte invisible (couche OCR) : il n'apparaît pas à l'écran ni à l'impression.";
+        else if (invisible && font?.isType3Font) reason = "Police Type 3 : non modifiable.";
         else if (font?.isType3Font) reason = "Police Type 3 (glyphes dessinés) : non modifiable.";
         else if (font?.vertical) reason = "Écriture verticale : non prise en charge.";
         else if (fontSize < 0.5 || str.trim().length === 0) reason = "Passage vide.";
@@ -304,6 +303,7 @@ export async function extractTextRuns(
           original: encoding,
           fallback: fallbackFor(font),
           fontUsable: !font?.isType3Font && !font?.vertical,
+          kind: invisible ? "ocr" : "native",
         });
         tm = mul(translate(advance, 0), tm);
         break;
@@ -368,6 +368,7 @@ export function mergeFragments(runs: TextRun[], nextIsPositioned: boolean[]): Te
 function canMerge(a: TextRun, b: TextRun): boolean {
   if (b.opIndex !== a.opIndex + a.extraOps.length + 1) return false;
   if (a.original !== b.original) return false; // same font object
+  if (a.kind !== b.kind) return false;
   if (Math.abs(a.fontSize - b.fontSize) > 0.05 * a.fontSize) return false;
   if (Math.abs(a.angle - b.angle) > 0.5) return false;
   const rad = (a.angle * Math.PI) / 180;

@@ -50,6 +50,8 @@ export interface RawTextOp {
    * text-showing operator: removing this operator cannot shift later text.
    */
   nextIsPositioned: boolean;
+  /** Text matrix in effect (absolute `Tm` combined with later `Td`/`TD`/`T*`), when known. */
+  textMatrix: number[] | null;
 }
 
 /** Decoded, concatenated content of a page (streams joined by a newline). */
@@ -83,12 +85,48 @@ export function collectTextOps(content: Uint8Array): RawTextOp[] {
   const stack: (typeof font)[] = [];
   let lastText: RawTextOp | null = null;
   const positioning = new Set(["Td", "TD", "Tm", "T*", "ET", "BT", "q", "Q", "cm"]);
+  // Text matrix tracking (line matrix only: enough to re-enter a text object at the same place).
+  let tm: number[] | null = null;
+  let tlm: number[] | null = null;
+  let leading = 0;
+  const num = (o: Operand | undefined) => (o?.type === "number" ? o.value : 0);
+  const td = (tx: number, ty: number) => {
+    if (!tlm) tlm = [1, 0, 0, 1, 0, 0];
+    tlm = [
+      tlm[0]!,
+      tlm[1]!,
+      tlm[2]!,
+      tlm[3]!,
+      tlm[0]! * tx + tlm[2]! * ty + tlm[4]!,
+      tlm[1]! * tx + tlm[3]! * ty + tlm[5]!,
+    ];
+    tm = tlm;
+  };
   for (const op of ops) {
     if (positioning.has(op.op) && lastText) {
       lastText.nextIsPositioned = true;
       lastText = null;
     }
     switch (op.op) {
+      case "BT":
+        tm = tlm = [1, 0, 0, 1, 0, 0];
+        break;
+      case "Tm":
+        tm = tlm = op.operands.slice(0, 6).map(num);
+        break;
+      case "Td":
+        td(num(op.operands[0]), num(op.operands[1]));
+        break;
+      case "TD":
+        leading = -num(op.operands[1]);
+        td(num(op.operands[0]), num(op.operands[1]));
+        break;
+      case "TL":
+        leading = num(op.operands[0]);
+        break;
+      case "T*":
+        td(0, -leading);
+        break;
       case "q":
         stack.push(font);
         break;
@@ -122,6 +160,7 @@ export function collectTextOps(content: Uint8Array): RawTextOp[] {
             stringBytes,
             stringCount,
             nextIsPositioned: false,
+            textMatrix: tm ? [...tm] : null,
           };
           result.push(raw);
           lastText = raw;
@@ -130,6 +169,21 @@ export function collectTextOps(content: Uint8Array): RawTextOp[] {
   }
   if (lastText) lastText.nextIsPositioned = true;
   return result;
+}
+
+/**
+ * After closing and reopening a text object, the font and the text matrix are
+ * gone: re-emit them from the state recorded on the raw operator.
+ */
+function restoreTextState(raw: RawTextOp): string {
+  const parts: string[] = [];
+  if (raw.fontName !== null && raw.fontSize !== null)
+    parts.push(`${PDFName.of(raw.fontName).toString()} ${raw.fontSize} Tf`);
+  if (raw.textMatrix)
+    parts.push(
+      `${raw.textMatrix.map((v) => (Math.round(v * 1000) / 1000).toString()).join(" ")} Tm`,
+    );
+  return parts.join(" ");
 }
 
 /** Pairs that fonts often draw as one ligature glyph. */
@@ -323,6 +377,17 @@ export async function applyTextEdits(
         const origName = PDFName.of(raw.fontName).toString();
         replacement = `${prefix}/${resourceName} ${raw.fontSize} Tf ${encoded} Tj ${origName} ${raw.fontSize} Tf`;
         report.fontReplaced += 1;
+      }
+      if (edit.visual) {
+        // Visual rewrite of a recognised (invisible) run: repaint the box with the
+        // sampled background and show the new text; the user asked for it explicitly.
+        const n = (v: number) => (Math.round(v * 100) / 100).toString();
+        const [p0, ...rest] = edit.visual.polygon;
+        if (p0 && rest.length >= 2) {
+          const path = `${n(p0.x)} ${n(p0.y)} m ${rest.map((p) => `${n(p.x)} ${n(p.y)} l`).join(" ")} h f`;
+          const { r, g, b } = edit.visual.fill;
+          replacement = `ET q ${n(r)} ${n(g)} ${n(b)} rg ${path} Q BT ${restoreTextState(raw)} 0 Tr ${replacement} 3 Tr`;
+        }
       }
       replacements.push({ start: raw.op.start, end: raw.op.end, bytes: fromLatin1(replacement) });
       report.applied += 1;

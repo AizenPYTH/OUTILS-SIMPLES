@@ -92,3 +92,53 @@ export const toolHints: Record<WorkspaceTool, string> = {
   image: "Choisissez une image PNG ou JPEG : elle sera placée au centre de la page.",
   signature: "Dessinez, tapez ou importez votre signature, puis placez-la sur la page.",
 };
+
+/** Panels of the editor: at most one open at a time (besides the pages panel). */
+export type EditorPanel = "ocr" | "document" | "history" | "shortcuts";
+
+/** Tool groups by intent (docs/DESIGN_PRINCIPES.md § C). */
+export const TOOL_GROUPS: { id: string; label: string; tools: WorkspaceTool[] }[] = [
+  { id: "select", label: "Sélection", tools: ["select"] },
+  { id: "text", label: "Texte", tools: ["editText", "text", "comment"] },
+  {
+    id: "annotate",
+    label: "Annoter",
+    tools: ["pen", "highlight", "underline", "rect", "ellipse", "arrow"],
+  },
+  { id: "insert", label: "Insérer", tools: ["image", "signature"] },
+];
+
+/** Single-key shortcuts of the tools (outside text fields). */
+export const toolShortcuts: Partial<Record<WorkspaceTool, string>> = {
+  select: "V",
+  editText: "E",
+  text: "T",
+  comment: "N",
+  pen: "P",
+  highlight: "H",
+  underline: "U",
+  rect: "R",
+  ellipse: "O",
+  arrow: "A",
+  image: "I",
+  signature: "S",
+};
+
+export const SHORTCUTS: { keys: string; action: string }[] = [
+  {
+    keys: "Ctrl + Z / Ctrl + Maj + Z",
+    action: "Annuler / rétablir (ajouts, textes modifiés, pages)",
+  },
+  { keys: "Ctrl + S", action: "Télécharger le PDF modifié" },
+  { keys: "Suppr", action: "Supprimer l'élément sélectionné" },
+  { keys: "Flèches (+ Maj)", action: "Déplacer l'élément sélectionné de 1 pt (10 pt)" },
+  { keys: "Échap", action: "Désélectionner, revenir à l'outil Sélection, fermer un panneau" },
+  { keys: "Page suiv. / Page préc.", action: "Page suivante / précédente" },
+  { keys: "+ / − / 0", action: "Zoom avant / arrière / ajuster" },
+  { keys: "Ctrl + molette", action: "Zoom progressif" },
+  {
+    keys: "V, E, T, N, P, H, U, R, O, A, I, S",
+    action: "Choisir un outil (voir l'info-bulle de chaque outil)",
+  },
+  { keys: "?", action: "Afficher cette aide" },
+];
