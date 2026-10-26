@@ -272,6 +272,21 @@ export const fr = {
     updated: "Vos préférences ont été enregistrées.",
     alwaysOn: "Toujours actif",
   },
+  offline: {
+    banner:
+      "Vous êtes hors connexion. Les outils déjà enregistrés sur cet appareil continuent de fonctionner.",
+    bannerLink: "Voir les outils disponibles",
+    makeAvailable: "Utiliser hors ligne",
+    available: "Disponible hors ligne",
+    saving: "Enregistrement…",
+    savingProgress: (done: number, total: number) => `Enregistrement… ${done}/${total}`,
+    sizeHint: (size: string) => `${size} à télécharger une seule fois`,
+    failed:
+      "Impossible d'enregistrer cet outil pour le hors ligne. Vérifiez votre connexion et réessayez.",
+    needsConnection: "Connectez-vous à internet pour enregistrer cet outil.",
+    none: "Aucun outil n'est encore enregistré sur cet appareil.",
+    forget: "Retirer",
+  },
   footer: {
     tagline: "Outils en ligne gratuits, traités dans votre navigateur.",
     toolsHeading: "Outils",

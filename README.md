@@ -153,15 +153,27 @@ d'objets sont révoquées après usage, les documents pdf.js détruits au change
 événements analytics (`src/lib/analytics/events.ts`) sont filtrés par liste blanche et ne contiennent jamais
 de nom de fichier.
 
+### Mode hors ligne
+
+Un service worker (`src/sw/service-worker.js`, construit en `public/sw.js` par `scripts/build-sw.mjs`
+avant chaque build) met en cache les fichiers statiques (noms à empreinte, cache permanent), les moteurs
+(`/pdfjs`, `/ocr`, `/qpdf`, `/fonts`, cache nommé d'après leurs versions) et les pages visitées
+(réseau d'abord, copie en cache sinon, page `/hors-ligne/` en dernier recours). Sur chaque page
+d'outil, « Utiliser hors ligne » enregistre explicitement la page, ses scripts et les groupes de moteurs
+nécessaires (`src/lib/offline/needs.ts`, poids annoncé avant téléchargement : PDF 4,7 Mo, OCR 17 Mo, polices
+4,2 Mo). Limites assumées : première visite en ligne obligatoire, modèle OCR anglais et polices autres que
+Liberation enregistrés seulement après un premier usage en ligne, tables CMap (polices asiatiques) jamais
+pré-enregistrées, éviction possible par le navigateur. Le worker n'est enregistré qu'en production.
+
 ## Tests
 
-- `pnpm test` : 197 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
+- `pnpm test` : 201 tests Vitest (registre, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
   sur fixtures réelles, permissions de chiffrement relues par pdf.js, géométrie/détection du scanner, OCR →
   PDF recherchable, métadonnées d'images, encodeur PNG, extraction d'images et de liens, comparaison,
   caviardage (y compris pages pivotées), Markdown → PDF, regex, dates et jours fériés, TVA, unités,
   codes-barres, couleurs, décodage QR, documents imprimables, limites et fichiers invalides, fondations
   de l'éditeur : diagnostic d'import, mot de passe, couche OCR, plan de pages, passages OCR, modèle de
-  zoom, palette de polices incorporées).
+  zoom, palette de polices incorporées, besoins hors ligne et manifeste du service worker).
 - `pnpm build && pnpm test:e2e` : 97 parcours Playwright exécutés sur desktop et mobile (Pixel 7) :
   catalogue, recherche, navigation, 404, métadonnées, sitemap/robots/CSP, thème, absence de débordement
   horizontal, et pour chacun des 66 outils un parcours avec fichiers téléchargés vérifiés (pdf-lib, pdf.js,
@@ -169,7 +181,7 @@ de nom de fichier.
   Des suites dédiées vérifient la confidentialité (aucune requête hors origine ni avec corps, aucun stockage),
   l'accessibilité (axe-core, clavier, menu mobile, états annoncés), la caméra avec le périphérique factice de
   Chromium, les gros fichiers (60 Mo traité, 101 Mo et 1 001 pages refusés) et les replis de compatibilité
-  (navigateur sans encodeur WebP, variantes SIMD du moteur OCR). Safari et Firefox ne sont pas exécutés : voir
+  (navigateur sans encodeur WebP, variantes SIMD du moteur OCR), ainsi que le mode hors ligne (outil enregistré puis utilisé sans réseau, repli vers `/hors-ligne/`). Safari et Firefox ne sont pas exécutés : voir
   la procédure manuelle dans `docs/AUDIT_QUALITE.md`.
 
 ## Déploiement

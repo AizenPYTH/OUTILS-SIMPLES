@@ -163,6 +163,23 @@ développement). Détails : `docs/OCR_ORIENTATIONS.md`.
   serveur devra vivre sous `/api/` (déjà `disallow` dans robots) avec ses propres contrôles.
 - JSON-LD sérialisé avec `<` échappé.
 
+## Mode hors ligne
+
+- `src/sw/service-worker.js` : source du worker ; `scripts/build-sw.mjs` injecte une version (paquet,
+  commit, horodatage) et une clé d'actifs (versions de pdf.js, Tesseract, qpdf) puis écrit `public/sw.js`
+  et `public/offline-manifest.json` (fichiers et poids par groupe `pdf`, `ocr`, `fonts`). Les deux sont
+  servis avec `Cache-Control: no-cache` (`next.config.ts`).
+- Caches : `outilia-static-v1` (`/_next/static`, permanent, 600 entrées max), `outilia-assets-<clé>`
+  (moteurs), `outilia-shell-<version>` (pages HTML, page hors ligne, manifeste). Les anciens caches sont
+  supprimés à l'activation. Les requêtes RSC (`?_rsc=`) et tout ce qui n'est pas GET même origine passent
+  au réseau sans interception ; hors ligne, Next replie une navigation client vers un chargement complet,
+  servi par le worker.
+- Côté page : `src/lib/offline/client.ts` (enregistrement, `collectPageAssets()` à partir des scripts et
+  des entrées `performance`, dialogue par `MessageChannel` : `CHECK_URLS`, `CACHE_URLS` avec progression,
+  `LIST_PAGES`, `FORGET_PAGE`), `src/lib/offline/needs.ts` (groupes par outil), `OfflineControl`
+  (page d'outil), `ServiceWorkerRegistration` (bandeau hors connexion, enregistrement en production
+  seulement), page `/hors-ligne/` (liste des outils enregistrés, limites).
+
 ## Architecture SEO
 
 - Métadonnées uniques par page (`src/lib/seo.ts`), canonical construit depuis `NEXT_PUBLIC_SITE_URL`

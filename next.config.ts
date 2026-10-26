@@ -25,6 +25,11 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: buildSecurityHeaders({ isDev: process.env.NODE_ENV !== "production" }),
       },
+      // The service worker and the offline manifest are revalidated on every check for updates.
+      {
+        source: "/(sw.js|offline-manifest.json)",
+        headers: [{ key: "Cache-Control", value: "no-cache, max-age=0, must-revalidate" }],
+      },
     ];
   },
 };

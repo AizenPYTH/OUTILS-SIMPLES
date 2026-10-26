@@ -42,7 +42,8 @@ le sitemap, `robots.txt`, les balises Open Graph et les images de partage.
 - En-têtes de sécurité : ils sont émis par Next (`src/config/security.ts`) ; vérifier qu'un CDN
   ne les écrase pas (`curl -I`).
 - `/_next/static`, `/pdfjs`, `/ocr`, `/qpdf`, `/fonts` servis avec un cache long (immuables,
-  nommés par version ou empreinte).
+  nommés par version ou empreinte) ; `/sw.js` et `/offline-manifest.json` jamais mis en cache par un
+  CDN (Next émet déjà `no-cache`), sinon les visiteurs garderaient un ancien service worker.
 - Soumettre `/sitemap.xml` à la Search Console ; tester une page de partage (LinkedIn Post
   Inspector, X Card Validator) : l'image `opengraph-image` doit apparaître.
 

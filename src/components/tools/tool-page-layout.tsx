@@ -4,6 +4,8 @@ import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ToolCard } from "@/components/tools/tool-card";
 import { AdSlot } from "@/components/monetization/ad-slot";
+import { OfflineControl } from "@/components/offline/offline-control";
+import { offlineGroupsFor } from "@/lib/offline/needs";
 import { Badge } from "@/components/ui/badge";
 import { formatBytes } from "@/lib/files/format";
 import { getGuidesForTool } from "@/lib/content/guides";
@@ -58,6 +60,9 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
               </Badge>
               <Badge variant="neutral">{t.tool.freeBadge}</Badge>
               {tool.status === "beta" ? <Badge variant="warning">{t.tool.betaBadge}</Badge> : null}
+              <span className="ml-auto">
+                <OfflineControl toolId={tool.id} groups={offlineGroupsFor(tool)} />
+              </span>
             </div>
           </section>
 

@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { siteConfig } from "@/config/site";
 import { publicEnv } from "@/config/env";
 import { AppProviders } from "@/components/providers/app-providers";
-import { ConsentBanner } from "@/components/monetization/consent-banner";
-import { AnalyticsLoader } from "@/components/monetization/analytics-loader";
+import { ConsentGate } from "@/components/monetization/consent-gate";
+import { ServiceWorkerRegistration } from "@/components/offline/sw-register";
 import { t } from "@/lib/i18n";
 import { fontBody, fontHeading, fontSignature } from "./fonts";
 import "./globals.css";
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     title: `${siteConfig.name} – ${siteConfig.tagline}`,
     description: siteConfig.description,
   },
-  twitter: { card: "summary" },
+  twitter: { card: "summary_large_image" },
   verification: publicEnv.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
     ? { google: publicEnv.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
     : undefined,
@@ -56,9 +56,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {t.common.skipToContent}
         </a>
         <AppProviders>
+          <ServiceWorkerRegistration />
           {children}
-          <ConsentBanner />
-          <AnalyticsLoader />
+          <ConsentGate />
         </AppProviders>
       </body>
     </html>
