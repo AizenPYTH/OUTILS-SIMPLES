@@ -4,6 +4,7 @@ import * as React from "react";
 import { FileUp, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { takeHandoff } from "@/lib/files/handoff";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 
@@ -42,6 +43,17 @@ export function FileDropzone({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = React.useState(false);
   const [inlineError, setInlineError] = React.useState<string | null>(null);
+  const handleRef = React.useRef<(list: FileList | File[] | null) => void>(() => {});
+
+  // A file dropped on the home page arrives here (src/lib/files/handoff.ts).
+  React.useEffect(() => {
+    if (disabled || compact) return;
+    const id = window.setTimeout(() => {
+      const file = takeHandoff();
+      if (file) handleRef.current([file]);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [disabled, compact]);
 
   const handle = (list: FileList | File[] | null) => {
     if (!list) return;
@@ -60,6 +72,9 @@ export function FileDropzone({
     if (accepted.length) onFiles(accepted);
     if (inputRef.current) inputRef.current.value = "";
   };
+  React.useEffect(() => {
+    handleRef.current = handle;
+  });
 
   return (
     <div className={className}>

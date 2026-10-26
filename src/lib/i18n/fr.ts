@@ -70,7 +70,7 @@ export const fr = {
   home: {
     heroTitle: "Vos fichiers, vos outils, votre navigateur.",
     heroSubtitle:
-      "66 outils gratuits pour les PDF, les images, la numérisation et le texte. Tout est traité sur votre appareil : rien n'est envoyé, rien n'est stocké, aucun compte à créer.",
+      "69 outils gratuits pour vos PDF, images, scans et textes, traités sur votre appareil : rien n'est envoyé, aucun compte à créer.",
     usagesTitle: "Que voulez-vous faire ?",
     usagesSubtitle: "Quatre parcours pour les tâches les plus fréquentes.",
     trustTitle: "Pourquoi OUTILIA",

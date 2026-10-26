@@ -5,6 +5,7 @@ import { FileUp, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { formatBytes } from "@/lib/files/format";
+import { takeHandoff } from "@/lib/files/handoff";
 import { validatePdfFileMeta } from "@/lib/files/validation";
 import { isPdfError } from "@/lib/pdf/errors";
 import { t } from "@/lib/i18n";
@@ -40,6 +41,17 @@ export function PdfDropzone({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = React.useState(false);
   const [inlineError, setInlineError] = React.useState<string | null>(null);
+  const handleRef = React.useRef<(list: FileList | File[] | null) => void>(() => {});
+
+  // A file dropped on the home page arrives here (src/lib/files/handoff.ts).
+  React.useEffect(() => {
+    if (disabled || compact) return;
+    const id = window.setTimeout(() => {
+      const file = takeHandoff();
+      if (file) handleRef.current([file]);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [disabled, compact]);
 
   const handleFiles = (list: FileList | File[] | null) => {
     if (!list) return;
@@ -66,6 +78,9 @@ export function PdfDropzone({
     if (accepted.length) onFiles(accepted);
     if (inputRef.current) inputRef.current.value = "";
   };
+  React.useEffect(() => {
+    handleRef.current = handleFiles;
+  });
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
