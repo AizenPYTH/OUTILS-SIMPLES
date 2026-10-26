@@ -185,4 +185,9 @@ double-clic qui sélectionne un mot, 09 recherche / remplacement, 10 masque visu
 
 ## 9. Commit final
 
-{{COMMIT}}
+Commit `4266906` sur `claude/festive-turing-f4fmzh` (après `ff9bcfd`), poussé. Arbre propre
+après le commit de ce rapport ; aucun déploiement, aucune configuration sensible touchée ; une
+dépendance ajoutée : `@pdf-lib/fontkit` 1.1.1 (MIT), chargée à la demande (≈ 250 Ko) uniquement
+lors de l'export d'une police incorporée ; polices libres ajoutées dans `public/fonts` (licences
+jointes). `pnpm typecheck`, `pnpm lint`, `pnpm build`, `pnpm test` et la suite Playwright
+complète ont été exécutés sur cet état.
