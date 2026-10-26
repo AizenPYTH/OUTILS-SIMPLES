@@ -1,9 +1,20 @@
 import { describe, expect, it } from "vitest";
 import exifr from "exifr";
 import { PDFDocument, PDFName, PDFString, StandardFonts } from "pdf-lib";
-import { describeExif, detectMetadataFormat, stripImageMetadata, stripJpegMetadata, stripPngMetadata } from "@/lib/images/metadata";
+import {
+  describeExif,
+  detectMetadataFormat,
+  stripImageMetadata,
+  stripJpegMetadata,
+  stripPngMetadata,
+} from "@/lib/images/metadata";
 import { crc32, encodePng } from "@/lib/images/png-encode";
-import { extractLinkAnnotations, findTextLinks, linksToCsv, mergeLinks } from "@/lib/pdf/operations/links";
+import {
+  extractLinkAnnotations,
+  findTextLinks,
+  linksToCsv,
+  mergeLinks,
+} from "@/lib/pdf/operations/links";
 import { extractImages } from "@/lib/pdf/operations/extract-images";
 import { compareReport, comparePageTexts } from "@/lib/pdf/operations/compare";
 import { normalizeRect, padRect, replacePagesWithImages } from "@/lib/pdf/operations/redact";
@@ -46,7 +57,8 @@ describe("image metadata", () => {
   it("strips an EXIF segment from a JPEG without touching the pixels", async () => {
     const photo = await fixture("photo-800x600.jpg");
     const withExif = concat(photo.subarray(0, 2), exifApp1("OUTILIA"), photo.subarray(2));
-    const before = (await exifr.parse(withExif, { tiff: true, exif: true })) as Record<string, unknown> | undefined;
+    const before = (await exifr.parse(withExif, { tiff: true, exif: true })) as
+      Record<string, unknown> | undefined;
     expect(before?.Make).toBe("OUTILIA");
     const baseline = stripJpegMetadata(photo);
     const stripped = stripJpegMetadata(withExif);
@@ -70,7 +82,10 @@ describe("image metadata", () => {
     chunk.set([0x74, 0x45, 0x58, 0x74], 4);
     chunk.set(text, 8);
     const crc = crc32(chunk.subarray(4, 8 + text.length));
-    chunk.set([(crc >>> 24) & 255, (crc >>> 16) & 255, (crc >>> 8) & 255, crc & 255], 8 + text.length);
+    chunk.set(
+      [(crc >>> 24) & 255, (crc >>> 16) & 255, (crc >>> 8) & 255, crc & 255],
+      8 + text.length,
+    );
     const withText = concat(png.subarray(0, 33), chunk, png.subarray(33));
     const stripped = stripPngMetadata(withText);
     expect(stripped.removed).toBe(1);
@@ -81,7 +96,15 @@ describe("image metadata", () => {
   });
 
   it("describes EXIF tags in French and flags sensitive ones", () => {
-    const summary = describeExif({ Make: "Pixel", Model: "7", ExposureTime: 0.004, FNumber: 1.85, latitude: 48.8584, longitude: 2.2945, Foo: 1 });
+    const summary = describeExif({
+      Make: "Pixel",
+      Model: "7",
+      ExposureTime: 0.004,
+      FNumber: 1.85,
+      latitude: 48.8584,
+      longitude: 2.2945,
+      Foo: 1,
+    });
     expect(summary.gps).toEqual({ latitude: 48.8584, longitude: 2.2945 });
     expect(summary.rows[0]!.label).toBe("Position GPS");
     expect(summary.rows.find((r) => r.key === "ExposureTime")!.value).toBe("1/250 s");
@@ -109,10 +132,26 @@ async function pdfWithLinks(): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const page = doc.addPage([400, 300]);
-  page.drawText("Voir https://outilia.fr/aide. Contact : contact@exemple.fr", { x: 20, y: 200, size: 10, font });
-  const annot = doc.context.obj({ Type: "Annot", Subtype: "Link", Rect: [20, 190, 200, 210], Border: [0, 0, 0], A: { Type: "Action", S: "URI", URI: PDFString.of("https://outilia.fr/") } });
+  page.drawText("Voir https://outilia.fr/aide. Contact : contact@exemple.fr", {
+    x: 20,
+    y: 200,
+    size: 10,
+    font,
+  });
+  const annot = doc.context.obj({
+    Type: "Annot",
+    Subtype: "Link",
+    Rect: [20, 190, 200, 210],
+    Border: [0, 0, 0],
+    A: { Type: "Action", S: "URI", URI: PDFString.of("https://outilia.fr/") },
+  });
   page.node.addAnnot(doc.context.register(annot));
-  const internal = doc.context.obj({ Type: "Annot", Subtype: "Link", Rect: [20, 100, 60, 120], Dest: [page.ref, PDFName.of("Fit")] });
+  const internal = doc.context.obj({
+    Type: "Annot",
+    Subtype: "Link",
+    Rect: [20, 100, 60, 120],
+    Dest: [page.ref, PDFName.of("Fit")],
+  });
   page.node.addAnnot(doc.context.register(internal));
   return doc.save();
 }
@@ -125,11 +164,18 @@ describe("pdf links", () => {
     expect(annots.internalLinks).toBe(1);
     const text = (await extractPageText(bytes, 0)).join(" ");
     const found = findTextLinks([{ pageIndex: 0, text }]);
-    expect(found.map((l) => l.url)).toEqual(["https://outilia.fr/aide", "mailto:contact@exemple.fr"]);
+    expect(found.map((l) => l.url)).toEqual([
+      "https://outilia.fr/aide",
+      "mailto:contact@exemple.fr",
+    ]);
     const merged = mergeLinks(annots.links, found, found);
     expect(merged).toHaveLength(3);
     expect(linksToCsv(merged).split("\n")).toHaveLength(4);
-    expect(findTextLinks([{ pageIndex: 2, text: "site www.exemple.org, fin." }])[0]).toEqual({ pageIndex: 2, url: "https://www.exemple.org", kind: "texte" });
+    expect(findTextLinks([{ pageIndex: 2, text: "site www.exemple.org, fin." }])[0]).toEqual({
+      pageIndex: 2,
+      url: "https://www.exemple.org",
+      kind: "texte",
+    });
   });
 });
 
@@ -170,7 +216,10 @@ describe("pdf image extraction", () => {
 
 describe("pdf comparison", () => {
   it("reports changed, added and identical pages", () => {
-    const result = comparePageTexts(["Bonjour le monde", "Page deux"], ["Bonjour tout le monde", "Page deux", "Page trois"]);
+    const result = comparePageTexts(
+      ["Bonjour le monde", "Page deux"],
+      ["Bonjour tout le monde", "Page deux", "Page trois"],
+    );
     expect(result.pages.map((p) => p.status)).toEqual(["changed", "identical", "added"]);
     expect(result.changedPages).toBe(2);
     expect(result.identical).toBe(false);
@@ -187,7 +236,9 @@ describe("redaction by rasterisation", () => {
   it("replaces redacted pages by images and strips metadata", async () => {
     const source = await fixture("simple-3-pages.pdf");
     const raster = await fixture("logo-alpha.png");
-    const out = await replacePagesWithImages(source, [{ pageIndex: 1, bytes: raster, mimeType: "image/png" }]);
+    const out = await replacePagesWithImages(source, [
+      { pageIndex: 1, bytes: raster, mimeType: "image/png" },
+    ]);
     const doc = await openPdf(out);
     expect(doc.getPageCount()).toBe(3);
     expect((await extractPageText(out, 0)).join(" ")).toContain("Page 1");
@@ -198,7 +249,12 @@ describe("redaction by rasterisation", () => {
     expect(meta.hasXmp).toBe(false);
     expect(normalizeRect(10, 10, 12, 12)).toBeNull();
     expect(normalizeRect(50, 60, 10, 20)).toEqual({ x: 10, y: 20, width: 40, height: 40 });
-    expect(padRect({ x: 2, y: 2, width: 10, height: 10 }, 4, { width: 14, height: 100 })).toEqual({ x: 0, y: 0, width: 14, height: 18 });
+    expect(padRect({ x: 2, y: 2, width: 10, height: 10 }, 4, { width: 14, height: 100 })).toEqual({
+      x: 0,
+      y: 0,
+      width: 14,
+      height: 18,
+    });
   });
 });
 
@@ -244,8 +300,16 @@ Fin du document.`;
   });
 
   it("paginates long plain text, numbers pages and flags unsupported characters", async () => {
-    const long = Array.from({ length: 120 }, (_, i) => `Ligne ${i + 1} : du texte pour remplir la page, encore et encore.`).join("\n");
-    const result = await textToPdf(`${long}\n\nEmoji 🙂 ici`, { ...defaultTextToPdfOptions, markdown: false, fontFamily: "courier", fontSize: 12 });
+    const long = Array.from(
+      { length: 120 },
+      (_, i) => `Ligne ${i + 1} : du texte pour remplir la page, encore et encore.`,
+    ).join("\n");
+    const result = await textToPdf(`${long}\n\nEmoji 🙂 ici`, {
+      ...defaultTextToPdfOptions,
+      markdown: false,
+      fontFamily: "courier",
+      fontSize: 12,
+    });
     expect(result.pageCount).toBeGreaterThan(1);
     expect(result.replacedCharacters).toBe(true);
     const last = (await extractPageText(result.bytes, result.pageCount - 1)).join(" ");

@@ -17,7 +17,13 @@ import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { useOperation } from "@/components/pdf/hooks/use-operation";
 import type { LoadedPdf } from "@/components/pdf/hooks/use-pdf-document";
 import { renderPageToCanvas, visualSize } from "@/lib/pdf/browser/pdfjs";
-import { normalizeRect, padRect, replacePagesWithImages, type RasterizedPage, type RedactionRect } from "@/lib/pdf/operations/redact";
+import {
+  normalizeRect,
+  padRect,
+  replacePagesWithImages,
+  type RasterizedPage,
+  type RedactionRect,
+} from "@/lib/pdf/operations/redact";
 import { encodeCanvas, releaseCanvas } from "@/lib/images/canvas";
 import { formatBytes } from "@/lib/files/format";
 import { uid } from "@/lib/utils";
@@ -34,7 +40,11 @@ interface Box extends RedactionRect {
 type Boxes = Record<number, Box[]>;
 
 export function RedactTool() {
-  return <SingleFileTool toolId={TOOL_ID}>{({ pdf, reset }) => <Workspace pdf={pdf} reset={reset} />}</SingleFileTool>;
+  return (
+    <SingleFileTool toolId={TOOL_ID}>
+      {({ pdf, reset }) => <Workspace pdf={pdf} reset={reset} />}
+    </SingleFileTool>
+  );
 }
 
 function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
@@ -48,8 +58,13 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
   const total = Object.values(boxes).reduce((s, list) => s + list.length, 0);
   const pagesTouched = Object.values(boxes).filter((l) => l.length > 0).length;
 
-  const addBox = (pageIndex: number, rect: RedactionRect) => setBoxes((b) => ({ ...b, [pageIndex]: [...(b[pageIndex] ?? []), { ...rect, id: uid("box") }] }));
-  const removeBox = (pageIndex: number, id: string) => setBoxes((b) => ({ ...b, [pageIndex]: (b[pageIndex] ?? []).filter((x) => x.id !== id) }));
+  const addBox = (pageIndex: number, rect: RedactionRect) =>
+    setBoxes((b) => ({
+      ...b,
+      [pageIndex]: [...(b[pageIndex] ?? []), { ...rect, id: uid("box") }],
+    }));
+  const removeBox = (pageIndex: number, id: string) =>
+    setBoxes((b) => ({ ...b, [pageIndex]: (b[pageIndex] ?? []).filter((x) => x.id !== id) }));
 
   const search = async () => {
     const needle = normalize(query);
@@ -64,11 +79,16 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           for (const hit of found) {
             const page = pdf.pages[hit.pageIndex]!;
             const size = visualSize(page);
-            next[hit.pageIndex] = [...(next[hit.pageIndex] ?? []), { ...padRect(hit.rect, 1.5, size), id: uid("box") }];
+            next[hit.pageIndex] = [
+              ...(next[hit.pageIndex] ?? []),
+              { ...padRect(hit.rect, 1.5, size), id: uid("box") },
+            ];
           }
           return next;
         });
-        toast.success(`${found.length} occurrence(s) marquée(s) sur ${new Set(found.map((f) => f.pageIndex)).size} page(s).`);
+        toast.success(
+          `${found.length} occurrence(s) marquée(s) sur ${new Set(found.map((f) => f.pageIndex)).size} page(s).`,
+        );
       }
     } catch {
       toast.error("Recherche impossible dans ce document.");
@@ -85,20 +105,36 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       for (let i = 0; i < touched.length; i += 1) {
         const [key, list] = touched[i]!;
         const pageIndex = Number(key);
-        report({ current: i + 1, total: touched.length, label: t.progress.processingPage(i + 1, touched.length) });
+        report({
+          current: i + 1,
+          total: touched.length,
+          label: t.progress.processingPage(i + 1, touched.length),
+        });
         const page = pdf.pages[pageIndex]!;
         const size = visualSize(page);
         const px = size.width * scale * size.height * scale;
         const effective = px > 25_000_000 ? scale * Math.sqrt(25_000_000 / px) : scale;
         const canvas = document.createElement("canvas");
-        const { viewport } = await renderPageToCanvas(pdf.opened.doc, pageIndex, canvas, { scale: effective });
+        const { viewport } = await renderPageToCanvas(pdf.opened.doc, pageIndex, canvas, {
+          scale: effective,
+        });
         const factor = canvas.width / viewport.width;
         const ctx = canvas.getContext("2d")!;
         ctx.fillStyle = "#000000";
-        for (const box of list) ctx.fillRect(Math.floor(box.x * effective * factor), Math.floor(box.y * effective * factor), Math.ceil(box.width * effective * factor), Math.ceil(box.height * effective * factor));
+        for (const box of list)
+          ctx.fillRect(
+            Math.floor(box.x * effective * factor),
+            Math.floor(box.y * effective * factor),
+            Math.ceil(box.width * effective * factor),
+            Math.ceil(box.height * effective * factor),
+          );
         const encoded = await encodeCanvas(canvas, quality, 0.85);
         releaseCanvas(canvas);
-        rasterized.push({ pageIndex, bytes: new Uint8Array(await encoded.blob.arrayBuffer()), mimeType: quality });
+        rasterized.push({
+          pageIndex,
+          bytes: new Uint8Array(await encoded.blob.arrayBuffer()),
+          mimeType: quality,
+        });
         await new Promise((r) => setTimeout(r, 0));
       }
       report({ current: touched.length, total: touched.length, label: "Reconstruction du PDF…" });
@@ -106,7 +142,8 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
     });
 
   if (op.state.status === "busy") return <BusyPanel progress={op.state.progress} />;
-  if (op.state.status === "error") return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={reset} />;
+  if (op.state.status === "error")
+    return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={reset} />;
   if (op.state.status === "done") {
     const bytes = op.state.result;
     return (
@@ -116,17 +153,28 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         onDownload={() => downloadPdf(bytes, pdf.file.name, "caviarde", TOOL_ID)}
         onStartOver={() => (op.reset(), reset())}
       >
-        <Alert variant="info">Les pages caviardées ont été converties en images : leur texte d&apos;origine n&apos;existe plus dans le fichier (il n&apos;est plus sélectionnable ni recherchable). Les autres pages sont inchangées. Ouvrez le résultat et vérifiez chaque zone avant de le partager.</Alert>
+        <Alert variant="info">
+          Les pages caviardées ont été converties en images : leur texte d&apos;origine
+          n&apos;existe plus dans le fichier (il n&apos;est plus sélectionnable ni recherchable).
+          Les autres pages sont inchangées. Ouvrez le résultat et vérifiez chaque zone avant de le
+          partager.
+        </Alert>
       </DonePanel>
     );
   }
 
   return (
     <div className="space-y-5">
-      <FileSummary name={pdf.file.name} size={pdf.file.size} pageCount={pdf.pageCount} onReset={reset} />
+      <FileSummary
+        name={pdf.file.name}
+        size={pdf.file.size}
+        pageCount={pdf.pageCount}
+        onReset={reset}
+      />
       <ToolPanel className="space-y-3">
         <Label htmlFor="redact-search" className="flex items-center gap-2">
-          <Search className="size-4" aria-hidden="true" /> Marquer automatiquement un mot, un nom ou un numéro
+          <Search className="size-4" aria-hidden="true" /> Marquer automatiquement un mot, un nom ou
+          un numéro
         </Label>
         <form
           className="flex flex-col gap-2 sm:flex-row"
@@ -135,30 +183,85 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
             void search();
           }}
         >
-          <Input id="redact-search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ex. Dupont, 1 85 03 75 123 456 78, IBAN" data-testid="redact-search" />
-          <Button type="submit" variant="outline" loading={searching} disabled={!query.trim()} data-testid="redact-search-run">
+          <Input
+            id="redact-search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="ex. Dupont, 1 85 03 75 123 456 78, IBAN"
+            data-testid="redact-search"
+          />
+          <Button
+            type="submit"
+            variant="outline"
+            loading={searching}
+            disabled={!query.trim()}
+            data-testid="redact-search-run"
+          >
             Rechercher et marquer
           </Button>
         </form>
-        <p className="text-xs text-muted-foreground">Dessinez aussi des rectangles directement sur les pages (souris ou doigt). Un clic sur une zone la supprime. Les documents scannés n&apos;ont pas de texte : dessinez les zones à la main.</p>
+        <p className="text-xs text-muted-foreground">
+          Dessinez aussi des rectangles directement sur les pages (souris ou doigt). Un clic sur une
+          zone la supprime. Les documents scannés n&apos;ont pas de texte : dessinez les zones à la
+          main.
+        </p>
       </ToolPanel>
       <ol className="space-y-6" aria-label="Pages du document" data-testid="redact-pages">
         {pdf.pages.map((page) => (
-          <RedactPage key={page.index} doc={pdf.opened.doc} pageIndex={page.index} size={visualSize(page)} boxes={boxes[page.index] ?? []} onAdd={(rect) => addBox(page.index, rect)} onRemove={(id) => removeBox(page.index, id)} />
+          <RedactPage
+            key={page.index}
+            doc={pdf.opened.doc}
+            pageIndex={page.index}
+            size={visualSize(page)}
+            boxes={boxes[page.index] ?? []}
+            onAdd={(rect) => addBox(page.index, rect)}
+            onRemove={(id) => removeBox(page.index, id)}
+          />
         ))}
       </ol>
       <ToolPanel className="space-y-4">
-        <Segmented label="Qualité des pages caviardées" value={dpi} onChange={setDpi} options={[{ value: "150", label: "150 dpi", description: "Léger" }, { value: "200", label: "200 dpi", description: "Lecture et impression" }, { value: "300", label: "300 dpi", description: "Impression fine, plus lourd" }]} />
-        <Segmented label="Encodage" value={quality} onChange={setQuality} className="sm:grid-cols-2" options={[{ value: "image/jpeg", label: "JPEG", description: "Fichier plus léger" }, { value: "image/png", label: "PNG", description: "Texte très net, fichier plus lourd" }]} />
+        <Segmented
+          label="Qualité des pages caviardées"
+          value={dpi}
+          onChange={setDpi}
+          options={[
+            { value: "150", label: "150 dpi", description: "Léger" },
+            { value: "200", label: "200 dpi", description: "Lecture et impression" },
+            { value: "300", label: "300 dpi", description: "Impression fine, plus lourd" },
+          ]}
+        />
+        <Segmented
+          label="Encodage"
+          value={quality}
+          onChange={setQuality}
+          className="sm:grid-cols-2"
+          options={[
+            { value: "image/jpeg", label: "JPEG", description: "Fichier plus léger" },
+            { value: "image/png", label: "PNG", description: "Texte très net, fichier plus lourd" },
+          ]}
+        />
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground" data-testid="redact-summary">
             {total === 0 ? "Aucune zone marquée." : `${total} zone(s) sur ${pagesTouched} page(s).`}
           </p>
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" variant="ghost" size="sm" onClick={() => setBoxes({})} disabled={total === 0}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setBoxes({})}
+              disabled={total === 0}
+            >
               <Trash2 aria-hidden="true" /> Tout effacer
             </Button>
-            <Button type="button" size="lg" className="w-full sm:w-auto" onClick={run} disabled={total === 0} data-testid="redact-run">
+            <Button
+              type="button"
+              size="lg"
+              className="w-full sm:w-auto"
+              onClick={run}
+              disabled={total === 0}
+              data-testid="redact-run"
+            >
               <EyeOff aria-hidden="true" /> Caviarder et créer le PDF
             </Button>
           </div>
@@ -182,13 +285,21 @@ function RedactPage({ doc, pageIndex, size, boxes, onAdd, onRemove }: RedactPage
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [visible, setVisible] = React.useState(false);
   const [scale, setScale] = React.useState(1);
-  const [draft, setDraft] = React.useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const [draft, setDraft] = React.useState<{
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  } | null>(null);
   const draftRef = React.useRef<typeof draft>(null);
 
   React.useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
-    const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && setVisible(true), { rootMargin: "400px 0px" });
+    const io = new IntersectionObserver(
+      (entries) => entries.some((e) => e.isIntersecting) && setVisible(true),
+      { rootMargin: "400px 0px" },
+    );
     io.observe(el);
     const ro = new ResizeObserver((entries) => {
       const width = Math.min(entries[0]?.contentRect.width ?? PREVIEW_MAX_WIDTH, PREVIEW_MAX_WIDTH);
@@ -205,13 +316,18 @@ function RedactPage({ doc, pageIndex, size, boxes, onAdd, onRemove }: RedactPage
     const canvas = canvasRef.current;
     if (!visible || !canvas) return;
     const controller = new AbortController();
-    void renderPageToCanvas(doc, pageIndex, canvas, { scale, signal: controller.signal }).catch(() => undefined);
+    void renderPageToCanvas(doc, pageIndex, canvas, { scale, signal: controller.signal }).catch(
+      () => undefined,
+    );
     return () => controller.abort();
   }, [doc, pageIndex, scale, visible]);
 
   const toPoints = (e: React.PointerEvent) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    return { x: Math.min(size.width, Math.max(0, (e.clientX - rect.left) / scale)), y: Math.min(size.height, Math.max(0, (e.clientY - rect.top) / scale)) };
+    return {
+      x: Math.min(size.width, Math.max(0, (e.clientX - rect.left) / scale)),
+      y: Math.min(size.height, Math.max(0, (e.clientY - rect.top) / scale)),
+    };
   };
 
   const onDown = (e: React.PointerEvent) => {
@@ -244,10 +360,27 @@ function RedactPage({ doc, pageIndex, size, boxes, onAdd, onRemove }: RedactPage
   return (
     <li ref={wrapperRef} className="space-y-1.5" data-testid="redact-page">
       <p className="text-sm font-medium">
-        Page {pageIndex + 1} {boxes.length ? <span className="text-xs font-normal text-muted-foreground">· {boxes.length} zone(s)</span> : null}
+        Page {pageIndex + 1}{" "}
+        {boxes.length ? (
+          <span className="text-xs font-normal text-muted-foreground">
+            · {boxes.length} zone(s)
+          </span>
+        ) : null}
       </p>
-      <div className="relative mx-auto select-none overflow-hidden rounded-[6px] border border-border bg-white shadow-sm" style={{ width: cssWidth, height: cssHeight, touchAction: "none", cursor: "crosshair" }} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} data-testid="redact-surface">
-        <canvas ref={canvasRef} className="block" aria-label={`Aperçu de la page ${pageIndex + 1}`} />
+      <div
+        className="relative mx-auto select-none overflow-hidden rounded-[6px] border border-border bg-white shadow-sm"
+        style={{ width: cssWidth, height: cssHeight, touchAction: "none", cursor: "crosshair" }}
+        onPointerDown={onDown}
+        onPointerMove={onMove}
+        onPointerUp={onUp}
+        onPointerCancel={onUp}
+        data-testid="redact-surface"
+      >
+        <canvas
+          ref={canvasRef}
+          className="block"
+          aria-label={`Aperçu de la page ${pageIndex + 1}`}
+        />
         {boxes.map((box) => (
           <button
             key={box.id}
@@ -256,25 +389,38 @@ function RedactPage({ doc, pageIndex, size, boxes, onAdd, onRemove }: RedactPage
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => onRemove(box.id)}
             className="group absolute bg-black outline-2 outline-offset-0 outline-transparent hover:outline-destructive focus-visible:outline-primary"
-            style={{ left: box.x * scale, top: box.y * scale, width: Math.max(4, box.width * scale), height: Math.max(4, box.height * scale) }}
+            style={{
+              left: box.x * scale,
+              top: box.y * scale,
+              width: Math.max(4, box.width * scale),
+              height: Math.max(4, box.height * scale),
+            }}
             data-testid="redact-rect"
           >
-            <X className="absolute right-0 top-0 size-3 text-white opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100" aria-hidden="true" />
+            <X
+              className="absolute right-0 top-0 size-3 text-white opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+              aria-hidden="true"
+            />
           </button>
         ))}
-        {draft ? <div className="pointer-events-none absolute border-2 border-dashed border-destructive bg-black/60" style={{ left: Math.min(draft.x1, draft.x2) * scale, top: Math.min(draft.y1, draft.y2) * scale, width: Math.abs(draft.x2 - draft.x1) * scale, height: Math.abs(draft.y2 - draft.y1) * scale }} /> : null}
+        {draft ? (
+          <div
+            className="pointer-events-none absolute border-2 border-dashed border-destructive bg-black/60"
+            style={{
+              left: Math.min(draft.x1, draft.x2) * scale,
+              top: Math.min(draft.y1, draft.y2) * scale,
+              width: Math.abs(draft.x2 - draft.x1) * scale,
+              height: Math.abs(draft.y2 - draft.y1) * scale,
+            }}
+          />
+        ) : null}
       </div>
     </li>
   );
 }
 
 function normalize(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 interface TextHit {
@@ -291,20 +437,29 @@ interface PdfTextItem {
 
 /** Applies pdf.js' viewport matrix [a b c d e f] to a user-space point. */
 function toViewport(matrix: number[], x: number, y: number): { x: number; y: number } {
-  return { x: matrix[0]! * x + matrix[2]! * y + matrix[4]!, y: matrix[1]! * x + matrix[3]! * y + matrix[5]! };
+  return {
+    x: matrix[0]! * x + matrix[2]! * y + matrix[4]!,
+    y: matrix[1]! * x + matrix[3]! * y + matrix[5]!,
+  };
 }
 
 /**
  * Finds every occurrence of `needle` in the page text and returns the
  * bounding boxes of the text items covering it (in visual points).
  */
-async function findTextRects(doc: PDFDocumentProxy, pageCount: number, needle: string): Promise<TextHit[]> {
+async function findTextRects(
+  doc: PDFDocumentProxy,
+  pageCount: number,
+  needle: string,
+): Promise<TextHit[]> {
   const hits: TextHit[] = [];
   for (let i = 0; i < pageCount; i += 1) {
     const page = await doc.getPage(i + 1);
     const viewport = page.getViewport({ scale: 1, rotation: page.rotate });
     const content = await page.getTextContent();
-    const items = content.items.filter((it) => "str" in it && typeof (it as { str: unknown }).str === "string") as unknown as PdfTextItem[];
+    const items = content.items.filter(
+      (it) => "str" in it && typeof (it as { str: unknown }).str === "string",
+    ) as unknown as PdfTextItem[];
     // Group into lines by baseline so that matches spanning several items are found.
     const lines: { y: number; items: typeof items }[] = [];
     for (const item of items) {
@@ -336,7 +491,15 @@ async function findTextRects(doc: PDFDocumentProxy, pageCount: number, needle: s
           const h = Math.abs(item.transform[3] ?? item.height) || item.height;
           const p1 = toViewport(viewport.transform, x, y - h * 0.25);
           const p2 = toViewport(viewport.transform, x + item.width, y + h);
-          hits.push({ pageIndex: i, rect: { x: Math.min(p1.x, p2.x), y: Math.min(p1.y, p2.y), width: Math.abs(p2.x - p1.x), height: Math.abs(p2.y - p1.y) } });
+          hits.push({
+            pageIndex: i,
+            rect: {
+              x: Math.min(p1.x, p2.x),
+              y: Math.min(p1.y, p2.y),
+              width: Math.abs(p2.x - p1.x),
+              height: Math.abs(p2.y - p1.y),
+            },
+          });
         }
         from = end;
       }

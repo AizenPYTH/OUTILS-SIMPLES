@@ -14,14 +14,20 @@ export interface TextStats {
 }
 
 const STOP_WORDS = new Set(
-  "le la les de des du un une et en à a au aux ce cet cette ces il elle ils elles on nous vous je tu ne pas que qui quoi dont où est sont été être avoir ont par pour sur dans avec sans plus moins ou mais donc or ni car se sa son ses leur leurs mon ma mes ton ta tes votre vos notre nos y the of and to in is it that for on with as are was be this".split(" "),
+  "le la les de des du un une et en à a au aux ce cet cette ces il elle ils elles on nous vous je tu ne pas que qui quoi dont où est sont été être avoir ont par pour sur dans avec sans plus moins ou mais donc or ni car se sa son ses leur leurs mon ma mes ton ta tes votre vos notre nos y the of and to in is it that for on with as are was be this".split(
+    " ",
+  ),
 );
 
 export function computeTextStats(text: string): TextStats {
   const trimmed = text.trim();
   const words = trimmed.length ? trimmed.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)) : [];
-  const sentences = trimmed.length ? trimmed.split(/[.!?…]+(?:\s|$)/).filter((s) => s.trim().length > 0).length : 0;
-  const paragraphs = trimmed.length ? trimmed.split(/\n\s*\n/).filter((p) => p.trim().length > 0).length : 0;
+  const sentences = trimmed.length
+    ? trimmed.split(/[.!?…]+(?:\s|$)/).filter((s) => s.trim().length > 0).length
+    : 0;
+  const paragraphs = trimmed.length
+    ? trimmed.split(/\n\s*\n/).filter((p) => p.trim().length > 0).length
+    : 0;
   const lines = text.length ? text.split(/\r?\n/).length : 0;
   const counts = new Map<string, number>();
   for (const raw of words) {

@@ -1,7 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { applyHomography, computeHomography, orderQuad, quadOutputSize, warpPerspective, type Quad } from "@/lib/scan/geometry";
+import {
+  applyHomography,
+  computeHomography,
+  orderQuad,
+  quadOutputSize,
+  warpPerspective,
+  type Quad,
+} from "@/lib/scan/geometry";
 import { detectDocumentQuad, polygonArea } from "@/lib/scan/detect";
-import { adjustBrightnessContrast, documentFilter, extractPalette, otsuThreshold, toBlackAndWhite, toGrayscale } from "@/lib/images/pixels";
+import {
+  adjustBrightnessContrast,
+  documentFilter,
+  extractPalette,
+  otsuThreshold,
+  toBlackAndWhite,
+  toGrayscale,
+} from "@/lib/images/pixels";
 import { clampCrop, fitDimensions } from "@/lib/images/types";
 import { buildSearchablePdf } from "@/lib/ocr/searchable-pdf";
 import { cleanOcrText, toPageResult } from "@/lib/ocr/engine";
@@ -54,7 +68,8 @@ describe("perspective geometry", () => {
     const w = 60;
     const h = 60;
     const data = new Uint8ClampedArray(w * h * 4);
-    const inside = (x: number, y: number) => x >= 10 + (y - 10) * 0.3 && x <= 40 + (y - 10) * 0.3 && y >= 10 && y <= 50;
+    const inside = (x: number, y: number) =>
+      x >= 10 + (y - 10) * 0.3 && x <= 40 + (y - 10) * 0.3 && y >= 10 && y <= 50;
     for (let y = 0; y < h; y += 1) {
       for (let x = 0; x < w; x += 1) {
         const v = inside(x, y) ? 240 : 20;
@@ -81,7 +96,9 @@ describe("perspective geometry", () => {
     const w = 120;
     const h = 90;
     const gray = new Uint8ClampedArray(w * h);
-    for (let y = 0; y < h; y += 1) for (let x = 0; x < w; x += 1) gray[y * w + x] = x >= 20 && x <= 100 && y >= 15 && y <= 75 ? 230 : 30;
+    for (let y = 0; y < h; y += 1)
+      for (let x = 0; x < w; x += 1)
+        gray[y * w + x] = x >= 20 && x <= 100 && y >= 15 && y <= 75 ? 230 : 30;
     const result = detectDocumentQuad(gray, w, h);
     expect(result).not.toBeNull();
     expect(result!.quad[0]).toEqual({ x: 20, y: 15 });
@@ -93,7 +110,11 @@ describe("perspective geometry", () => {
 });
 
 describe("pixel filters", () => {
-  const img = { width: 2, height: 1, data: new Uint8ClampedArray([255, 0, 0, 255, 0, 0, 255, 128]) };
+  const img = {
+    width: 2,
+    height: 1,
+    data: new Uint8ClampedArray([255, 0, 0, 255, 0, 0, 255, 128]),
+  };
   it("grayscale, brightness/contrast, black & white and Otsu", () => {
     const gray = toGrayscale(img);
     expect(gray.data[0]).toBe(76);
@@ -134,12 +155,27 @@ describe("pixel filters", () => {
     expect(palette[0]!.share).toBeCloseTo(0.75);
   });
   it("fits dimensions and clamps crops", () => {
-    expect(fitDimensions({ width: 4000, height: 3000 }, { width: 1200 })).toEqual({ width: 1200, height: 900 });
-    expect(fitDimensions({ width: 400, height: 300 }, { width: 1200 })).toEqual({ width: 400, height: 300 });
-    expect(fitDimensions({ width: 400, height: 300 }, { width: 1200, allowUpscale: true })).toEqual({ width: 1200, height: 900 });
-    expect(fitDimensions({ width: 4000, height: 3000 }, { maxWidth: 1000, maxHeight: 500 })).toEqual({ width: 667, height: 500 });
-    expect(fitDimensions({ width: 4000, height: 3000 }, { percent: 25 })).toEqual({ width: 1000, height: 750 });
-    expect(clampCrop({ x: -10, y: 50, width: 500, height: 500 }, { width: 100, height: 100 })).toEqual({ x: 0, y: 0, width: 100, height: 100 });
+    expect(fitDimensions({ width: 4000, height: 3000 }, { width: 1200 })).toEqual({
+      width: 1200,
+      height: 900,
+    });
+    expect(fitDimensions({ width: 400, height: 300 }, { width: 1200 })).toEqual({
+      width: 400,
+      height: 300,
+    });
+    expect(fitDimensions({ width: 400, height: 300 }, { width: 1200, allowUpscale: true })).toEqual(
+      { width: 1200, height: 900 },
+    );
+    expect(
+      fitDimensions({ width: 4000, height: 3000 }, { maxWidth: 1000, maxHeight: 500 }),
+    ).toEqual({ width: 667, height: 500 });
+    expect(fitDimensions({ width: 4000, height: 3000 }, { percent: 25 })).toEqual({
+      width: 1000,
+      height: 750,
+    });
+    expect(
+      clampCrop({ x: -10, y: 50, width: 500, height: 500 }, { width: 100, height: 100 }),
+    ).toEqual({ x: 0, y: 0, width: 100, height: 100 });
   });
 });
 
@@ -151,8 +187,23 @@ describe("OCR helpers", () => {
         text: "Facture numéro 2026-0042\nMontant total",
         confidence: 91,
         lines: [
-          { text: "Facture numéro 2026-0042", bbox: { x0: 80, y0: 90, x1: 520, y1: 130 }, words: [{ text: "Facture", confidence: 95, bbox: { x0: 80, y0: 90, x1: 200, y1: 130 } }, { text: "numéro", confidence: 92, bbox: { x0: 210, y0: 90, x1: 330, y1: 130 } }, { text: "2026-0042", confidence: 88, bbox: { x0: 340, y0: 90, x1: 520, y1: 130 } }] },
-          { text: "Montant total", bbox: { x0: 80, y0: 270, x1: 320, y1: 310 }, words: [{ text: "Montant", confidence: 20, bbox: { x0: 80, y0: 270, x1: 200, y1: 310 } }, { text: "total", confidence: 90, bbox: { x0: 210, y0: 270, x1: 320, y1: 310 } }] },
+          {
+            text: "Facture numéro 2026-0042",
+            bbox: { x0: 80, y0: 90, x1: 520, y1: 130 },
+            words: [
+              { text: "Facture", confidence: 95, bbox: { x0: 80, y0: 90, x1: 200, y1: 130 } },
+              { text: "numéro", confidence: 92, bbox: { x0: 210, y0: 90, x1: 330, y1: 130 } },
+              { text: "2026-0042", confidence: 88, bbox: { x0: 340, y0: 90, x1: 520, y1: 130 } },
+            ],
+          },
+          {
+            text: "Montant total",
+            bbox: { x0: 80, y0: 270, x1: 320, y1: 310 },
+            words: [
+              { text: "Montant", confidence: 20, bbox: { x0: 80, y0: 270, x1: 200, y1: 310 } },
+              { text: "total", confidence: 90, bbox: { x0: 210, y0: 270, x1: 320, y1: 310 } },
+            ],
+          },
         ],
         imageWidth: 1200,
         imageHeight: 700,
@@ -160,7 +211,10 @@ describe("OCR helpers", () => {
       0,
     );
     expect(ocr.lines).toHaveLength(2);
-    const { bytes, wordsPlaced, wordsSkipped } = await buildSearchablePdf([{ image: png, mimeType: "image/png", width: 1200, height: 700, ocr }], { minConfidence: 30, title: "Test OCR" });
+    const { bytes, wordsPlaced, wordsSkipped } = await buildSearchablePdf(
+      [{ image: png, mimeType: "image/png", width: 1200, height: 700, ocr }],
+      { minConfidence: 30, title: "Test OCR" },
+    );
     expect(wordsPlaced).toBe(4);
     expect(wordsSkipped).toBe(1);
     const doc = await openPdf(bytes);
@@ -179,13 +233,39 @@ describe("OCR helpers", () => {
 });
 
 describe("QR payloads", () => {
-  const base = { url: "", text: "", wifi: { ssid: "", password: "", security: "WPA" as const, hidden: false }, card: { firstName: "", lastName: "", phone: "", email: "", organization: "", url: "" } };
+  const base = {
+    url: "",
+    text: "",
+    wifi: { ssid: "", password: "", security: "WPA" as const, hidden: false },
+    card: { firstName: "", lastName: "", phone: "", email: "", organization: "", url: "" },
+  };
   it("builds url, wifi and vcard strings", () => {
-    expect(buildQrPayload("url", { ...base, url: "outilia.fr/pdf" }).value).toBe("https://outilia.fr/pdf");
+    expect(buildQrPayload("url", { ...base, url: "outilia.fr/pdf" }).value).toBe(
+      "https://outilia.fr/pdf",
+    );
     expect(buildQrPayload("url", { ...base, url: "https://" }).value).toBe("");
-    expect(buildQrPayload("wifi", { ...base, wifi: { ssid: "Ma;Box", password: "p:w", security: "WPA", hidden: true } }).value).toBe("WIFI:T:WPA;S:Ma\\;Box;P:p\\:w;H:true;;");
-    expect(buildQrPayload("wifi", { ...base, wifi: { ssid: "Box", password: "", security: "WPA", hidden: false } }).error).toMatch(/mot de passe/);
-    const vcard = buildQrPayload("vcard", { ...base, card: { ...base.card, firstName: "Jeanne", lastName: "Martin", phone: "06 12 34 56 78", email: "j@example.fr" } }).value;
+    expect(
+      buildQrPayload("wifi", {
+        ...base,
+        wifi: { ssid: "Ma;Box", password: "p:w", security: "WPA", hidden: true },
+      }).value,
+    ).toBe("WIFI:T:WPA;S:Ma\\;Box;P:p\\:w;H:true;;");
+    expect(
+      buildQrPayload("wifi", {
+        ...base,
+        wifi: { ssid: "Box", password: "", security: "WPA", hidden: false },
+      }).error,
+    ).toMatch(/mot de passe/);
+    const vcard = buildQrPayload("vcard", {
+      ...base,
+      card: {
+        ...base.card,
+        firstName: "Jeanne",
+        lastName: "Martin",
+        phone: "06 12 34 56 78",
+        email: "j@example.fr",
+      },
+    }).value;
     expect(vcard).toContain("BEGIN:VCARD");
     expect(vcard).toContain("N:Martin;Jeanne;;;");
     expect(vcard).toContain("TEL;TYPE=CELL:0612345678");

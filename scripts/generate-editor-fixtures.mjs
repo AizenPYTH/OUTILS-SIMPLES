@@ -19,15 +19,13 @@ const require = createRequire(import.meta.url);
 async function mixed() {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
-  doc
-    .addPage([595, 842])
-    .drawText("Page avec texte natif : contrat de location, article 1.", {
-      x: 60,
-      y: 760,
-      size: 14,
-      font,
-      color: rgb(0, 0, 0),
-    });
+  doc.addPage([595, 842]).drawText("Page avec texte natif : contrat de location, article 1.", {
+    x: 60,
+    y: 760,
+    size: 14,
+    font,
+    color: rgb(0, 0, 0),
+  });
   const png = await doc.embedPng(await readFile(path.join(outDir, "logo-alpha.png")));
   doc.addPage([595, 842]).drawImage(png, { x: 40, y: 60, width: 515, height: 720 });
   doc

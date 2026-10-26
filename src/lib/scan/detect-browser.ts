@@ -6,7 +6,10 @@ import { getRgba, releaseCanvas, resizeCanvas } from "@/lib/images/canvas";
 import { detectDocumentQuad, type DetectionResult } from "./detect";
 import type { Quad } from "./geometry";
 
-export function detectQuadFromBitmap(bitmap: ImageBitmap, maxDimension = 480): DetectionResult | null {
+export function detectQuadFromBitmap(
+  bitmap: ImageBitmap,
+  maxDimension = 480,
+): DetectionResult | null {
   const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
   const width = Math.max(1, Math.round(bitmap.width * scale));
   const height = Math.max(1, Math.round(bitmap.height * scale));
@@ -21,7 +24,13 @@ export function detectQuadFromBitmap(bitmap: ImageBitmap, maxDimension = 480): D
   const detected = detectDocumentQuad(gray, width, height);
   if (!detected) return null;
   const factor = 1 / scale;
-  return { confidence: detected.confidence, quad: detected.quad.map((p) => ({ x: Math.min(bitmap.width, p.x * factor), y: Math.min(bitmap.height, p.y * factor) })) as Quad };
+  return {
+    confidence: detected.confidence,
+    quad: detected.quad.map((p) => ({
+      x: Math.min(bitmap.width, p.x * factor),
+      y: Math.min(bitmap.height, p.y * factor),
+    })) as Quad,
+  };
 }
 
 /** Default quad when nothing is detected: the whole image inset by 8 %. */

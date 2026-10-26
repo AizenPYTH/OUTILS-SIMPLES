@@ -35,13 +35,24 @@ function readDate(info: PDFDict | undefined, key: string): string {
 export function readMetadataFromDocument(doc: PDFDocument, bytes: Uint8Array): PdfMetadata {
   const info = doc.context.lookup(doc.context.trailerInfo.Info);
   const dict = info instanceof PDFDict ? info : undefined;
-  const standard = new Set(["Title", "Author", "Subject", "Keywords", "Creator", "Producer", "CreationDate", "ModDate", "Trapped"]);
+  const standard = new Set([
+    "Title",
+    "Author",
+    "Subject",
+    "Keywords",
+    "Creator",
+    "Producer",
+    "CreationDate",
+    "ModDate",
+    "Trapped",
+  ]);
   const custom: Record<string, string> = {};
   if (dict) {
     for (const [key, value] of dict.entries()) {
       const name = key.decodeText();
       if (standard.has(name)) continue;
-      if (value instanceof PDFString || value instanceof PDFHexString) custom[name] = value.decodeText();
+      if (value instanceof PDFString || value instanceof PDFHexString)
+        custom[name] = value.decodeText();
       else custom[name] = value.toString();
     }
   }
@@ -81,7 +92,10 @@ export interface MetadataEdit {
  * the fields the user wants to keep. Producer/Creator are left empty rather
  * than replaced, so nothing identifies the original software.
  */
-export async function stripMetadata(bytes: Uint8Array, keep: MetadataEdit = {}): Promise<Uint8Array> {
+export async function stripMetadata(
+  bytes: Uint8Array,
+  keep: MetadataEdit = {},
+): Promise<Uint8Array> {
   const doc = await loadPdfDocument(bytes, { updateMetadata: false });
   const infoRef = doc.context.trailerInfo.Info;
   const info = doc.context.lookup(infoRef);

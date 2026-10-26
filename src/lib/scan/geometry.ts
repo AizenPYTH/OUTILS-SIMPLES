@@ -36,8 +36,10 @@ function solveLinear(A: number[][], b: number[]): number[] {
   const M = A.map((row, i) => [...row, b[i]!]);
   for (let col = 0; col < n; col += 1) {
     let pivot = col;
-    for (let r = col + 1; r < n; r += 1) if (Math.abs(M[r]![col]!) > Math.abs(M[pivot]![col]!)) pivot = r;
-    if (Math.abs(M[pivot]![col]!) < 1e-12) throw new Error("Quadrilatère dégénéré : les coins doivent former une surface.");
+    for (let r = col + 1; r < n; r += 1)
+      if (Math.abs(M[r]![col]!) > Math.abs(M[pivot]![col]!)) pivot = r;
+    if (Math.abs(M[pivot]![col]!) < 1e-12)
+      throw new Error("Quadrilatère dégénéré : les coins doivent former une surface.");
     [M[col], M[pivot]] = [M[pivot]!, M[col]!];
     for (let r = 0; r < n; r += 1) {
       if (r === col) continue;
@@ -80,7 +82,11 @@ export function orderQuad(points: Point[]): Quad {
  * Warps `src` (RGBA, width×height) so that `quad` becomes an upright rectangle
  * of the given output size, using inverse mapping with bilinear sampling.
  */
-export function warpPerspective(src: { data: Uint8ClampedArray; width: number; height: number }, quad: Quad, out: { width: number; height: number }): { data: Uint8ClampedArray; width: number; height: number } {
+export function warpPerspective(
+  src: { data: Uint8ClampedArray; width: number; height: number },
+  quad: Quad,
+  out: { width: number; height: number },
+): { data: Uint8ClampedArray; width: number; height: number } {
   const dst: Quad = [
     { x: 0, y: 0 },
     { x: out.width, y: 0 },
@@ -113,7 +119,9 @@ export function warpPerspective(src: { data: Uint8ClampedArray; width: number; h
         const p10 = src.data[(y0 * sw + x1) * 4 + c]!;
         const p01 = src.data[(y1 * sw + x0) * 4 + c]!;
         const p11 = src.data[(y1 * sw + x1) * 4 + c]!;
-        data[o + c] = Math.round((p00 * (1 - fx) + p10 * fx) * (1 - fy) + (p01 * (1 - fx) + p11 * fx) * fy);
+        data[o + c] = Math.round(
+          (p00 * (1 - fx) + p10 * fx) * (1 - fy) + (p01 * (1 - fx) + p11 * fx) * fy,
+        );
       }
     }
   }

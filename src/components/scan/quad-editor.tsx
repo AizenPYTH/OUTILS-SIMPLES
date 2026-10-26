@@ -35,7 +35,10 @@ export function QuadEditor({ imageUrl, imageWidth, imageHeight, quad, onChange }
 
   const toImage = (e: React.PointerEvent): Point => {
     const rect = rootRef.current!.getBoundingClientRect();
-    return { x: clamp((e.clientX - rect.left) / scale, 0, imageWidth), y: clamp((e.clientY - rect.top) / scale, 0, imageHeight) };
+    return {
+      x: clamp((e.clientX - rect.left) / scale, 0, imageWidth),
+      y: clamp((e.clientY - rect.top) / scale, 0, imageHeight),
+    };
   };
 
   const startDrag = (index: number, e: React.PointerEvent) => {
@@ -50,7 +53,14 @@ export function QuadEditor({ imageUrl, imageWidth, imageHeight, quad, onChange }
     const drag = dragRef.current;
     if (!drag) return;
     const p = toImage(e);
-    const next = quad.map((pt, i) => (i === drag.index ? { x: clamp(p.x + drag.offset.x, 0, imageWidth), y: clamp(p.y + drag.offset.y, 0, imageHeight) } : pt)) as Quad;
+    const next = quad.map((pt, i) =>
+      i === drag.index
+        ? {
+            x: clamp(p.x + drag.offset.x, 0, imageWidth),
+            y: clamp(p.y + drag.offset.y, 0, imageHeight),
+          }
+        : pt,
+    ) as Quad;
     onChange(next);
   };
 
@@ -60,19 +70,43 @@ export function QuadEditor({ imageUrl, imageWidth, imageHeight, quad, onChange }
 
   const onKey = (index: number, e: React.KeyboardEvent) => {
     const step = (e.shiftKey ? 10 : 1) / scale;
-    const delta: Record<string, Point> = { ArrowLeft: { x: -step, y: 0 }, ArrowRight: { x: step, y: 0 }, ArrowUp: { x: 0, y: -step }, ArrowDown: { x: 0, y: step } };
+    const delta: Record<string, Point> = {
+      ArrowLeft: { x: -step, y: 0 },
+      ArrowRight: { x: step, y: 0 },
+      ArrowUp: { x: 0, y: -step },
+      ArrowDown: { x: 0, y: step },
+    };
     const d = delta[e.key];
     if (!d) return;
     e.preventDefault();
-    onChange(quad.map((pt, i) => (i === index ? { x: clamp(pt.x + d.x, 0, imageWidth), y: clamp(pt.y + d.y, 0, imageHeight) } : pt)) as Quad);
+    onChange(
+      quad.map((pt, i) =>
+        i === index
+          ? { x: clamp(pt.x + d.x, 0, imageWidth), y: clamp(pt.y + d.y, 0, imageHeight) }
+          : pt,
+      ) as Quad,
+    );
   };
 
   const points = quad.map((p) => `${p.x * scale},${p.y * scale}`).join(" ");
 
   return (
-    <div ref={rootRef} className="relative mx-auto w-full max-w-3xl select-none overflow-hidden rounded-[6px] bg-muted" style={{ aspectRatio: `${imageWidth} / ${imageHeight}`, touchAction: "none" }} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} data-testid="quad-editor">
+    <div
+      ref={rootRef}
+      className="relative mx-auto w-full max-w-3xl select-none overflow-hidden rounded-[6px] bg-muted"
+      style={{ aspectRatio: `${imageWidth} / ${imageHeight}`, touchAction: "none" }}
+      onPointerMove={onMove}
+      onPointerUp={onUp}
+      onPointerCancel={onUp}
+      data-testid="quad-editor"
+    >
       {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
-      <img src={imageUrl} alt="Document à redresser" className="block h-full w-full" draggable={false} />
+      <img
+        src={imageUrl}
+        alt="Document à redresser"
+        className="block h-full w-full"
+        draggable={false}
+      />
       <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
         <defs>
           <mask id="quad-mask">
@@ -81,9 +115,30 @@ export function QuadEditor({ imageUrl, imageWidth, imageHeight, quad, onChange }
           </mask>
         </defs>
         <rect width="100%" height="100%" fill="rgba(0,0,0,0.45)" mask="url(#quad-mask)" />
-        <polygon points={points} fill="none" stroke="var(--color-primary, #5146e5)" strokeWidth={2} />
-        <line x1={quad[0]!.x * scale} y1={quad[0]!.y * scale} x2={quad[2]!.x * scale} y2={quad[2]!.y * scale} stroke="rgba(255,255,255,0.35)" strokeWidth={1} strokeDasharray="4 4" />
-        <line x1={quad[1]!.x * scale} y1={quad[1]!.y * scale} x2={quad[3]!.x * scale} y2={quad[3]!.y * scale} stroke="rgba(255,255,255,0.35)" strokeWidth={1} strokeDasharray="4 4" />
+        <polygon
+          points={points}
+          fill="none"
+          stroke="var(--color-primary, #5146e5)"
+          strokeWidth={2}
+        />
+        <line
+          x1={quad[0]!.x * scale}
+          y1={quad[0]!.y * scale}
+          x2={quad[2]!.x * scale}
+          y2={quad[2]!.y * scale}
+          stroke="rgba(255,255,255,0.35)"
+          strokeWidth={1}
+          strokeDasharray="4 4"
+        />
+        <line
+          x1={quad[1]!.x * scale}
+          y1={quad[1]!.y * scale}
+          x2={quad[3]!.x * scale}
+          y2={quad[3]!.y * scale}
+          stroke="rgba(255,255,255,0.35)"
+          strokeWidth={1}
+          strokeDasharray="4 4"
+        />
       </svg>
       {quad.map((p, i) => (
         <button

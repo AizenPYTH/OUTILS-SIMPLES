@@ -2,7 +2,13 @@
 
 import * as React from "react";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TextInputPanel, TextOutputPanel } from "@/components/tools/shared/text-io";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { slugify } from "@/lib/text/transform";
@@ -33,7 +39,15 @@ export function SlugTool() {
 
   return (
     <div className="space-y-4">
-      <TextInputPanel id="slug-input" label="Titre(s) à transformer (un par ligne)" value={text} onChange={setText} placeholder="Été 2026 : les 10 meilleurs outils PDF gratuits !" rows={5} hint="Accents retirés, minuscules, ponctuation remplacée par le séparateur." />
+      <TextInputPanel
+        id="slug-input"
+        label="Titre(s) à transformer (un par ligne)"
+        value={text}
+        onChange={setText}
+        placeholder="Été 2026 : les 10 meilleurs outils PDF gratuits !"
+        rows={5}
+        hint="Accents retirés, minuscules, ponctuation remplacée par le séparateur."
+      />
       <ToolPanel className="flex flex-wrap items-end gap-4">
         <div className="space-y-1">
           <Label htmlFor="slug-separator">Séparateur</Label>
@@ -63,7 +77,14 @@ export function SlugTool() {
           </Select>
         </div>
       </ToolPanel>
-      <TextOutputPanel id="slug-output" label="Slug" value={output} filename="slugs.txt" rows={5} toolId="text-slug" />
+      <TextOutputPanel
+        id="slug-output"
+        label="Slug"
+        value={output}
+        filename="slugs.txt"
+        rows={5}
+        toolId="text-slug"
+      />
     </div>
   );
 }

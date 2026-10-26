@@ -7,7 +7,10 @@ export function round(value: number, decimals = 2): number {
 
 export function formatAmount(value: number, decimals = 2, locale = "fr-FR"): string {
   if (!Number.isFinite(value)) return "—";
-  return value.toLocaleString(locale, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return value.toLocaleString(locale, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
 }
 
 /** Parses "1 234,56" / "1234.56" / "12 %" into a number. */

@@ -148,7 +148,12 @@ function fromCelsius(value: number, unit: string): number {
   return value;
 }
 
-export function convertUnit(categoryId: string, value: number, fromId: string, toId: string): number | null {
+export function convertUnit(
+  categoryId: string,
+  value: number,
+  fromId: string,
+  toId: string,
+): number | null {
   const category = getUnitCategory(categoryId);
   if (!category) return null;
   const from = category.units.find((u) => u.id === fromId);

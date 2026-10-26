@@ -14,7 +14,12 @@ export interface DiffResult {
 }
 
 /** Wraps the `diff` library (Myers algorithm) with a summary; pure and testable. */
-export function computeDiff(a: string, b: string, mode: DiffMode, options: { ignoreCase?: boolean; ignoreWhitespace?: boolean } = {}): DiffResult {
+export function computeDiff(
+  a: string,
+  b: string,
+  mode: DiffMode,
+  options: { ignoreCase?: boolean; ignoreWhitespace?: boolean } = {},
+): DiffResult {
   const normalize = (s: string) => {
     let out = s.replace(/\r\n?/g, "\n");
     if (options.ignoreCase) out = out.toLocaleLowerCase("fr-FR");
@@ -23,12 +28,19 @@ export function computeDiff(a: string, b: string, mode: DiffMode, options: { ign
   const left = normalize(a);
   const right = normalize(b);
   let changes: Change[];
-  if (mode === "lines") changes = diffLines(left, right, { ignoreWhitespace: options.ignoreWhitespace, newlineIsToken: false });
+  if (mode === "lines")
+    changes = diffLines(left, right, {
+      ignoreWhitespace: options.ignoreWhitespace,
+      newlineIsToken: false,
+    });
   else if (mode === "words") changes = diffWordsWithSpace(left, right);
   else changes = diffChars(left, right);
   const summary: DiffSummary = { added: 0, removed: 0, unchanged: 0 };
   for (const change of changes) {
-    const units = mode === "lines" ? change.value.split("\n").filter((l, i, arr) => !(i === arr.length - 1 && l === "")).length : change.value.length;
+    const units =
+      mode === "lines"
+        ? change.value.split("\n").filter((l, i, arr) => !(i === arr.length - 1 && l === "")).length
+        : change.value.length;
     if (change.added) summary.added += units;
     else if (change.removed) summary.removed += units;
     else summary.unchanged += units;

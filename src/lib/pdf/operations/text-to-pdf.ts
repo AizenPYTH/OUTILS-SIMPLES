@@ -18,7 +18,14 @@ export interface TextToPdfOptions {
   pageNumbers: boolean;
 }
 
-export const defaultTextToPdfOptions: TextToPdfOptions = { markdown: true, fontFamily: "helvetica", fontSize: 11, pageSize: "a4", margin: 56, pageNumbers: true };
+export const defaultTextToPdfOptions: TextToPdfOptions = {
+  markdown: true,
+  fontFamily: "helvetica",
+  fontSize: 11,
+  pageSize: "a4",
+  margin: 56,
+  pageNumbers: true,
+};
 
 export interface TextToPdfResult {
   bytes: Uint8Array;
@@ -64,14 +71,26 @@ const BLACK = rgb(0.1, 0.1, 0.1);
  * fonts (no font download): headings, paragraphs, nested lists, code blocks,
  * quotes, tables, rules and clickable links. Pure pdf-lib, runs in Node too.
  */
-export async function textToPdf(source: string, options: TextToPdfOptions = defaultTextToPdfOptions): Promise<TextToPdfResult> {
-  if (!source.trim() && !options.title?.trim()) throw new PdfError("NO_SELECTION", "Le texte à convertir est vide.", { recoverable: true });
+export async function textToPdf(
+  source: string,
+  options: TextToPdfOptions = defaultTextToPdfOptions,
+): Promise<TextToPdfResult> {
+  if (!source.trim() && !options.title?.trim())
+    throw new PdfError("NO_SELECTION", "Le texte à convertir est vide.", { recoverable: true });
   const doc = await createPdfDocument();
   const fonts: Fonts = {
-    regular: await doc.embedFont(resolveStandardFont(options.fontFamily, { bold: false, italic: false })),
-    bold: await doc.embedFont(resolveStandardFont(options.fontFamily, { bold: true, italic: false })),
-    italic: await doc.embedFont(resolveStandardFont(options.fontFamily, { bold: false, italic: true })),
-    boldItalic: await doc.embedFont(resolveStandardFont(options.fontFamily, { bold: true, italic: true })),
+    regular: await doc.embedFont(
+      resolveStandardFont(options.fontFamily, { bold: false, italic: false }),
+    ),
+    bold: await doc.embedFont(
+      resolveStandardFont(options.fontFamily, { bold: true, italic: false }),
+    ),
+    italic: await doc.embedFont(
+      resolveStandardFont(options.fontFamily, { bold: false, italic: true }),
+    ),
+    boldItalic: await doc.embedFont(
+      resolveStandardFont(options.fontFamily, { bold: true, italic: true }),
+    ),
     mono: await doc.embedFont(StandardFonts.Courier),
     monoBold: await doc.embedFont(StandardFonts.CourierBold),
   };
@@ -85,7 +104,12 @@ export async function textToPdf(source: string, options: TextToPdfOptions = defa
     throw toPdfError(error, "PROCESSING_FAILED");
   }
   const bytes = await savePdfDocument(doc);
-  return { bytes, pageCount: doc.getPageCount(), replacedCharacters: layout.replaced, skipped: layout.skipped };
+  return {
+    bytes,
+    pageCount: doc.getPageCount(),
+    replacedCharacters: layout.replaced,
+    skipped: layout.skipped,
+  };
 }
 
 function plainRun(text: string): Run {
@@ -151,14 +175,22 @@ class Layout {
   private block(token: Token, indent: number): void {
     switch (token.type) {
       case "heading":
-        this.heading(this.inline((token as Tokens.Heading).tokens), (token as Tokens.Heading).depth, indent);
+        this.heading(
+          this.inline((token as Tokens.Heading).tokens),
+          (token as Tokens.Heading).depth,
+          indent,
+        );
         break;
       case "paragraph":
         this.paragraph(this.inline((token as Tokens.Paragraph).tokens), indent);
         break;
       case "text": {
         const t = token as Tokens.Text;
-        this.paragraph(t.tokens ? this.inline(t.tokens) : [plainRun(unescapeHtml(t.text))], indent, 0.3);
+        this.paragraph(
+          t.tokens ? this.inline(t.tokens) : [plainRun(unescapeHtml(t.text))],
+          indent,
+          0.3,
+        );
         break;
       }
       case "list":
@@ -176,7 +208,12 @@ class Layout {
       case "hr":
         this.ensure(this.size * 1.5);
         this.y -= this.size * 0.6;
-        this.page.drawLine({ start: { x: this.margin + indent, y: this.y }, end: { x: this.pageWidth - this.margin, y: this.y }, thickness: 0.8, color: RULE });
+        this.page.drawLine({
+          start: { x: this.margin + indent, y: this.y },
+          end: { x: this.pageWidth - this.margin, y: this.y },
+          thickness: 0.8,
+          color: RULE,
+        });
         this.y -= this.size * 0.9;
         break;
       case "table":
@@ -192,8 +229,10 @@ class Layout {
       case "def":
         break;
       default:
-        if ("tokens" in token && Array.isArray((token as { tokens?: Token[] }).tokens)) this.paragraph(this.inline((token as { tokens: Token[] }).tokens), indent);
-        else if ("text" in token && typeof (token as { text?: string }).text === "string") this.paragraph([plainRun((token as { text: string }).text)], indent);
+        if ("tokens" in token && Array.isArray((token as { tokens?: Token[] }).tokens))
+          this.paragraph(this.inline((token as { tokens: Token[] }).tokens), indent);
+        else if ("text" in token && typeof (token as { text?: string }).text === "string")
+          this.paragraph([plainRun((token as { text: string }).text)], indent);
     }
   }
 
@@ -202,10 +241,18 @@ class Layout {
     const size = this.size * scale;
     this.ensure(size * 3.2);
     if (this.y < this.pageHeight - this.margin - 1) this.y -= size * 0.7;
-    this.drawRuns(runs.map((r) => ({ ...r, bold: true })), { indent, size, lineHeight: size * 1.25 });
+    this.drawRuns(
+      runs.map((r) => ({ ...r, bold: true })),
+      { indent, size, lineHeight: size * 1.25 },
+    );
     if (depth <= 2) {
       this.y -= size * 0.25;
-      this.page.drawLine({ start: { x: this.margin + indent, y: this.y }, end: { x: this.pageWidth - this.margin, y: this.y }, thickness: depth === 1 ? 1 : 0.5, color: RULE });
+      this.page.drawLine({
+        start: { x: this.margin + indent, y: this.y },
+        end: { x: this.pageWidth - this.margin, y: this.y },
+        thickness: depth === 1 ? 1 : 0.5,
+        color: RULE,
+      });
     }
     this.y -= size * 0.45;
   }
@@ -231,15 +278,30 @@ class Layout {
           continue;
         }
         if (token.type === "space") continue;
-        const runs = token.type === "text" || token.type === "paragraph" ? this.inline((token as Tokens.Text).tokens ?? []) : null;
+        const runs =
+          token.type === "text" || token.type === "paragraph"
+            ? this.inline((token as Tokens.Text).tokens ?? [])
+            : null;
         if (runs) {
           if (i === 0 && prefix) runs.unshift({ ...plainRun(prefix), code: true });
-          this.drawRuns(runs, { indent: indent + markerWidth, size: this.size, lineHeight: this.size * 1.4, marker: markerY.placed ? undefined : marker, markerIndent: indent });
+          this.drawRuns(runs, {
+            indent: indent + markerWidth,
+            size: this.size,
+            lineHeight: this.size * 1.4,
+            marker: markerY.placed ? undefined : marker,
+            markerIndent: indent,
+          });
           markerY.placed = true;
           this.y -= this.size * 0.25;
         } else {
           if (!markerY.placed) {
-            this.drawRuns([plainRun("")], { indent: indent + markerWidth, size: this.size, lineHeight: this.size * 1.4, marker, markerIndent: indent });
+            this.drawRuns([plainRun("")], {
+              indent: indent + markerWidth,
+              size: this.size,
+              lineHeight: this.size * 1.4,
+              marker,
+              markerIndent: indent,
+            });
             markerY.placed = true;
           }
           this.block(token, indent + markerWidth);
@@ -267,9 +329,21 @@ class Layout {
       this.ensure(lineHeight + (i === 0 ? pad : 0));
       const top = this.y;
       const h = lineHeight + (i === 0 ? pad : 0) + (i === lines.length - 1 ? pad : 0);
-      this.page.drawRectangle({ x: this.margin + indent, y: top - h, width: this.contentWidth - indent, height: h, color: CODE_BG });
+      this.page.drawRectangle({
+        x: this.margin + indent,
+        y: top - h,
+        width: this.contentWidth - indent,
+        height: h,
+        color: CODE_BG,
+      });
       const baseline = top - (i === 0 ? pad : 0) - lineHeight + size * 0.3;
-      this.page.drawText(lines[i]!, { x: this.margin + indent + pad, y: baseline, size, font, color: BLACK });
+      this.page.drawText(lines[i]!, {
+        x: this.margin + indent + pad,
+        y: baseline,
+        size,
+        font,
+        color: BLACK,
+      });
       this.y = top - h;
     }
     this.y -= size * 0.9;
@@ -286,12 +360,25 @@ class Layout {
     const rows = [table.header, ...table.rows];
     rows.forEach((cells, rowIndex) => {
       const bold = rowIndex === 0;
-      const wrapped = cells.map((cell) => this.wrap(this.inline(cell.tokens).map((r) => ({ ...r, bold: r.bold || bold })), colWidth - pad * 2, size));
+      const wrapped = cells.map((cell) =>
+        this.wrap(
+          this.inline(cell.tokens).map((r) => ({ ...r, bold: r.bold || bold })),
+          colWidth - pad * 2,
+          size,
+        ),
+      );
       const lines = Math.max(1, ...wrapped.map((w) => w.length));
       const rowHeight = lines * lineHeight + pad * 2;
       this.ensure(rowHeight);
       const top = this.y;
-      if (bold) this.page.drawRectangle({ x: this.margin + indent, y: top - rowHeight, width, height: rowHeight, color: CODE_BG });
+      if (bold)
+        this.page.drawRectangle({
+          x: this.margin + indent,
+          y: top - rowHeight,
+          width,
+          height: rowHeight,
+          color: CODE_BG,
+        });
       wrapped.forEach((cellLines, c) => {
         const x = this.margin + indent + c * colWidth + pad;
         let lineTop = top - pad;
@@ -301,8 +388,21 @@ class Layout {
         }
       });
       // Grid
-      this.page.drawRectangle({ x: this.margin + indent, y: top - rowHeight, width, height: rowHeight, borderColor: RULE, borderWidth: 0.5 });
-      for (let c = 1; c < columns; c += 1) this.page.drawLine({ start: { x: this.margin + indent + c * colWidth, y: top }, end: { x: this.margin + indent + c * colWidth, y: top - rowHeight }, thickness: 0.5, color: RULE });
+      this.page.drawRectangle({
+        x: this.margin + indent,
+        y: top - rowHeight,
+        width,
+        height: rowHeight,
+        borderColor: RULE,
+        borderWidth: 0.5,
+      });
+      for (let c = 1; c < columns; c += 1)
+        this.page.drawLine({
+          start: { x: this.margin + indent + c * colWidth, y: top },
+          end: { x: this.margin + indent + c * colWidth, y: top - rowHeight },
+          thickness: 0.5,
+          color: RULE,
+        });
       this.y = top - rowHeight;
     });
     this.y -= this.size * 0.8;
@@ -328,7 +428,13 @@ class Layout {
       const label = `${i + 1} / ${pages.length}`;
       const size = 9;
       const width = this.fonts.regular.widthOfTextAtSize(label, size);
-      page.drawText(label, { x: (this.pageWidth - width) / 2, y: this.margin / 2 - size / 2, size, font: this.fonts.regular, color: GRAY });
+      page.drawText(label, {
+        x: (this.pageWidth - width) / 2,
+        y: this.margin / 2 - size / 2,
+        size,
+        font: this.fonts.regular,
+        color: GRAY,
+      });
     });
   }
 
@@ -356,7 +462,11 @@ class Layout {
           out.push(...this.inline((token as Tokens.Del).tokens, { ...style, strike: true }));
           break;
         case "codespan":
-          out.push({ ...plainRun(unescapeHtml((token as Tokens.Codespan).text)), ...style, code: true });
+          out.push({
+            ...plainRun(unescapeHtml((token as Tokens.Codespan).text)),
+            ...style,
+            code: true,
+          });
           break;
         case "link": {
           const link = token as Tokens.Link;
@@ -365,8 +475,11 @@ class Layout {
           break;
         }
         case "image":
-          this.skipped.push(`Image ignorée : ${(token as Tokens.Image).text || (token as Tokens.Image).href}`);
-          if ((token as Tokens.Image).text) out.push({ ...plainRun(`[${(token as Tokens.Image).text}]`), ...style, italic: true });
+          this.skipped.push(
+            `Image ignorée : ${(token as Tokens.Image).text || (token as Tokens.Image).href}`,
+          );
+          if ((token as Tokens.Image).text)
+            out.push({ ...plainRun(`[${(token as Tokens.Image).text}]`), ...style, italic: true });
           break;
         case "br":
           out.push({ ...plainRun("\n"), ...style });
@@ -377,8 +490,10 @@ class Layout {
           break;
         }
         default:
-          if ("tokens" in token && Array.isArray((token as { tokens?: Token[] }).tokens)) out.push(...this.inline((token as { tokens: Token[] }).tokens, style));
-          else if ("text" in token && typeof (token as { text?: string }).text === "string") out.push({ ...plainRun((token as { text: string }).text), ...style });
+          if ("tokens" in token && Array.isArray((token as { tokens?: Token[] }).tokens))
+            out.push(...this.inline((token as { tokens: Token[] }).tokens, style));
+          else if ("text" in token && typeof (token as { text?: string }).text === "string")
+            out.push({ ...plainRun((token as { text: string }).text), ...style });
       }
     }
     return out;
@@ -449,15 +564,38 @@ class Layout {
     return lines;
   }
 
-  private drawRuns(runs: Run[], opts: { indent: number; size: number; lineHeight: number; marker?: string; markerIndent?: number }): void {
+  private drawRuns(
+    runs: Run[],
+    opts: {
+      indent: number;
+      size: number;
+      lineHeight: number;
+      marker?: string;
+      markerIndent?: number;
+    },
+  ): void {
     const x = this.margin + opts.indent;
     const maxWidth = this.contentWidth - opts.indent;
     const lines = this.wrap(runs, maxWidth, opts.size);
     lines.forEach((line, i) => {
       this.ensure(opts.lineHeight);
       const baseline = this.y - opts.lineHeight + opts.size * 0.3;
-      if (i === 0 && opts.marker !== undefined) this.page.drawText(opts.marker, { x: this.margin + (opts.markerIndent ?? 0) + 2, y: baseline, size: opts.size, font: this.fonts.regular, color: BLACK });
-      if (this.quoteDepth > 0) this.page.drawRectangle({ x: x - 10, y: this.y - opts.lineHeight, width: 2.5, height: opts.lineHeight, color: RULE });
+      if (i === 0 && opts.marker !== undefined)
+        this.page.drawText(opts.marker, {
+          x: this.margin + (opts.markerIndent ?? 0) + 2,
+          y: baseline,
+          size: opts.size,
+          font: this.fonts.regular,
+          color: BLACK,
+        });
+      if (this.quoteDepth > 0)
+        this.page.drawRectangle({
+          x: x - 10,
+          y: this.y - opts.lineHeight,
+          width: 2.5,
+          height: opts.lineHeight,
+          color: RULE,
+        });
       this.drawLinePieces(line, x, baseline, opts.size);
       this.y -= opts.lineHeight;
     });
@@ -477,10 +615,35 @@ class Layout {
         closeLink(cursor);
         linkStart = { x: cursor, url: piece.link };
       } else if (!piece.link) closeLink(cursor);
-      if (piece.code && piece.text.trim()) this.page.drawRectangle({ x: cursor - 1, y: baseline - size * 0.25, width: piece.width + 2, height: size * 1.1, color: CODE_BG });
-      this.page.drawText(piece.text, { x: cursor, y: baseline, size, font, color: piece.link ? LINK : BLACK });
-      if (piece.link) this.page.drawLine({ start: { x: cursor, y: baseline - 1.5 }, end: { x: cursor + piece.width, y: baseline - 1.5 }, thickness: 0.6, color: LINK });
-      if (piece.strike) this.page.drawLine({ start: { x: cursor, y: baseline + size * 0.3 }, end: { x: cursor + piece.width, y: baseline + size * 0.3 }, thickness: 0.7, color: BLACK });
+      if (piece.code && piece.text.trim())
+        this.page.drawRectangle({
+          x: cursor - 1,
+          y: baseline - size * 0.25,
+          width: piece.width + 2,
+          height: size * 1.1,
+          color: CODE_BG,
+        });
+      this.page.drawText(piece.text, {
+        x: cursor,
+        y: baseline,
+        size,
+        font,
+        color: piece.link ? LINK : BLACK,
+      });
+      if (piece.link)
+        this.page.drawLine({
+          start: { x: cursor, y: baseline - 1.5 },
+          end: { x: cursor + piece.width, y: baseline - 1.5 },
+          thickness: 0.6,
+          color: LINK,
+        });
+      if (piece.strike)
+        this.page.drawLine({
+          start: { x: cursor, y: baseline + size * 0.3 },
+          end: { x: cursor + piece.width, y: baseline + size * 0.3 },
+          thickness: 0.7,
+          color: BLACK,
+        });
       cursor += piece.width;
     }
     closeLink(cursor);

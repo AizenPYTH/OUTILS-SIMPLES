@@ -17,7 +17,10 @@ export function TextDiffTool() {
   const [mode, setMode] = React.useState<DiffMode>("words");
   const [ignoreCase, setIgnoreCase] = React.useState(false);
   const [ignoreWhitespace, setIgnoreWhitespace] = React.useState(false);
-  const result = React.useMemo(() => (a || b ? computeDiff(a, b, mode, { ignoreCase, ignoreWhitespace }) : null), [a, b, mode, ignoreCase, ignoreWhitespace]);
+  const result = React.useMemo(
+    () => (a || b ? computeDiff(a, b, mode, { ignoreCase, ignoreWhitespace }) : null),
+    [a, b, mode, ignoreCase, ignoreWhitespace],
+  );
   const unified = React.useMemo(() => (result ? formatUnified(result.changes) : ""), [result]);
   const identical = result && result.summary.added === 0 && result.summary.removed === 0;
 
@@ -40,13 +43,22 @@ export function TextDiffTool() {
         />
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center gap-2">
-            <Checkbox id="diff-case" checked={ignoreCase} onCheckedChange={(c) => setIgnoreCase(c === true)} />
+            <Checkbox
+              id="diff-case"
+              checked={ignoreCase}
+              onCheckedChange={(c) => setIgnoreCase(c === true)}
+            />
             <Label htmlFor="diff-case" className="font-normal">
               Ignorer la casse
             </Label>
           </div>
           <div className="flex items-center gap-2">
-            <Checkbox id="diff-ws" checked={ignoreWhitespace} onCheckedChange={(c) => setIgnoreWhitespace(c === true)} disabled={mode !== "lines"} />
+            <Checkbox
+              id="diff-ws"
+              checked={ignoreWhitespace}
+              onCheckedChange={(c) => setIgnoreWhitespace(c === true)}
+              disabled={mode !== "lines"}
+            />
             <Label htmlFor="diff-ws" className="font-normal">
               Ignorer les espaces (mode lignes)
             </Label>
@@ -58,11 +70,17 @@ export function TextDiffTool() {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm" aria-live="polite">
               {identical ? (
-                <span className="font-medium text-success-foreground">Les deux textes sont identiques.</span>
+                <span className="font-medium text-success-foreground">
+                  Les deux textes sont identiques.
+                </span>
               ) : (
                 <>
-                  <span className="rounded bg-success-soft px-1.5 py-0.5 font-medium text-success-foreground">+{result.summary.added}</span>{" "}
-                  <span className="rounded bg-destructive-soft px-1.5 py-0.5 font-medium text-destructive">−{result.summary.removed}</span>{" "}
+                  <span className="rounded bg-success-soft px-1.5 py-0.5 font-medium text-success-foreground">
+                    +{result.summary.added}
+                  </span>{" "}
+                  <span className="rounded bg-destructive-soft px-1.5 py-0.5 font-medium text-destructive">
+                    −{result.summary.removed}
+                  </span>{" "}
                   <span className="text-muted-foreground">
                     {mode === "lines" ? "lignes" : "caractères"} ajoutés / supprimés
                   </span>
@@ -76,7 +94,14 @@ export function TextDiffTool() {
           </div>
           <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-border bg-muted/40 p-3 font-mono text-[13px] leading-relaxed">
             {result.changes.map((change, i) => (
-              <span key={i} className={cn(change.added && "bg-success-soft text-success-foreground", change.removed && "bg-destructive-soft text-destructive line-through decoration-destructive/60")}>
+              <span
+                key={i}
+                className={cn(
+                  change.added && "bg-success-soft text-success-foreground",
+                  change.removed &&
+                    "bg-destructive-soft text-destructive line-through decoration-destructive/60",
+                )}
+              >
                 {change.value}
               </span>
             ))}

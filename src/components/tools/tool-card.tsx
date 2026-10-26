@@ -64,7 +64,9 @@ export function ToolCard({ tool, className, featured = false }: ToolCardProps) {
           {tool.shortDescription}
         </span>
         {featured && category ? (
-          <span className={cn("mt-3 block text-xs font-medium", tone.text)}>{category.shortName}</span>
+          <span className={cn("mt-3 block text-xs font-medium", tone.text)}>
+            {category.shortName}
+          </span>
         ) : null}
       </span>
     </Link>

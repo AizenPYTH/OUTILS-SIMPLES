@@ -14,7 +14,11 @@ export interface DetectionResult {
   confidence: number;
 }
 
-export function detectDocumentQuad(gray: Uint8ClampedArray | Uint8Array, width: number, height: number): DetectionResult | null {
+export function detectDocumentQuad(
+  gray: Uint8ClampedArray | Uint8Array,
+  width: number,
+  height: number,
+): DetectionResult | null {
   const threshold = otsuThreshold(gray, 1);
   const bright = new Uint8Array(width * height);
   for (let i = 0; i < bright.length; i += 1) bright[i] = gray[i]! > threshold ? 1 : 0;
@@ -52,8 +56,14 @@ export function detectDocumentQuad(gray: Uint8ClampedArray | Uint8Array, width: 
   if (best.label === -1 || areaShare < 0.08 || areaShare > 0.97) return null;
 
   // Extreme points of the component: TL (min x+y), TR (max x−y), BR (max x+y), BL (min x−y).
-  let tl: Point | null = null, tr: Point | null = null, br: Point | null = null, bl: Point | null = null;
-  let minSum = Infinity, maxSum = -Infinity, minDiff = Infinity, maxDiff = -Infinity;
+  let tl: Point | null = null,
+    tr: Point | null = null,
+    br: Point | null = null,
+    bl: Point | null = null;
+  let minSum = Infinity,
+    maxSum = -Infinity,
+    minDiff = Infinity,
+    maxDiff = -Infinity;
   for (let i = 0; i < labels.length; i += 1) {
     if (labels[i] !== best.label) continue;
     const x = i % width;

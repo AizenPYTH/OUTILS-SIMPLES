@@ -41,7 +41,11 @@ export async function extractLinkAnnotations(bytes: Uint8Array): Promise<LinkExt
         if (kindName === "URI") {
           const uri = decodeString(doc.context.lookup(action.get(PDFName.of("URI"))));
           if (uri) {
-            links.push({ pageIndex, url: uri, kind: uri.toLowerCase().startsWith("mailto:") ? "e-mail" : "lien" });
+            links.push({
+              pageIndex,
+              url: uri,
+              kind: uri.toLowerCase().startsWith("mailto:") ? "e-mail" : "lien",
+            });
             continue;
           }
         }
@@ -63,9 +67,14 @@ export function findTextLinks(pages: { pageIndex: number; text: string }[]): Pdf
   for (const page of pages) {
     for (const match of page.text.matchAll(URL_PATTERN)) {
       const raw = match[1]!.replace(/[.,;:!?]+$/, "");
-      out.push({ pageIndex: page.pageIndex, url: raw.startsWith("www.") ? `https://${raw}` : raw, kind: "texte" });
+      out.push({
+        pageIndex: page.pageIndex,
+        url: raw.startsWith("www.") ? `https://${raw}` : raw,
+        kind: "texte",
+      });
     }
-    for (const match of page.text.matchAll(EMAIL_PATTERN)) out.push({ pageIndex: page.pageIndex, url: `mailto:${match[0]}`, kind: "e-mail" });
+    for (const match of page.text.matchAll(EMAIL_PATTERN))
+      out.push({ pageIndex: page.pageIndex, url: `mailto:${match[0]}`, kind: "e-mail" });
   }
   return out;
 }
@@ -87,7 +96,10 @@ export function mergeLinks(...lists: PdfLink[][]): PdfLink[] {
 
 export function linksToCsv(links: PdfLink[]): string {
   const escape = (s: string) => `"${s.replace(/"/g, '""')}"`;
-  return ["page;type;adresse", ...links.map((l) => `${l.pageIndex + 1};${l.kind};${escape(l.url)}`)].join("\n");
+  return [
+    "page;type;adresse",
+    ...links.map((l) => `${l.pageIndex + 1};${l.kind};${escape(l.url)}`),
+  ].join("\n");
 }
 
 export function linksToText(links: PdfLink[]): string {

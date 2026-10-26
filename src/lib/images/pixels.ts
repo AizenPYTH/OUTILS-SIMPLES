@@ -11,7 +11,9 @@ export interface RgbaImage {
 export function toGrayscale(img: RgbaImage): RgbaImage {
   const out = new Uint8ClampedArray(img.data.length);
   for (let i = 0; i < img.data.length; i += 4) {
-    const g = Math.round(0.299 * img.data[i]! + 0.587 * img.data[i + 1]! + 0.114 * img.data[i + 2]!);
+    const g = Math.round(
+      0.299 * img.data[i]! + 0.587 * img.data[i + 1]! + 0.114 * img.data[i + 2]!,
+    );
     out[i] = out[i + 1] = out[i + 2] = g;
     out[i + 3] = img.data[i + 3]!;
   }
@@ -19,7 +21,11 @@ export function toGrayscale(img: RgbaImage): RgbaImage {
 }
 
 /** brightness: -100..100, contrast: -100..100 */
-export function adjustBrightnessContrast(img: RgbaImage, brightness: number, contrast: number): RgbaImage {
+export function adjustBrightnessContrast(
+  img: RgbaImage,
+  brightness: number,
+  contrast: number,
+): RgbaImage {
   const out = new Uint8ClampedArray(img.data.length);
   const b = (brightness / 100) * 255;
   const c = contrast / 100;
@@ -155,14 +161,18 @@ export function extractPalette(img: RgbaImage, count = 6, sampleStep = 4): Palet
       buckets.push(bucket);
       break;
     }
-    const ranges = [0, 1, 2].map((c) => Math.max(...bucket.map((p) => p[c]!)) - Math.min(...bucket.map((p) => p[c]!)));
+    const ranges = [0, 1, 2].map(
+      (c) => Math.max(...bucket.map((p) => p[c]!)) - Math.min(...bucket.map((p) => p[c]!)),
+    );
     const channel = ranges.indexOf(Math.max(...ranges));
     bucket.sort((a, b) => a[channel]! - b[channel]!);
     const mid = Math.floor(bucket.length / 2);
     buckets.push(bucket.slice(0, mid), bucket.slice(mid));
   }
   // Refine the median-cut seeds with a few k-means iterations so clusters follow colour boundaries.
-  let centroids = buckets.map((bucket) => [0, 1, 2].map((c) => bucket.reduce((s, p) => s + p[c]!, 0) / bucket.length));
+  let centroids = buckets.map((bucket) =>
+    [0, 1, 2].map((c) => bucket.reduce((s, p) => s + p[c]!, 0) / bucket.length),
+  );
   let assignment: number[][][] = buckets;
   for (let iter = 0; iter < 6; iter += 1) {
     const groups: number[][][] = centroids.map(() => []);
@@ -180,7 +190,9 @@ export function extractPalette(img: RgbaImage, count = 6, sampleStep = 4): Palet
       groups[best]!.push(p);
     }
     assignment = groups.filter((g) => g.length > 0);
-    centroids = assignment.map((g) => [0, 1, 2].map((c) => g.reduce((s, p) => s + p[c]!, 0) / g.length));
+    centroids = assignment.map((g) =>
+      [0, 1, 2].map((c) => g.reduce((s, p) => s + p[c]!, 0) / g.length),
+    );
   }
   const total = pixels.length;
   return assignment
@@ -192,5 +204,11 @@ export function extractPalette(img: RgbaImage, count = 6, sampleStep = 4): Palet
 }
 
 export function rgbToHex(r: number, g: number, b: number): string {
-  return `#${[r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("")}`;
+  return `#${[r, g, b]
+    .map((v) =>
+      Math.max(0, Math.min(255, Math.round(v)))
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
 }

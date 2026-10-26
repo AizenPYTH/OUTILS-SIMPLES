@@ -6,6 +6,7 @@ Principes de design et application page par page : `docs/DESIGN_PRINCIPES.md`.
 ## 1. Changements effectués
 
 ### Interface (simplification)
+
 - **Accueil `/`** : un titre, une phrase, un seul champ de recherche (→ `/outils/?q=`), la mention
   « Vos fichiers restent chez vous », 9 outils populaires, 8 familles d'outils avec leur nombre
   d'outils, un bouton « Voir tous les outils », le bloc « Comment ça marche » en trois étapes.
@@ -21,6 +22,7 @@ Principes de design et application page par page : `docs/DESIGN_PRINCIPES.md`.
   outil » (contenu SEO inchangé, FAQ et JSON-LD inchangés).
 
 ### Éditeur PDF (rendu)
+
 - **Netteté** : le canvas a désormais un nombre entier de pixels et sa taille CSS est dérivée de ce
   nombre (`backing / ratio`), au lieu d'arrondir la taille CSS : sur un écran 2,625×, le rapport
   mesuré passe de 2,6236 (rééchantillonnage flou) à 2,625. Le rendu est recalculé à chaque zoom
@@ -31,6 +33,7 @@ Principes de design et application page par page : `docs/DESIGN_PRINCIPES.md`.
   vérifiée par le test sur le fichier à page pivotée.
 
 ### Éditeur PDF (texte existant) — nouveau
+
 - Outil **« Modifier le texte »** (distinct d'« Ajouter du texte », des dessins, de la signature) :
   clic sur un passage, champ en place, Entrée. Le passage est **remplacé dans le flux de contenu**
   de la page (même position, même couleur), avec la **police d'origine** quand elle contient les
@@ -44,6 +47,7 @@ Principes de design et application page par page : `docs/DESIGN_PRINCIPES.md`.
   modifier le texte existant ? », mais la liste exacte des cas pris en charge).
 
 ### Scanner mobile
+
 - **Cause 1 (« la page apparaît en noir et blanc dégradé »)** : le réglage par défaut appliquait
   le filtre « Document » à toute photo dès son ajout ; ce filtre divise chaque pixel par le fond
   local et **produit une image grise**. Corrigé : filtre « Couleur » (photo d'origine) par défaut,
@@ -61,17 +65,19 @@ Principes de design et application page par page : `docs/DESIGN_PRINCIPES.md`.
 - Le lecteur de QR code passe aussi par l'aperçu « Garder ».
 
 ## 2. Bugs corrigés
-| # | Bug | Cause réelle | Correction |
-| --- | --- | --- | --- |
-| 1 | Éditeur : document flou sur écran haute densité | Arrondi de la taille CSS du canvas → rapport non entier | Taille CSS dérivée du nombre entier de pixels |
-| 2 | Éditeur : document trop petit | Ajustement à la hauteur, plafonné | Ajustement à la largeur, plafond 1,3 × hauteur, zoom 400 % |
-| 3 | Scanner : page « dégradée noir et blanc » | Filtre « Document » (gris) appliqué par défaut | Filtre « Couleur » par défaut, choix explicite |
-| 4 | Scanner : déclencheur « sans effet » | Aucun retour visuel, dialogue restant ouvert | Aperçu Garder / Reprendre, compteur, Terminer |
-| 5 | Scanner : cadrage trompeur | Aperçu `object-cover` recadrait l'image affichée | `object-contain` |
-| 6 | En-tête desktop : recherche réduite à un cercle, catégorie coupée | Trop d'éléments | Navigation courte |
-| 7 | Éditeur : « Puis-je modifier le texte ? » → « Non » | Fonction absente | Édition réelle implémentée, limites écrites |
+
+| #   | Bug                                                               | Cause réelle                                            | Correction                                                 |
+| --- | ----------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------- |
+| 1   | Éditeur : document flou sur écran haute densité                   | Arrondi de la taille CSS du canvas → rapport non entier | Taille CSS dérivée du nombre entier de pixels              |
+| 2   | Éditeur : document trop petit                                     | Ajustement à la hauteur, plafonné                       | Ajustement à la largeur, plafond 1,3 × hauteur, zoom 400 % |
+| 3   | Scanner : page « dégradée noir et blanc »                         | Filtre « Document » (gris) appliqué par défaut          | Filtre « Couleur » par défaut, choix explicite             |
+| 4   | Scanner : déclencheur « sans effet »                              | Aucun retour visuel, dialogue restant ouvert            | Aperçu Garder / Reprendre, compteur, Terminer              |
+| 5   | Scanner : cadrage trompeur                                        | Aperçu `object-cover` recadrait l'image affichée        | `object-contain`                                           |
+| 6   | En-tête desktop : recherche réduite à un cercle, catégorie coupée | Trop d'éléments                                         | Navigation courte                                          |
+| 7   | Éditeur : « Puis-je modifier le texte ? » → « Non »               | Fonction absente                                        | Édition réelle implémentée, limites écrites                |
 
 ## 3. Tests réellement exécutés
+
 - `pnpm typecheck`, `pnpm lint`, `pnpm build` : OK.
 - `pnpm test` (Vitest, Node) : **146 tests** (136 + 10 nouveaux) : tokenizer, collecte des
   opérateurs, encodage original / repli, application sur PDF généré (ancien texte absent, nouveau
@@ -90,6 +96,7 @@ Principes de design et application page par page : `docs/DESIGN_PRINCIPES.md`.
   l'éditeur 654 px de large sur 1 140 px disponibles (desktop), pleine largeur sur mobile.
 
 ## 4. Ce qui n'a pas pu être testé (dit honnêtement)
+
 - **Aucun téléphone réel ni caméra physique** : la caméra est vérifiée avec le périphérique
   factice de Chromium (mire verte). Procédure manuelle dans `docs/AUDIT_QUALITE.md` § procédure
   manuelle ; points à vérifier sur un vrai appareil : orientation de la vidéo arrière, première
@@ -103,6 +110,7 @@ Principes de design et application page par page : `docs/DESIGN_PRINCIPES.md`.
   charge sont détectés et annoncés, pas devinés.
 
 ## 5. Limites restantes
+
 - Édition de texte sans reflux (le texte qui suit ne bouge pas) ; crénage `TJ` remplacé par un
   `Tj` ; aperçu proportionnel à la taille du fichier (rechargement du document à chaque
   validation) ; Annuler / Rétablir ne couvrent pas ces modifications.

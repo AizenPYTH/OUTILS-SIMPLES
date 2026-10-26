@@ -4,7 +4,12 @@ import * as React from "react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { cn } from "@/lib/utils";
 
-function Slider({ className, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, ...props }: React.ComponentProps<typeof SliderPrimitive.Root>) {
+function Slider({
+  className,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
+  ...props
+}: React.ComponentProps<typeof SliderPrimitive.Root>) {
   const values = props.value ?? props.defaultValue ?? [0];
   // Radix puts role="slider" on each thumb: that is where the accessible name must live.
   return (

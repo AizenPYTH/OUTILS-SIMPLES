@@ -24,7 +24,18 @@ interface TextInputPanelProps {
 }
 
 /** Text input area with paste/file import and clear; used by every text/dev tool. */
-export function TextInputPanel({ id, label, value, onChange, placeholder, acceptFile = ".txt,.md,.csv,.json,.xml,.html,text/plain", maxLength = 2_000_000, rows = 10, className, hint }: TextInputPanelProps) {
+export function TextInputPanel({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  acceptFile = ".txt,.md,.csv,.json,.xml,.html,text/plain",
+  maxLength = 2_000_000,
+  rows = 10,
+  className,
+  hint,
+}: TextInputPanelProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [fileError, setFileError] = React.useState<string | null>(null);
 
@@ -47,13 +58,38 @@ export function TextInputPanel({ id, label, value, onChange, placeholder, accept
           <Button type="button" variant="ghost" size="sm" onClick={() => inputRef.current?.click()}>
             <Upload aria-hidden="true" /> Importer un fichier
           </Button>
-          <input ref={inputRef} type="file" accept={acceptFile} className="sr-only" tabIndex={-1} aria-label="Importer un fichier texte" onChange={(e) => void onFile(e.target.files?.[0])} />
-          <Button type="button" variant="ghost" size="sm" onClick={() => onChange("")} disabled={!value} aria-label="Effacer">
+          <input
+            ref={inputRef}
+            type="file"
+            accept={acceptFile}
+            className="sr-only"
+            tabIndex={-1}
+            aria-label="Importer un fichier texte"
+            onChange={(e) => void onFile(e.target.files?.[0])}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onChange("")}
+            disabled={!value}
+            aria-label="Effacer"
+          >
             <X aria-hidden="true" />
           </Button>
         </div>
       </div>
-      <Textarea id={id} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={rows} spellCheck={false} className="font-mono text-[13px] leading-relaxed" maxLength={maxLength} data-testid={`${id}-input`} />
+      <Textarea
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        rows={rows}
+        spellCheck={false}
+        className="font-mono text-[13px] leading-relaxed"
+        maxLength={maxLength}
+        data-testid={`${id}-input`}
+      />
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
       {fileError ? (
         <p role="alert" className="text-xs text-destructive">
@@ -79,7 +115,20 @@ interface TextOutputPanelProps {
   emptyHint?: string;
 }
 
-export function TextOutputPanel({ id, label, value, filename, mimeType, toolId, rows = 10, className, editable = false, onChange, children, emptyHint = "Le résultat apparaîtra ici." }: TextOutputPanelProps) {
+export function TextOutputPanel({
+  id,
+  label,
+  value,
+  filename,
+  mimeType,
+  toolId,
+  rows = 10,
+  className,
+  editable = false,
+  onChange,
+  children,
+  emptyHint = "Le résultat apparaîtra ici.",
+}: TextOutputPanelProps) {
   return (
     <div className={cn("space-y-1.5", className)}>
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -87,10 +136,26 @@ export function TextOutputPanel({ id, label, value, filename, mimeType, toolId, 
         <div className="flex items-center gap-1">
           {children}
           <CopyButton text={value} />
-          <DownloadTextButton text={value} filename={filename} mimeType={mimeType} toolId={toolId} />
+          <DownloadTextButton
+            text={value}
+            filename={filename}
+            mimeType={mimeType}
+            toolId={toolId}
+          />
         </div>
       </div>
-      <Textarea id={id} value={value} readOnly={!editable} onChange={editable && onChange ? (e) => onChange(e.target.value) : undefined} rows={rows} spellCheck={false} placeholder={emptyHint} className={cn("font-mono text-[13px] leading-relaxed", !editable && "bg-muted/40")} data-testid={`${id}-output`} aria-live="polite" />
+      <Textarea
+        id={id}
+        value={value}
+        readOnly={!editable}
+        onChange={editable && onChange ? (e) => onChange(e.target.value) : undefined}
+        rows={rows}
+        spellCheck={false}
+        placeholder={emptyHint}
+        className={cn("font-mono text-[13px] leading-relaxed", !editable && "bg-muted/40")}
+        data-testid={`${id}-output`}
+        aria-live="polite"
+      />
     </div>
   );
 }

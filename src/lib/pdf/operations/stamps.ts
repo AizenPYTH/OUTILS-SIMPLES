@@ -40,7 +40,10 @@ export const defaultStampOptions: StampOptions = {
   fileName: "",
 };
 
-export function renderTemplate(template: string, values: { page: number; total: number; date: string; file: string }): string {
+export function renderTemplate(
+  template: string,
+  values: { page: number; total: number; date: string; file: string },
+): string {
   return template
     .replace(/\{page\}/g, String(values.page))
     .replace(/\{total\}/g, String(values.total))
@@ -52,9 +55,14 @@ export function renderTemplate(template: string, values: { page: number; total: 
  * Adds headers/footers/page numbers. Text is placed in the visual frame of
  * each page (honours /Rotate) at the given edge margin.
  */
-export async function stampPages(bytes: Uint8Array, options: StampOptions): Promise<{ bytes: Uint8Array; replaced: boolean }> {
+export async function stampPages(
+  bytes: Uint8Array,
+  options: StampOptions,
+): Promise<{ bytes: Uint8Array; replaced: boolean }> {
   const doc = await loadPdfDocument(bytes);
-  const font = await doc.embedFont(resolveStandardFont(options.fontFamily, { bold: false, italic: false }));
+  const font = await doc.embedFont(
+    resolveStandardFont(options.fontFamily, { bold: false, italic: false }),
+  );
   const pages = doc.getPages();
   const total = pages.length - options.startPageIndex;
   let replaced = false;
@@ -76,21 +84,46 @@ export async function stampPages(bytes: Uint8Array, options: StampOptions): Prom
   return { bytes: await savePdfDocument(doc), replaced };
 }
 
-function drawEdgeText(page: PDFPage, font: PDFFont, text: string, options: StampOptions, position: StampPosition, edge: "top" | "bottom"): void {
+function drawEdgeText(
+  page: PDFPage,
+  font: PDFFont,
+  text: string,
+  options: StampOptions,
+  position: StampPosition,
+  edge: "top" | "bottom",
+): void {
   if (!text) return;
   const rotation = ((page.getRotation().angle % 360) + 360) % 360;
   const { width, height } = page.getSize();
   const visualWidth = rotation === 90 || rotation === 270 ? height : width;
   const visualHeight = rotation === 90 || rotation === 270 ? width : height;
   const textWidth = font.widthOfTextAtSize(text, options.fontSize);
-  const x = position === "left" ? options.margin : position === "right" ? visualWidth - options.margin - textWidth : (visualWidth - textWidth) / 2;
+  const x =
+    position === "left"
+      ? options.margin
+      : position === "right"
+        ? visualWidth - options.margin - textWidth
+        : (visualWidth - textWidth) / 2;
   const y = edge === "bottom" ? options.margin : visualHeight - options.margin - options.fontSize;
   const { x: ux, y: uy } = visualToUser(x, y, rotation, width, height);
-  page.drawText(text, { x: ux, y: uy, size: options.fontSize, font, color: rgb(options.color.r, options.color.g, options.color.b), rotate: degrees(rotation) });
+  page.drawText(text, {
+    x: ux,
+    y: uy,
+    size: options.fontSize,
+    font,
+    color: rgb(options.color.r, options.color.g, options.color.b),
+    rotate: degrees(rotation),
+  });
 }
 
 /** Maps a point in the visual (upright) frame to user space for a page with /Rotate. */
-export function visualToUser(vx: number, vy: number, rotation: number, pageWidth: number, pageHeight: number): { x: number; y: number } {
+export function visualToUser(
+  vx: number,
+  vy: number,
+  rotation: number,
+  pageWidth: number,
+  pageHeight: number,
+): { x: number; y: number } {
   switch (rotation) {
     case 90:
       return { x: pageWidth - vy, y: vx };

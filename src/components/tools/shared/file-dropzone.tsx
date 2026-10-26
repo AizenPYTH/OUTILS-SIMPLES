@@ -25,7 +25,20 @@ interface FileDropzoneProps {
 }
 
 /** Generic accessible drop area (same look as the PDF dropzone) for images and text files. */
-export function FileDropzone({ onFiles, accept, validate, multiple = false, title, hint, buttonLabel, compact = false, disabled = false, className, capture, testId = "file-dropzone" }: FileDropzoneProps) {
+export function FileDropzone({
+  onFiles,
+  accept,
+  validate,
+  multiple = false,
+  title,
+  hint,
+  buttonLabel,
+  compact = false,
+  disabled = false,
+  className,
+  capture,
+  testId = "file-dropzone",
+}: FileDropzoneProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = React.useState(false);
   const [inlineError, setInlineError] = React.useState<string | null>(null);
@@ -63,20 +76,55 @@ export function FileDropzone({ onFiles, accept, validate, multiple = false, titl
           setDragActive(false);
           if (!disabled) handle(e.dataTransfer.files);
         }}
-        className={cn("flex flex-col items-center justify-center gap-4 rounded-[24px] border border-dashed text-center shadow-sm transition-[border-color,background-color,box-shadow]", compact ? "px-6 py-6" : "px-6 py-9 sm:py-16", dragActive ? "border-primary bg-primary-soft shadow-md" : "border-primary/40 bg-surface hover:border-primary/70 hover:bg-primary-soft/30", disabled && "opacity-60")}
+        className={cn(
+          "flex flex-col items-center justify-center gap-4 rounded-[24px] border border-dashed text-center shadow-sm transition-[border-color,background-color,box-shadow]",
+          compact ? "px-6 py-6" : "px-6 py-9 sm:py-16",
+          dragActive
+            ? "border-primary bg-primary-soft shadow-md"
+            : "border-primary/40 bg-surface hover:border-primary/70 hover:bg-primary-soft/30",
+          disabled && "opacity-60",
+        )}
         data-testid={testId}
       >
-        <span className={cn("flex items-center justify-center rounded-[14px] bg-primary-soft text-link", compact ? "size-10" : "size-14")}>
-          {dragActive ? <FileUp className={compact ? "size-5" : "size-7"} aria-hidden="true" /> : <Upload className={compact ? "size-5" : "size-7"} aria-hidden="true" />}
+        <span
+          className={cn(
+            "flex items-center justify-center rounded-[14px] bg-primary-soft text-link",
+            compact ? "size-10" : "size-14",
+          )}
+        >
+          {dragActive ? (
+            <FileUp className={compact ? "size-5" : "size-7"} aria-hidden="true" />
+          ) : (
+            <Upload className={compact ? "size-5" : "size-7"} aria-hidden="true" />
+          )}
         </span>
         <div>
-          <p className={cn("font-heading font-bold", compact ? "text-base" : "text-xl")}>{dragActive ? t.upload.dragActive : title}</p>
+          <p className={cn("font-heading font-bold", compact ? "text-base" : "text-xl")}>
+            {dragActive ? t.upload.dragActive : title}
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">{hint}</p>
         </div>
-        <Button type="button" size={compact ? "default" : "lg"} onClick={() => inputRef.current?.click()} disabled={disabled} data-testid={`${testId}-browse`}>
+        <Button
+          type="button"
+          size={compact ? "default" : "lg"}
+          onClick={() => inputRef.current?.click()}
+          disabled={disabled}
+          data-testid={`${testId}-browse`}
+        >
           {buttonLabel ?? (multiple ? t.upload.browseMultiple : t.upload.browse)}
         </Button>
-        <input ref={inputRef} type="file" accept={accept} multiple={multiple} capture={capture} className="sr-only" tabIndex={-1} aria-label={buttonLabel ?? title} onChange={(e) => handle(e.target.files)} data-testid={`${testId}-input`} />
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          multiple={multiple}
+          capture={capture}
+          className="sr-only"
+          tabIndex={-1}
+          aria-label={buttonLabel ?? title}
+          onChange={(e) => handle(e.target.files)}
+          data-testid={`${testId}-input`}
+        />
       </div>
       {inlineError ? (
         <p role="alert" className="mt-3 text-sm text-destructive">

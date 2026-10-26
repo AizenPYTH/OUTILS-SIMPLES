@@ -19,7 +19,9 @@ export function parseInstant(input: string): ParsedInstant | null {
   const parsed = Date.parse(trimmed);
   if (Number.isNaN(parsed)) {
     // French "JJ/MM/AAAA[ HH:MM]" form.
-    const fr = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(trimmed);
+    const fr = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(
+      trimmed,
+    );
     if (!fr) return null;
     const [, d, m, y, h = "0", mi = "0", s = "0"] = fr;
     const date = new Date(Number(y), Number(m) - 1, Number(d), Number(h), Number(mi), Number(s));
@@ -42,10 +44,27 @@ export interface InstantDescription {
   valid: boolean;
 }
 
-export function describeInstant(ms: number, now = Date.now(), locale = "fr-FR", timeZone?: string): InstantDescription {
+export function describeInstant(
+  ms: number,
+  now = Date.now(),
+  locale = "fr-FR",
+  timeZone?: string,
+): InstantDescription {
   const date = new Date(ms);
   if (Number.isNaN(date.getTime()) || Math.abs(ms) > 8.64e15) {
-    return { unixSeconds: 0, unixMilliseconds: 0, iso: "", utc: "", local: "", localZone: "", relative: "", weekday: "", dayOfYear: 0, isoWeek: 0, valid: false };
+    return {
+      unixSeconds: 0,
+      unixMilliseconds: 0,
+      iso: "",
+      utc: "",
+      local: "",
+      localZone: "",
+      relative: "",
+      weekday: "",
+      dayOfYear: 0,
+      isoWeek: 0,
+      valid: false,
+    };
   }
   const zone = timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
   return {
@@ -53,7 +72,11 @@ export function describeInstant(ms: number, now = Date.now(), locale = "fr-FR", 
     unixMilliseconds: ms,
     iso: date.toISOString(),
     utc: date.toUTCString(),
-    local: new Intl.DateTimeFormat(locale, { dateStyle: "full", timeStyle: "long", timeZone: zone }).format(date),
+    local: new Intl.DateTimeFormat(locale, {
+      dateStyle: "full",
+      timeStyle: "long",
+      timeZone: zone,
+    }).format(date),
     localZone: zone,
     relative: relativeTime(ms, now, locale),
     weekday: new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: zone }).format(date),
@@ -83,7 +106,11 @@ export function relativeTime(ms: number, now: number, locale = "fr-FR"): string 
 
 export function dayOfYear(date: Date): number {
   const start = Date.UTC(date.getUTCFullYear(), 0, 1);
-  return Math.floor((Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - start) / 86400_000) + 1;
+  return (
+    Math.floor(
+      (Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - start) / 86400_000,
+    ) + 1
+  );
 }
 
 /** ISO-8601 week number (weeks start Monday; week 1 contains the first Thursday). */

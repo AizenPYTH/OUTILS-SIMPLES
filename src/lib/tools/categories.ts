@@ -48,7 +48,8 @@ export const toolCategories: readonly ToolCategory[] = [
     slug: "conversion",
     name: "Conversion de fichiers",
     shortName: "Conversion",
-    description: "Convertir des documents et des données d'un format à un autre : PDF, images, texte, Markdown, CSV, JSON.",
+    description:
+      "Convertir des documents et des données d'un format à un autre : PDF, images, texte, Markdown, CSV, JSON.",
     icon: "arrow-right-left",
     seo: {
       title: "Conversion de fichiers en ligne : PDF, images, texte, CSV, JSON",
@@ -61,7 +62,8 @@ export const toolCategories: readonly ToolCategory[] = [
     slug: "texte",
     name: "Texte et productivité",
     shortName: "Texte",
-    description: "Compter, nettoyer, transformer, comparer et extraire du texte, instantanément et sans inscription.",
+    description:
+      "Compter, nettoyer, transformer, comparer et extraire du texte, instantanément et sans inscription.",
     icon: "type",
     seo: {
       title: "Outils texte en ligne : compter, nettoyer, comparer, transformer",
@@ -74,7 +76,8 @@ export const toolCategories: readonly ToolCategory[] = [
     slug: "developpeur",
     name: "Outils développeur",
     shortName: "Développeur",
-    description: "JSON, Base64, URL, UUID, hash, mots de passe, regex, timestamps et couleurs : les utilitaires du quotidien, sans envoi de données.",
+    description:
+      "JSON, Base64, URL, UUID, hash, mots de passe, regex, timestamps et couleurs : les utilitaires du quotidien, sans envoi de données.",
     icon: "braces",
     seo: {
       title: "Outils développeur en ligne : JSON, Base64, UUID, hash, regex",
@@ -87,7 +90,8 @@ export const toolCategories: readonly ToolCategory[] = [
     slug: "calculatrices",
     name: "Calculatrices et conversions",
     shortName: "Calculs",
-    description: "Pourcentages, TVA, remises, marges, durées entre dates, jours ouvrés et convertisseurs d'unités.",
+    description:
+      "Pourcentages, TVA, remises, marges, durées entre dates, jours ouvrés et convertisseurs d'unités.",
     icon: "calculator",
     seo: {
       title: "Calculatrices en ligne : pourcentages, TVA, dates, unités",
@@ -100,7 +104,8 @@ export const toolCategories: readonly ToolCategory[] = [
     slug: "codes",
     name: "QR codes, codes-barres et couleurs",
     shortName: "QR & couleurs",
-    description: "Générer et lire des QR codes, créer des codes-barres, convertir des couleurs et vérifier leurs contrastes.",
+    description:
+      "Générer et lire des QR codes, créer des codes-barres, convertir des couleurs et vérifier leurs contrastes.",
     icon: "qr-code",
     seo: {
       title: "Générateur de QR code, codes-barres et outils couleurs",
@@ -113,7 +118,8 @@ export const toolCategories: readonly ToolCategory[] = [
     slug: "documents",
     name: "Documents à imprimer",
     shortName: "Documents",
-    description: "Créer des PDF prêts à imprimer : feuilles quadrillées ou lignées, calendriers, pages de garde et fiches.",
+    description:
+      "Créer des PDF prêts à imprimer : feuilles quadrillées ou lignées, calendriers, pages de garde et fiches.",
     icon: "printer",
     seo: {
       title: "Documents PDF à imprimer : feuilles, calendriers, pages de garde",

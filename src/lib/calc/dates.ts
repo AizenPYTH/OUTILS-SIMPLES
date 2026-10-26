@@ -3,8 +3,29 @@
  * durations, business days and French public holidays.
  */
 
-export const FRENCH_MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
-export const FRENCH_WEEKDAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"];
+export const FRENCH_MONTHS = [
+  "janvier",
+  "février",
+  "mars",
+  "avril",
+  "mai",
+  "juin",
+  "juillet",
+  "août",
+  "septembre",
+  "octobre",
+  "novembre",
+  "décembre",
+];
+export const FRENCH_WEEKDAYS = [
+  "lundi",
+  "mardi",
+  "mercredi",
+  "jeudi",
+  "vendredi",
+  "samedi",
+  "dimanche",
+];
 export const FRENCH_WEEKDAYS_SHORT = ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."];
 
 /** Builds a UTC calendar day. Month is 1-based. */
@@ -23,14 +44,24 @@ export function parseDay(input: string): Date | null {
 
 function validDay(y: number, m: number, d: number): Date | null {
   const date = day(y, m, d);
-  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d ? date : null;
+  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d
+    ? date
+    : null;
 }
 
 export function toIsoDay(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-export function formatDayFr(date: Date, options: Intl.DateTimeFormatOptions = { weekday: "long", day: "numeric", month: "long", year: "numeric" }): string {
+export function formatDayFr(
+  date: Date,
+  options: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  },
+): string {
   return new Intl.DateTimeFormat("fr-FR", { ...options, timeZone: "UTC" }).format(date);
 }
 
@@ -78,7 +109,15 @@ export function durationBetween(from: Date, to: Date): Duration {
   }
   const days = daysBetween(cursor, b);
   const totalDays = daysBetween(a, b);
-  return { years, months, days, totalDays, totalWeeks: Math.floor(totalDays / 7), remainingDaysAfterWeeks: totalDays % 7, negative };
+  return {
+    years,
+    months,
+    days,
+    totalDays,
+    totalWeeks: Math.floor(totalDays / 7),
+    remainingDaysAfterWeeks: totalDays % 7,
+    negative,
+  };
 }
 
 /** Easter Sunday (Gregorian, Meeus/Jones/Butcher). */
@@ -121,7 +160,11 @@ export function frenchPublicHolidays(year: number, alsaceMoselle = false): Holid
     { date: day(year, 11, 11), name: "Armistice 1918" },
     { date: day(year, 12, 25), name: "Noël" },
   ];
-  if (alsaceMoselle) list.push({ date: addDays(easter, -2), name: "Vendredi saint" }, { date: day(year, 12, 26), name: "Saint-Étienne" });
+  if (alsaceMoselle)
+    list.push(
+      { date: addDays(easter, -2), name: "Vendredi saint" },
+      { date: day(year, 12, 26), name: "Saint-Étienne" },
+    );
   return list.sort((x, y) => x.date.getTime() - y.date.getTime());
 }
 
@@ -132,7 +175,8 @@ export function isWeekend(date: Date): boolean {
 
 function holidaySet(fromYear: number, toYear: number, alsaceMoselle: boolean): Set<string> {
   const set = new Set<string>();
-  for (let y = fromYear; y <= toYear; y += 1) for (const h of frenchPublicHolidays(y, alsaceMoselle)) set.add(toIsoDay(h.date));
+  for (let y = fromYear; y <= toYear; y += 1)
+    for (const h of frenchPublicHolidays(y, alsaceMoselle)) set.add(toIsoDay(h.date));
   return set;
 }
 
@@ -144,11 +188,20 @@ export interface BusinessDaysOptions {
 }
 
 /** Working days (Mon–Fri) between two dates, optionally minus French public holidays. */
-export function businessDaysBetween(from: Date, to: Date, options: BusinessDaysOptions): { businessDays: number; weekendDays: number; holidays: Holiday[] } {
+export function businessDaysBetween(
+  from: Date,
+  to: Date,
+  options: BusinessDaysOptions,
+): { businessDays: number; weekendDays: number; holidays: Holiday[] } {
   const [a, b] = to < from ? [to, from] : [from, to];
-  const holidays = options.excludeHolidays ? holidaySet(a.getUTCFullYear(), b.getUTCFullYear(), options.alsaceMoselle ?? false) : new Set<string>();
+  const holidays = options.excludeHolidays
+    ? holidaySet(a.getUTCFullYear(), b.getUTCFullYear(), options.alsaceMoselle ?? false)
+    : new Set<string>();
   const names = new Map<string, string>();
-  if (options.excludeHolidays) for (let y = a.getUTCFullYear(); y <= b.getUTCFullYear(); y += 1) for (const h of frenchPublicHolidays(y, options.alsaceMoselle ?? false)) names.set(toIsoDay(h.date), h.name);
+  if (options.excludeHolidays)
+    for (let y = a.getUTCFullYear(); y <= b.getUTCFullYear(); y += 1)
+      for (const h of frenchPublicHolidays(y, options.alsaceMoselle ?? false))
+        names.set(toIsoDay(h.date), h.name);
   let businessDays = 0;
   let weekendDays = 0;
   const hit: Holiday[] = [];
@@ -173,7 +226,13 @@ export function addBusinessDays(from: Date, count: number, options: BusinessDays
   const step = count < 0 ? -1 : 1;
   let remaining = Math.abs(count);
   let current = from;
-  const holidays = options.excludeHolidays ? holidaySet(from.getUTCFullYear() - 1, from.getUTCFullYear() + Math.ceil(Math.abs(count) / 200) + 1, options.alsaceMoselle ?? false) : new Set<string>();
+  const holidays = options.excludeHolidays
+    ? holidaySet(
+        from.getUTCFullYear() - 1,
+        from.getUTCFullYear() + Math.ceil(Math.abs(count) / 200) + 1,
+        options.alsaceMoselle ?? false,
+      )
+    : new Set<string>();
   while (remaining > 0) {
     current = addDays(current, step);
     if (isWeekend(current) || holidays.has(toIsoDay(current))) continue;

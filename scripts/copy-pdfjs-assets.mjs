@@ -50,12 +50,17 @@ async function fresh(dir) {
   const { readdir } = await import("node:fs/promises");
   // Only the single-file "*.wasm.js" builds are ever requested by the worker (the wasm is embedded);
   // the separate .js/.wasm pairs would be dead weight in public/.
-  const coreFiles = (await readdir(core)).filter((f) => /^tesseract-core-.*lstm.*\.wasm\.js$/.test(f));
+  const coreFiles = (await readdir(core)).filter((f) =>
+    /^tesseract-core-.*lstm.*\.wasm\.js$/.test(f),
+  );
   for (const file of coreFiles) await cp(path.join(core, file), path.join(target, "core", file));
   await mkdir(path.join(target, "lang"), { recursive: true });
   for (const lang of ["fra", "eng"]) {
     const dir = pkgDir(`@tesseract.js-data/${lang}`);
-    await cp(path.join(dir, "4.0.0", `${lang}.traineddata.gz`), path.join(target, "lang", `${lang}.traineddata.gz`));
+    await cp(
+      path.join(dir, "4.0.0", `${lang}.traineddata.gz`),
+      path.join(target, "lang", `${lang}.traineddata.gz`),
+    );
   }
   const { version } = require("tesseract.js/package.json");
   await writeFile(path.join(target, "VERSION"), `${version}\n`);
@@ -66,7 +71,10 @@ async function fresh(dir) {
 {
   const target = path.join(publicDir, "qpdf");
   await fresh(target);
-  await cp(path.join(pkgDir("@neslinesli93/qpdf-wasm"), "dist/qpdf.wasm"), path.join(target, "qpdf.wasm"));
+  await cp(
+    path.join(pkgDir("@neslinesli93/qpdf-wasm"), "dist/qpdf.wasm"),
+    path.join(target, "qpdf.wasm"),
+  );
   const { version } = require("@neslinesli93/qpdf-wasm/package.json");
   await writeFile(path.join(target, "VERSION"), `${version}\n`);
   console.log(`qpdf-wasm ${version} → public/qpdf`);

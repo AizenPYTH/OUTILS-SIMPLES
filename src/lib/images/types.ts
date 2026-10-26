@@ -14,7 +14,15 @@ export const outputExtensions: Record<ImageOutputFormat, string> = {
 };
 
 /** Formats the browser can decode (tested at runtime with createImageBitmap). */
-export const acceptedInputMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/bmp", "image/avif", "image/svg+xml"] as const;
+export const acceptedInputMimeTypes = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/bmp",
+  "image/avif",
+  "image/svg+xml",
+] as const;
 
 export function supportsTransparency(format: ImageOutputFormat): boolean {
   return format !== "image/jpeg";
@@ -26,7 +34,17 @@ export interface ImageDimensions {
 }
 
 /** Computes target dimensions preserving aspect ratio (pure, tested). */
-export function fitDimensions(source: ImageDimensions, target: { width?: number; height?: number; maxWidth?: number; maxHeight?: number; percent?: number; allowUpscale?: boolean }): ImageDimensions {
+export function fitDimensions(
+  source: ImageDimensions,
+  target: {
+    width?: number;
+    height?: number;
+    maxWidth?: number;
+    maxHeight?: number;
+    percent?: number;
+    allowUpscale?: boolean;
+  },
+): ImageDimensions {
   const ratio = source.width / source.height;
   let width = source.width;
   let height = source.height;
@@ -86,5 +104,10 @@ export function clampCrop(rect: CropRect, image: ImageDimensions, minSize = 8): 
   const height = Math.min(Math.max(minSize, rect.height), image.height);
   const x = Math.min(Math.max(0, rect.x), image.width - width);
   const y = Math.min(Math.max(0, rect.y), image.height - height);
-  return { x: Math.round(x), y: Math.round(y), width: Math.round(width), height: Math.round(height) };
+  return {
+    x: Math.round(x),
+    y: Math.round(y),
+    width: Math.round(width),
+    height: Math.round(height),
+  };
 }

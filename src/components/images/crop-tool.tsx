@@ -6,18 +6,42 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FileDropzone } from "@/components/tools/shared/file-dropzone";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { DonePanel } from "@/components/pdf/shared/processing-panel";
-import { cropCanvas, decodeImage, encodeCanvas, flattenOnBackground, releaseCanvas, type DecodedImage } from "@/lib/images/canvas";
-import { aspectPresets, clampCrop, outputExtensions, supportsTransparency, type CropRect } from "@/lib/images/types";
+import {
+  cropCanvas,
+  decodeImage,
+  encodeCanvas,
+  flattenOnBackground,
+  releaseCanvas,
+  type DecodedImage,
+} from "@/lib/images/canvas";
+import {
+  aspectPresets,
+  clampCrop,
+  outputExtensions,
+  supportsTransparency,
+  type CropRect,
+} from "@/lib/images/types";
 import { deriveOutputName } from "@/lib/files/filename";
 import { triggerDownload } from "@/lib/files/download";
 import { formatBytes } from "@/lib/files/format";
 import { track } from "@/lib/analytics/events";
 import { IMAGE_MAX_SIZE, validateImageFile } from "./image-batch-tool";
-import { FormatOptions, defaultFormatSettings, resolveFormat, type FormatSettings } from "./format-options";
+import {
+  FormatOptions,
+  defaultFormatSettings,
+  resolveFormat,
+  type FormatSettings,
+} from "./format-options";
 import { CropBox } from "./crop-box";
 
 const TOOL_ID = "image-crop";
@@ -28,8 +52,17 @@ export function CropImageTool() {
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
   const [crop, setCrop] = React.useState<CropRect | null>(null);
   const [ratioIndex, setRatioIndex] = React.useState(0);
-  const [format, setFormat] = React.useState<FormatSettings>({ ...defaultFormatSettings, quality: 0.92 });
-  const [result, setResult] = React.useState<{ blob: Blob; name: string; width: number; height: number; url: string } | null>(null);
+  const [format, setFormat] = React.useState<FormatSettings>({
+    ...defaultFormatSettings,
+    quality: 0.92,
+  });
+  const [result, setResult] = React.useState<{
+    blob: Blob;
+    name: string;
+    width: number;
+    height: number;
+    url: string;
+  } | null>(null);
   const [busy, setBusy] = React.useState(false);
 
   React.useEffect(() => {
@@ -96,7 +129,13 @@ export function CropImageTool() {
       const encoded = await encodeCanvas(canvas, target, format.quality);
       releaseCanvas(canvas);
       if (result) URL.revokeObjectURL(result.url);
-      setResult({ blob: encoded.blob, name: deriveOutputName(file.name, "recadre", outputExtensions[target]), width: crop.width, height: crop.height, url: URL.createObjectURL(encoded.blob) });
+      setResult({
+        blob: encoded.blob,
+        name: deriveOutputName(file.name, "recadre", outputExtensions[target]),
+        width: crop.width,
+        height: crop.height,
+        url: URL.createObjectURL(encoded.blob),
+      });
       track("tool_success", { tool: TOOL_ID });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Recadrage impossible.");
@@ -106,7 +145,17 @@ export function CropImageTool() {
   };
 
   if (!file || !decoded || !crop || !previewUrl) {
-    return <FileDropzone onFiles={(f) => f[0] && void load(f[0])} accept="image/*" validate={validateImageFile} title="Déposez une image à recadrer" hint={`JPG, PNG, WebP, GIF, BMP, AVIF, SVG · ${formatBytes(IMAGE_MAX_SIZE)} max`} buttonLabel="Choisir une image" testId="image-dropzone" />;
+    return (
+      <FileDropzone
+        onFiles={(f) => f[0] && void load(f[0])}
+        accept="image/*"
+        validate={validateImageFile}
+        title="Déposez une image à recadrer"
+        hint={`JPG, PNG, WebP, GIF, BMP, AVIF, SVG · ${formatBytes(IMAGE_MAX_SIZE)} max`}
+        buttonLabel="Choisir une image"
+        testId="image-dropzone"
+      />
+    );
   }
 
   if (result) {
@@ -122,7 +171,11 @@ export function CropImageTool() {
       >
         <div className="flex justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
-          <img src={result.url} alt="Aperçu de l'image recadrée" className="max-h-80 max-w-full rounded-md border border-border checkerboard" />
+          <img
+            src={result.url}
+            alt="Aperçu de l'image recadrée"
+            className="max-h-80 max-w-full rounded-md border border-border checkerboard"
+          />
         </div>
         <div className="mt-4 text-center">
           <Button type="button" variant="ghost" size="sm" onClick={() => setResult(null)}>
@@ -143,7 +196,14 @@ export function CropImageTool() {
           <RefreshCw aria-hidden="true" /> Autre image
         </Button>
       </div>
-      <CropBox imageUrl={previewUrl} imageWidth={decoded.width} imageHeight={decoded.height} crop={crop} onChange={(c) => setCrop(clampCrop(c, decoded))} ratio={aspectPresets[ratioIndex]?.ratio ?? null} />
+      <CropBox
+        imageUrl={previewUrl}
+        imageWidth={decoded.width}
+        imageHeight={decoded.height}
+        crop={crop}
+        onChange={(c) => setCrop(clampCrop(c, decoded))}
+        ratio={aspectPresets[ratioIndex]?.ratio ?? null}
+      />
       <ToolPanel className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto_auto]">
           <div className="space-y-1">
@@ -163,13 +223,32 @@ export function CropImageTool() {
           </div>
           {(["x", "y", "width", "height"] as const).map((key) => (
             <div key={key} className="space-y-1">
-              <Label htmlFor={`crop-${key}`}>{{ x: "X", y: "Y", width: "Largeur", height: "Hauteur" }[key]}</Label>
-              <Input id={`crop-${key}`} type="number" min={0} value={crop[key]} onChange={(e) => setCrop(clampCrop({ ...crop, [key]: Number(e.target.value) || 0 }, decoded))} className="w-24" data-testid={`crop-${key}`} />
+              <Label htmlFor={`crop-${key}`}>
+                {{ x: "X", y: "Y", width: "Largeur", height: "Hauteur" }[key]}
+              </Label>
+              <Input
+                id={`crop-${key}`}
+                type="number"
+                min={0}
+                value={crop[key]}
+                onChange={(e) =>
+                  setCrop(clampCrop({ ...crop, [key]: Number(e.target.value) || 0 }, decoded))
+                }
+                className="w-24"
+                data-testid={`crop-${key}`}
+              />
             </div>
           ))}
         </div>
         <FormatOptions value={format} onChange={setFormat} idPrefix="crop" />
-        <Button type="button" size="lg" className="w-full" onClick={() => void run()} loading={busy} data-testid="crop-run">
+        <Button
+          type="button"
+          size="lg"
+          className="w-full"
+          onClick={() => void run()}
+          loading={busy}
+          data-testid="crop-run"
+        >
           <Crop aria-hidden="true" /> Recadrer ({crop.width}×{crop.height} px)
         </Button>
       </ToolPanel>

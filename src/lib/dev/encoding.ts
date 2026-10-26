@@ -10,7 +10,8 @@ export function encodeBase64(text: string, urlSafe = false): string {
 
 export function decodeBase64(input: string): string {
   let normalized = input.trim().replace(/-/g, "+").replace(/_/g, "/").replace(/\s+/g, "");
-  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(normalized)) throw new Error("Ce texte n'est pas du Base64 valide.");
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(normalized))
+    throw new Error("Ce texte n'est pas du Base64 valide.");
   while (normalized.length % 4 !== 0) normalized += "=";
   const binary = atob(normalized);
   const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
@@ -20,7 +21,8 @@ export function decodeBase64(input: string): string {
 export function bytesToBase64(bytes: Uint8Array): string {
   let binary = "";
   const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  for (let i = 0; i < bytes.length; i += chunk)
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
   return btoa(binary);
 }
 
@@ -32,15 +34,50 @@ export function decodeUrl(text: string): string {
   try {
     return decodeURIComponent(text.replace(/\+/g, " "));
   } catch {
-    throw new Error("Séquence pour-cent invalide : ce texte n'est pas une URL encodée correctement.");
+    throw new Error(
+      "Séquence pour-cent invalide : ce texte n'est pas une URL encodée correctement.",
+    );
   }
 }
 
-const HTML_ESCAPES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+const HTML_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
 const HTML_NAMED: Record<string, string> = {
-  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", eacute: "é", egrave: "è", agrave: "à", ccedil: "ç", ecirc: "ê",
-  ocirc: "ô", ucirc: "û", icirc: "î", acirc: "â", euml: "ë", iuml: "ï", uuml: "ü", ugrave: "ù", oelig: "œ", laquo: "«", raquo: "»",
-  hellip: "…", mdash: "—", ndash: "–", euro: "€", copy: "©", reg: "®", trade: "™", deg: "°",
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+  eacute: "é",
+  egrave: "è",
+  agrave: "à",
+  ccedil: "ç",
+  ecirc: "ê",
+  ocirc: "ô",
+  ucirc: "û",
+  icirc: "î",
+  acirc: "â",
+  euml: "ë",
+  iuml: "ï",
+  uuml: "ü",
+  ugrave: "ù",
+  oelig: "œ",
+  laquo: "«",
+  raquo: "»",
+  hellip: "…",
+  mdash: "—",
+  ndash: "–",
+  euro: "€",
+  copy: "©",
+  reg: "®",
+  trade: "™",
+  deg: "°",
 };
 
 export function escapeHtml(text: string): string {

@@ -1,4 +1,16 @@
-import { PDFArray, PDFBool, PDFDict, PDFHexString, PDFName, PDFNumber, PDFRawStream, PDFRef, PDFStream, PDFString, decodePDFRawStream } from "pdf-lib";
+import {
+  PDFArray,
+  PDFBool,
+  PDFDict,
+  PDFHexString,
+  PDFName,
+  PDFNumber,
+  PDFRawStream,
+  PDFRef,
+  PDFStream,
+  PDFString,
+  decodePDFRawStream,
+} from "pdf-lib";
 import { loadPdfDocument } from "../load";
 import { encodePng, type PngChannels } from "@/lib/images/png-encode";
 
@@ -37,14 +49,22 @@ export interface ExtractImagesOptions {
  * converted to PNG. CCITT fax and JBIG2 images (some scanners) are reported
  * as skipped rather than silently dropped.
  */
-export async function extractImages(bytes: Uint8Array, options: ExtractImagesOptions = {}): Promise<ExtractImagesResult> {
+export async function extractImages(
+  bytes: Uint8Array,
+  options: ExtractImagesOptions = {},
+): Promise<ExtractImagesResult> {
   const minDimension = options.minDimension ?? 8;
   const doc = await loadPdfDocument(bytes);
   const pages = doc.getPages();
   const result: ExtractImagesResult = { images: [], skipped: [] };
   const seen = new Set<string>();
 
-  const visit = (resources: PDFDict | undefined, pageIndex: number, depth: number, counter: { n: number }) => {
+  const visit = (
+    resources: PDFDict | undefined,
+    pageIndex: number,
+    depth: number,
+    counter: { n: number },
+  ) => {
     if (!resources || depth > 4) return;
     const xobjects = doc.context.lookup(resources.get(PDFName.of("XObject")));
     if (!(xobjects instanceof PDFDict)) return;
@@ -68,7 +88,10 @@ export async function extractImages(bytes: Uint8Array, options: ExtractImagesOpt
         const image = convertImageStream(doc.context, stream, pageIndex, counter.n, minDimension);
         if (image) result.images.push(image);
       } catch (error) {
-        result.skipped.push({ pageIndex, reason: error instanceof Error ? error.message : "image illisible" });
+        result.skipped.push({
+          pageIndex,
+          reason: error instanceof Error ? error.message : "image illisible",
+        });
       }
     }
   };
@@ -81,12 +104,18 @@ export async function extractImages(bytes: Uint8Array, options: ExtractImagesOpt
   return result;
 }
 
-type Context = ReturnType<typeof loadPdfDocument> extends Promise<infer D> ? (D extends { context: infer C } ? C : never) : never;
+type Context =
+  ReturnType<typeof loadPdfDocument> extends Promise<infer D>
+    ? D extends { context: infer C }
+      ? C
+      : never
+    : never;
 
 function filterNames(context: Context, dict: PDFDict): string[] {
   const filter = context.lookup(dict.get(PDFName.of("Filter")));
   if (filter instanceof PDFName) return [filter.decodeText()];
-  if (filter instanceof PDFArray) return filter.asArray().map((f) => (f instanceof PDFName ? f.decodeText() : ""));
+  if (filter instanceof PDFArray)
+    return filter.asArray().map((f) => (f instanceof PDFName ? f.decodeText() : ""));
   return [];
 }
 
@@ -95,7 +124,13 @@ function numberOf(context: Context, dict: PDFDict, key: string, fallback: number
   return value instanceof PDFNumber ? value.asNumber() : fallback;
 }
 
-function convertImageStream(context: Context, stream: PDFStream, pageIndex: number, index: number, minDimension: number): ExtractedImage | null {
+function convertImageStream(
+  context: Context,
+  stream: PDFStream,
+  pageIndex: number,
+  index: number,
+  minDimension: number,
+): ExtractedImage | null {
   const dict = stream.dict;
   const width = numberOf(context, dict, "Width", 0);
   const height = numberOf(context, dict, "Height", 0);
@@ -109,20 +144,59 @@ function convertImageStream(context: Context, stream: PDFStream, pageIndex: numb
   const codec = filters[filters.length - 1];
   if (codec === "DCTDecode") {
     if (filters.length > 1) throw new Error("JPEG encapsulé dans un second filtre");
-    return { pageIndex, name: `${baseName}.jpg`, bytes: stream.contents, mimeType: "image/jpeg", width, height, note: hasSMask ? "transparence non conservée" : undefined };
+    return {
+      pageIndex,
+      name: `${baseName}.jpg`,
+      bytes: stream.contents,
+      mimeType: "image/jpeg",
+      width,
+      height,
+      note: hasSMask ? "transparence non conservée" : undefined,
+    };
   }
   if (codec === "JPXDecode") {
     if (filters.length > 1) throw new Error("JPEG 2000 encapsulé dans un second filtre");
-    return { pageIndex, name: `${baseName}.jp2`, bytes: stream.contents, mimeType: "image/jp2", width, height, note: "JPEG 2000 : ouvrir avec un logiciel compatible" };
+    return {
+      pageIndex,
+      name: `${baseName}.jp2`,
+      bytes: stream.contents,
+      mimeType: "image/jp2",
+      width,
+      height,
+      note: "JPEG 2000 : ouvrir avec un logiciel compatible",
+    };
   }
-  if (codec === "CCITTFaxDecode") throw new Error("image fax CCITT non prise en charge (utilisez « PDF vers images »)");
-  if (codec === "JBIG2Decode") throw new Error("image JBIG2 non prise en charge (utilisez « PDF vers images »)");
-  if (filters.some((f) => !["FlateDecode", "LZWDecode", "ASCIIHexDecode", "ASCII85Decode", "RunLengthDecode"].includes(f))) throw new Error(`filtre ${codec} non pris en charge`);
+  if (codec === "CCITTFaxDecode")
+    throw new Error("image fax CCITT non prise en charge (utilisez « PDF vers images »)");
+  if (codec === "JBIG2Decode")
+    throw new Error("image JBIG2 non prise en charge (utilisez « PDF vers images »)");
+  if (
+    filters.some(
+      (f) =>
+        ![
+          "FlateDecode",
+          "LZWDecode",
+          "ASCIIHexDecode",
+          "ASCII85Decode",
+          "RunLengthDecode",
+        ].includes(f),
+    )
+  )
+    throw new Error(`filtre ${codec} non pris en charge`);
 
   const samples = filters.length ? decodePDFRawStream(stream).decode() : stream.contents;
-  const isMask = context.lookup(dict.get(PDFName.of("ImageMask"))) instanceof PDFBool && (context.lookup(dict.get(PDFName.of("ImageMask"))) as PDFBool).asBoolean();
+  const isMask =
+    context.lookup(dict.get(PDFName.of("ImageMask"))) instanceof PDFBool &&
+    (context.lookup(dict.get(PDFName.of("ImageMask"))) as PDFBool).asBoolean();
   const bpc = isMask ? 1 : numberOf(context, dict, "BitsPerComponent", 8);
-  const color = isMask ? { components: 1 as const, kind: "gray" as const, palette: null, paletteComponents: 1 as const } : describeColorSpace(context, context.lookup(dict.get(PDFName.of("ColorSpace"))));
+  const color = isMask
+    ? {
+        components: 1 as const,
+        kind: "gray" as const,
+        palette: null,
+        paletteComponents: 1 as const,
+      }
+    : describeColorSpace(context, context.lookup(dict.get(PDFName.of("ColorSpace"))));
   const rowBits = width * color.components * bpc;
   const rowBytes = Math.ceil(rowBits / 8);
   if (samples.length < rowBytes * height) throw new Error("données d'image incomplètes");
@@ -161,7 +235,12 @@ function convertImageStream(context: Context, stream: PDFStream, pageIndex: numb
         pixels[p * 3 + 1] = color.palette[idx * 3 + 1] ?? 0;
         pixels[p * 3 + 2] = color.palette[idx * 3 + 2] ?? 0;
       } else {
-        const [c, m, yy, k] = [color.palette[idx * 4] ?? 0, color.palette[idx * 4 + 1] ?? 0, color.palette[idx * 4 + 2] ?? 0, color.palette[idx * 4 + 3] ?? 0];
+        const [c, m, yy, k] = [
+          color.palette[idx * 4] ?? 0,
+          color.palette[idx * 4 + 1] ?? 0,
+          color.palette[idx * 4 + 2] ?? 0,
+          color.palette[idx * 4 + 3] ?? 0,
+        ];
         const rgb = cmykToRgb(c, m, yy, k);
         pixels.set(rgb, p * 3);
       }
@@ -169,7 +248,16 @@ function convertImageStream(context: Context, stream: PDFStream, pageIndex: numb
   } else if (color.components === 4) {
     channels = 3;
     pixels = new Uint8Array(width * height * 3);
-    for (let p = 0; p < width * height; p += 1) pixels.set(cmykToRgb(unpacked[p * 4]!, unpacked[p * 4 + 1]!, unpacked[p * 4 + 2]!, unpacked[p * 4 + 3]!), p * 3);
+    for (let p = 0; p < width * height; p += 1)
+      pixels.set(
+        cmykToRgb(
+          unpacked[p * 4]!,
+          unpacked[p * 4 + 1]!,
+          unpacked[p * 4 + 2]!,
+          unpacked[p * 4 + 3]!,
+        ),
+        p * 3,
+      );
   } else {
     channels = color.components === 3 ? 3 : 1;
     pixels = unpacked;
@@ -177,8 +265,11 @@ function convertImageStream(context: Context, stream: PDFStream, pageIndex: numb
   if (isMask) {
     // Decode [0 1] (default): sample 0 = paint (black), 1 = transparent (white here).
     const decode = context.lookup(dict.get(PDFName.of("Decode")));
-    const inverted = decode instanceof PDFArray && decode.asArray()[0] instanceof PDFNumber && (decode.asArray()[0] as PDFNumber).asNumber() === 1;
-    for (let p = 0; p < pixels.length; p += 1) pixels[p] = (pixels[p]! > 127) !== inverted ? 255 : 0;
+    const inverted =
+      decode instanceof PDFArray &&
+      decode.asArray()[0] instanceof PDFNumber &&
+      (decode.asArray()[0] as PDFNumber).asNumber() === 1;
+    for (let p = 0; p < pixels.length; p += 1) pixels[p] = pixels[p]! > 127 !== inverted ? 255 : 0;
   }
 
   let note: string | undefined;
@@ -186,14 +277,23 @@ function convertImageStream(context: Context, stream: PDFStream, pageIndex: numb
   if (alpha) {
     const withAlpha = new Uint8Array(width * height * (channels + 1));
     for (let p = 0; p < width * height; p += 1) {
-      for (let c = 0; c < channels; c += 1) withAlpha[p * (channels + 1) + c] = pixels[p * channels + c]!;
+      for (let c = 0; c < channels; c += 1)
+        withAlpha[p * (channels + 1) + c] = pixels[p * channels + c]!;
       withAlpha[p * (channels + 1) + channels] = alpha[p]!;
     }
     pixels = withAlpha;
     channels = (channels + 1) as PngChannels;
   } else if (hasSMask) note = "transparence non conservée";
 
-  return { pageIndex, name: `${baseName}.png`, bytes: encodePng(width, height, channels, pixels), mimeType: "image/png", width, height, note };
+  return {
+    pageIndex,
+    name: `${baseName}.png`,
+    bytes: encodePng(width, height, channels, pixels),
+    mimeType: "image/png",
+    width,
+    height,
+    note,
+  };
 }
 
 interface ColorInfo {
@@ -260,10 +360,19 @@ function invertedGrayPalette(): Uint8Array {
 }
 
 function cmykToRgb(c: number, m: number, y: number, k: number): [number, number, number] {
-  return [Math.round((255 - c) * (255 - k) / 255), Math.round((255 - m) * (255 - k) / 255), Math.round((255 - y) * (255 - k) / 255)];
+  return [
+    Math.round(((255 - c) * (255 - k)) / 255),
+    Math.round(((255 - m) * (255 - k)) / 255),
+    Math.round(((255 - y) * (255 - k)) / 255),
+  ];
 }
 
-function readSoftMask(context: Context, dict: PDFDict, width: number, height: number): Uint8Array | null {
+function readSoftMask(
+  context: Context,
+  dict: PDFDict,
+  width: number,
+  height: number,
+): Uint8Array | null {
   try {
     const smask = context.lookup(dict.get(PDFName.of("SMask")));
     if (!(smask instanceof PDFRawStream)) return null;

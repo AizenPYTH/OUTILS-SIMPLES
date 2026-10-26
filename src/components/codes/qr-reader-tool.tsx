@@ -16,7 +16,16 @@ import { formatBytes } from "@/lib/files/format";
 import { track } from "@/lib/analytics/events";
 
 const TOOL_ID = "qr-read";
-const KIND_LABEL: Record<QrDecoded["kind"], string> = { url: "Lien web", wifi: "Réseau Wi-Fi", vcard: "Carte de visite (vCard)", email: "Adresse e-mail", phone: "Numéro de téléphone", sms: "SMS", geo: "Position géographique", text: "Texte" };
+const KIND_LABEL: Record<QrDecoded["kind"], string> = {
+  url: "Lien web",
+  wifi: "Réseau Wi-Fi",
+  vcard: "Carte de visite (vCard)",
+  email: "Adresse e-mail",
+  phone: "Numéro de téléphone",
+  sms: "SMS",
+  geo: "Position géographique",
+  text: "Texte",
+};
 
 /** Tries several sizes: jsQR works best around 300–1200 px. */
 async function decodeFile(file: Blob): Promise<QrDecoded | null> {
@@ -24,7 +33,11 @@ async function decodeFile(file: Blob): Promise<QrDecoded | null> {
   try {
     for (const target of [800, 1200, 500, 1600]) {
       const scale = Math.min(1, target / Math.max(decoded.width, decoded.height));
-      const canvas = resizeCanvas(decoded.bitmap, Math.max(1, Math.round(decoded.width * scale)), Math.max(1, Math.round(decoded.height * scale)));
+      const canvas = resizeCanvas(
+        decoded.bitmap,
+        Math.max(1, Math.round(decoded.width * scale)),
+        Math.max(1, Math.round(decoded.height * scale)),
+      );
       const rgba = getRgba(canvas);
       releaseCanvas(canvas);
       const result = decodeQrFromRgba(rgba.data, rgba.width, rgba.height);
@@ -45,7 +58,10 @@ export function QrReaderTool() {
   const [cameraSession, setCameraSession] = React.useState(0);
   const hasCamera = React.useMemo(() => cameraSupported(), []);
   const previewRef = React.useRef<string | null>(null);
-  React.useEffect(() => () => void (previewRef.current && URL.revokeObjectURL(previewRef.current)), []);
+  React.useEffect(
+    () => () => void (previewRef.current && URL.revokeObjectURL(previewRef.current)),
+    [],
+  );
 
   const setCameraOpen = (open: boolean) => {
     if (open) setCameraSession((n) => n + 1);
@@ -69,11 +85,23 @@ export function QrReaderTool() {
     }
   };
 
-  const wifi = result && result !== "none" && result.kind === "wifi" ? parseWifiPayload(result.text) : null;
+  const wifi =
+    result && result !== "none" && result.kind === "wifi" ? parseWifiPayload(result.text) : null;
 
   return (
     <div className="space-y-4">
-      <FileDropzone onFiles={(f) => f[0] && void read(f[0])} accept="image/*" validate={validateImageFile} compact={!!preview} title="Déposez une image contenant un QR code" hint={`Photo ou capture d'écran · JPG, PNG, WebP · ${formatBytes(IMAGE_MAX_SIZE)} max`} buttonLabel="Choisir une image" capture={hasCamera ? undefined : "environment"} disabled={busy} testId="qr-dropzone" />
+      <FileDropzone
+        onFiles={(f) => f[0] && void read(f[0])}
+        accept="image/*"
+        validate={validateImageFile}
+        compact={!!preview}
+        title="Déposez une image contenant un QR code"
+        hint={`Photo ou capture d'écran · JPG, PNG, WebP · ${formatBytes(IMAGE_MAX_SIZE)} max`}
+        buttonLabel="Choisir une image"
+        capture={hasCamera ? undefined : "environment"}
+        disabled={busy}
+        testId="qr-dropzone"
+      />
       {hasCamera ? (
         <div className="text-center">
           <Button type="button" variant="outline" onClick={() => setCameraOpen(true)}>
@@ -84,16 +112,29 @@ export function QrReaderTool() {
       {preview ? (
         <div className="grid gap-4 md:grid-cols-[200px_1fr]">
           {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
-          <img src={preview} alt="Image analysée" className="max-h-52 w-full rounded-[12px] border border-border object-contain checkerboard" />
+          <img
+            src={preview}
+            alt="Image analysée"
+            className="max-h-52 w-full rounded-[12px] border border-border object-contain checkerboard"
+          />
           <ToolPanel className="space-y-3" data-testid="qr-result">
             {busy ? <p className="text-sm text-muted-foreground">Lecture en cours…</p> : null}
-            {result === "none" ? <Alert variant="warning" title="Aucun QR code lisible">Essayez une photo plus nette, mieux éclairée et cadrée sur le code (le QR code doit occuper au moins un quart de l&apos;image). Les codes-barres linéaires ne sont pas pris en charge.</Alert> : null}
+            {result === "none" ? (
+              <Alert variant="warning" title="Aucun QR code lisible">
+                Essayez une photo plus nette, mieux éclairée et cadrée sur le code (le QR code doit
+                occuper au moins un quart de l&apos;image). Les codes-barres linéaires ne sont pas
+                pris en charge.
+              </Alert>
+            ) : null}
             {result && result !== "none" ? (
               <>
                 <p className="flex items-center gap-2 text-sm font-medium">
                   <QrCode className="size-4" aria-hidden="true" /> {KIND_LABEL[result.kind]}
                 </p>
-                <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-all rounded-md bg-muted/40 p-3 font-mono text-[13px]" data-testid="qr-text">
+                <pre
+                  className="max-h-48 overflow-auto whitespace-pre-wrap break-all rounded-md bg-muted/40 p-3 font-mono text-[13px]"
+                  data-testid="qr-text"
+                >
                   {result.text}
                 </pre>
                 {wifi ? (
@@ -110,19 +151,35 @@ export function QrReaderTool() {
                   <CopyButton text={result.text} label="Copier le contenu" />
                   {result.kind === "url" ? (
                     <Button asChild variant="outline" size="sm">
-                      <a href={result.text.startsWith("www.") ? `https://${result.text}` : result.text} target="_blank" rel="noopener noreferrer nofollow">
+                      <a
+                        href={
+                          result.text.startsWith("www.") ? `https://${result.text}` : result.text
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                      >
                         <ExternalLink aria-hidden="true" /> Ouvrir le lien (nouvel onglet)
                       </a>
                     </Button>
                   ) : null}
                 </div>
-                {result.kind === "url" ? <p className="text-xs text-muted-foreground">Vérifiez l&apos;adresse avant d&apos;ouvrir : un QR code peut mener vers un site frauduleux.</p> : null}
+                {result.kind === "url" ? (
+                  <p className="text-xs text-muted-foreground">
+                    Vérifiez l&apos;adresse avant d&apos;ouvrir : un QR code peut mener vers un site
+                    frauduleux.
+                  </p>
+                ) : null}
               </>
             ) : null}
           </ToolPanel>
         </div>
       ) : null}
-      <CameraCapture key={cameraSession} open={cameraOpen} onOpenChange={setCameraOpen} onCapture={(blob) => void read(blob)} />
+      <CameraCapture
+        key={cameraSession}
+        open={cameraOpen}
+        onOpenChange={setCameraOpen}
+        onCapture={(blob) => void read(blob)}
+      />
     </div>
   );
 }

@@ -148,7 +148,10 @@ export default function HomePage() {
       </section>
 
       {/* 5. Families */}
-      <section className="border-y border-border bg-muted/40 py-12 sm:py-16" aria-labelledby="categories-heading">
+      <section
+        className="border-y border-border bg-muted/40 py-12 sm:py-16"
+        aria-labelledby="categories-heading"
+      >
         <div className="container-page">
           <div className="mb-5">
             <p className="section-label mb-1">Par famille</p>
@@ -239,7 +242,10 @@ export default function HomePage() {
                     Commencer
                     <ArrowRight className="size-4" aria-hidden="true" />
                   </Link>
-                  <Link href={journey.secondary.href} className="font-medium text-link hover:underline">
+                  <Link
+                    href={journey.secondary.href}
+                    className="font-medium text-link hover:underline"
+                  >
                     {journey.secondary.label}
                   </Link>
                 </div>
@@ -281,7 +287,10 @@ export default function HomePage() {
       </section>
 
       {/* 8. Guides */}
-      <section className="border-t border-border bg-muted/40 py-12 sm:py-16" aria-labelledby="guides-heading">
+      <section
+        className="border-t border-border bg-muted/40 py-12 sm:py-16"
+        aria-labelledby="guides-heading"
+      >
         <div className="container-page">
           <div className="mb-5 flex items-end justify-between gap-3">
             <div>

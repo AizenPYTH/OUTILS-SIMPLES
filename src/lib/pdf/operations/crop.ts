@@ -15,13 +15,20 @@ export interface CropMargins {
  * content is kept intact under the box: the operation is non-destructive and
  * reversible by another tool, which is stated on the page.
  */
-export async function cropPages(bytes: Uint8Array, margins: CropMargins, pageIndices: number[] = []): Promise<Uint8Array> {
+export async function cropPages(
+  bytes: Uint8Array,
+  margins: CropMargins,
+  pageIndices: number[] = [],
+): Promise<Uint8Array> {
   const doc = await loadPdfDocument(bytes);
   const pages = doc.getPages();
   const targets = pageIndices.length ? pageIndices : pages.map((_, i) => i);
   for (const index of targets) {
     const page = pages[index];
-    if (!page) throw new PdfError("INVALID_RANGE", t.ranges.errorOutOfBounds(pages.length), { recoverable: true });
+    if (!page)
+      throw new PdfError("INVALID_RANGE", t.ranges.errorOutOfBounds(pages.length), {
+        recoverable: true,
+      });
     const { x, y, width, height } = page.getCropBox();
     const rotation = ((page.getRotation().angle % 360) + 360) % 360;
     // Map visual margins back to user-space edges.
@@ -32,7 +39,11 @@ export async function cropPages(bytes: Uint8Array, margins: CropMargins, pageInd
     const newWidth = width - left - right;
     const newHeight = height - top - bottom;
     if (newWidth < 20 || newHeight < 20) {
-      throw new PdfError("INVALID_RANGE", "Les marges à retirer laissent une page trop petite (moins de 20 pt).", { recoverable: true });
+      throw new PdfError(
+        "INVALID_RANGE",
+        "Les marges à retirer laissent une page trop petite (moins de 20 pt).",
+        { recoverable: true },
+      );
     }
     page.setCropBox(x + left, y + bottom, newWidth, newHeight);
   }

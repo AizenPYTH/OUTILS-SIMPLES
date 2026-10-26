@@ -1,8 +1,38 @@
 /** Pure text transformations shared by the text tools. */
 
-export type CaseMode = "upper" | "lower" | "sentence" | "title" | "capitalize-words" | "invert" | "snake" | "kebab" | "camel";
+export type CaseMode =
+  | "upper"
+  | "lower"
+  | "sentence"
+  | "title"
+  | "capitalize-words"
+  | "invert"
+  | "snake"
+  | "kebab"
+  | "camel";
 
-const FRENCH_LOWER_WORDS = new Set(["de", "des", "du", "la", "le", "les", "et", "ou", "à", "au", "aux", "en", "un", "une", "d'", "l'", "sur", "pour", "par", "dans"]);
+const FRENCH_LOWER_WORDS = new Set([
+  "de",
+  "des",
+  "du",
+  "la",
+  "le",
+  "les",
+  "et",
+  "ou",
+  "à",
+  "au",
+  "aux",
+  "en",
+  "un",
+  "une",
+  "d'",
+  "l'",
+  "sur",
+  "pour",
+  "par",
+  "dans",
+]);
 
 export function changeCase(text: string, mode: CaseMode): string {
   switch (mode) {
@@ -13,16 +43,24 @@ export function changeCase(text: string, mode: CaseMode): string {
     case "sentence":
       return text
         .toLocaleLowerCase("fr-FR")
-        .replace(/(^\s*[\p{L}]|[.!?…]\s+[\p{L}]|\n\s*[\p{L}])/gu, (m) => m.toLocaleUpperCase("fr-FR"));
+        .replace(/(^\s*[\p{L}]|[.!?…]\s+[\p{L}]|\n\s*[\p{L}])/gu, (m) =>
+          m.toLocaleUpperCase("fr-FR"),
+        );
     case "capitalize-words":
       return text.replace(/[\p{L}\p{N}'’]+/gu, (w) => capitalize(w));
     case "title":
       return text.replace(/[\p{L}\p{N}'’]+/gu, (w, offset: number) =>
-        offset > 0 && FRENCH_LOWER_WORDS.has(w.toLocaleLowerCase("fr-FR")) ? w.toLocaleLowerCase("fr-FR") : capitalize(w),
+        offset > 0 && FRENCH_LOWER_WORDS.has(w.toLocaleLowerCase("fr-FR"))
+          ? w.toLocaleLowerCase("fr-FR")
+          : capitalize(w),
       );
     case "invert":
       return Array.from(text)
-        .map((c) => (c === c.toLocaleUpperCase("fr-FR") ? c.toLocaleLowerCase("fr-FR") : c.toLocaleUpperCase("fr-FR")))
+        .map((c) =>
+          c === c.toLocaleUpperCase("fr-FR")
+            ? c.toLocaleLowerCase("fr-FR")
+            : c.toLocaleUpperCase("fr-FR"),
+        )
         .join("");
     case "snake":
       return words(text).join("_").toLowerCase();
@@ -38,7 +76,9 @@ export function changeCase(text: string, mode: CaseMode): string {
 function capitalize(word: string): string {
   const chars = Array.from(word);
   if (chars.length === 0) return word;
-  return (chars[0] ?? "").toLocaleUpperCase("fr-FR") + chars.slice(1).join("").toLocaleLowerCase("fr-FR");
+  return (
+    (chars[0] ?? "").toLocaleUpperCase("fr-FR") + chars.slice(1).join("").toLocaleLowerCase("fr-FR")
+  );
 }
 
 function words(text: string): string[] {
@@ -91,12 +131,13 @@ export function cleanText(input: string, options: CleanOptions): string {
   if (options.trimLines) lines = lines.map((l) => l.trim());
   if (options.collapseSpaces) lines = lines.map((l) => l.replace(/[ \t]{2,}/g, " "));
   if (options.removeEmptyLines) lines = lines.filter((l) => l.trim().length > 0);
-  else lines = lines.reduce<string[]>((acc, line) => {
-    // Collapse 3+ blank lines into one blank line.
-    if (line.trim() === "" && acc.length >= 1 && acc[acc.length - 1]?.trim() === "") return acc;
-    acc.push(line);
-    return acc;
-  }, []);
+  else
+    lines = lines.reduce<string[]>((acc, line) => {
+      // Collapse 3+ blank lines into one blank line.
+      if (line.trim() === "" && acc.length >= 1 && acc[acc.length - 1]?.trim() === "") return acc;
+      acc.push(line);
+      return acc;
+    }, []);
   if (options.removeDuplicateLines) {
     const seen = new Set<string>();
     lines = lines.filter((l) => {
@@ -111,7 +152,11 @@ export function cleanText(input: string, options: CleanOptions): string {
     lines = [...lines].sort((a, b) => collator.compare(a, b));
     if (options.sortLines === "desc") lines.reverse();
   }
-  if (options.normalizeQuotes) text = lines.join("\n").replace(/[“”«»]/g, '"').replace(/[‘’]/g, "'");
+  if (options.normalizeQuotes)
+    text = lines
+      .join("\n")
+      .replace(/[“”«»]/g, '"')
+      .replace(/[‘’]/g, "'");
   else text = lines.join("\n");
   return text;
 }
@@ -126,7 +171,8 @@ export function slugify(text: string, separator = "-"): string {
 const EMAIL_RE = /[\p{L}\p{N}._%+-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,}/gu;
 const URL_RE = /\bhttps?:\/\/[^\s<>"'()]+[^\s<>"'().,;:!?]/gi;
 /** French numbers (+33 or 0X) in common written forms; international numbers with + and 8–15 digits. */
-const PHONE_RE = /(?:\+33\s?[1-9](?:[\s.-]?\d{2}){4}|\b0[1-9](?:[\s.-]?\d{2}){4}\b|\+\d{1,3}[\s.-]?(?:\d[\s.-]?){7,14}\d)/g;
+const PHONE_RE =
+  /(?:\+33\s?[1-9](?:[\s.-]?\d{2}){4}|\b0[1-9](?:[\s.-]?\d{2}){4}\b|\+\d{1,3}[\s.-]?(?:\d[\s.-]?){7,14}\d)/g;
 
 export function extractEmails(text: string): string[] {
   return unique(text.match(EMAIL_RE) ?? []);
@@ -150,8 +196,18 @@ export interface ListCompare {
 
 export function compareLists(a: string, b: string, caseInsensitive = false): ListCompare {
   const norm = (s: string) => (caseInsensitive ? s.trim().toLocaleLowerCase("fr-FR") : s.trim());
-  const la = unique(a.split(/\r?\n/).map((s) => s.trim()).filter(Boolean));
-  const lb = unique(b.split(/\r?\n/).map((s) => s.trim()).filter(Boolean));
+  const la = unique(
+    a
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .filter(Boolean),
+  );
+  const lb = unique(
+    b
+      .split(/\r?\n/)
+      .map((s) => s.trim())
+      .filter(Boolean),
+  );
   const setA = new Set(la.map(norm));
   const setB = new Set(lb.map(norm));
   return {
@@ -161,7 +217,12 @@ export function compareLists(a: string, b: string, caseInsensitive = false): Lis
   };
 }
 
-export function findAndReplace(text: string, search: string, replacement: string, options: { regex: boolean; caseInsensitive: boolean; wholeWord: boolean }): { result: string; count: number } {
+export function findAndReplace(
+  text: string,
+  search: string,
+  replacement: string,
+  options: { regex: boolean; caseInsensitive: boolean; wholeWord: boolean },
+): { result: string; count: number } {
   if (!search) return { result: text, count: 0 };
   let pattern: RegExp;
   const flags = `g${options.caseInsensitive ? "i" : ""}u`;
@@ -169,7 +230,10 @@ export function findAndReplace(text: string, search: string, replacement: string
     pattern = new RegExp(search, flags);
   } else {
     const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    pattern = new RegExp(options.wholeWord ? `(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])` : escaped, flags);
+    pattern = new RegExp(
+      options.wholeWord ? `(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])` : escaped,
+      flags,
+    );
   }
   let count = 0;
   const result = text.replace(pattern, (...args) => {
@@ -183,7 +247,9 @@ export function findAndReplace(text: string, search: string, replacement: string
 }
 
 const LOREM =
-  "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum".split(" ");
+  "lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum".split(
+    " ",
+  );
 
 /** Deterministic pseudo-random generator so the same seed yields the same text. */
 export function loremIpsum(paragraphs: number, sentencesPerParagraph = 5, seed = 1): string {

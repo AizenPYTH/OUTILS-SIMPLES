@@ -8,7 +8,12 @@ import { encodeCanvas, releaseCanvas, rotateFlipCanvas } from "@/lib/images/canv
 import { outputExtensions } from "@/lib/images/types";
 import { deriveOutputName } from "@/lib/files/filename";
 import { ImageBatchTool } from "./image-batch-tool";
-import { FormatOptions, defaultFormatSettings, resolveFormat, type FormatSettings } from "./format-options";
+import {
+  FormatOptions,
+  defaultFormatSettings,
+  resolveFormat,
+  type FormatSettings,
+} from "./format-options";
 import type { BatchProcessor } from "./use-image-batch";
 
 const TOOL_ID = "image-rotate";
@@ -17,14 +22,22 @@ export function RotateImageTool() {
   const [rotation, setRotation] = React.useState<0 | 90 | 180 | 270>(90);
   const [flipH, setFlipH] = React.useState(false);
   const [flipV, setFlipV] = React.useState(false);
-  const [format, setFormat] = React.useState<FormatSettings>({ ...defaultFormatSettings, quality: 0.92 });
+  const [format, setFormat] = React.useState<FormatSettings>({
+    ...defaultFormatSettings,
+    quality: 0.92,
+  });
 
   const processor: BatchProcessor = React.useCallback(
     async (item, decoded) => {
       const target = resolveFormat(format, decoded.type);
       const canvas = rotateFlipCanvas(decoded.bitmap, rotation, flipH, flipV);
       const encoded = await encodeCanvas(canvas, target, format.quality);
-      const result = { blob: encoded.blob, name: deriveOutputName(item.file.name, "pivote", outputExtensions[target]), width: canvas.width, height: canvas.height };
+      const result = {
+        blob: encoded.blob,
+        name: deriveOutputName(item.file.name, "pivote", outputExtensions[target]),
+        width: canvas.width,
+        height: canvas.height,
+      };
       releaseCanvas(canvas);
       return result;
     },
@@ -32,7 +45,13 @@ export function RotateImageTool() {
   );
 
   const rotateBtn = (value: 0 | 90 | 180 | 270, label: string, Icon?: typeof RotateCw) => (
-    <Button type="button" variant={rotation === value ? "default" : "outline"} onClick={() => setRotation(value)} aria-pressed={rotation === value} data-testid={`rotate-${value}`}>
+    <Button
+      type="button"
+      variant={rotation === value ? "default" : "outline"}
+      onClick={() => setRotation(value)}
+      aria-pressed={rotation === value}
+      data-testid={`rotate-${value}`}
+    >
       {Icon ? <Icon aria-hidden="true" /> : null}
       {label}
     </Button>
@@ -53,10 +72,20 @@ export function RotateImageTool() {
             {rotateBtn(270, "90° à gauche", RotateCcw)}
           </div>
           <div className="flex flex-wrap gap-2" role="group" aria-label="Retournement">
-            <Button type="button" variant={flipH ? "default" : "outline"} onClick={() => setFlipH((v) => !v)} aria-pressed={flipH}>
+            <Button
+              type="button"
+              variant={flipH ? "default" : "outline"}
+              onClick={() => setFlipH((v) => !v)}
+              aria-pressed={flipH}
+            >
               <FlipHorizontal aria-hidden="true" /> Miroir horizontal
             </Button>
-            <Button type="button" variant={flipV ? "default" : "outline"} onClick={() => setFlipV((v) => !v)} aria-pressed={flipV}>
+            <Button
+              type="button"
+              variant={flipV ? "default" : "outline"}
+              onClick={() => setFlipV((v) => !v)}
+              aria-pressed={flipV}
+            >
               <FlipVertical aria-hidden="true" /> Miroir vertical
             </Button>
           </div>

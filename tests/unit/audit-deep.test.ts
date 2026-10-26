@@ -8,24 +8,53 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import createQpdf from "@neslinesli93/qpdf-wasm";
 import { PDFDocument } from "pdf-lib";
-import { buildEncryptArgs, createQpdfRunner, checkPdf, isEncryptedPdf, passwordOpensFile, protectPdf, unlockPdf } from "@/lib/pdf/qpdf";
+import {
+  buildEncryptArgs,
+  createQpdfRunner,
+  checkPdf,
+  isEncryptedPdf,
+  passwordOpensFile,
+  protectPdf,
+  unlockPdf,
+} from "@/lib/pdf/qpdf";
 import { loadPdfDocument } from "@/lib/pdf/load";
 import { replacePagesWithImages } from "@/lib/pdf/operations/redact";
 import { stampPages, defaultStampOptions } from "@/lib/pdf/operations/stamps";
 import { cropPages } from "@/lib/pdf/operations/crop";
 import { imagesToPdf } from "@/lib/pdf/operations/images-to-pdf";
-import { assertPageCount, looksLikePdf, validateFileBatch, validatePdfFileMeta } from "@/lib/files/validation";
+import {
+  assertPageCount,
+  looksLikePdf,
+  validateFileBatch,
+  validatePdfFileMeta,
+} from "@/lib/files/validation";
 import { extractText, searchPages } from "@/lib/pdf/operations/extract-text";
 import { extractPageText, fixture, openPdf } from "../helpers";
 
 const require = createRequire(import.meta.url);
-const wasmPath = path.join(path.dirname(require.resolve("@neslinesli93/qpdf-wasm/package.json")), "dist/qpdf.wasm");
+const wasmPath = path.join(
+  path.dirname(require.resolve("@neslinesli93/qpdf-wasm/package.json")),
+  "dist/qpdf.wasm",
+);
 const qpdf = createQpdfRunner(createQpdf as never, wasmPath);
 
 /** Opens a PDF with pdf.js (optionally with a password) and returns its permission flags. */
-async function pdfjsPermissions(bytes: Uint8Array, password?: string): Promise<{ permissions: Set<number> | null; pageCount: number }> {
+async function pdfjsPermissions(
+  bytes: Uint8Array,
+  password?: string,
+): Promise<{ permissions: Set<number> | null; pageCount: number }> {
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  const task = pdfjs.getDocument({ data: new Uint8Array(bytes), password, useWorkerFetch: false, disableFontFace: true, verbosity: 0, standardFontDataUrl: path.join(path.dirname(require.resolve("pdfjs-dist/package.json")), "standard_fonts/") });
+  const task = pdfjs.getDocument({
+    data: new Uint8Array(bytes),
+    password,
+    useWorkerFetch: false,
+    disableFontFace: true,
+    verbosity: 0,
+    standardFontDataUrl: path.join(
+      path.dirname(require.resolve("pdfjs-dist/package.json")),
+      "standard_fonts/",
+    ),
+  });
   const doc = await task.promise;
   try {
     return { permissions: await doc.getPermissions(), pageCount: doc.numPages };
@@ -43,7 +72,15 @@ const MODIFY_ANNOTATIONS = 32;
 describe("audit — protection par mot de passe (qpdf)", () => {
   it("writes the chosen permissions into the file and the user password really locks it", async () => {
     const src = await fixture("simple-3-pages.pdf");
-    const locked = await protectPdf(qpdf, src, { userPassword: "lecture", ownerPassword: "proprio", level: "aes-256", allowPrinting: false, allowModification: false, allowCopy: false, allowAnnotations: true });
+    const locked = await protectPdf(qpdf, src, {
+      userPassword: "lecture",
+      ownerPassword: "proprio",
+      level: "aes-256",
+      allowPrinting: false,
+      allowModification: false,
+      allowCopy: false,
+      allowAnnotations: true,
+    });
     // Without the password pdf.js refuses the document.
     await expect(pdfjsPermissions(locked)).rejects.toMatchObject({ name: "PasswordException" });
     const { permissions, pageCount } = await pdfjsPermissions(locked, "lecture");
@@ -62,21 +99,58 @@ describe("audit — protection par mot de passe (qpdf)", () => {
 
   it("accepts a single password (owner defaults to the user password) and AES-128", async () => {
     const src = await fixture("simple-3-pages.pdf");
-    const locked = await protectPdf(qpdf, src, { userPassword: "seul", ownerPassword: "", level: "aes-128", allowPrinting: true, allowModification: true, allowCopy: true, allowAnnotations: true });
+    const locked = await protectPdf(qpdf, src, {
+      userPassword: "seul",
+      ownerPassword: "",
+      level: "aes-128",
+      allowPrinting: true,
+      allowModification: true,
+      allowCopy: true,
+      allowAnnotations: true,
+    });
     expect(isEncryptedPdf(locked)).toBe(true);
     // Regression: qpdf ≥ 11 refuses RC4, so 128-bit must request AES explicitly.
-    expect(buildEncryptArgs({ userPassword: "x", ownerPassword: "", level: "aes-128", allowPrinting: true, allowModification: true, allowCopy: true, allowAnnotations: true })).toContain("--use-aes=y");
-    const restricted = await protectPdf(qpdf, src, { userPassword: "seul", ownerPassword: "", level: "aes-128", allowPrinting: true, allowModification: false, allowCopy: false, allowAnnotations: false });
+    expect(
+      buildEncryptArgs({
+        userPassword: "x",
+        ownerPassword: "",
+        level: "aes-128",
+        allowPrinting: true,
+        allowModification: true,
+        allowCopy: true,
+        allowAnnotations: true,
+      }),
+    ).toContain("--use-aes=y");
+    const restricted = await protectPdf(qpdf, src, {
+      userPassword: "seul",
+      ownerPassword: "",
+      level: "aes-128",
+      allowPrinting: true,
+      allowModification: false,
+      allowCopy: false,
+      allowAnnotations: false,
+    });
     expect((await pdfjsPermissions(restricted, "seul")).permissions!.has(COPY)).toBe(false);
     const { permissions } = await pdfjsPermissions(locked, "seul");
     // Everything allowed → pdf.js reports no restriction set or a set containing all four flags.
-    expect(permissions === null || [PRINT, MODIFY_CONTENTS, COPY, MODIFY_ANNOTATIONS].every((f) => permissions.has(f))).toBe(true);
+    expect(
+      permissions === null ||
+        [PRINT, MODIFY_CONTENTS, COPY, MODIFY_ANNOTATIONS].every((f) => permissions.has(f)),
+    ).toBe(true);
     expect(Buffer.from(locked).toString("latin1")).toMatch(/\/AESV2|\/V 4/);
   }, 60_000);
 
   it("owner-only protection opens without password but restricts, and unlock removes it", async () => {
     const src = await fixture("simple-3-pages.pdf");
-    const locked = await protectPdf(qpdf, src, { userPassword: "", ownerPassword: "proprio", level: "aes-256", allowPrinting: false, allowModification: false, allowCopy: false, allowAnnotations: false });
+    const locked = await protectPdf(qpdf, src, {
+      userPassword: "",
+      ownerPassword: "proprio",
+      level: "aes-256",
+      allowPrinting: false,
+      allowModification: false,
+      allowCopy: false,
+      allowAnnotations: false,
+    });
     const { permissions } = await pdfjsPermissions(locked);
     expect(permissions).not.toBeNull();
     expect(permissions!.has(COPY)).toBe(false);
@@ -89,8 +163,26 @@ describe("audit — protection par mot de passe (qpdf)", () => {
 
   it("refuses to protect an already encrypted file and reports encryption in the check", async () => {
     const src = await fixture("simple-3-pages.pdf");
-    const locked = await protectPdf(qpdf, src, { userPassword: "a1b2", ownerPassword: "", level: "aes-256", allowPrinting: true, allowModification: false, allowCopy: false, allowAnnotations: false });
-    await expect(protectPdf(qpdf, locked, { userPassword: "autre", ownerPassword: "", level: "aes-256", allowPrinting: true, allowModification: false, allowCopy: false, allowAnnotations: false })).rejects.toBeTruthy();
+    const locked = await protectPdf(qpdf, src, {
+      userPassword: "a1b2",
+      ownerPassword: "",
+      level: "aes-256",
+      allowPrinting: true,
+      allowModification: false,
+      allowCopy: false,
+      allowAnnotations: false,
+    });
+    await expect(
+      protectPdf(qpdf, locked, {
+        userPassword: "autre",
+        ownerPassword: "",
+        level: "aes-256",
+        allowPrinting: true,
+        allowModification: false,
+        allowCopy: false,
+        allowAnnotations: false,
+      }),
+    ).rejects.toBeTruthy();
     const report = await checkPdf(qpdf, locked);
     expect(report.encrypted).toBe(true);
     expect(report.repaired).toBeNull();
@@ -109,7 +201,9 @@ describe("audit — caviardage sur page pivotée", () => {
     const { width, height } = page.getSize();
     expect(angle % 180).toBe(90);
     const photo = await fixture("photo-800x600.jpg");
-    const out = await replacePagesWithImages(src, [{ pageIndex: 1, bytes: photo, mimeType: "image/jpeg" }]);
+    const out = await replacePagesWithImages(src, [
+      { pageIndex: 1, bytes: photo, mimeType: "image/jpeg" },
+    ]);
     const doc = await openPdf(out);
     expect(doc.getPageCount()).toBe(original.getPageCount());
     const replaced = doc.getPage(1);
@@ -123,7 +217,14 @@ describe("audit — caviardage sur page pivotée", () => {
 describe("audit — fidélité des options", () => {
   it("numbers pages from the requested start and only from the requested page", async () => {
     const src = await fixture("simple-5-pages.pdf");
-    const { bytes } = await stampPages(src, { ...defaultStampOptions, startPageIndex: 1, startNumber: 10, footer: { template: "Page {page} sur {total}", position: "right" }, header: { template: "{file}", position: "left" }, fileName: "rapport.pdf" });
+    const { bytes } = await stampPages(src, {
+      ...defaultStampOptions,
+      startPageIndex: 1,
+      startNumber: 10,
+      footer: { template: "Page {page} sur {total}", position: "right" },
+      header: { template: "{file}", position: "left" },
+      fileName: "rapport.pdf",
+    });
     expect((await extractPageText(bytes, 0)).join(" ")).not.toContain("Page 10");
     expect((await extractPageText(bytes, 1)).join(" ")).toContain("Page 10 sur 4");
     expect((await extractPageText(bytes, 4)).join(" ")).toContain("Page 13 sur 4");
@@ -154,11 +255,19 @@ describe("audit — fidélité des options", () => {
 
   it("sizes fit-image pages from the dpi option", async () => {
     const photo = await fixture("photo-800x600.jpg");
-    const out = await imagesToPdf([{ name: "p.jpg", bytes: photo, mimeType: "image/jpeg" }], { pageSize: "fit-image", margin: 0, dpi: 200 });
+    const out = await imagesToPdf([{ name: "p.jpg", bytes: photo, mimeType: "image/jpeg" }], {
+      pageSize: "fit-image",
+      margin: 0,
+      dpi: 200,
+    });
     const page = (await openPdf(out)).getPage(0);
     expect(page.getWidth()).toBeCloseTo((800 * 72) / 200, 3);
     expect(page.getHeight()).toBeCloseTo((600 * 72) / 200, 3);
-    const landscape = await imagesToPdf([{ name: "p.jpg", bytes: photo, mimeType: "image/jpeg" }], { pageSize: "a4-landscape", margin: 24, dpi: 150 });
+    const landscape = await imagesToPdf([{ name: "p.jpg", bytes: photo, mimeType: "image/jpeg" }], {
+      pageSize: "a4-landscape",
+      margin: 24,
+      dpi: 150,
+    });
     const landscapePage = (await openPdf(landscape)).getPage(0);
     expect(landscapePage.getWidth()).toBeCloseTo(841.89, 1);
     expect(landscapePage.getHeight()).toBeCloseTo(595.28, 1);
@@ -167,7 +276,16 @@ describe("audit — fidélité des options", () => {
   it("search mode finds accent-insensitive matches with page numbers", async () => {
     const src = await fixture("simple-5-pages.pdf");
     const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-    const task = pdfjs.getDocument({ data: new Uint8Array(src), useWorkerFetch: false, disableFontFace: true, verbosity: 0, standardFontDataUrl: path.join(path.dirname(require.resolve("pdfjs-dist/package.json")), "standard_fonts/") });
+    const task = pdfjs.getDocument({
+      data: new Uint8Array(src),
+      useWorkerFetch: false,
+      disableFontFace: true,
+      verbosity: 0,
+      standardFontDataUrl: path.join(
+        path.dirname(require.resolve("pdfjs-dist/package.json")),
+        "standard_fonts/",
+      ),
+    });
     const doc = await task.promise;
     const text = await extractText(doc);
     await task.destroy();
@@ -181,11 +299,26 @@ describe("audit — fidélité des options", () => {
 
 describe("audit — limites et fichiers invalides", () => {
   it("rejects empty, oversized and mistyped files before reading them", () => {
-    expect(() => validatePdfFileMeta({ name: "x.pdf", size: 0, type: "application/pdf" })).toThrow();
-    expect(() => validatePdfFileMeta({ name: "x.pdf", size: 101 * 1024 * 1024, type: "application/pdf" }, { maxFileSizeBytes: 100 * 1024 * 1024 })).toThrow(/100/);
+    expect(() =>
+      validatePdfFileMeta({ name: "x.pdf", size: 0, type: "application/pdf" }),
+    ).toThrow();
+    expect(() =>
+      validatePdfFileMeta(
+        { name: "x.pdf", size: 101 * 1024 * 1024, type: "application/pdf" },
+        { maxFileSizeBytes: 100 * 1024 * 1024 },
+      ),
+    ).toThrow(/100/);
     expect(() => validatePdfFileMeta({ name: "x.png", size: 10, type: "image/png" })).toThrow();
     expect(() => validatePdfFileMeta({ name: "sans-type.pdf", size: 10, type: "" })).not.toThrow();
-    expect(() => validateFileBatch(Array.from({ length: 31 }, (_, i) => ({ name: `${i}.pdf`, size: 1, type: "application/pdf" })))).toThrow();
+    expect(() =>
+      validateFileBatch(
+        Array.from({ length: 31 }, (_, i) => ({
+          name: `${i}.pdf`,
+          size: 1,
+          type: "application/pdf",
+        })),
+      ),
+    ).toThrow();
     expect(() => assertPageCount(0)).toThrow(/vide|aucune/i);
     expect(() => assertPageCount(1001)).toThrow();
     expect(looksLikePdf(new Uint8Array([1, 2, 3, 4, 5]))).toBe(false);
@@ -193,11 +326,19 @@ describe("audit — limites et fichiers invalides", () => {
   });
 
   it("loads refuse non-PDF, empty page trees and encrypted flags with distinct codes", async () => {
-    await expect(loadPdfDocument(await fixture("not-a-pdf.txt"))).rejects.toMatchObject({ code: "NOT_PDF" });
-    await expect(loadPdfDocument(await fixture("corrupted.pdf"))).rejects.toMatchObject({ code: "CORRUPTED" });
-    await expect(loadPdfDocument(await fixture("encrypted-flag.pdf"))).rejects.toMatchObject({ code: "ENCRYPTED" });
+    await expect(loadPdfDocument(await fixture("not-a-pdf.txt"))).rejects.toMatchObject({
+      code: "NOT_PDF",
+    });
+    await expect(loadPdfDocument(await fixture("corrupted.pdf"))).rejects.toMatchObject({
+      code: "CORRUPTED",
+    });
+    await expect(loadPdfDocument(await fixture("encrypted-flag.pdf"))).rejects.toMatchObject({
+      code: "ENCRYPTED",
+    });
     const empty = await PDFDocument.create();
-    await expect(loadPdfDocument(await empty.save({ addDefaultPage: false }))).rejects.toMatchObject({ code: "EMPTY" });
+    await expect(
+      loadPdfDocument(await empty.save({ addDefaultPage: false })),
+    ).rejects.toMatchObject({ code: "EMPTY" });
   });
 });
 
@@ -205,18 +346,42 @@ describe("audit — feuilles à imprimer : géométrie des tracés", () => {
   it("draws a 5 mm grid with exact spacing inside the margins, on every page", async () => {
     const { paperPdf } = await import("@/lib/pdf/operations/printables");
     const { PDFArray, PDFRawStream, decodePDFRawStream } = await import("pdf-lib");
-    const bytes = await paperPdf({ kind: "grid", spacingMm: 5, page: "a4", marginMm: 10, color: "#000000", pages: 2 });
+    const bytes = await paperPdf({
+      kind: "grid",
+      spacingMm: 5,
+      page: "a4",
+      marginMm: 10,
+      color: "#000000",
+      pages: 2,
+    });
     const doc = await openPdf(bytes);
     expect(doc.getPageCount()).toBe(2);
     const mm = 72 / 25.4;
     for (const page of doc.getPages()) {
       const { width, height } = page.getSize();
       const contents = page.node.Contents();
-      const streams = contents instanceof PDFArray ? contents.asArray().map((r) => doc.context.lookup(r)) : [contents];
-      const ops = streams.map((s) => (s instanceof PDFRawStream ? Buffer.from(decodePDFRawStream(s).decode()).toString("latin1") : "")).join("\n");
-      const lines = Array.from(ops.matchAll(/([\d.]+) ([\d.]+) m\s+([\d.]+) ([\d.]+) l/g)).map((m) => m.slice(1, 5).map(Number));
-      const ys = lines.filter(([, y1, , y2]) => Math.abs(y1! - y2!) < 0.01).map(([, y]) => y!).sort((a, b) => b - a);
-      const xs = lines.filter(([x1, , x2]) => Math.abs(x1! - x2!) < 0.01).map(([x]) => x!).sort((a, b) => a - b);
+      const streams =
+        contents instanceof PDFArray
+          ? contents.asArray().map((r) => doc.context.lookup(r))
+          : [contents];
+      const ops = streams
+        .map((s) =>
+          s instanceof PDFRawStream
+            ? Buffer.from(decodePDFRawStream(s).decode()).toString("latin1")
+            : "",
+        )
+        .join("\n");
+      const lines = Array.from(ops.matchAll(/([\d.]+) ([\d.]+) m\s+([\d.]+) ([\d.]+) l/g)).map(
+        (m) => m.slice(1, 5).map(Number),
+      );
+      const ys = lines
+        .filter(([, y1, , y2]) => Math.abs(y1! - y2!) < 0.01)
+        .map(([, y]) => y!)
+        .sort((a, b) => b - a);
+      const xs = lines
+        .filter(([x1, , x2]) => Math.abs(x1! - x2!) < 0.01)
+        .map(([x]) => x!)
+        .sort((a, b) => a - b);
       expect(ys).toHaveLength(Math.floor((height - 20 * mm + 0.01) / (5 * mm)) + 1);
       expect(xs).toHaveLength(Math.floor((width - 20 * mm + 0.01) / (5 * mm)) + 1);
       for (let i = 1; i < ys.length; i += 1) expect(ys[i - 1]! - ys[i]!).toBeCloseTo(5 * mm, 2);
@@ -233,14 +398,43 @@ describe("audit — feuilles à imprimer : géométrie des tracés", () => {
     const read = async (bytes: Uint8Array) => {
       const doc = await openPdf(bytes);
       const contents = doc.getPage(0).node.Contents();
-      const streams = contents instanceof PDFArray ? contents.asArray().map((r) => doc.context.lookup(r)) : [contents];
-      return streams.map((s) => (s instanceof PDFRawStream ? Buffer.from(decodePDFRawStream(s).decode()).toString("latin1") : "")).join("\n");
+      const streams =
+        contents instanceof PDFArray
+          ? contents.asArray().map((r) => doc.context.lookup(r))
+          : [contents];
+      return streams
+        .map((s) =>
+          s instanceof PDFRawStream
+            ? Buffer.from(decodePDFRawStream(s).decode()).toString("latin1")
+            : "",
+        )
+        .join("\n");
     };
-    const lined = await read(await paperPdf({ kind: "lines", spacingMm: 8, page: "a4", marginMm: 15, color: "#000", pages: 1 }));
-    const linedLines = Array.from(lined.matchAll(/([\d.]+) ([\d.]+) m\s+([\d.]+) ([\d.]+) l/g)).map((m) => m.slice(1, 5).map(Number));
+    const lined = await read(
+      await paperPdf({
+        kind: "lines",
+        spacingMm: 8,
+        page: "a4",
+        marginMm: 15,
+        color: "#000",
+        pages: 1,
+      }),
+    );
+    const linedLines = Array.from(lined.matchAll(/([\d.]+) ([\d.]+) m\s+([\d.]+) ([\d.]+) l/g)).map(
+      (m) => m.slice(1, 5).map(Number),
+    );
     expect(linedLines.length).toBeGreaterThan(20);
     expect(linedLines.every(([, y1, , y2]) => Math.abs(y1! - y2!) < 0.01)).toBe(true);
-    const dotted = await read(await paperPdf({ kind: "dots", spacingMm: 5, page: "a5", marginMm: 10, color: "#000", pages: 1 }));
+    const dotted = await read(
+      await paperPdf({
+        kind: "dots",
+        spacingMm: 5,
+        page: "a5",
+        marginMm: 10,
+        color: "#000",
+        pages: 1,
+      }),
+    );
     expect(dotted).not.toMatch(/ l\b/);
     expect((dotted.match(/ c\b/g) ?? []).length).toBeGreaterThan(500); // Bézier arcs of the dots
   });

@@ -1,6 +1,7 @@
 /** Text watermark drawn on a canvas (browser only). */
 
-export type WatermarkPosition = "center" | "top-left" | "top-right" | "bottom-left" | "bottom-right" | "tile";
+export type WatermarkPosition =
+  "center" | "top-left" | "top-right" | "bottom-left" | "bottom-right" | "tile";
 
 export interface WatermarkSettings {
   text: string;
@@ -15,9 +16,21 @@ export interface WatermarkSettings {
   font: "sans" | "serif" | "mono";
 }
 
-export const defaultWatermarkSettings: WatermarkSettings = { text: "© OUTILIA", opacity: 0.4, sizePercent: 6, color: "#ffffff", position: "bottom-right", rotation: 0, font: "sans" };
+export const defaultWatermarkSettings: WatermarkSettings = {
+  text: "© OUTILIA",
+  opacity: 0.4,
+  sizePercent: 6,
+  color: "#ffffff",
+  position: "bottom-right",
+  rotation: 0,
+  font: "sans",
+};
 
-const FONTS = { sans: "'Instrument Sans', Arial, Helvetica, sans-serif", serif: "Georgia, 'Times New Roman', serif", mono: "'Courier New', monospace" };
+const FONTS = {
+  sans: "'Instrument Sans', Arial, Helvetica, sans-serif",
+  serif: "Georgia, 'Times New Roman', serif",
+  mono: "'Courier New', monospace",
+};
 
 export function drawTextWatermark(canvas: HTMLCanvasElement, settings: WatermarkSettings): void {
   const ctx = canvas.getContext("2d");
@@ -58,7 +71,9 @@ export function drawTextWatermark(canvas: HTMLCanvasElement, settings: Watermark
   } else {
     const halfW = textWidth / 2;
     const x = settings.position.endsWith("left") ? margin + halfW : canvas.width - margin - halfW;
-    const y = settings.position.startsWith("top") ? margin + size / 2 : canvas.height - margin - size / 2;
+    const y = settings.position.startsWith("top")
+      ? margin + size / 2
+      : canvas.height - margin - size / 2;
     drawAt(x, y);
   }
   ctx.restore();

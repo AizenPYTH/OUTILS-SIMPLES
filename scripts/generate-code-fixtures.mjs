@@ -3,5 +3,13 @@ import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import QRCode from "qrcode";
 const out = path.resolve(process.cwd(), "tests/fixtures/qr-outilia.png");
-await writeFile(out, await QRCode.toBuffer("https://outilia.fr/aide", { type: "png", width: 320, margin: 4, errorCorrectionLevel: "M" }));
+await writeFile(
+  out,
+  await QRCode.toBuffer("https://outilia.fr/aide", {
+    type: "png",
+    width: 320,
+    margin: 4,
+    errorCorrectionLevel: "M",
+  }),
+);
 console.log("written", out);

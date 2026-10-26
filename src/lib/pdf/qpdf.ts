@@ -51,7 +51,9 @@ export function createQpdfRunner(createModule: CreateModule, wasmUrl: string): Q
       console.log = (...parts: unknown[]) => (stdout += `${parts.join(" ")}\n`);
       console.error = (...parts: unknown[]) => (stderr += `${parts.join(" ")}\n`);
       try {
-        code = qpdfModule.callMain([...args.map((a) => a.replace("{in}", "/in.pdf").replace("{out}", "/out.pdf"))]);
+        code = qpdfModule.callMain([
+          ...args.map((a) => a.replace("{in}", "/in.pdf").replace("{out}", "/out.pdf")),
+        ]);
       } catch (error) {
         code = typeof error === "number" ? error : -1;
         stderr += String(error);
@@ -74,7 +76,9 @@ let browserRunner: Promise<QpdfRunner> | null = null;
 
 export function getBrowserQpdf(): Promise<QpdfRunner> {
   if (!browserRunner) {
-    browserRunner = import("@neslinesli93/qpdf-wasm").then((m) => createQpdfRunner(m.default as unknown as CreateModule, "/qpdf/qpdf.wasm"));
+    browserRunner = import("@neslinesli93/qpdf-wasm").then((m) =>
+      createQpdfRunner(m.default as unknown as CreateModule, "/qpdf/qpdf.wasm"),
+    );
   }
   return browserRunner;
 }
@@ -107,22 +111,37 @@ export function buildEncryptArgs(options: ProtectOptions): string[] {
   return ["--encrypt", options.userPassword, owner, bits, ...aes, ...perms, "--", "{in}", "{out}"];
 }
 
-export async function protectPdf(runner: QpdfRunner, bytes: Uint8Array, options: ProtectOptions): Promise<Uint8Array> {
+export async function protectPdf(
+  runner: QpdfRunner,
+  bytes: Uint8Array,
+  options: ProtectOptions,
+): Promise<Uint8Array> {
   if (!options.userPassword && !options.ownerPassword) {
-    throw new PdfError("NO_SELECTION", "Saisissez au moins un mot de passe.", { recoverable: true });
+    throw new PdfError("NO_SELECTION", "Saisissez au moins un mot de passe.", {
+      recoverable: true,
+    });
   }
   const run = await runner.run(buildEncryptArgs(options), bytes);
-  if (run.code !== 0 || !run.output) throw new PdfError("PROCESSING_FAILED", explainQpdf(run.stderr), { recoverable: true });
+  if (run.code !== 0 || !run.output)
+    throw new PdfError("PROCESSING_FAILED", explainQpdf(run.stderr), { recoverable: true });
   return run.output;
 }
 
-export async function unlockPdf(runner: QpdfRunner, bytes: Uint8Array, password: string): Promise<Uint8Array> {
+export async function unlockPdf(
+  runner: QpdfRunner,
+  bytes: Uint8Array,
+  password: string,
+): Promise<Uint8Array> {
   const run = await runner.run([`--password=${password}`, "--decrypt", "{in}", "{out}"], bytes);
   if (run.code !== 0 || !run.output) {
     // qpdf writes "invalid password" to stderr; in environments where stderr
     // is not captured, an encrypted input that fails to decrypt means the same.
     if (/invalid password/i.test(run.stderr) || isEncryptedPdf(bytes)) {
-      throw new PdfError("ENCRYPTED", "Mot de passe incorrect : le document n'a pas pu être déverrouillé.", { recoverable: true });
+      throw new PdfError(
+        "ENCRYPTED",
+        "Mot de passe incorrect : le document n'a pas pu être déverrouillé.",
+        { recoverable: true },
+      );
     }
     throw new PdfError("PROCESSING_FAILED", explainQpdf(run.stderr), { recoverable: true });
   }
@@ -130,7 +149,11 @@ export async function unlockPdf(runner: QpdfRunner, bytes: Uint8Array, password:
 }
 
 /** qpdf exits 3 with --requires-password when the supplied password opens the file. */
-export async function passwordOpensFile(runner: QpdfRunner, bytes: Uint8Array, password: string): Promise<boolean> {
+export async function passwordOpensFile(
+  runner: QpdfRunner,
+  bytes: Uint8Array,
+  password: string,
+): Promise<boolean> {
   const probe = await runner.run([`--password=${password}`, "--requires-password", "{in}"], bytes);
   return probe.code === 3;
 }
@@ -149,16 +172,32 @@ export interface PdfCheckReport {
 /** Structural check; when warnings are found qpdf attempts a rewrite ("réparation simple"). */
 export async function checkPdf(runner: QpdfRunner, bytes: Uint8Array): Promise<PdfCheckReport> {
   const run = await runner.run(["--check", "{in}"], bytes);
-  const lines = `${run.stdout}\n${run.stderr}`.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = `${run.stdout}\n${run.stderr}`
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
   const headerText = new TextDecoder("latin1").decode(bytes.subarray(0, 1024));
-  const version = /%PDF-(\d\.\d)/.exec(headerText)?.[1] ?? lines.find((l) => l.startsWith("PDF Version:"))?.replace("PDF Version:", "").trim() ?? "?";
+  const version =
+    /%PDF-(\d\.\d)/.exec(headerText)?.[1] ??
+    lines
+      .find((l) => l.startsWith("PDF Version:"))
+      ?.replace("PDF Version:", "")
+      .trim() ??
+    "?";
   // Messages may be unavailable (Node, or a glue that bypasses the console): fall back to byte heuristics.
   const encrypted = lines.some((l) => /^File is encrypted/i.test(l)) || isEncryptedPdf(bytes);
-  const linearized = lines.some((l) => /^File is linearized/i.test(l)) || /\/Linearized\b/.test(headerText);
+  const linearized =
+    lines.some((l) => /^File is linearized/i.test(l)) || /\/Linearized\b/.test(headerText);
   const warnings = lines.filter((l) => /WARNING/i.test(l));
-  const errors = lines.filter((l) => !/WARNING/i.test(l) && /error|can't find|unable|invalid|damaged|not a pdf/i.test(l));
+  const errors = lines.filter(
+    (l) => !/WARNING/i.test(l) && /error|can't find|unable|invalid|damaged|not a pdf/i.test(l),
+  );
   if (run.code !== 0 && errors.length === 0 && warnings.length === 0) {
-    errors.push(encrypted ? "Le document est chiffré : déverrouillez-le pour une analyse complète." : "qpdf n'a pas pu lire ce fichier (structure endommagée ou fichier incomplet).");
+    errors.push(
+      encrypted
+        ? "Le document est chiffré : déverrouillez-le pour une analyse complète."
+        : "qpdf n'a pas pu lire ce fichier (structure endommagée ou fichier incomplet).",
+    );
   }
   let repaired: Uint8Array | null = null;
   if (run.code !== 0 && !encrypted) {
@@ -169,7 +208,11 @@ export async function checkPdf(runner: QpdfRunner, bytes: Uint8Array): Promise<P
 }
 
 function explainQpdf(stderr: string): string {
-  const line = stderr.split("\n").find((l) => l.trim().length > 0)?.replace(/^[^:]*:\s*\/in\.pdf:\s*/, "") ?? "";
+  const line =
+    stderr
+      .split("\n")
+      .find((l) => l.trim().length > 0)
+      ?.replace(/^[^:]*:\s*\/in\.pdf:\s*/, "") ?? "";
   if (/not a pdf|startxref|xref/i.test(line)) return t.errors.corrupted;
   return line ? `qpdf : ${line}` : t.errors.processingFailed;
 }
@@ -177,5 +220,10 @@ function explainQpdf(stderr: string): string {
 export function isEncryptedPdf(bytes: Uint8Array): boolean {
   // Cheap heuristic on the trailer region: /Encrypt entry present.
   const tail = new TextDecoder("latin1").decode(bytes.subarray(Math.max(0, bytes.length - 4096)));
-  return /\/Encrypt\b/.test(tail) || /\/Encrypt\b/.test(new TextDecoder("latin1").decode(bytes.subarray(0, Math.min(bytes.length, 65536))));
+  return (
+    /\/Encrypt\b/.test(tail) ||
+    /\/Encrypt\b/.test(
+      new TextDecoder("latin1").decode(bytes.subarray(0, Math.min(bytes.length, 65536))),
+    )
+  );
 }

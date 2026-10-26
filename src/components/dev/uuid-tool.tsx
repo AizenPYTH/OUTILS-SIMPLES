@@ -5,7 +5,13 @@ import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TextOutputPanel } from "@/components/tools/shared/text-io";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { generateUuid } from "@/lib/dev/random";
@@ -27,8 +33,15 @@ function format(uuid: string, o: Options): string {
 }
 
 export function UuidTool() {
-  const [options, setOptions] = React.useState<Options>({ count: 5, uppercase: false, braces: false, noHyphens: false });
-  const [raw, setRaw] = React.useState<string[]>(() => Array.from({ length: 5 }, () => generateUuid()));
+  const [options, setOptions] = React.useState<Options>({
+    count: 5,
+    uppercase: false,
+    braces: false,
+    noHyphens: false,
+  });
+  const [raw, setRaw] = React.useState<string[]>(() =>
+    Array.from({ length: 5 }, () => generateUuid()),
+  );
   const patch = (p: Partial<Options>) => setOptions((o) => ({ ...o, ...p }));
 
   const regenerate = (count = options.count) => {
@@ -36,7 +49,10 @@ export function UuidTool() {
     track("tool_success", { tool: TOOL_ID, resultCount: count });
   };
 
-  const output = raw.slice(0, options.count).map((u) => format(u, options)).join("\n");
+  const output = raw
+    .slice(0, options.count)
+    .map((u) => format(u, options))
+    .join("\n");
 
   return (
     <div className="space-y-4">
@@ -64,20 +80,42 @@ export function UuidTool() {
           </Select>
         </div>
         <label className="flex items-center gap-2 pb-2 text-sm">
-          <Checkbox checked={options.uppercase} onCheckedChange={(v) => patch({ uppercase: v === true })} /> MAJUSCULES
+          <Checkbox
+            checked={options.uppercase}
+            onCheckedChange={(v) => patch({ uppercase: v === true })}
+          />{" "}
+          MAJUSCULES
         </label>
         <label className="flex items-center gap-2 pb-2 text-sm">
-          <Checkbox checked={options.braces} onCheckedChange={(v) => patch({ braces: v === true })} /> Accolades {"{ }"}
+          <Checkbox
+            checked={options.braces}
+            onCheckedChange={(v) => patch({ braces: v === true })}
+          />{" "}
+          Accolades {"{ }"}
         </label>
         <label className="flex items-center gap-2 pb-2 text-sm">
-          <Checkbox checked={options.noHyphens} onCheckedChange={(v) => patch({ noHyphens: v === true })} /> Sans tirets
+          <Checkbox
+            checked={options.noHyphens}
+            onCheckedChange={(v) => patch({ noHyphens: v === true })}
+          />{" "}
+          Sans tirets
         </label>
         <Button type="button" onClick={() => regenerate()} data-testid="uuid-regenerate">
           <RefreshCw aria-hidden="true" /> Régénérer
         </Button>
       </ToolPanel>
-      <TextOutputPanel id="uuid-output" label={`UUID v4 (${options.count})`} value={output} filename="uuid.txt" rows={Math.min(12, options.count + 1)} toolId={TOOL_ID} />
-      <p className="text-xs text-muted-foreground">Générés avec l&apos;API Web Crypto de votre navigateur (aléatoire cryptographique), version 4, variante RFC 4122. Rien n&apos;est conservé.</p>
+      <TextOutputPanel
+        id="uuid-output"
+        label={`UUID v4 (${options.count})`}
+        value={output}
+        filename="uuid.txt"
+        rows={Math.min(12, options.count + 1)}
+        toolId={TOOL_ID}
+      />
+      <p className="text-xs text-muted-foreground">
+        Générés avec l&apos;API Web Crypto de votre navigateur (aléatoire cryptographique), version
+        4, variante RFC 4122. Rien n&apos;est conservé.
+      </p>
     </div>
   );
 }

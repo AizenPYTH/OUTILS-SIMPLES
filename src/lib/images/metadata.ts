@@ -22,7 +22,8 @@ const JPEG_COM = 0xfe;
  * to decode the pixels, not who took the picture.
  */
 export function stripJpegMetadata(input: Uint8Array): StripResult {
-  if (input.length < 4 || input[0] !== 0xff || input[1] !== JPEG_SOI) throw new Error("Ce fichier n'est pas un JPEG valide.");
+  if (input.length < 4 || input[0] !== 0xff || input[1] !== JPEG_SOI)
+    throw new Error("Ce fichier n'est pas un JPEG valide.");
   const parts: Uint8Array[] = [input.subarray(0, 2)];
   let removed = 0;
   let pos = 2;
@@ -40,7 +41,8 @@ export function stripJpegMetadata(input: Uint8Array): StripResult {
     const length = (input[pos + 2]! << 8) | input[pos + 3]!;
     const end = pos + 2 + length;
     if (length < 2 || end > input.length) throw new Error("Segment JPEG tronqué.");
-    const isMetadata = (marker > JPEG_APP0 && marker <= 0xef && marker !== JPEG_APP14_ADOBE) || marker === JPEG_COM;
+    const isMetadata =
+      (marker > JPEG_APP0 && marker <= 0xef && marker !== JPEG_APP14_ADOBE) || marker === JPEG_COM;
     if (isMetadata) removed += 1;
     else parts.push(input.subarray(pos, end));
     pos = end;
@@ -53,13 +55,19 @@ const PNG_METADATA_CHUNKS = new Set(["tEXt", "zTXt", "iTXt", "eXIf", "tIME"]);
 
 /** Removes textual, EXIF and timestamp chunks from a PNG; colour chunks stay. */
 export function stripPngMetadata(input: Uint8Array): StripResult {
-  if (input.length < 8 || PNG_SIGNATURE.some((b, i) => input[i] !== b)) throw new Error("Ce fichier n'est pas un PNG valide.");
+  if (input.length < 8 || PNG_SIGNATURE.some((b, i) => input[i] !== b))
+    throw new Error("Ce fichier n'est pas un PNG valide.");
   const parts: Uint8Array[] = [input.subarray(0, 8)];
   let removed = 0;
   let pos = 8;
   while (pos + 12 <= input.length) {
     const length = readUint32(input, pos);
-    const type = String.fromCharCode(input[pos + 4]!, input[pos + 5]!, input[pos + 6]!, input[pos + 7]!);
+    const type = String.fromCharCode(
+      input[pos + 4]!,
+      input[pos + 5]!,
+      input[pos + 6]!,
+      input[pos + 7]!,
+    );
     const end = pos + 12 + length;
     if (end > input.length) throw new Error("Chunk PNG tronqué.");
     if (PNG_METADATA_CHUNKS.has(type)) removed += 1;
@@ -99,7 +107,12 @@ export interface ExifSummary {
   total: number;
 }
 
-const KNOWN: { key: string; label: string; sensitive?: boolean; format?: (v: unknown) => string }[] = [
+const KNOWN: {
+  key: string;
+  label: string;
+  sensitive?: boolean;
+  format?: (v: unknown) => string;
+}[] = [
   { key: "Make", label: "Marque de l'appareil", sensitive: true },
   { key: "Model", label: "Modèle de l'appareil", sensitive: true },
   { key: "LensModel", label: "Objectif" },
@@ -107,11 +120,20 @@ const KNOWN: { key: string; label: string; sensitive?: boolean; format?: (v: unk
   { key: "DateTimeOriginal", label: "Date de prise de vue", sensitive: true, format: formatDate },
   { key: "CreateDate", label: "Date de création", sensitive: true, format: formatDate },
   { key: "ModifyDate", label: "Date de modification", sensitive: true, format: formatDate },
-  { key: "ExposureTime", label: "Temps d'exposition", format: (v) => (typeof v === "number" ? (v >= 1 ? `${v} s` : `1/${Math.round(1 / v)} s`) : String(v)) },
+  {
+    key: "ExposureTime",
+    label: "Temps d'exposition",
+    format: (v) =>
+      typeof v === "number" ? (v >= 1 ? `${v} s` : `1/${Math.round(1 / v)} s`) : String(v),
+  },
   { key: "FNumber", label: "Ouverture", format: (v) => `f/${String(v)}` },
   { key: "ISO", label: "Sensibilité ISO" },
   { key: "FocalLength", label: "Focale", format: (v) => `${String(v)} mm` },
-  { key: "FocalLengthIn35mmFormat", label: "Focale équivalente 35 mm", format: (v) => `${String(v)} mm` },
+  {
+    key: "FocalLengthIn35mmFormat",
+    label: "Focale équivalente 35 mm",
+    format: (v) => `${String(v)} mm`,
+  },
   { key: "Flash", label: "Flash" },
   { key: "WhiteBalance", label: "Balance des blancs" },
   { key: "Orientation", label: "Orientation" },
@@ -126,12 +148,18 @@ const KNOWN: { key: string; label: string; sensitive?: boolean; format?: (v: unk
   { key: "OwnerName", label: "Propriétaire", sensitive: true },
   { key: "SerialNumber", label: "Numéro de série", sensitive: true },
   { key: "BodySerialNumber", label: "Numéro de série du boîtier", sensitive: true },
-  { key: "GPSAltitude", label: "Altitude GPS", sensitive: true, format: (v) => `${Math.round(Number(v))} m` },
+  {
+    key: "GPSAltitude",
+    label: "Altitude GPS",
+    sensitive: true,
+    format: (v) => `${Math.round(Number(v))} m`,
+  },
   { key: "GPSDateStamp", label: "Date GPS", sensitive: true },
 ];
 
 function formatDate(v: unknown): string {
-  if (v instanceof Date && !Number.isNaN(v.getTime())) return v.toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" });
+  if (v instanceof Date && !Number.isNaN(v.getTime()))
+    return v.toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" });
   return String(v);
 }
 
@@ -148,8 +176,20 @@ export function describeExif(tags: Record<string, unknown> | null | undefined): 
   }
   const lat = tags.latitude;
   const lon = tags.longitude;
-  const gps = typeof lat === "number" && typeof lon === "number" && Number.isFinite(lat) && Number.isFinite(lon) ? { latitude: lat, longitude: lon } : null;
-  if (gps) rows.unshift({ key: "GPS", label: "Position GPS", value: `${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)}`, sensitive: true });
+  const gps =
+    typeof lat === "number" &&
+    typeof lon === "number" &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lon)
+      ? { latitude: lat, longitude: lon }
+      : null;
+  if (gps)
+    rows.unshift({
+      key: "GPS",
+      label: "Position GPS",
+      value: `${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)}`,
+      sensitive: true,
+    });
   const total = Object.keys(tags).filter((k) => !["latitude", "longitude"].includes(k)).length;
   return { rows, gps, total };
 }
@@ -163,7 +203,9 @@ function stringify(value: unknown): string {
 }
 
 function readUint32(bytes: Uint8Array, pos: number): number {
-  return ((bytes[pos]! << 24) >>> 0) + (bytes[pos + 1]! << 16) + (bytes[pos + 2]! << 8) + bytes[pos + 3]!;
+  return (
+    ((bytes[pos]! << 24) >>> 0) + (bytes[pos + 1]! << 16) + (bytes[pos + 2]! << 8) + bytes[pos + 3]!
+  );
 }
 
 function concat(parts: Uint8Array[]): Uint8Array {

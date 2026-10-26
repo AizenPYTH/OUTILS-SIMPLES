@@ -1,13 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { describeJson, formatJson, minifyJson, validateJson } from "@/lib/dev/json";
-import { decodeBase64, decodeUrl, encodeBase64, encodeUrl, escapeHtml, unescapeHtml } from "@/lib/dev/encoding";
+import {
+  decodeBase64,
+  decodeUrl,
+  encodeBase64,
+  encodeUrl,
+  escapeHtml,
+  unescapeHtml,
+} from "@/lib/dev/encoding";
 import { generatePassword, generateUuid, passwordEntropyBits, sha256Hex } from "@/lib/dev/random";
 import { csvToJson, detectDelimiter, jsonToCsv, parseCsv } from "@/lib/dev/csv";
 
 describe("json", () => {
   it("validates and formats", () => {
-    expect(validateJson('{"a":[1,2,{"b":null}],"c":"é"}')).toEqual({ ok: true, value: { a: [1, 2, { b: null }], c: "é" } });
-    expect(formatJson('{"b":1,"a":{"z":2,"y":[3]}}', 2, true)).toBe('{\n  "a": {\n    "y": [\n      3\n    ],\n    "z": 2\n  },\n  "b": 1\n}');
+    expect(validateJson('{"a":[1,2,{"b":null}],"c":"é"}')).toEqual({
+      ok: true,
+      value: { a: [1, 2, { b: null }], c: "é" },
+    });
+    expect(formatJson('{"b":1,"a":{"z":2,"y":[3]}}', 2, true)).toBe(
+      '{\n  "a": {\n    "y": [\n      3\n    ],\n    "z": 2\n  },\n  "b": 1\n}',
+    );
     expect(minifyJson('{ "a" : 1 }')).toBe('{"a":1}');
     expect(describeJson([1, 2])).toBe("tableau de 2 élément(s)");
   });
@@ -41,14 +53,25 @@ describe("encodings", () => {
     expect(decodeUrl("a+b%20c")).toBe("a b c");
     expect(() => decodeUrl("%E0%A4%A")).toThrow();
     expect(escapeHtml('<a href="x">&</a>')).toBe("&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;");
-    expect(unescapeHtml("&lt;b&gt;caf&eacute; &#233; &#x1F600;&lt;/b&gt;")).toBe("<b>café é 😀</b>");
+    expect(unescapeHtml("&lt;b&gt;caf&eacute; &#233; &#x1F600;&lt;/b&gt;")).toBe(
+      "<b>café é 😀</b>",
+    );
   });
 });
 
 describe("random & hash", () => {
   it("generates valid uuids and passwords with required classes", () => {
-    expect(generateUuid()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
-    const options = { length: 20, lowercase: true, uppercase: true, digits: true, symbols: true, excludeAmbiguous: true };
+    expect(generateUuid()).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    );
+    const options = {
+      length: 20,
+      lowercase: true,
+      uppercase: true,
+      digits: true,
+      symbols: true,
+      excludeAmbiguous: true,
+    };
     for (let i = 0; i < 20; i += 1) {
       const pw = generatePassword(options);
       expect(pw).toHaveLength(20);
@@ -58,10 +81,20 @@ describe("random & hash", () => {
       expect(pw).not.toMatch(/[0O1lI|]/);
     }
     expect(passwordEntropyBits(options)).toBeGreaterThan(100);
-    expect(() => generatePassword({ ...options, lowercase: false, uppercase: false, digits: false, symbols: false })).toThrow();
+    expect(() =>
+      generatePassword({
+        ...options,
+        lowercase: false,
+        uppercase: false,
+        digits: false,
+        symbols: false,
+      }),
+    ).toThrow();
   });
   it("hashes with SHA-256", async () => {
-    expect(await sha256Hex("abc")).toBe("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+    expect(await sha256Hex("abc")).toBe(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    );
   });
 });
 
@@ -80,8 +113,24 @@ describe("csv", () => {
     ]);
   });
   it("serialises json to csv", () => {
-    expect(jsonToCsv([{ a: 1, b: "x;y" }, { a: 2, c: true }], ";")).toBe('a;b;c\n1;"x;y";\n2;;true');
+    expect(
+      jsonToCsv(
+        [
+          { a: 1, b: "x;y" },
+          { a: 2, c: true },
+        ],
+        ";",
+      ),
+    ).toBe('a;b;c\n1;"x;y";\n2;;true');
     expect(() => jsonToCsv("nope")).toThrow();
-    expect(jsonToCsv([[1, 2], [3, 4]], ",")).toBe("1,2\n3,4");
+    expect(
+      jsonToCsv(
+        [
+          [1, 2],
+          [3, 4],
+        ],
+        ",",
+      ),
+    ).toBe("1,2\n3,4");
   });
 });

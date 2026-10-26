@@ -6,11 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Segmented } from "@/components/pdf/shared/segmented";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
-import { encodeCanvas, flattenOnBackground, releaseCanvas, resizeCanvas } from "@/lib/images/canvas";
+import {
+  encodeCanvas,
+  flattenOnBackground,
+  releaseCanvas,
+  resizeCanvas,
+} from "@/lib/images/canvas";
 import { fitDimensions, outputExtensions, supportsTransparency } from "@/lib/images/types";
 import { deriveOutputName } from "@/lib/files/filename";
 import { ImageBatchTool } from "./image-batch-tool";
-import { FormatOptions, defaultFormatSettings, resolveFormat, type FormatSettings } from "./format-options";
+import {
+  FormatOptions,
+  defaultFormatSettings,
+  resolveFormat,
+  type FormatSettings,
+} from "./format-options";
 import type { BatchProcessor } from "./use-image-batch";
 
 const TOOL_ID = "image-resize";
@@ -46,10 +56,24 @@ export function ResizeImageTool() {
         canvas = flat;
         note = "transparence aplatie";
       }
-      if (mode === "exact" && Math.abs(dims.width / dims.height - source.width / source.height) > 0.01) note = (note ? `${note} · ` : "") + "proportions modifiées";
+      if (
+        mode === "exact" &&
+        Math.abs(dims.width / dims.height - source.width / source.height) > 0.01
+      )
+        note = (note ? `${note} · ` : "") + "proportions modifiées";
       const encoded = await encodeCanvas(canvas, target, format.quality);
       releaseCanvas(canvas);
-      return { blob: encoded.blob, name: deriveOutputName(item.file.name, `${dims.width}x${dims.height}`, outputExtensions[target]), width: dims.width, height: dims.height, note };
+      return {
+        blob: encoded.blob,
+        name: deriveOutputName(
+          item.file.name,
+          `${dims.width}x${dims.height}`,
+          outputExtensions[target],
+        ),
+        width: dims.width,
+        height: dims.height,
+        note,
+      };
     },
     [mode, percent, width, height, allowUpscale, format],
   );
@@ -57,7 +81,15 @@ export function ResizeImageTool() {
   const numberField = (id: string, label: string, value: number, set: (v: number) => void) => (
     <div className="space-y-1">
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} type="number" min={1} max={20000} value={value} onChange={(e) => set(Number(e.target.value) || 1)} className="w-32" />
+      <Input
+        id={id}
+        type="number"
+        min={1}
+        max={20000}
+        value={value}
+        onChange={(e) => set(Number(e.target.value) || 1)}
+        className="w-32"
+      />
     </div>
   );
 
@@ -83,12 +115,22 @@ export function ResizeImageTool() {
             ]}
           />
           <div className="flex flex-wrap items-end gap-4">
-            {mode === "percent" ? numberField("resize-percent", "Échelle (%)", percent, setPercent) : null}
-            {mode !== "percent" && mode !== "height" ? numberField("resize-width", "Largeur (px)", width, setWidth) : null}
-            {mode !== "percent" && mode !== "width" ? numberField("resize-height", "Hauteur (px)", height, setHeight) : null}
+            {mode === "percent"
+              ? numberField("resize-percent", "Échelle (%)", percent, setPercent)
+              : null}
+            {mode !== "percent" && mode !== "height"
+              ? numberField("resize-width", "Largeur (px)", width, setWidth)
+              : null}
+            {mode !== "percent" && mode !== "width"
+              ? numberField("resize-height", "Hauteur (px)", height, setHeight)
+              : null}
             {mode === "width" || mode === "height" ? (
               <div className="flex items-center gap-2 pb-2">
-                <Checkbox id="resize-upscale" checked={allowUpscale} onCheckedChange={(c) => setAllowUpscale(c === true)} />
+                <Checkbox
+                  id="resize-upscale"
+                  checked={allowUpscale}
+                  onCheckedChange={(c) => setAllowUpscale(c === true)}
+                />
                 <Label htmlFor="resize-upscale" className="font-normal">
                   Autoriser l&apos;agrandissement (perte de netteté)
                 </Label>

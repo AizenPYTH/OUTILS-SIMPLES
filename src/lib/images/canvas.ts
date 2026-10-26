@@ -49,7 +49,12 @@ export function context2d(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
   return ctx;
 }
 
-export function drawToCanvas(source: CanvasImageSource, width: number, height: number, background?: string): HTMLCanvasElement {
+export function drawToCanvas(
+  source: CanvasImageSource,
+  width: number,
+  height: number,
+  background?: string,
+): HTMLCanvasElement {
   const canvas = createCanvas(width, height);
   const ctx = context2d(canvas);
   if (background) {
@@ -63,7 +68,11 @@ export function drawToCanvas(source: CanvasImageSource, width: number, height: n
 }
 
 /** High-quality downscale in steps of at most 2× to avoid aliasing. */
-export function resizeCanvas(source: CanvasImageSource & { width: number; height: number }, width: number, height: number): HTMLCanvasElement {
+export function resizeCanvas(
+  source: CanvasImageSource & { width: number; height: number },
+  width: number,
+  height: number,
+): HTMLCanvasElement {
   let current: CanvasImageSource & { width: number; height: number } = source;
   let cw = source.width;
   let ch = source.height;
@@ -82,9 +91,17 @@ export function cropCanvas(source: CanvasImageSource, rect: CropRect): HTMLCanva
   return canvas;
 }
 
-export function rotateFlipCanvas(source: CanvasImageSource & { width: number; height: number }, rotation: 0 | 90 | 180 | 270, flipH = false, flipV = false): HTMLCanvasElement {
+export function rotateFlipCanvas(
+  source: CanvasImageSource & { width: number; height: number },
+  rotation: 0 | 90 | 180 | 270,
+  flipH = false,
+  flipV = false,
+): HTMLCanvasElement {
   const swap = rotation === 90 || rotation === 270;
-  const canvas = createCanvas(swap ? source.height : source.width, swap ? source.width : source.height);
+  const canvas = createCanvas(
+    swap ? source.height : source.width,
+    swap ? source.width : source.height,
+  );
   const ctx = context2d(canvas);
   ctx.translate(canvas.width / 2, canvas.height / 2);
   ctx.rotate((rotation * Math.PI) / 180);
@@ -102,7 +119,11 @@ export function getRgba(canvas: HTMLCanvasElement): RgbaImage {
 export function putRgba(img: RgbaImage): HTMLCanvasElement {
   const canvas = createCanvas(img.width, img.height);
   const ctx = context2d(canvas);
-  ctx.putImageData(new ImageData(img.data as Uint8ClampedArray<ArrayBuffer>, img.width, img.height), 0, 0);
+  ctx.putImageData(
+    new ImageData(img.data as Uint8ClampedArray<ArrayBuffer>, img.width, img.height),
+    0,
+    0,
+  );
   return canvas;
 }
 
@@ -128,16 +149,26 @@ export interface EncodeResult {
   format: ImageOutputFormat;
 }
 
-export async function encodeCanvas(canvas: HTMLCanvasElement, format: ImageOutputFormat, quality = 0.85): Promise<EncodeResult> {
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, format, format === "image/png" ? undefined : quality));
+export async function encodeCanvas(
+  canvas: HTMLCanvasElement,
+  format: ImageOutputFormat,
+  quality = 0.85,
+): Promise<EncodeResult> {
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, format, format === "image/png" ? undefined : quality),
+  );
   if (!blob) throw new Error("Encodage de l'image impossible.");
   // Some browsers silently fall back to PNG when WebP is unsupported.
-  if (blob.type !== format) throw new Error(`Le format ${format} n'est pas pris en charge par ce navigateur.`);
+  if (blob.type !== format)
+    throw new Error(`Le format ${format} n'est pas pris en charge par ce navigateur.`);
   return { blob, bytes: blob.size, format };
 }
 
 /** Flattens transparency on a background colour (needed before JPEG export). */
-export function flattenOnBackground(source: CanvasImageSource & { width: number; height: number }, color: string): HTMLCanvasElement {
+export function flattenOnBackground(
+  source: CanvasImageSource & { width: number; height: number },
+  color: string,
+): HTMLCanvasElement {
   return drawToCanvas(source, source.width, source.height, color);
 }
 
@@ -146,6 +177,12 @@ export function releaseCanvas(canvas: HTMLCanvasElement): void {
   canvas.height = 0;
 }
 
-export function canvasToBytes(canvas: HTMLCanvasElement, format: ImageOutputFormat, quality?: number): Promise<Uint8Array> {
-  return encodeCanvas(canvas, format, quality).then(async (r) => new Uint8Array(await r.blob.arrayBuffer()));
+export function canvasToBytes(
+  canvas: HTMLCanvasElement,
+  format: ImageOutputFormat,
+  quality?: number,
+): Promise<Uint8Array> {
+  return encodeCanvas(canvas, format, quality).then(
+    async (r) => new Uint8Array(await r.blob.arrayBuffer()),
+  );
 }

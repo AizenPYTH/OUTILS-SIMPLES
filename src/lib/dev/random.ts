@@ -65,7 +65,11 @@ export function generatePassword(options: PasswordOptions): string {
 export function passwordEntropyBits(options: PasswordOptions): number {
   const size = (["lowercase", "uppercase", "digits", "symbols"] as const)
     .filter((k) => options[k])
-    .reduce((sum, k) => sum + (options.excludeAmbiguous ? SETS[k].replace(AMBIGUOUS, "") : SETS[k]).length, 0);
+    .reduce(
+      (sum, k) =>
+        sum + (options.excludeAmbiguous ? SETS[k].replace(AMBIGUOUS, "") : SETS[k]).length,
+      0,
+    );
   return size > 0 ? Math.round(Math.log2(size) * options.length) : 0;
 }
 
@@ -82,7 +86,10 @@ export async function sha256Hex(input: string | Uint8Array): Promise<string> {
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-export async function hashHex(algorithm: "SHA-1" | "SHA-256" | "SHA-384" | "SHA-512", input: string | Uint8Array): Promise<string> {
+export async function hashHex(
+  algorithm: "SHA-1" | "SHA-256" | "SHA-384" | "SHA-512",
+  input: string | Uint8Array,
+): Promise<string> {
   const data = typeof input === "string" ? new TextEncoder().encode(input) : input;
   const digest = await crypto.subtle.digest(algorithm, data as BufferSource);
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");

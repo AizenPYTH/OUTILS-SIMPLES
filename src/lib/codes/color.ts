@@ -22,8 +22,39 @@ export interface Cmyk {
 }
 
 const NAMED: Record<string, string> = {
-  black: "#000000", white: "#ffffff", red: "#ff0000", green: "#008000", blue: "#0000ff", yellow: "#ffff00", orange: "#ffa500", purple: "#800080", pink: "#ffc0cb", gray: "#808080", grey: "#808080", silver: "#c0c0c0",
-  navy: "#000080", teal: "#008080", olive: "#808000", maroon: "#800000", lime: "#00ff00", aqua: "#00ffff", cyan: "#00ffff", magenta: "#ff00ff", fuchsia: "#ff00ff", brown: "#a52a2a", gold: "#ffd700", indigo: "#4b0082", violet: "#ee82ee", coral: "#ff7f50", salmon: "#fa8072", khaki: "#f0e68c", tomato: "#ff6347", turquoise: "#40e0d0", beige: "#f5f5dc", ivory: "#fffff0", crimson: "#dc143c",
+  black: "#000000",
+  white: "#ffffff",
+  red: "#ff0000",
+  green: "#008000",
+  blue: "#0000ff",
+  yellow: "#ffff00",
+  orange: "#ffa500",
+  purple: "#800080",
+  pink: "#ffc0cb",
+  gray: "#808080",
+  grey: "#808080",
+  silver: "#c0c0c0",
+  navy: "#000080",
+  teal: "#008080",
+  olive: "#808000",
+  maroon: "#800000",
+  lime: "#00ff00",
+  aqua: "#00ffff",
+  cyan: "#00ffff",
+  magenta: "#ff00ff",
+  fuchsia: "#ff00ff",
+  brown: "#a52a2a",
+  gold: "#ffd700",
+  indigo: "#4b0082",
+  violet: "#ee82ee",
+  coral: "#ff7f50",
+  salmon: "#fa8072",
+  khaki: "#f0e68c",
+  tomato: "#ff6347",
+  turquoise: "#40e0d0",
+  beige: "#f5f5dc",
+  ivory: "#fffff0",
+  crimson: "#dc143c",
 };
 
 const clamp255 = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
@@ -36,17 +67,35 @@ export function parseColor(input: string): Rgb | null {
   const hex = /^#?([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/.exec(s);
   if (hex) {
     let h = hex[1]!;
-    if (h.length <= 4) h = h.split("").map((c) => c + c).join("");
+    if (h.length <= 4)
+      h = h
+        .split("")
+        .map((c) => c + c)
+        .join("");
     const r = parseInt(h.slice(0, 2), 16);
     const g = parseInt(h.slice(2, 4), 16);
     const b = parseInt(h.slice(4, 6), 16);
     const a = h.length === 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1;
     return { r, g, b, a };
   }
-  const rgb = /^rgba?\(\s*([\d.]+)\s*,?\s*([\d.]+)\s*,?\s*([\d.]+)\s*(?:[,/]\s*([\d.]+%?)\s*)?\)$/.exec(s);
-  if (rgb) return { r: clamp255(Number(rgb[1])), g: clamp255(Number(rgb[2])), b: clamp255(Number(rgb[3])), a: parseAlpha(rgb[4]) };
-  const hsl = /^hsla?\(\s*([\d.]+)(?:deg)?\s*,?\s*([\d.]+)%\s*,?\s*([\d.]+)%\s*(?:[,/]\s*([\d.]+%?)\s*)?\)$/.exec(s);
-  if (hsl) return { ...hslToRgb({ h: Number(hsl[1]), s: Number(hsl[2]), l: Number(hsl[3]) }), a: parseAlpha(hsl[4]) };
+  const rgb =
+    /^rgba?\(\s*([\d.]+)\s*,?\s*([\d.]+)\s*,?\s*([\d.]+)\s*(?:[,/]\s*([\d.]+%?)\s*)?\)$/.exec(s);
+  if (rgb)
+    return {
+      r: clamp255(Number(rgb[1])),
+      g: clamp255(Number(rgb[2])),
+      b: clamp255(Number(rgb[3])),
+      a: parseAlpha(rgb[4]),
+    };
+  const hsl =
+    /^hsla?\(\s*([\d.]+)(?:deg)?\s*,?\s*([\d.]+)%\s*,?\s*([\d.]+)%\s*(?:[,/]\s*([\d.]+%?)\s*)?\)$/.exec(
+      s,
+    );
+  if (hsl)
+    return {
+      ...hslToRgb({ h: Number(hsl[1]), s: Number(hsl[2]), l: Number(hsl[3]) }),
+      a: parseAlpha(hsl[4]),
+    };
   return null;
 }
 
@@ -58,7 +107,13 @@ function parseAlpha(value: string | undefined): number {
 
 export function rgbToHex({ r, g, b, a }: Rgb, withAlpha = false): string {
   const hex = [r, g, b].map((v) => clamp255(v).toString(16).padStart(2, "0")).join("");
-  return `#${hex}${withAlpha && a < 1 ? clamp255(a * 255).toString(16).padStart(2, "0") : ""}`;
+  return `#${hex}${
+    withAlpha && a < 1
+      ? clamp255(a * 255)
+          .toString(16)
+          .padStart(2, "0")
+      : ""
+  }`;
 }
 
 export function rgbToHsl({ r, g, b }: Rgb): Hsl {
@@ -96,7 +151,12 @@ export function hslToRgb({ h, s, l }: Hsl): Rgb {
   else if (hp < 5) [r, g, b] = [x, 0, c];
   else [r, g, b] = [c, 0, x];
   const m = ln - c / 2;
-  return { r: clamp255((r + m) * 255), g: clamp255((g + m) * 255), b: clamp255((b + m) * 255), a: 1 };
+  return {
+    r: clamp255((r + m) * 255),
+    g: clamp255((g + m) * 255),
+    b: clamp255((b + m) * 255),
+    a: 1,
+  };
 }
 
 export function rgbToCmyk({ r, g, b }: Rgb): Cmyk {
@@ -105,7 +165,12 @@ export function rgbToCmyk({ r, g, b }: Rgb): Cmyk {
   const bn = b / 255;
   const k = 1 - Math.max(rn, gn, bn);
   if (k === 1) return { c: 0, m: 0, y: 0, k: 100 };
-  return { c: Math.round(((1 - rn - k) / (1 - k)) * 100), m: Math.round(((1 - gn - k) / (1 - k)) * 100), y: Math.round(((1 - bn - k) / (1 - k)) * 100), k: Math.round(k * 100) };
+  return {
+    c: Math.round(((1 - rn - k) / (1 - k)) * 100),
+    m: Math.round(((1 - gn - k) / (1 - k)) * 100),
+    y: Math.round(((1 - bn - k) / (1 - k)) * 100),
+    k: Math.round(k * 100),
+  };
 }
 
 export function formatRgb({ r, g, b, a }: Rgb): string {
@@ -113,7 +178,9 @@ export function formatRgb({ r, g, b, a }: Rgb): string {
 }
 
 export function formatHsl(hsl: Hsl, a = 1): string {
-  return a < 1 ? `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, ${Number(a.toFixed(2))})` : `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+  return a < 1
+    ? `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, ${Number(a.toFixed(2))})`
+    : `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
 }
 
 export function formatCmyk({ c, m, y, k }: Cmyk): string {
@@ -147,7 +214,14 @@ export interface WcagResult {
 
 export function wcagContrast(foreground: Rgb, background: Rgb): WcagResult {
   const ratio = contrastRatio(foreground, background);
-  return { ratio: Math.round(ratio * 100) / 100, aaNormal: ratio >= 4.5, aaLarge: ratio >= 3, aaaNormal: ratio >= 7, aaaLarge: ratio >= 4.5, uiComponents: ratio >= 3 };
+  return {
+    ratio: Math.round(ratio * 100) / 100,
+    aaNormal: ratio >= 4.5,
+    aaLarge: ratio >= 3,
+    aaaNormal: ratio >= 7,
+    aaaLarge: ratio >= 4.5,
+    uiComponents: ratio >= 3,
+  };
 }
 
 /** Lighter / darker variants and the complementary colour, handy for palettes. */

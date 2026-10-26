@@ -13,7 +13,14 @@ interface DownloadTextButtonProps extends Omit<ButtonProps, "onClick" | "childre
   toolId?: string;
 }
 
-export function DownloadTextButton({ text, filename, mimeType = "text/plain;charset=utf-8", label = "Télécharger", toolId, ...props }: DownloadTextButtonProps) {
+export function DownloadTextButton({
+  text,
+  filename,
+  mimeType = "text/plain;charset=utf-8",
+  label = "Télécharger",
+  toolId,
+  ...props
+}: DownloadTextButtonProps) {
   return (
     <Button
       type="button"

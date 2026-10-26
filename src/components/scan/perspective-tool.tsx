@@ -16,7 +16,12 @@ import { imagesToPdf } from "@/lib/pdf/operations/images-to-pdf";
 import { defaultQuad, detectQuadFromBitmap } from "@/lib/scan/detect-browser";
 import { polygonArea } from "@/lib/scan/detect";
 import type { Quad } from "@/lib/scan/geometry";
-import { encodeScanPage, renderScanPage, type ScanFilter, type ScanPageSettings } from "@/lib/scan/page-pipeline";
+import {
+  encodeScanPage,
+  renderScanPage,
+  type ScanFilter,
+  type ScanPageSettings,
+} from "@/lib/scan/page-pipeline";
 import { bytesToBlob, triggerDownload } from "@/lib/files/download";
 import { deriveOutputName } from "@/lib/files/filename";
 import { formatBytes } from "@/lib/files/format";
@@ -36,10 +41,21 @@ interface Loaded {
 export function PerspectiveTool() {
   const [loaded, setLoaded] = React.useState<Loaded | null>(null);
   const [quad, setQuad] = React.useState<Quad | null>(null);
-  const [settings, setSettings] = React.useState<Omit<ScanPageSettings, "quad" | "crop">>({ rotation: 0, filter: "document", brightness: 0, contrast: 10 });
+  const [settings, setSettings] = React.useState<Omit<ScanPageSettings, "quad" | "crop">>({
+    rotation: 0,
+    filter: "document",
+    brightness: 0,
+    contrast: 10,
+  });
   const [format, setFormat] = React.useState<ExportFormat>("jpg");
   const [busy, setBusy] = React.useState(false);
-  const [result, setResult] = React.useState<{ blob: Blob; name: string; url: string; width: number; height: number } | null>(null);
+  const [result, setResult] = React.useState<{
+    blob: Blob;
+    name: string;
+    url: string;
+    width: number;
+    height: number;
+  } | null>(null);
   const loadedRef = React.useRef<Loaded | null>(null);
   React.useEffect(() => {
     loadedRef.current = loaded;
@@ -68,7 +84,12 @@ export function PerspectiveTool() {
       const decoded = await decodeImage(file);
       release();
       const detection = detectQuadFromBitmap(decoded.bitmap);
-      setLoaded({ file, decoded, url: URL.createObjectURL(file), detected: detection?.confidence ?? null });
+      setLoaded({
+        file,
+        decoded,
+        url: URL.createObjectURL(file),
+        detected: detection?.confidence ?? null,
+      });
       setQuad(detection?.quad ?? defaultQuad(decoded.width, decoded.height));
       setResult(null);
       track("tool_start", { tool: TOOL_ID });
@@ -111,7 +132,11 @@ export function PerspectiveTool() {
       let blob: Blob;
       let name: string;
       if (format === "pdf") {
-        const pdf = await imagesToPdf([{ name: "page.jpg", bytes, mimeType: mime }], { pageSize: "fit-image", margin: 0, dpi: 200 });
+        const pdf = await imagesToPdf([{ name: "page.jpg", bytes, mimeType: mime }], {
+          pageSize: "fit-image",
+          margin: 0,
+          dpi: 200,
+        });
         blob = bytesToBlob(pdf, "application/pdf");
         name = deriveOutputName(loaded.file.name, "redresse", "pdf");
       } else {
@@ -119,7 +144,13 @@ export function PerspectiveTool() {
         name = deriveOutputName(loaded.file.name, "redresse", format);
       }
       if (result) URL.revokeObjectURL(result.url);
-      setResult({ blob, name, url: URL.createObjectURL(format === "pdf" ? bytesToBlob(bytes, mime) : blob), width, height });
+      setResult({
+        blob,
+        name,
+        url: URL.createObjectURL(format === "pdf" ? bytesToBlob(bytes, mime) : blob),
+        width,
+        height,
+      });
       track("tool_success", { tool: TOOL_ID });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Correction impossible.");
@@ -131,8 +162,20 @@ export function PerspectiveTool() {
   if (!loaded || !quad) {
     return (
       <div className="space-y-4">
-        <FileDropzone onFiles={(f) => f[0] && void load(f[0])} accept="image/*" validate={validateImageFile} title="Déposez la photo du document" hint={`JPG, PNG, WebP · ${formatBytes(IMAGE_MAX_SIZE)} max · la feuille doit être plus claire que le fond`} buttonLabel="Choisir ou photographier" capture="environment" testId="perspective-dropzone" />
-        <Alert variant="info">Pour plusieurs pages à la suite, utilisez plutôt « Scanner un document » ; cet outil se concentre sur une page avec un redressement précis.</Alert>
+        <FileDropzone
+          onFiles={(f) => f[0] && void load(f[0])}
+          accept="image/*"
+          validate={validateImageFile}
+          title="Déposez la photo du document"
+          hint={`JPG, PNG, WebP · ${formatBytes(IMAGE_MAX_SIZE)} max · la feuille doit être plus claire que le fond`}
+          buttonLabel="Choisir ou photographier"
+          capture="environment"
+          testId="perspective-dropzone"
+        />
+        <Alert variant="info">
+          Pour plusieurs pages à la suite, utilisez plutôt « Scanner un document » ; cet outil se
+          concentre sur une page avec un redressement précis.
+        </Alert>
       </div>
     );
   }
@@ -151,7 +194,12 @@ export function PerspectiveTool() {
       >
         <div className="flex justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
-          <img src={result.url} alt="Aperçu du document redressé" className="max-h-96 max-w-full rounded-md border border-border shadow-sm" data-testid="perspective-result" />
+          <img
+            src={result.url}
+            alt="Aperçu du document redressé"
+            className="max-h-96 max-w-full rounded-md border border-border shadow-sm"
+            data-testid="perspective-result"
+          />
         </div>
         <div className="mt-4 text-center">
           <Button type="button" variant="ghost" size="sm" onClick={() => setResult(null)}>
@@ -167,7 +215,9 @@ export function PerspectiveTool() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground">
           {loaded.file.name} · {loaded.decoded.width}×{loaded.decoded.height} px
-          {loaded.detected !== null ? ` · coins détectés (confiance ${Math.round(loaded.detected * 100)} %)` : " · coins à placer manuellement"}
+          {loaded.detected !== null
+            ? ` · coins détectés (confiance ${Math.round(loaded.detected * 100)} %)`
+            : " · coins à placer manuellement"}
         </p>
         <Button type="button" variant="outline" size="sm" onClick={reset}>
           <RefreshCw aria-hidden="true" /> Autre photo
@@ -176,24 +226,62 @@ export function PerspectiveTool() {
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="space-y-2">
           <p className="text-sm font-medium">1. Placez les quatre coins de la feuille</p>
-          <QuadEditor imageUrl={loaded.url} imageWidth={loaded.decoded.width} imageHeight={loaded.decoded.height} quad={quad} onChange={setQuad} />
+          <QuadEditor
+            imageUrl={loaded.url}
+            imageWidth={loaded.decoded.width}
+            imageHeight={loaded.decoded.height}
+            quad={quad}
+            onChange={setQuad}
+          />
           <div className="flex flex-wrap gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={redetect} data-testid="perspective-detect">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={redetect}
+              data-testid="perspective-detect"
+            >
               <Wand2 aria-hidden="true" /> Détecter les coins
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => setQuad([{ x: 0, y: 0 }, { x: loaded.decoded.width, y: 0 }, { x: loaded.decoded.width, y: loaded.decoded.height }, { x: 0, y: loaded.decoded.height }])}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setQuad([
+                  { x: 0, y: 0 },
+                  { x: loaded.decoded.width, y: 0 },
+                  { x: loaded.decoded.width, y: loaded.decoded.height },
+                  { x: 0, y: loaded.decoded.height },
+                ])
+              }
+            >
               <Maximize2 aria-hidden="true" /> Toute l&apos;image
             </Button>
           </div>
         </div>
         <div className="space-y-2">
           <p className="text-sm font-medium">2. Aperçu du résultat</p>
-          <WarpPreview bitmap={loaded.decoded.bitmap} settings={{ ...settings, quad, crop: null }} />
+          <WarpPreview
+            bitmap={loaded.decoded.bitmap}
+            settings={{ ...settings, quad, crop: null }}
+          />
         </div>
       </div>
       <ToolPanel className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={() => setSettings((s) => ({ ...s, rotation: ((s.rotation + 90) % 360) as 0 | 90 | 180 | 270 }))} data-testid="perspective-rotate">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setSettings((s) => ({
+                ...s,
+                rotation: ((s.rotation + 90) % 360) as 0 | 90 | 180 | 270,
+              }))
+            }
+            data-testid="perspective-rotate"
+          >
             <RotateCw aria-hidden="true" /> Pivoter le résultat
           </Button>
         </div>
@@ -212,15 +300,47 @@ export function PerspectiveTool() {
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
             <Label htmlFor="persp-brightness">Luminosité ({settings.brightness})</Label>
-            <input id="persp-brightness" type="range" min={-60} max={60} value={settings.brightness} onChange={(e) => setSettings((s) => ({ ...s, brightness: Number(e.target.value) }))} className="w-full accent-primary" />
+            <input
+              id="persp-brightness"
+              type="range"
+              min={-60}
+              max={60}
+              value={settings.brightness}
+              onChange={(e) => setSettings((s) => ({ ...s, brightness: Number(e.target.value) }))}
+              className="w-full accent-primary"
+            />
           </div>
           <div className="space-y-1">
             <Label htmlFor="persp-contrast">Contraste ({settings.contrast})</Label>
-            <input id="persp-contrast" type="range" min={-60} max={80} value={settings.contrast} onChange={(e) => setSettings((s) => ({ ...s, contrast: Number(e.target.value) }))} className="w-full accent-primary" />
+            <input
+              id="persp-contrast"
+              type="range"
+              min={-60}
+              max={80}
+              value={settings.contrast}
+              onChange={(e) => setSettings((s) => ({ ...s, contrast: Number(e.target.value) }))}
+              className="w-full accent-primary"
+            />
           </div>
         </div>
-        <Segmented label="Format d'export" value={format} onChange={setFormat} options={[{ value: "jpg", label: "JPG", description: "Léger, pour partager" }, { value: "png", label: "PNG", description: "Sans perte" }, { value: "pdf", label: "PDF", description: "Une page à la taille de l'image" }]} />
-        <Button type="button" size="lg" className="w-full" onClick={() => void run()} loading={busy} data-testid="perspective-run">
+        <Segmented
+          label="Format d'export"
+          value={format}
+          onChange={setFormat}
+          options={[
+            { value: "jpg", label: "JPG", description: "Léger, pour partager" },
+            { value: "png", label: "PNG", description: "Sans perte" },
+            { value: "pdf", label: "PDF", description: "Une page à la taille de l'image" },
+          ]}
+        />
+        <Button
+          type="button"
+          size="lg"
+          className="w-full"
+          onClick={() => void run()}
+          loading={busy}
+          data-testid="perspective-run"
+        >
           <ScanLine aria-hidden="true" /> Redresser et exporter
         </Button>
       </ToolPanel>
@@ -253,8 +373,15 @@ function WarpPreview({ bitmap, settings }: { bitmap: ImageBitmap; settings: Scan
     };
   }, [bitmap, key, settings]);
   return (
-    <div className="flex min-h-[240px] items-center justify-center rounded-[6px] border border-border bg-muted/60 p-2" data-testid="perspective-preview">
-      <canvas ref={canvasRef} className="max-h-[60vh] max-w-full rounded-[4px] shadow-md" aria-label="Aperçu du document redressé" />
+    <div
+      className="flex min-h-[240px] items-center justify-center rounded-[6px] border border-border bg-muted/60 p-2"
+      data-testid="perspective-preview"
+    >
+      <canvas
+        ref={canvasRef}
+        className="max-h-[60vh] max-w-full rounded-[4px] shadow-md"
+        aria-label="Aperçu du document redressé"
+      />
     </div>
   );
 }

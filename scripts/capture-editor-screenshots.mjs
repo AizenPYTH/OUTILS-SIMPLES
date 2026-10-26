@@ -14,11 +14,15 @@ const base = process.env.BASE_URL ?? "http://127.0.0.1:3200";
 
 const browser = await chromium.launch();
 const shot = (page, name) => page.screenshot({ path: path.join(outDir, `${name}.png`) });
-const upload = (page, name) => page.setInputFiles('[data-testid="pdf-input"]', path.join(fixtures, name));
+const upload = (page, name) =>
+  page.setInputFiles('[data-testid="pdf-input"]', path.join(fixtures, name));
 
 // Desktop
 {
-  const context = await browser.newContext({ viewport: { width: 1366, height: 860 }, deviceScaleFactor: 1 });
+  const context = await browser.newContext({
+    viewport: { width: 1366, height: 860 },
+    deviceScaleFactor: 1,
+  });
   const page = await context.newPage();
   await page.goto(`${base}/pdf/modifier/`);
   await upload(page, "protected-user.pdf");
@@ -29,13 +33,18 @@ const upload = (page, name) => page.setInputFiles('[data-testid="pdf-input"]', p
   await page.getByTestId("editor-shell").waitFor({ timeout: 60_000 });
   await page.getByTestId("tool-editText").first().click();
   await page.getByTestId("text-run").first().waitFor({ timeout: 20_000 });
-  await page.getByRole("button", { name: "Afficher toutes les zones de texte modifiables" }).click();
+  await page
+    .getByRole("button", { name: "Afficher toutes les zones de texte modifiables" })
+    .click();
   await page.waitForTimeout(400);
   await shot(page, "02-editeur-texte-natif-zones");
   await page.getByTestId("text-run").first().click();
   await page.getByTestId("text-run-editor").fill("Titre corrigé");
   await page.getByTestId("text-run-editor").press("Enter");
-  await page.locator('[data-testid="text-run"][data-edited="true"]').first().waitFor({ timeout: 20_000 });
+  await page
+    .locator('[data-testid="text-run"][data-edited="true"]')
+    .first()
+    .waitFor({ timeout: 20_000 });
   await page.getByTestId("page-item-1").hover();
   await page.waitForTimeout(300);
   await shot(page, "03-texte-modifie-panneau-pages");
@@ -61,8 +70,13 @@ const upload = (page, name) => page.setInputFiles('[data-testid="pdf-input"]', p
   await page.getByTestId("ocr-progress").waitFor();
   await shot(page, "08-ocr-en-cours");
   await page.getByTestId("ocr-layer-summary").waitFor({ timeout: 120_000 });
-  await page.locator('[data-testid="text-run"][data-kind="ocr"]').first().waitFor({ timeout: 20_000 });
-  await page.getByRole("button", { name: "Afficher toutes les zones de texte modifiables" }).click();
+  await page
+    .locator('[data-testid="text-run"][data-kind="ocr"]')
+    .first()
+    .waitFor({ timeout: 20_000 });
+  await page
+    .getByRole("button", { name: "Afficher toutes les zones de texte modifiables" })
+    .click();
   await page.waitForTimeout(400);
   await shot(page, "09-ocr-termine-zones-reconnues");
   await page.locator('[data-testid="text-run"][data-kind="ocr"]').nth(2).click();

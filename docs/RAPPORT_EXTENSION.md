@@ -71,12 +71,12 @@ Seyès, millimétré, isométrique, musique) · Calendrier mensuel / annuel · P
 
 ## 4. Vérifications réellement exécutées (dernier passage complet)
 
-| Commande         | Résultat                                                                              |
-| ---------------- | ------------------------------------------------------------------------------------- |
-| `pnpm typecheck` | 0 erreur (`next typegen` + `tsc --noEmit`, TypeScript strict)                         |
-| `pnpm lint`      | 0 erreur, 0 avertissement                                                             |
-| `pnpm test`      | 121 tests Vitest, 13 fichiers, tous verts                                             |
-| `pnpm build`     | 96 pages statiques générées                                                           |
+| Commande         | Résultat                                                                                                                            |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm typecheck` | 0 erreur (`next typegen` + `tsc --noEmit`, TypeScript strict)                                                                       |
+| `pnpm lint`      | 0 erreur, 0 avertissement                                                                                                           |
+| `pnpm test`      | 121 tests Vitest, 13 fichiers, tous verts                                                                                           |
+| `pnpm build`     | 96 pages statiques générées                                                                                                         |
 | `pnpm test:e2e`  | 56 parcours Playwright × 2 projets (desktop, mobile Pixel 7) : tous verts, 4 ignorés volontairement sur mobile (raccourcis clavier) |
 
 Les parcours e2e vérifient les fichiers téléchargés (pdf-lib, pdf.js : nombre de pages, texte présent ou
@@ -91,18 +91,18 @@ avec un test de balayage mobile pour éviter la régression).
 
 ## 5. Bibliothèques ajoutées, licences et raisons
 
-| Bibliothèque                                 | Licence              | Raison                                                                                     |
-| -------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------ |
-| tesseract.js 7 + tesseract.js-core 7         | Apache-2.0           | OCR dans le navigateur (WebAssembly), seule option open source mature côté client          |
-| @tesseract.js-data/fra, /eng                 | Apache-2.0           | Modèles de langue auto-hébergés (aucun téléchargement depuis un CDN tiers)                 |
-| @neslinesli93/qpdf-wasm                      | ISC (qpdf : Apache-2.0) | Chiffrement AES-256, déverrouillage et vérification de PDF ; pdf-lib ne chiffre pas       |
-| qrcode                                       | MIT                  | Génération de QR codes (PNG, SVG)                                                          |
-| jsqr                                         | Apache-2.0           | Décodage de QR codes à partir de pixels                                                    |
-| diff                                         | BSD-3-Clause         | Algorithme de Myers pour les comparaisons de textes et de PDF                              |
-| exifr                                        | MIT                  | Lecture EXIF/XMP/IPTC rapide ; la suppression est réalisée par notre propre code           |
-| marked                                       | MIT                  | Analyse Markdown (jetons) pour la mise en page PDF et l'aperçu                             |
-| dompurify                                    | MPL-2.0 / Apache-2.0 | Assainissement de l'aperçu HTML du Markdown                                                |
-| @types/qrcode (dev)                          | MIT                  | Typages                                                                                    |
+| Bibliothèque                         | Licence                 | Raison                                                                              |
+| ------------------------------------ | ----------------------- | ----------------------------------------------------------------------------------- |
+| tesseract.js 7 + tesseract.js-core 7 | Apache-2.0              | OCR dans le navigateur (WebAssembly), seule option open source mature côté client   |
+| @tesseract.js-data/fra, /eng         | Apache-2.0              | Modèles de langue auto-hébergés (aucun téléchargement depuis un CDN tiers)          |
+| @neslinesli93/qpdf-wasm              | ISC (qpdf : Apache-2.0) | Chiffrement AES-256, déverrouillage et vérification de PDF ; pdf-lib ne chiffre pas |
+| qrcode                               | MIT                     | Génération de QR codes (PNG, SVG)                                                   |
+| jsqr                                 | Apache-2.0              | Décodage de QR codes à partir de pixels                                             |
+| diff                                 | BSD-3-Clause            | Algorithme de Myers pour les comparaisons de textes et de PDF                       |
+| exifr                                | MIT                     | Lecture EXIF/XMP/IPTC rapide ; la suppression est réalisée par notre propre code    |
+| marked                               | MIT                     | Analyse Markdown (jetons) pour la mise en page PDF et l'aperçu                      |
+| dompurify                            | MPL-2.0 / Apache-2.0    | Assainissement de l'aperçu HTML du Markdown                                         |
+| @types/qrcode (dev)                  | MIT                     | Typages                                                                             |
 
 Écrit sans dépendance : encodeur PNG, encodeurs de codes-barres, homographie et détection de coins,
 filtres d'image (Otsu, document, palette), extraction d'images PDF, mise en page Markdown → PDF,
@@ -142,16 +142,16 @@ modèles fra 6,3 Mo et eng 10,9 Mo compressés ; qpdf 1,3 Mo. Tout est chargé
 
 Aucune API payante n'est utilisée et aucune ne l'est par défaut.
 
-| Poste                                      | Obligatoire ? | Estimation                                                                                         |
-| ------------------------------------------ | ------------- | -------------------------------------------------------------------------------------------------- |
-| Nom de domaine                             | Oui           | 10–15 €/an                                                                                         |
-| Hébergement statique (Vercel, Netlify, Cloudflare Pages, VPS) | Oui | 0 € sur les offres gratuites tant que le trafic reste modeste ; 20 €/mois environ au-delà (offre Pro) ou 5–10 €/mois pour un VPS |
-| Bande passante                              | Oui (incluse ou facturée) | Un utilisateur OCR télécharge jusqu'à ≈ 13 Mo (moteur + modèle français), ≈ 5 Mo pour pdf.js ; à surveiller si l'OCR devient populaire, ou servir ces actifs depuis un CDN avec cache long (déjà en-têtes immuables côté Next) |
-| Certificat HTTPS                            | Oui           | 0 € (Let's Encrypt / inclus chez l'hébergeur)                                                      |
-| Mesure d'audience                           | Non           | 0 € (GA4) ou ≈ 9 €/mois (Plausible), chargée uniquement après consentement                        |
-| CMP certifiée (obligatoire seulement si publicité en EEE) | Non | 0–50 €/mois selon le trafic                                                           |
-| Publicité AdSense, affiliation              | Non           | Gratuit à mettre en place (revenu, pas coût)                                                       |
-| Maintenance des dépendances                 | Oui (temps)   | Quelques heures par trimestre (mises à jour pdf.js, Tesseract, Next)                               |
+| Poste                                                         | Obligatoire ?             | Estimation                                                                                                                                                                                                                     |
+| ------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Nom de domaine                                                | Oui                       | 10–15 €/an                                                                                                                                                                                                                     |
+| Hébergement statique (Vercel, Netlify, Cloudflare Pages, VPS) | Oui                       | 0 € sur les offres gratuites tant que le trafic reste modeste ; 20 €/mois environ au-delà (offre Pro) ou 5–10 €/mois pour un VPS                                                                                               |
+| Bande passante                                                | Oui (incluse ou facturée) | Un utilisateur OCR télécharge jusqu'à ≈ 13 Mo (moteur + modèle français), ≈ 5 Mo pour pdf.js ; à surveiller si l'OCR devient populaire, ou servir ces actifs depuis un CDN avec cache long (déjà en-têtes immuables côté Next) |
+| Certificat HTTPS                                              | Oui                       | 0 € (Let's Encrypt / inclus chez l'hébergeur)                                                                                                                                                                                  |
+| Mesure d'audience                                             | Non                       | 0 € (GA4) ou ≈ 9 €/mois (Plausible), chargée uniquement après consentement                                                                                                                                                     |
+| CMP certifiée (obligatoire seulement si publicité en EEE)     | Non                       | 0–50 €/mois selon le trafic                                                                                                                                                                                                    |
+| Publicité AdSense, affiliation                                | Non                       | Gratuit à mettre en place (revenu, pas coût)                                                                                                                                                                                   |
+| Maintenance des dépendances                                   | Oui (temps)               | Quelques heures par trimestre (mises à jour pdf.js, Tesseract, Next)                                                                                                                                                           |
 
 Total minimal : le prix du domaine, soit environ 1 €/mois ; configuration confortable avec hébergement
 Pro et Plausible : environ 30 €/mois.

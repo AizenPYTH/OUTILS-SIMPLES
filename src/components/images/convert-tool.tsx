@@ -3,15 +3,30 @@
 import * as React from "react";
 import { Alert } from "@/components/ui/alert";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
-import { drawToCanvas, encodeCanvas, flattenOnBackground, releaseCanvas } from "@/lib/images/canvas";
+import {
+  drawToCanvas,
+  encodeCanvas,
+  flattenOnBackground,
+  releaseCanvas,
+} from "@/lib/images/canvas";
 import { outputExtensions, supportsTransparency, type ImageOutputFormat } from "@/lib/images/types";
 import { deriveOutputName, stripExtension } from "@/lib/files/filename";
 import { ImageBatchTool } from "./image-batch-tool";
 import { FormatOptions, type FormatSettings } from "./format-options";
 import type { BatchProcessor } from "./use-image-batch";
 
-export function ConvertImageTool({ defaultFormat = "image/png", toolId = "image-convert" }: { defaultFormat?: ImageOutputFormat; toolId?: string }) {
-  const [format, setFormat] = React.useState<FormatSettings>({ format: defaultFormat, quality: 0.9, background: "#ffffff" });
+export function ConvertImageTool({
+  defaultFormat = "image/png",
+  toolId = "image-convert",
+}: {
+  defaultFormat?: ImageOutputFormat;
+  toolId?: string;
+}) {
+  const [format, setFormat] = React.useState<FormatSettings>({
+    format: defaultFormat,
+    quality: 0.9,
+    background: "#ffffff",
+  });
 
   const processor: BatchProcessor = React.useCallback(
     async (item, decoded) => {
@@ -27,7 +42,13 @@ export function ConvertImageTool({ defaultFormat = "image/png", toolId = "image-
       if (decoded.type === "image/gif") note = (note ? `${note} · ` : "") + "première image du GIF";
       const encoded = await encodeCanvas(canvas, target, format.quality);
       releaseCanvas(canvas);
-      return { blob: encoded.blob, name: `${stripExtension(deriveOutputName(item.file.name, ""))}.${outputExtensions[target]}`, width: decoded.width, height: decoded.height, note };
+      return {
+        blob: encoded.blob,
+        name: `${stripExtension(deriveOutputName(item.file.name, ""))}.${outputExtensions[target]}`,
+        width: decoded.width,
+        height: decoded.height,
+        note,
+      };
     },
     [format],
   );
@@ -41,7 +62,10 @@ export function ConvertImageTool({ defaultFormat = "image/png", toolId = "image-
       options={
         <ToolPanel className="space-y-4">
           <FormatOptions value={format} onChange={setFormat} allowSame={false} idPrefix="convert" />
-          <Alert variant="info">Formats lus par le navigateur : JPG, PNG, WebP, GIF (première image), BMP, AVIF et SVG (rendu en pixels). HEIC et TIFF ne sont pas pris en charge.</Alert>
+          <Alert variant="info">
+            Formats lus par le navigateur : JPG, PNG, WebP, GIF (première image), BMP, AVIF et SVG
+            (rendu en pixels). HEIC et TIFF ne sont pas pris en charge.
+          </Alert>
         </ToolPanel>
       }
     />

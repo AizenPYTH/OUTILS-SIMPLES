@@ -3,18 +3,56 @@ import QRCode from "qrcode";
 import { PDFDocument } from "pdf-lib";
 import { REGEX_PRESETS, replaceWithRegex, runRegex, segmentMatches } from "@/lib/dev/regex";
 import { describeInstant, isoWeek, parseInstant } from "@/lib/dev/timestamp";
-import { FRENCH_VAT_RATES, applyPercent, beforePercent, parseNumber, percentChange, percentOf, vatFromHt, vatFromTtc, whatPercent } from "@/lib/calc/percent";
-import { addBusinessDays, businessDaysBetween, day, durationBetween, easterSunday, frenchPublicHolidays, parseDay, toIsoDay } from "@/lib/calc/dates";
+import {
+  FRENCH_VAT_RATES,
+  applyPercent,
+  beforePercent,
+  parseNumber,
+  percentChange,
+  percentOf,
+  vatFromHt,
+  vatFromTtc,
+  whatPercent,
+} from "@/lib/calc/percent";
+import {
+  addBusinessDays,
+  businessDaysBetween,
+  day,
+  durationBetween,
+  easterSunday,
+  frenchPublicHolidays,
+  parseDay,
+  toIsoDay,
+} from "@/lib/calc/dates";
 import { UNIT_CATEGORIES, convertUnit, formatConverted } from "@/lib/calc/units";
-import { BARCODE_TYPES, CODE128_PATTERNS, CODE39, barcodeToSvg, eanCheckDigit, encodeBarcode } from "@/lib/codes/barcode";
-import { contrastRatio, hslToRgb, parseColor, rgbToCmyk, rgbToHex, rgbToHsl, wcagContrast } from "@/lib/codes/color";
+import {
+  BARCODE_TYPES,
+  CODE128_PATTERNS,
+  CODE39,
+  barcodeToSvg,
+  eanCheckDigit,
+  encodeBarcode,
+} from "@/lib/codes/barcode";
+import {
+  contrastRatio,
+  hslToRgb,
+  parseColor,
+  rgbToCmyk,
+  rgbToHex,
+  rgbToHsl,
+  wcagContrast,
+} from "@/lib/codes/color";
 import { classifyQr, decodeQrFromRgba, parseWifiPayload } from "@/lib/codes/qr-read";
 import { calendarPdf, coverPagePdf, paperPdf } from "@/lib/pdf/operations/printables";
 import { extractPageText } from "../helpers";
 
 describe("regex tester", () => {
   it("lists matches with groups and highlights segments", () => {
-    const result = runRegex("(\\d{2})/(\\d{2})/(?<year>\\d{4})", "g", "Le 12/03/2026 puis le 01/01/2027.");
+    const result = runRegex(
+      "(\\d{2})/(\\d{2})/(?<year>\\d{4})",
+      "g",
+      "Le 12/03/2026 puis le 01/01/2027.",
+    );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.matches).toHaveLength(2);
@@ -30,9 +68,17 @@ describe("regex tester", () => {
     const empty = runRegex("a*", "g", "bbb", 10);
     expect(empty.ok && empty.matches.length).toBe(4);
     expect(runRegex("b", "", "bbb")).toMatchObject({ ok: true, matches: [{ index: 0 }] });
-    expect(replaceWithRegex("(\\w+)@(\\w+)", "g", "a@b", "$2@$1")).toEqual({ ok: true, result: "b@a" });
-    for (const preset of REGEX_PRESETS) expect(runRegex(preset.pattern, preset.flags, "test").ok).toBe(true);
-    const email = runRegex(REGEX_PRESETS[0]!.pattern, REGEX_PRESETS[0]!.flags, "Écrire à jean.dupont@exemple.fr vite");
+    expect(replaceWithRegex("(\\w+)@(\\w+)", "g", "a@b", "$2@$1")).toEqual({
+      ok: true,
+      result: "b@a",
+    });
+    for (const preset of REGEX_PRESETS)
+      expect(runRegex(preset.pattern, preset.flags, "test").ok).toBe(true);
+    const email = runRegex(
+      REGEX_PRESETS[0]!.pattern,
+      REGEX_PRESETS[0]!.flags,
+      "Écrire à jean.dupont@exemple.fr vite",
+    );
     expect(email.ok && email.matches[0]!.text).toBe("jean.dupont@exemple.fr");
   });
 });
@@ -84,13 +130,28 @@ describe("dates", () => {
     expect(toIsoDay(easterSunday(2024))).toBe("2024-03-31");
     const holidays = frenchPublicHolidays(2026);
     expect(holidays).toHaveLength(11);
-    expect(holidays.find((h) => h.name === "Ascension") && toIsoDay(holidays.find((h) => h.name === "Ascension")!.date)).toBe("2026-05-14");
+    expect(
+      holidays.find((h) => h.name === "Ascension") &&
+        toIsoDay(holidays.find((h) => h.name === "Ascension")!.date),
+    ).toBe("2026-05-14");
     expect(frenchPublicHolidays(2026, true)).toHaveLength(13);
     const d = durationBetween(day(2024, 1, 31), day(2026, 3, 1));
     expect(d).toMatchObject({ years: 2, months: 1, days: 1, totalDays: 760 });
-    expect(durationBetween(day(2024, 1, 31), day(2024, 2, 29))).toMatchObject({ years: 0, months: 1, days: 0 });
-    expect(durationBetween(day(2024, 1, 31), day(2024, 2, 28))).toMatchObject({ years: 0, months: 0, days: 28 });
-    expect(durationBetween(day(2024, 1, 15), day(2024, 2, 15))).toMatchObject({ years: 0, months: 1, days: 0 });
+    expect(durationBetween(day(2024, 1, 31), day(2024, 2, 29))).toMatchObject({
+      years: 0,
+      months: 1,
+      days: 0,
+    });
+    expect(durationBetween(day(2024, 1, 31), day(2024, 2, 28))).toMatchObject({
+      years: 0,
+      months: 0,
+      days: 28,
+    });
+    expect(durationBetween(day(2024, 1, 15), day(2024, 2, 15))).toMatchObject({
+      years: 0,
+      months: 1,
+      days: 0,
+    });
     expect(durationBetween(day(2026, 3, 1), day(2024, 1, 31)).negative).toBe(true);
     expect(parseDay("2026-02-30")).toBeNull();
     expect(toIsoDay(parseDay("12/03/2026")!)).toBe("2026-03-12");
@@ -98,14 +159,28 @@ describe("dates", () => {
 
   it("counts and adds business days with French holidays", () => {
     // May 2026: 1 (Fri, holiday), 8 (Fri, holiday), 14 (Thu, Ascension), 25 (Mon, Pentecôte).
-    const result = businessDaysBetween(day(2026, 5, 1), day(2026, 5, 31), { excludeHolidays: true });
+    const result = businessDaysBetween(day(2026, 5, 1), day(2026, 5, 31), {
+      excludeHolidays: true,
+    });
     expect(result.businessDays).toBe(17);
     expect(result.weekendDays).toBe(10);
-    expect(result.holidays.map((h) => h.name)).toEqual(["Fête du Travail", "Victoire 1945", "Ascension", "Lundi de Pentecôte"]);
-    expect(businessDaysBetween(day(2026, 5, 1), day(2026, 5, 31), { excludeHolidays: false }).businessDays).toBe(21);
+    expect(result.holidays.map((h) => h.name)).toEqual([
+      "Fête du Travail",
+      "Victoire 1945",
+      "Ascension",
+      "Lundi de Pentecôte",
+    ]);
+    expect(
+      businessDaysBetween(day(2026, 5, 1), day(2026, 5, 31), { excludeHolidays: false })
+        .businessDays,
+    ).toBe(21);
     // Friday 2026-05-07 + 1 business day → Monday 11 (8 May is a holiday).
-    expect(toIsoDay(addBusinessDays(day(2026, 5, 7), 1, { excludeHolidays: true }))).toBe("2026-05-11");
-    expect(toIsoDay(addBusinessDays(day(2026, 5, 11), -1, { excludeHolidays: true }))).toBe("2026-05-07");
+    expect(toIsoDay(addBusinessDays(day(2026, 5, 7), 1, { excludeHolidays: true }))).toBe(
+      "2026-05-11",
+    );
+    expect(toIsoDay(addBusinessDays(day(2026, 5, 11), -1, { excludeHolidays: true }))).toBe(
+      "2026-05-07",
+    );
   });
 });
 
@@ -130,7 +205,9 @@ describe("units", () => {
 describe("barcodes", () => {
   it("has consistent symbol tables", () => {
     expect(CODE128_PATTERNS).toHaveLength(107);
-    CODE128_PATTERNS.slice(0, 106).forEach((p) => expect(p.split("").reduce((s, c) => s + Number(c), 0)).toBe(11));
+    CODE128_PATTERNS.slice(0, 106).forEach((p) =>
+      expect(p.split("").reduce((s, c) => s + Number(c), 0)).toBe(11),
+    );
     expect(CODE128_PATTERNS[106]!.split("").reduce((s, c) => s + Number(c), 0)).toBe(13);
     for (const pattern of Object.values(CODE39)) {
       expect(pattern).toHaveLength(9);
@@ -146,7 +223,10 @@ describe("barcodes", () => {
     expect(ean.ok && ean.barcode.modules).toHaveLength(95);
     expect(ean.ok && ean.barcode.text).toBe("4006381333931");
     expect(encodeBarcode("ean13", "4006381333930")).toMatchObject({ ok: false });
-    expect(encodeBarcode("ean13", "400638133393")).toMatchObject({ ok: true, barcode: { text: "4006381333931" } });
+    expect(encodeBarcode("ean13", "400638133393")).toMatchObject({
+      ok: true,
+      barcode: { text: "4006381333931" },
+    });
     const ean8 = encodeBarcode("ean8", "9638507");
     expect(ean8.ok && ean8.barcode.text).toBe("96385074");
     expect(ean8.ok && ean8.barcode.modules).toHaveLength(67);
@@ -204,8 +284,16 @@ describe("colours", () => {
     const black = parseColor("#000")!;
     const white = parseColor("#fff")!;
     expect(contrastRatio(black, white)).toBeCloseTo(21, 1);
-    expect(wcagContrast(parseColor("#777")!, white)).toMatchObject({ aaNormal: false, aaLarge: true, ratio: 4.48 });
-    expect(wcagContrast(parseColor("#767676")!, white)).toMatchObject({ aaNormal: true, aaaNormal: false, ratio: 4.54 });
+    expect(wcagContrast(parseColor("#777")!, white)).toMatchObject({
+      aaNormal: false,
+      aaLarge: true,
+      ratio: 4.48,
+    });
+    expect(wcagContrast(parseColor("#767676")!, white)).toMatchObject({
+      aaNormal: true,
+      aaaNormal: false,
+      ratio: 4.54,
+    });
     expect(wcagContrast(parseColor("#5146e5")!, white).aaNormal).toBe(true);
   });
 });
@@ -241,7 +329,12 @@ describe("qr reading", () => {
     const wifi = await qrPixels("WIFI:T:WPA;S:Ma\\;Box;P:secret;;");
     const decodedWifi = decodeQrFromRgba(wifi.data, wifi.size, wifi.size);
     expect(decodedWifi?.kind).toBe("wifi");
-    expect(parseWifiPayload(decodedWifi!.text)).toEqual({ ssid: "Ma;Box", password: "secret", security: "WPA", hidden: false });
+    expect(parseWifiPayload(decodedWifi!.text)).toEqual({
+      ssid: "Ma;Box",
+      password: "secret",
+      security: "WPA",
+      hidden: false,
+    });
     expect(classifyQr("BEGIN:VCARD\nFN:X")).toBe("vcard");
     expect(classifyQr("bonjour")).toBe("text");
     expect(decodeQrFromRgba(new Uint8ClampedArray(64 * 64 * 4).fill(255), 64, 64)).toBeNull();
@@ -250,24 +343,60 @@ describe("qr reading", () => {
 
 describe("printables", () => {
   it("generates paper, calendars and cover pages", async () => {
-    const paper = await paperPdf({ kind: "grid", spacingMm: 5, page: "a4", marginMm: 10, color: "#9aa3b2", pages: 2, title: "Quadrillage 5 mm" });
+    const paper = await paperPdf({
+      kind: "grid",
+      spacingMm: 5,
+      page: "a4",
+      marginMm: 10,
+      color: "#9aa3b2",
+      pages: 2,
+      title: "Quadrillage 5 mm",
+    });
     const paperDoc = await PDFDocument.load(paper);
     expect(paperDoc.getPageCount()).toBe(2);
     expect((await extractPageText(paper, 0)).join(" ")).toContain("Quadrillage 5 mm");
     for (const kind of ["lines", "dots", "seyes", "millimeter", "isometric", "music"] as const) {
-      const bytes = await paperPdf({ kind, spacingMm: 7, page: "a5", marginMm: 8, color: "#000", pages: 1 });
+      const bytes = await paperPdf({
+        kind,
+        spacingMm: 7,
+        page: "a5",
+        marginMm: 8,
+        color: "#000",
+        pages: 1,
+      });
       expect((await PDFDocument.load(bytes)).getPageCount()).toBe(1);
     }
-    const month = await calendarPdf({ year: 2026, month: 5, holidays: true, notes: true, page: "a4-landscape" });
+    const month = await calendarPdf({
+      year: 2026,
+      month: 5,
+      holidays: true,
+      notes: true,
+      page: "a4-landscape",
+    });
     const monthText = (await extractPageText(month, 0)).join(" ");
     expect(monthText).toContain("Mai 2026");
     expect(monthText).toContain("Ascension");
     expect(monthText).toContain("31");
-    const year = await calendarPdf({ year: 2027, month: null, holidays: true, notes: false, page: "a4" });
+    const year = await calendarPdf({
+      year: 2027,
+      month: null,
+      holidays: true,
+      notes: false,
+      page: "a4",
+    });
     const yearText = (await extractPageText(year, 0)).join(" ");
     expect(yearText).toContain("2027");
     expect(yearText).toContain("Décembre");
-    const cover = await coverPagePdf({ title: "Rapport de stage", subtitle: "Développement web", author: "Camille Martin", institution: "Université", date: "Juin 2026", footer: "Confidentiel", page: "a4", accent: "#5146e5" });
+    const cover = await coverPagePdf({
+      title: "Rapport de stage",
+      subtitle: "Développement web",
+      author: "Camille Martin",
+      institution: "Université",
+      date: "Juin 2026",
+      footer: "Confidentiel",
+      page: "a4",
+      accent: "#5146e5",
+    });
     expect(cover.replaced).toBe(false);
     const coverText = (await extractPageText(cover.bytes, 0)).join(" ");
     expect(coverText).toContain("Rapport de stage");

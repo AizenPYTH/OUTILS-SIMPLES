@@ -27,11 +27,44 @@ export const BARCODE_TYPES: { id: BarcodeType; label: string; hint: string }[] =
 
 // ------------------------------------------------------------------ EAN / UPC
 
-const EAN_L = ["0001101", "0011001", "0010011", "0111101", "0100011", "0110001", "0101111", "0111011", "0110111", "0001011"];
-const EAN_G = EAN_L.map((p) => p.split("").reverse().map((c) => (c === "0" ? "1" : "0")).join(""));
-const EAN_R = EAN_L.map((p) => p.split("").map((c) => (c === "0" ? "1" : "0")).join(""));
+const EAN_L = [
+  "0001101",
+  "0011001",
+  "0010011",
+  "0111101",
+  "0100011",
+  "0110001",
+  "0101111",
+  "0111011",
+  "0110111",
+  "0001011",
+];
+const EAN_G = EAN_L.map((p) =>
+  p
+    .split("")
+    .reverse()
+    .map((c) => (c === "0" ? "1" : "0"))
+    .join(""),
+);
+const EAN_R = EAN_L.map((p) =>
+  p
+    .split("")
+    .map((c) => (c === "0" ? "1" : "0"))
+    .join(""),
+);
 /** First-digit parity patterns for EAN-13 (L = L-code, G = G-code). */
-const EAN13_PARITY = ["LLLLLL", "LLGLGG", "LLGGLG", "LLGGGL", "LGLLGG", "LGGLLG", "LGGGLL", "LGLGLG", "LGLGGL", "LGGLGL"];
+const EAN13_PARITY = [
+  "LLLLLL",
+  "LLGLGG",
+  "LLGGLG",
+  "LLGGGL",
+  "LGLLGG",
+  "LGGLLG",
+  "LGGGLL",
+  "LGLGLG",
+  "LGLGGL",
+  "LGGLGL",
+];
 
 export function eanCheckDigit(digits: string): number {
   let sum = 0;
@@ -46,14 +79,17 @@ function bits(pattern: string): boolean[] {
 
 function encodeEan13(input: string): BarcodeResult {
   const digits = input.replace(/\s/g, "");
-  if (!/^\d{12,13}$/.test(digits)) return { ok: false, error: "EAN-13 : saisissez 12 chiffres (ou 13 avec la clé)." };
+  if (!/^\d{12,13}$/.test(digits))
+    return { ok: false, error: "EAN-13 : saisissez 12 chiffres (ou 13 avec la clé)." };
   const body = digits.slice(0, 12);
   const check = eanCheckDigit(body);
-  if (digits.length === 13 && Number(digits[12]) !== check) return { ok: false, error: `Clé de contrôle incorrecte : attendue ${check}.` };
+  if (digits.length === 13 && Number(digits[12]) !== check)
+    return { ok: false, error: `Clé de contrôle incorrecte : attendue ${check}.` };
   const full = body + check;
   const parity = EAN13_PARITY[Number(full[0])]!;
   const modules: boolean[] = [...bits("101")];
-  for (let i = 1; i <= 6; i += 1) modules.push(...bits((parity[i - 1] === "L" ? EAN_L : EAN_G)[Number(full[i])]!));
+  for (let i = 1; i <= 6; i += 1)
+    modules.push(...bits((parity[i - 1] === "L" ? EAN_L : EAN_G)[Number(full[i])]!));
   modules.push(...bits("01010"));
   for (let i = 7; i <= 12; i += 1) modules.push(...bits(EAN_R[Number(full[i])]!));
   modules.push(...bits("101"));
@@ -62,10 +98,12 @@ function encodeEan13(input: string): BarcodeResult {
 
 function encodeEan8(input: string): BarcodeResult {
   const digits = input.replace(/\s/g, "");
-  if (!/^\d{7,8}$/.test(digits)) return { ok: false, error: "EAN-8 : saisissez 7 chiffres (ou 8 avec la clé)." };
+  if (!/^\d{7,8}$/.test(digits))
+    return { ok: false, error: "EAN-8 : saisissez 7 chiffres (ou 8 avec la clé)." };
   const body = digits.slice(0, 7);
   const check = eanCheckDigit(body);
-  if (digits.length === 8 && Number(digits[7]) !== check) return { ok: false, error: `Clé de contrôle incorrecte : attendue ${check}.` };
+  if (digits.length === 8 && Number(digits[7]) !== check)
+    return { ok: false, error: `Clé de contrôle incorrecte : attendue ${check}.` };
   const full = body + check;
   const modules: boolean[] = [...bits("101")];
   for (let i = 0; i < 4; i += 1) modules.push(...bits(EAN_L[Number(full[i])]!));
@@ -77,26 +115,126 @@ function encodeEan8(input: string): BarcodeResult {
 
 function encodeUpcA(input: string): BarcodeResult {
   const digits = input.replace(/\s/g, "");
-  if (!/^\d{11,12}$/.test(digits)) return { ok: false, error: "UPC-A : saisissez 11 chiffres (ou 12 avec la clé)." };
+  if (!/^\d{11,12}$/.test(digits))
+    return { ok: false, error: "UPC-A : saisissez 11 chiffres (ou 12 avec la clé)." };
   const asEan = encodeEan13(`0${digits}`);
   if (!asEan.ok) return asEan;
-  return { ok: true, barcode: { ...asEan.barcode, type: "upca", text: asEan.barcode.text.slice(1), quietZone: 9 } };
+  return {
+    ok: true,
+    barcode: { ...asEan.barcode, type: "upca", text: asEan.barcode.text.slice(1), quietZone: 9 },
+  };
 }
 
 // ------------------------------------------------------------------ Code 128
 
 const CODE128_PATTERNS = [
-  "212222", "222122", "222221", "121223", "121322", "131222", "122213", "122312", "132212", "221213",
-  "221312", "231212", "112232", "122132", "122231", "113222", "123122", "123221", "223211", "221132",
-  "221231", "213212", "223112", "312131", "311222", "321122", "321221", "312212", "322112", "322211",
-  "212123", "212321", "232121", "111323", "131123", "131321", "112313", "132113", "132311", "211313",
-  "231113", "231311", "112133", "112331", "132131", "113123", "113321", "133121", "313121", "211331",
-  "231131", "213113", "213311", "213131", "311123", "311321", "331121", "312113", "312311", "332111",
-  "314111", "221411", "431111", "111224", "111422", "121124", "121421", "141122", "141221", "112214",
-  "112412", "122114", "122411", "142112", "142211", "241211", "221114", "413111", "241112", "134111",
-  "111242", "121142", "121241", "114212", "124112", "124211", "411212", "421112", "421211", "212141",
-  "214121", "412121", "111143", "111341", "131141", "114113", "114311", "411113", "411311", "113141",
-  "114131", "311141", "411131", "211412", "211214", "211232", "2331112",
+  "212222",
+  "222122",
+  "222221",
+  "121223",
+  "121322",
+  "131222",
+  "122213",
+  "122312",
+  "132212",
+  "221213",
+  "221312",
+  "231212",
+  "112232",
+  "122132",
+  "122231",
+  "113222",
+  "123122",
+  "123221",
+  "223211",
+  "221132",
+  "221231",
+  "213212",
+  "223112",
+  "312131",
+  "311222",
+  "321122",
+  "321221",
+  "312212",
+  "322112",
+  "322211",
+  "212123",
+  "212321",
+  "232121",
+  "111323",
+  "131123",
+  "131321",
+  "112313",
+  "132113",
+  "132311",
+  "211313",
+  "231113",
+  "231311",
+  "112133",
+  "112331",
+  "132131",
+  "113123",
+  "113321",
+  "133121",
+  "313121",
+  "211331",
+  "231131",
+  "213113",
+  "213311",
+  "213131",
+  "311123",
+  "311321",
+  "331121",
+  "312113",
+  "312311",
+  "332111",
+  "314111",
+  "221411",
+  "431111",
+  "111224",
+  "111422",
+  "121124",
+  "121421",
+  "141122",
+  "141221",
+  "112214",
+  "112412",
+  "122114",
+  "122411",
+  "142112",
+  "142211",
+  "241211",
+  "221114",
+  "413111",
+  "241112",
+  "134111",
+  "111242",
+  "121142",
+  "121241",
+  "114212",
+  "124112",
+  "124211",
+  "411212",
+  "421112",
+  "421211",
+  "212141",
+  "214121",
+  "412121",
+  "111143",
+  "111341",
+  "131141",
+  "114113",
+  "114311",
+  "411113",
+  "411311",
+  "113141",
+  "114131",
+  "311141",
+  "411131",
+  "211412",
+  "211214",
+  "211232",
+  "2331112",
 ];
 const CODE128_START_B = 104;
 const CODE128_START_C = 105;
@@ -119,10 +257,15 @@ function widthsToModules(widths: string, startWithBar = true): boolean[] {
 /** Code 128 with automatic subset selection: runs of 4+ digit pairs use subset C. */
 function encodeCode128(input: string): BarcodeResult {
   if (!input.length) return { ok: false, error: "Saisissez le texte à encoder." };
-  if (input.length > 80) return { ok: false, error: "Code 128 : 80 caractères maximum pour rester lisible." };
+  if (input.length > 80)
+    return { ok: false, error: "Code 128 : 80 caractères maximum pour rester lisible." };
   for (const ch of input) {
     const code = ch.charCodeAt(0);
-    if (code < 32 || code > 126) return { ok: false, error: `Caractère non pris en charge par le Code 128 (sous-ensemble B) : « ${ch} ».` };
+    if (code < 32 || code > 126)
+      return {
+        ok: false,
+        error: `Caractère non pris en charge par le Code 128 (sous-ensemble B) : « ${ch} ».`,
+      };
   }
   const values: number[] = [];
   let i = 0;
@@ -160,10 +303,50 @@ function encodeCode128(input: string): BarcodeResult {
 // ------------------------------------------------------------------- Code 39
 
 const CODE39: Record<string, string> = {
-  "0": "nnnwwnwnn", "1": "wnnwnnnnw", "2": "nnwwnnnnw", "3": "wnwwnnnnn", "4": "nnnwwnnnw", "5": "wnnwwnnnn", "6": "nnwwwnnnn", "7": "nnnwnnwnw", "8": "wnnwnnwnn", "9": "nnwwnnwnn",
-  A: "wnnnnwnnw", B: "nnwnnwnnw", C: "wnwnnwnnn", D: "nnnnwwnnw", E: "wnnnwwnnn", F: "nnwnwwnnn", G: "nnnnnwwnw", H: "wnnnnwwnn", I: "nnwnnwwnn", J: "nnnnwwwnn",
-  K: "wnnnnnnww", L: "nnwnnnnww", M: "wnwnnnnwn", N: "nnnnwnnww", O: "wnnnwnnwn", P: "nnwnwnnwn", Q: "nnnnnnwww", R: "wnnnnnwwn", S: "nnwnnnwwn", T: "nnnnwnwwn",
-  U: "wwnnnnnnw", V: "nwwnnnnnw", W: "wwwnnnnnn", X: "nwnnwnnnw", Y: "wwnnwnnnn", Z: "nwwnwnnnn", "-": "nwnnnnwnw", ".": "wwnnnnwnn", " ": "nwwnnnwnn", $: "nwnwnwnnn", "/": "nwnwnnnwn", "+": "nwnnnwnwn", "%": "nnnwnwnwn", "*": "nwnnwnwnn",
+  "0": "nnnwwnwnn",
+  "1": "wnnwnnnnw",
+  "2": "nnwwnnnnw",
+  "3": "wnwwnnnnn",
+  "4": "nnnwwnnnw",
+  "5": "wnnwwnnnn",
+  "6": "nnwwwnnnn",
+  "7": "nnnwnnwnw",
+  "8": "wnnwnnwnn",
+  "9": "nnwwnnwnn",
+  A: "wnnnnwnnw",
+  B: "nnwnnwnnw",
+  C: "wnwnnwnnn",
+  D: "nnnnwwnnw",
+  E: "wnnnwwnnn",
+  F: "nnwnwwnnn",
+  G: "nnnnnwwnw",
+  H: "wnnnnwwnn",
+  I: "nnwnnwwnn",
+  J: "nnnnwwwnn",
+  K: "wnnnnnnww",
+  L: "nnwnnnnww",
+  M: "wnwnnnnwn",
+  N: "nnnnwnnww",
+  O: "wnnnwnnwn",
+  P: "nnwnwnnwn",
+  Q: "nnnnnnwww",
+  R: "wnnnnnwwn",
+  S: "nnwnnnwwn",
+  T: "nnnnwnwwn",
+  U: "wwnnnnnnw",
+  V: "nwwnnnnnw",
+  W: "wwwnnnnnn",
+  X: "nwnnwnnnw",
+  Y: "wwnnwnnnn",
+  Z: "nwwnwnnnn",
+  "-": "nwnnnnwnw",
+  ".": "wwnnnnwnn",
+  " ": "nwwnnnwnn",
+  $: "nwnwnwnnn",
+  "/": "nwnwnnnwn",
+  "+": "nwnnnwnwn",
+  "%": "nnnwnwnwn",
+  "*": "nwnnwnwnn",
 };
 
 export { CODE39 };
@@ -171,8 +354,14 @@ export { CODE39 };
 function encodeCode39(input: string): BarcodeResult {
   const text = input.toUpperCase();
   if (!text.length) return { ok: false, error: "Saisissez le texte à encoder." };
-  if (text.length > 40) return { ok: false, error: "Code 39 : 40 caractères maximum pour rester lisible." };
-  for (const ch of text) if (!CODE39[ch] || ch === "*") return { ok: false, error: `Caractère non pris en charge par le Code 39 : « ${ch} ». Autorisés : A-Z, 0-9, espace, - . $ / + %` };
+  if (text.length > 40)
+    return { ok: false, error: "Code 39 : 40 caractères maximum pour rester lisible." };
+  for (const ch of text)
+    if (!CODE39[ch] || ch === "*")
+      return {
+        ok: false,
+        error: `Caractère non pris en charge par le Code 39 : « ${ch} ». Autorisés : A-Z, 0-9, espace, - . $ / + %`,
+      };
   const modules: boolean[] = [];
   const wide = 3;
   const encodeChar = (pattern: string) => {
@@ -213,10 +402,19 @@ export interface BarcodeRenderOptions {
   background: string;
 }
 
-export const defaultBarcodeRender: BarcodeRenderOptions = { moduleWidth: 3, height: 90, showText: true, foreground: "#000000", background: "#ffffff" };
+export const defaultBarcodeRender: BarcodeRenderOptions = {
+  moduleWidth: 3,
+  height: 90,
+  showText: true,
+  foreground: "#000000",
+  background: "#ffffff",
+};
 
 /** Renders the module sequence as an SVG string with a quiet zone and optional text. */
-export function barcodeToSvg(barcode: Barcode, options: BarcodeRenderOptions = defaultBarcodeRender): string {
+export function barcodeToSvg(
+  barcode: Barcode,
+  options: BarcodeRenderOptions = defaultBarcodeRender,
+): string {
   const { moduleWidth: mw, height, showText } = options;
   const width = (barcode.modules.length + barcode.quietZone * 2) * mw;
   const fontSize = Math.max(10, mw * 4);
@@ -227,14 +425,21 @@ export function barcodeToSvg(barcode: Barcode, options: BarcodeRenderOptions = d
     const bar = i < barcode.modules.length && barcode.modules[i];
     if (bar) run += 1;
     else if (run > 0) {
-      rects.push(`<rect x="${(barcode.quietZone + i - run) * mw}" y="0" width="${run * mw}" height="${height}" />`);
+      rects.push(
+        `<rect x="${(barcode.quietZone + i - run) * mw}" y="0" width="${run * mw}" height="${height}" />`,
+      );
       run = 0;
     }
   }
-  const text = showText ? `<text x="${width / 2}" y="${height + fontSize}" text-anchor="middle" font-family="Helvetica, Arial, monospace" font-size="${fontSize}" letter-spacing="${mw * 0.6}">${escapeXml(barcode.text)}</text>` : "";
+  const text = showText
+    ? `<text x="${width / 2}" y="${height + fontSize}" text-anchor="middle" font-family="Helvetica, Arial, monospace" font-size="${fontSize}" letter-spacing="${mw * 0.6}">${escapeXml(barcode.text)}</text>`
+    : "";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${totalHeight}" viewBox="0 0 ${width} ${totalHeight}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="${options.background}" /><g fill="${options.foreground}">${rects.join("")}${text}</g></svg>`;
 }
 
 function escapeXml(s: string): string {
-  return s.replace(/[<>&"']/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&apos;" })[c]!);
+  return s.replace(
+    /[<>&"']/g,
+    (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&apos;" })[c]!,
+  );
 }

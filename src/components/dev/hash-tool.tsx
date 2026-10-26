@@ -30,7 +30,9 @@ async function hashAll(input: string | Uint8Array): Promise<Hashes> {
 export function HashTool() {
   const [text, setText] = React.useState("");
   const [textHashes, setTextHashes] = React.useState<Hashes>({});
-  const [file, setFile] = React.useState<{ name: string; size: number; hashes: Hashes } | null>(null);
+  const [file, setFile] = React.useState<{ name: string; size: number; hashes: Hashes } | null>(
+    null,
+  );
   const [busy, setBusy] = React.useState(false);
   const [expected, setExpected] = React.useState("");
   const [uppercase, setUppercase] = React.useState(false);
@@ -60,7 +62,13 @@ export function HashTool() {
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium">Empreintes</p>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={uppercase} onChange={(e) => setUppercase(e.target.checked)} className="accent-primary" /> majuscules
+          <input
+            type="checkbox"
+            checked={uppercase}
+            onChange={(e) => setUppercase(e.target.checked)}
+            className="accent-primary"
+          />{" "}
+          majuscules
         </label>
       </div>
       <dl className="space-y-2">
@@ -84,7 +92,10 @@ export function HashTool() {
                 ) : null}
               </dt>
               <dd className="mt-1 flex items-start gap-2">
-                <code className="min-w-0 flex-1 break-all font-mono text-[12px]" data-testid={`${idPrefix}-${algorithm.toLowerCase()}`}>
+                <code
+                  className="min-w-0 flex-1 break-all font-mono text-[12px]"
+                  data-testid={`${idPrefix}-${algorithm.toLowerCase()}`}
+                >
                   {shown}
                 </code>
                 <CopyButton text={shown} label="Copier" />
@@ -104,11 +115,30 @@ export function HashTool() {
           <TabsTrigger value="file">Fichier</TabsTrigger>
         </TabsList>
         <TabsContent value="text" className="space-y-4">
-          <TextInputPanel id="hash-input" label="Texte (UTF-8)" value={text} onChange={setText} rows={5} placeholder="Le texte dont vous voulez l'empreinte" />
+          <TextInputPanel
+            id="hash-input"
+            label="Texte (UTF-8)"
+            value={text}
+            onChange={setText}
+            rows={5}
+            placeholder="Le texte dont vous voulez l'empreinte"
+          />
           {render(textHashes, "hash-text")}
         </TabsContent>
         <TabsContent value="file" className="space-y-4">
-          <FileDropzone onFiles={(f) => f[0] && void onFile(f[0])} accept="*/*" validate={(f) => (f.size > FILE_MAX ? `fichier trop volumineux (max ${formatBytes(FILE_MAX)})` : null)} title="Déposez un fichier pour calculer son empreinte" hint={`Tout type de fichier · ${formatBytes(FILE_MAX)} max · lu localement`} buttonLabel="Choisir un fichier" compact={!!file} disabled={busy} testId="hash-file" />
+          <FileDropzone
+            onFiles={(f) => f[0] && void onFile(f[0])}
+            accept="*/*"
+            validate={(f) =>
+              f.size > FILE_MAX ? `fichier trop volumineux (max ${formatBytes(FILE_MAX)})` : null
+            }
+            title="Déposez un fichier pour calculer son empreinte"
+            hint={`Tout type de fichier · ${formatBytes(FILE_MAX)} max · lu localement`}
+            buttonLabel="Choisir un fichier"
+            compact={!!file}
+            disabled={busy}
+            testId="hash-file"
+          />
           {busy ? <p className="text-sm text-muted-foreground">Calcul en cours…</p> : null}
           {file ? (
             <>
@@ -122,8 +152,19 @@ export function HashTool() {
       </Tabs>
       <ToolPanel className="space-y-2">
         <Label htmlFor="hash-expected">Comparer avec une empreinte attendue (facultatif)</Label>
-        <Input id="hash-expected" value={expected} onChange={(e) => setExpected(e.target.value)} placeholder="Collez le SHA-256 fourni par l'éditeur du fichier" className="font-mono text-xs" data-testid="hash-expected" />
-        <Alert variant="info">MD5 n&apos;est pas proposé : il n&apos;est plus considéré comme sûr et n&apos;est pas disponible dans l&apos;API Web Crypto des navigateurs. SHA-1 est fourni pour vérifier d&apos;anciennes sommes de contrôle uniquement.</Alert>
+        <Input
+          id="hash-expected"
+          value={expected}
+          onChange={(e) => setExpected(e.target.value)}
+          placeholder="Collez le SHA-256 fourni par l'éditeur du fichier"
+          className="font-mono text-xs"
+          data-testid="hash-expected"
+        />
+        <Alert variant="info">
+          MD5 n&apos;est pas proposé : il n&apos;est plus considéré comme sûr et n&apos;est pas
+          disponible dans l&apos;API Web Crypto des navigateurs. SHA-1 est fourni pour vérifier
+          d&apos;anciennes sommes de contrôle uniquement.
+        </Alert>
       </ToolPanel>
     </div>
   );

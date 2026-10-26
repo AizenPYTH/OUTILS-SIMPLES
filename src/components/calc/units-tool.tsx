@@ -5,7 +5,13 @@ import { ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { UNIT_CATEGORIES, convertUnit, formatConverted, getUnitCategory } from "@/lib/calc/units";
 import { parseNumber } from "@/lib/calc/percent";
@@ -51,7 +57,13 @@ export function UnitsTool({ initialCategory = "length" }: { initialCategory?: st
         <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto_1fr] sm:items-end">
           <div className="space-y-1">
             <Label htmlFor="units-value">Valeur</Label>
-            <Input id="units-value" inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} data-testid="units-value" />
+            <Input
+              id="units-value"
+              inputMode="decimal"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              data-testid="units-value"
+            />
           </div>
           <div className="space-y-1">
             <Label htmlFor="units-from">De</Label>
@@ -68,7 +80,14 @@ export function UnitsTool({ initialCategory = "length" }: { initialCategory?: st
               </SelectContent>
             </Select>
           </div>
-          <Button type="button" variant="outline" size="icon" aria-label="Inverser les unités" onClick={() => (setFrom(to), setTo(from))} className="mb-0.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label="Inverser les unités"
+            onClick={() => (setFrom(to), setTo(from))}
+            className="mb-0.5"
+          >
             <ArrowLeftRight aria-hidden="true" />
           </Button>
           <div className="space-y-1">
@@ -90,12 +109,17 @@ export function UnitsTool({ initialCategory = "length" }: { initialCategory?: st
       </ToolPanel>
       <ToolPanel>
         <p className="text-xs text-muted-foreground">Résultat</p>
-        <p className="font-heading text-2xl font-bold tabular-nums" data-testid="units-result" aria-live="polite">
+        <p
+          className="font-heading text-2xl font-bold tabular-nums"
+          data-testid="units-result"
+          aria-live="polite"
+        >
           {result === null ? "—" : `${formatConverted(result)} ${toUnit?.symbol ?? ""}`}
         </p>
         {number !== null && fromUnit ? (
           <p className="mt-1 text-sm text-muted-foreground">
-            {formatConverted(number)} {fromUnit.symbol} = {result === null ? "—" : formatConverted(result)} {toUnit?.symbol}
+            {formatConverted(number)} {fromUnit.symbol} ={" "}
+            {result === null ? "—" : formatConverted(result)} {toUnit?.symbol}
           </p>
         ) : null}
       </ToolPanel>
@@ -112,7 +136,8 @@ export function UnitsTool({ initialCategory = "length" }: { initialCategory?: st
                   <tr key={u.id} className="border-b border-border/60 tabular-nums">
                     <td className="py-1">{u.label}</td>
                     <td className="py-1 text-right font-mono">
-                      {formatConverted(convertUnit(category.id, number, from, u.id) ?? Number.NaN)} {u.symbol}
+                      {formatConverted(convertUnit(category.id, number, from, u.id) ?? Number.NaN)}{" "}
+                      {u.symbol}
                     </td>
                   </tr>
                 ))}

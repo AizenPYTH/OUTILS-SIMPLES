@@ -5,13 +5,26 @@ import { Alert } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TextInputPanel, TextOutputPanel } from "@/components/tools/shared/text-io";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
-import { REGEX_FLAGS, REGEX_PRESETS, replaceWithRegex, runRegex, segmentMatches } from "@/lib/dev/regex";
+import {
+  REGEX_FLAGS,
+  REGEX_PRESETS,
+  replaceWithRegex,
+  runRegex,
+  segmentMatches,
+} from "@/lib/dev/regex";
 import { cn } from "@/lib/utils";
 
-const SAMPLE = "Contactez jean.dupont@exemple.fr ou marie@site.org avant le 12/03/2026.\nTéléphone : 06 12 34 56 78 — code postal 75011.";
+const SAMPLE =
+  "Contactez jean.dupont@exemple.fr ou marie@site.org avant le 12/03/2026.\nTéléphone : 06 12 34 56 78 — code postal 75011.";
 
 export function RegexTool() {
   const [pattern, setPattern] = React.useState("[\\w.+-]+@[\\w-]+\\.[\\w.-]+");
@@ -20,8 +33,12 @@ export function RegexTool() {
   const [replacement, setReplacement] = React.useState("");
 
   const result = React.useMemo(() => runRegex(pattern, flags, text), [pattern, flags, text]);
-  const replaced = React.useMemo(() => (replacement ? replaceWithRegex(pattern, flags, text, replacement) : null), [pattern, flags, text, replacement]);
-  const toggleFlag = (flag: string, on: boolean) => setFlags((f) => (on ? (f.includes(flag) ? f : f + flag) : f.replace(flag, "")));
+  const replaced = React.useMemo(
+    () => (replacement ? replaceWithRegex(pattern, flags, text, replacement) : null),
+    [pattern, flags, text, replacement],
+  );
+  const toggleFlag = (flag: string, on: boolean) =>
+    setFlags((f) => (on ? (f.includes(flag) ? f : f + flag) : f.replace(flag, "")));
 
   return (
     <div className="space-y-4">
@@ -31,7 +48,14 @@ export function RegexTool() {
             <Label htmlFor="regex-pattern">Expression régulière</Label>
             <div className="flex items-center gap-1 font-mono text-sm">
               <span className="text-muted-foreground">/</span>
-              <Input id="regex-pattern" value={pattern} onChange={(e) => setPattern(e.target.value)} className="font-mono" spellCheck={false} data-testid="regex-pattern" />
+              <Input
+                id="regex-pattern"
+                value={pattern}
+                onChange={(e) => setPattern(e.target.value)}
+                className="font-mono"
+                spellCheck={false}
+                data-testid="regex-pattern"
+              />
               <span className="text-muted-foreground">/{flags}</span>
             </div>
           </div>
@@ -62,28 +86,51 @@ export function RegexTool() {
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
           {REGEX_FLAGS.map((f) => (
             <label key={f.flag} className="flex items-center gap-2">
-              <Checkbox checked={flags.includes(f.flag)} onCheckedChange={(v) => toggleFlag(f.flag, v === true)} /> {f.label}
+              <Checkbox
+                checked={flags.includes(f.flag)}
+                onCheckedChange={(v) => toggleFlag(f.flag, v === true)}
+              />{" "}
+              {f.label}
             </label>
           ))}
         </div>
-        {!result.ok ? <Alert variant="destructive" data-testid="regex-error">{result.error}</Alert> : null}
+        {!result.ok ? (
+          <Alert variant="destructive" data-testid="regex-error">
+            {result.error}
+          </Alert>
+        ) : null}
       </ToolPanel>
-      <TextInputPanel id="regex-text" label="Texte de test" value={text} onChange={setText} rows={6} />
+      <TextInputPanel
+        id="regex-text"
+        label="Texte de test"
+        value={text}
+        onChange={setText}
+        rows={6}
+      />
       {result.ok ? (
         <ToolPanel className="space-y-3" data-testid="regex-results">
           <p className="text-sm font-medium">
             {result.matches.length} correspondance{result.matches.length > 1 ? "s" : ""}
             {result.truncated ? " (affichage limité)" : ""}
-            {!result.global && result.matches.length === 1 ? " — ajoutez le drapeau g pour toutes les occurrences" : ""}
+            {!result.global && result.matches.length === 1
+              ? " — ajoutez le drapeau g pour toutes les occurrences"
+              : ""}
           </p>
           <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-md bg-muted/40 p-3 font-mono text-[13px] leading-relaxed">
             {segmentMatches(text, result.matches).map((seg, i) => (
-              <span key={i} className={cn(seg.match && "rounded bg-primary-soft text-link ring-1 ring-primary/40")}>
+              <span
+                key={i}
+                className={cn(
+                  seg.match && "rounded bg-primary-soft text-link ring-1 ring-primary/40",
+                )}
+              >
                 {seg.text}
               </span>
             ))}
           </pre>
-          {result.matches.length > 0 && (result.matches[0]!.groups.length > 0 || Object.keys(result.matches[0]!.named).length > 0) ? (
+          {result.matches.length > 0 &&
+          (result.matches[0]!.groups.length > 0 ||
+            Object.keys(result.matches[0]!.named).length > 0) ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <caption className="sr-only">Correspondances et groupes capturés</caption>
@@ -96,7 +143,10 @@ export function RegexTool() {
                 </thead>
                 <tbody>
                   {result.matches.slice(0, 200).map((m, i) => (
-                    <tr key={i} className="border-b border-border/60 align-top font-mono text-[12px]">
+                    <tr
+                      key={i}
+                      className="border-b border-border/60 align-top font-mono text-[12px]"
+                    >
                       <td className="py-1 pr-3 text-muted-foreground">{i + 1}</td>
                       <td className="py-1 pr-3 break-all">{m.text}</td>
                       <td className="py-1 break-all">
@@ -121,12 +171,37 @@ export function RegexTool() {
       ) : null}
       <ToolPanel className="space-y-3">
         <div className="space-y-1">
-          <Label htmlFor="regex-replacement">Remplacement (facultatif) — $1, $2 ou $&lt;nom&gt; pour les groupes</Label>
-          <Input id="regex-replacement" value={replacement} onChange={(e) => setReplacement(e.target.value)} className="font-mono" placeholder="ex. [$&]" data-testid="regex-replacement" />
+          <Label htmlFor="regex-replacement">
+            Remplacement (facultatif) — $1, $2 ou $&lt;nom&gt; pour les groupes
+          </Label>
+          <Input
+            id="regex-replacement"
+            value={replacement}
+            onChange={(e) => setReplacement(e.target.value)}
+            className="font-mono"
+            placeholder="ex. [$&]"
+            data-testid="regex-replacement"
+          />
         </div>
-        {replaced ? replaced.ok ? <TextOutputPanel id="regex-replaced" label="Texte remplacé" value={replaced.result} filename="texte-remplace.txt" rows={5} /> : <Alert variant="destructive">{replaced.error}</Alert> : null}
+        {replaced ? (
+          replaced.ok ? (
+            <TextOutputPanel
+              id="regex-replaced"
+              label="Texte remplacé"
+              value={replaced.result}
+              filename="texte-remplace.txt"
+              rows={5}
+            />
+          ) : (
+            <Alert variant="destructive">{replaced.error}</Alert>
+          )
+        ) : null}
       </ToolPanel>
-      <p className="text-xs text-muted-foreground">Syntaxe JavaScript (ECMAScript) : la même que dans les navigateurs et Node.js. Les expressions sont exécutées localement ; une expression très coûteuse peut ralentir l&apos;onglet.</p>
+      <p className="text-xs text-muted-foreground">
+        Syntaxe JavaScript (ECMAScript) : la même que dans les navigateurs et Node.js. Les
+        expressions sont exécutées localement ; une expression très coûteuse peut ralentir
+        l&apos;onglet.
+      </p>
     </div>
   );
 }

@@ -40,7 +40,8 @@ export function sortObjectKeys(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(sortObjectKeys);
   if (value && typeof value === "object") {
     const out: Record<string, unknown> = {};
-    for (const key of Object.keys(value as Record<string, unknown>).sort()) out[key] = sortObjectKeys((value as Record<string, unknown>)[key]);
+    for (const key of Object.keys(value as Record<string, unknown>).sort())
+      out[key] = sortObjectKeys((value as Record<string, unknown>)[key]);
     return out;
   }
   return value;
@@ -51,7 +52,13 @@ export function describeJson(value: unknown): string {
   if (Array.isArray(value)) return `tableau de ${value.length} élément(s)`;
   if (value === null) return "null";
   if (typeof value === "object") return `objet avec ${Object.keys(value as object).length} clé(s)`;
-  return typeof value === "string" ? "chaîne" : typeof value === "number" ? "nombre" : typeof value === "boolean" ? "booléen" : typeof value;
+  return typeof value === "string"
+    ? "chaîne"
+    : typeof value === "number"
+      ? "nombre"
+      : typeof value === "boolean"
+        ? "booléen"
+        : typeof value;
 }
 
 class ParseError extends Error {
@@ -75,10 +82,15 @@ class Parser {
 
   parseDocument(): unknown {
     this.skipWhitespace();
-    if (this.pos >= this.text.length) throw new ParseError("Document vide : aucune valeur JSON trouvée.", this.pos);
+    if (this.pos >= this.text.length)
+      throw new ParseError("Document vide : aucune valeur JSON trouvée.", this.pos);
     const value = this.parseValue();
     this.skipWhitespace();
-    if (this.pos < this.text.length) throw new ParseError(`Caractère inattendu « ${this.peekDisplay()} » après la fin du document.`, this.pos);
+    if (this.pos < this.text.length)
+      throw new ParseError(
+        `Caractère inattendu « ${this.peekDisplay()} » après la fin du document.`,
+        this.pos,
+      );
     return value;
   }
 
@@ -99,10 +111,14 @@ class Parser {
     if (c === "[") return this.parseArray();
     if (c === '"') return this.parseString();
     if (c === "-" || (c >= "0" && c <= "9")) return this.parseNumber();
-    if (this.text.startsWith("true", this.pos)) return (this.pos += 4, true);
-    if (this.text.startsWith("false", this.pos)) return (this.pos += 5, false);
-    if (this.text.startsWith("null", this.pos)) return (this.pos += 4, null);
-    if (c === "'") throw new ParseError("Les chaînes JSON doivent utiliser des guillemets doubles (\"), pas des apostrophes.", this.pos);
+    if (this.text.startsWith("true", this.pos)) return ((this.pos += 4), true);
+    if (this.text.startsWith("false", this.pos)) return ((this.pos += 5), false);
+    if (this.text.startsWith("null", this.pos)) return ((this.pos += 4), null);
+    if (c === "'")
+      throw new ParseError(
+        'Les chaînes JSON doivent utiliser des guillemets doubles ("), pas des apostrophes.',
+        this.pos,
+      );
     if (c === "") throw new ParseError("Fin du texte inattendue : valeur manquante.", this.pos);
     throw new ParseError(`Valeur inattendue à partir de « ${this.peekDisplay()} ».`, this.pos);
   }
@@ -111,17 +127,25 @@ class Parser {
     const out: Record<string, unknown> = {};
     this.pos += 1;
     this.skipWhitespace();
-    if (this.peek() === "}") return (this.pos += 1, out);
+    if (this.peek() === "}") return ((this.pos += 1), out);
     for (;;) {
       this.skipWhitespace();
       if (this.peek() !== '"') {
         if (this.peek() === "}") throw new ParseError("Virgule en trop avant « } ».", this.pos);
-        if (this.peek() === "'") throw new ParseError("Les clés JSON doivent utiliser des guillemets doubles (\"), pas des apostrophes.", this.pos);
-        throw new ParseError(`Nom de clé attendu entre guillemets, trouvé « ${this.peekDisplay()} ».`, this.pos);
+        if (this.peek() === "'")
+          throw new ParseError(
+            'Les clés JSON doivent utiliser des guillemets doubles ("), pas des apostrophes.',
+            this.pos,
+          );
+        throw new ParseError(
+          `Nom de clé attendu entre guillemets, trouvé « ${this.peekDisplay()} ».`,
+          this.pos,
+        );
       }
       const key = this.parseString();
       this.skipWhitespace();
-      if (this.peek() !== ":") throw new ParseError(`« : » attendu après la clé "${key}".`, this.pos);
+      if (this.peek() !== ":")
+        throw new ParseError(`« : » attendu après la clé "${key}".`, this.pos);
       this.pos += 1;
       this.skipWhitespace();
       out[key] = this.parseValue();
@@ -131,7 +155,7 @@ class Parser {
         this.pos += 1;
         continue;
       }
-      if (c === "}") return (this.pos += 1, out);
+      if (c === "}") return ((this.pos += 1), out);
       throw new ParseError(`« , » ou « } » attendu, trouvé « ${this.peekDisplay()} ».`, this.pos);
     }
   }
@@ -140,7 +164,7 @@ class Parser {
     const out: unknown[] = [];
     this.pos += 1;
     this.skipWhitespace();
-    if (this.peek() === "]") return (this.pos += 1, out);
+    if (this.peek() === "]") return ((this.pos += 1), out);
     for (;;) {
       this.skipWhitespace();
       if (this.peek() === "]") throw new ParseError("Virgule en trop avant « ] ».", this.pos);
@@ -151,7 +175,7 @@ class Parser {
         this.pos += 1;
         continue;
       }
-      if (c === "]") return (this.pos += 1, out);
+      if (c === "]") return ((this.pos += 1), out);
       throw new ParseError(`« , » ou « ] » attendu, trouvé « ${this.peekDisplay()} ».`, this.pos);
     }
   }
@@ -161,18 +185,32 @@ class Parser {
     this.pos += 1;
     let out = "";
     for (;;) {
-      if (this.pos >= this.text.length) throw new ParseError("Chaîne non terminée : guillemet fermant manquant.", start);
+      if (this.pos >= this.text.length)
+        throw new ParseError("Chaîne non terminée : guillemet fermant manquant.", start);
       const c = this.text[this.pos]!;
-      if (c === '"') return (this.pos += 1, out);
+      if (c === '"') return ((this.pos += 1), out);
       if (c === "\\") {
         const next = this.text[this.pos + 1] ?? "";
-        const map: Record<string, string> = { '"': '"', "\\": "\\", "/": "/", b: "\b", f: "\f", n: "\n", r: "\r", t: "\t" };
+        const map: Record<string, string> = {
+          '"': '"',
+          "\\": "\\",
+          "/": "/",
+          b: "\b",
+          f: "\f",
+          n: "\n",
+          r: "\r",
+          t: "\t",
+        };
         if (next in map) {
           out += map[next];
           this.pos += 2;
         } else if (next === "u") {
           const hex = this.text.slice(this.pos + 2, this.pos + 6);
-          if (!/^[0-9a-fA-F]{4}$/.test(hex)) throw new ParseError("Séquence \\u invalide (4 chiffres hexadécimaux attendus).", this.pos);
+          if (!/^[0-9a-fA-F]{4}$/.test(hex))
+            throw new ParseError(
+              "Séquence \\u invalide (4 chiffres hexadécimaux attendus).",
+              this.pos,
+            );
           out += String.fromCharCode(Number.parseInt(hex, 16));
           this.pos += 6;
         } else {
@@ -180,7 +218,8 @@ class Parser {
         }
         continue;
       }
-      if (c === "\n") throw new ParseError("Saut de ligne dans une chaîne : utilisez \\n.", this.pos);
+      if (c === "\n")
+        throw new ParseError("Saut de ligne dans une chaîne : utilisez \\n.", this.pos);
       out += c;
       this.pos += 1;
     }
@@ -191,7 +230,8 @@ class Parser {
     if (!match) throw new ParseError("Nombre invalide.", this.pos);
     const raw = match[0];
     const after = this.text[this.pos + raw.length] ?? "";
-    if (/[0-9.]/.test(after)) throw new ParseError("Nombre invalide (zéro initial ou point mal placé).", this.pos);
+    if (/[0-9.]/.test(after))
+      throw new ParseError("Nombre invalide (zéro initial ou point mal placé).", this.pos);
     this.pos += raw.length;
     return Number(raw);
   }

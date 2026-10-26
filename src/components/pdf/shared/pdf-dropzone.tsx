@@ -93,7 +93,9 @@ export function PdfDropzone({
         className={cn(
           "flex flex-col items-center justify-center gap-4 rounded-[24px] border border-dashed text-center shadow-sm transition-[border-color,background-color,box-shadow]",
           compact ? "px-6 py-6" : "px-6 py-9 sm:py-16",
-          dragActive ? "border-primary bg-primary-soft shadow-md" : "border-primary/40 bg-surface hover:border-primary/70 hover:bg-primary-soft/30",
+          dragActive
+            ? "border-primary bg-primary-soft shadow-md"
+            : "border-primary/40 bg-surface hover:border-primary/70 hover:bg-primary-soft/30",
           disabled && "opacity-60",
         )}
         data-testid="pdf-dropzone"

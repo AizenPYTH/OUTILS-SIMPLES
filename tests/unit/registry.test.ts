@@ -26,8 +26,8 @@ describe("tool registry", () => {
     const published = getPublishedTools();
     const ids = published.map((t) => t.id);
     expect(ids.length).toBeGreaterThanOrEqual(30);
-    expect(ids).toEqual(expect.arrayContaining(
-      [
+    expect(ids).toEqual(
+      expect.arrayContaining([
         "pdf-add-text",
         "pdf-annotate",
         "pdf-compress",
@@ -53,9 +53,13 @@ describe("tool registry", () => {
     expect(getToolPath(getToolByPath("pdf", "modifier")!)).toBe("/pdf/modifier/");
     expect(getToolByPath("images", "compresser")?.status).toBe("published");
     expect(getToolByPath("numerisation", "ocr")?.status).toBe("published");
-    expect(getToolByPath("numerisation", "corriger-un-document-photographie")?.status).toBe("published");
+    expect(getToolByPath("numerisation", "corriger-un-document-photographie")?.status).toBe(
+      "published",
+    );
     expect(getToolByPath("documents", "markdown-vers-pdf")?.status).toBe("published");
-    expect(getActiveCategories().map((c) => c.id)).toEqual(expect.arrayContaining(["pdf", "images", "texte", "developpeur", "codes"]));
+    expect(getActiveCategories().map((c) => c.id)).toEqual(
+      expect.arrayContaining(["pdf", "images", "texte", "developpeur", "codes"]),
+    );
   });
 
   it("resolves related tools to published ones only", () => {

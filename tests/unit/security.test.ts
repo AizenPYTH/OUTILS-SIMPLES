@@ -27,7 +27,9 @@ describe("security headers", () => {
 
 describe("public env", () => {
   it("allows the camera for this origin only (scanner, QR reader) and nothing else", () => {
-    const policy = buildSecurityHeaders({ isDev: false }).find((h) => h.key === "Permissions-Policy")!.value;
+    const policy = buildSecurityHeaders({ isDev: false }).find(
+      (h) => h.key === "Permissions-Policy",
+    )!.value;
     expect(policy).toContain("camera=(self)");
     expect(policy).toContain("microphone=()");
     expect(policy).toContain("geolocation=()");

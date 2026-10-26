@@ -7,14 +7,32 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Segmented } from "@/components/pdf/shared/segmented";
 import { BusyPanel, DonePanel, ErrorPanel } from "@/components/pdf/shared/processing-panel";
 import { downloadPdf } from "@/components/pdf/shared/result-utils";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { useOperation } from "@/components/pdf/hooks/use-operation";
-import { calendarPdf, coverPagePdf, defaultCalendarOptions, defaultCoverOptions, defaultPaperOptions, paperPdf, type CalendarOptions, type CoverPageOptions, type PageFormat, type PaperKind, type PaperOptions } from "@/lib/pdf/operations/printables";
+import {
+  calendarPdf,
+  coverPagePdf,
+  defaultCalendarOptions,
+  defaultCoverOptions,
+  defaultPaperOptions,
+  paperPdf,
+  type CalendarOptions,
+  type CoverPageOptions,
+  type PageFormat,
+  type PaperKind,
+  type PaperOptions,
+} from "@/lib/pdf/operations/printables";
 import { FRENCH_MONTHS } from "@/lib/calc/dates";
 import { formatBytes } from "@/lib/files/format";
 
@@ -28,14 +46,27 @@ const PAGE_FORMATS: { value: PageFormat; label: string }[] = [
 const PAPER_KINDS: { value: PaperKind; label: string; description: string; spacing: boolean }[] = [
   { value: "grid", label: "Quadrillé", description: "Petits carreaux", spacing: true },
   { value: "lines", label: "Ligné", description: "Lignes horizontales", spacing: true },
-  { value: "dots", label: "Pointillé", description: "Grille de points (bullet journal)", spacing: true },
+  {
+    value: "dots",
+    label: "Pointillé",
+    description: "Grille de points (bullet journal)",
+    spacing: true,
+  },
   { value: "seyes", label: "Seyès", description: "Grands carreaux français", spacing: false },
   { value: "millimeter", label: "Millimétré", description: "1 / 5 / 10 mm", spacing: false },
   { value: "isometric", label: "Isométrique", description: "Triangles 60°", spacing: true },
   { value: "music", label: "Musique", description: "Portées", spacing: false },
 ];
 
-function PageFormatField({ value, onChange, id }: { value: PageFormat; onChange: (v: PageFormat) => void; id: string }) {
+function PageFormatField({
+  value,
+  onChange,
+  id,
+}: {
+  value: PageFormat;
+  onChange: (v: PageFormat) => void;
+  id: string;
+}) {
   return (
     <div className="space-y-1">
       <Label htmlFor={id}>Format</Label>
@@ -55,9 +86,26 @@ function PageFormatField({ value, onChange, id }: { value: PageFormat; onChange:
   );
 }
 
-function Done({ bytes, name, toolId, onBack, note }: { bytes: Uint8Array; name: string; toolId: string; onBack: () => void; note?: string }) {
+function Done({
+  bytes,
+  name,
+  toolId,
+  onBack,
+  note,
+}: {
+  bytes: Uint8Array;
+  name: string;
+  toolId: string;
+  onBack: () => void;
+  note?: string;
+}) {
   return (
-    <DonePanel title="Votre PDF est prêt" summary={formatBytes(bytes.byteLength)} onDownload={() => downloadPdf(bytes, name, "", toolId)} onStartOver={onBack}>
+    <DonePanel
+      title="Votre PDF est prêt"
+      summary={formatBytes(bytes.byteLength)}
+      onDownload={() => downloadPdf(bytes, name, "", toolId)}
+      onStartOver={onBack}
+    >
       {note ? <Alert variant="warning">{note}</Alert> : null}
     </DonePanel>
   );
@@ -70,48 +118,121 @@ export function PaperTool() {
   const kind = PAPER_KINDS.find((k) => k.value === options.kind)!;
 
   if (op.state.status === "busy") return <BusyPanel progress={op.state.progress} />;
-  if (op.state.status === "error") return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={op.reset} />;
-  if (op.state.status === "done") return <Done bytes={op.state.result} name={`feuille-${options.kind}.pdf`} toolId="doc-paper" onBack={op.reset} />;
+  if (op.state.status === "error")
+    return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={op.reset} />;
+  if (op.state.status === "done")
+    return (
+      <Done
+        bytes={op.state.result}
+        name={`feuille-${options.kind}.pdf`}
+        toolId="doc-paper"
+        onBack={op.reset}
+      />
+    );
 
   return (
     <div className="space-y-4">
-      <Segmented label="Type de feuille" value={options.kind} onChange={(kind) => patch({ kind })} className="sm:grid-cols-4" options={PAPER_KINDS.map((k) => ({ value: k.value, label: k.label, description: k.description }))} />
+      <Segmented
+        label="Type de feuille"
+        value={options.kind}
+        onChange={(kind) => patch({ kind })}
+        className="sm:grid-cols-4"
+        options={PAPER_KINDS.map((k) => ({
+          value: k.value,
+          label: k.label,
+          description: k.description,
+        }))}
+      />
       <ToolPanel className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <PageFormatField id="paper-format" value={options.page} onChange={(page) => patch({ page })} />
+          <PageFormatField
+            id="paper-format"
+            value={options.page}
+            onChange={(page) => patch({ page })}
+          />
           {kind.spacing ? (
             <div className="space-y-1">
               <Label htmlFor="paper-spacing">Espacement : {options.spacingMm} mm</Label>
-              <input id="paper-spacing" type="range" min={2} max={25} step={0.5} value={options.spacingMm} onChange={(e) => patch({ spacingMm: Number(e.target.value) })} className="w-full accent-primary" />
+              <input
+                id="paper-spacing"
+                type="range"
+                min={2}
+                max={25}
+                step={0.5}
+                value={options.spacingMm}
+                onChange={(e) => patch({ spacingMm: Number(e.target.value) })}
+                className="w-full accent-primary"
+              />
             </div>
           ) : null}
           <div className="space-y-1">
             <Label htmlFor="paper-margin">Marge : {options.marginMm} mm</Label>
-            <input id="paper-margin" type="range" min={0} max={30} value={options.marginMm} onChange={(e) => patch({ marginMm: Number(e.target.value) })} className="w-full accent-primary" />
+            <input
+              id="paper-margin"
+              type="range"
+              min={0}
+              max={30}
+              value={options.marginMm}
+              onChange={(e) => patch({ marginMm: Number(e.target.value) })}
+              className="w-full accent-primary"
+            />
           </div>
           <div className="space-y-1">
             <Label htmlFor="paper-pages">Nombre de pages</Label>
-            <Input id="paper-pages" type="number" min={1} max={50} value={options.pages} onChange={(e) => patch({ pages: Number(e.target.value) || 1 })} />
+            <Input
+              id="paper-pages"
+              type="number"
+              min={1}
+              max={50}
+              value={options.pages}
+              onChange={(e) => patch({ pages: Number(e.target.value) || 1 })}
+            />
           </div>
           <div className="space-y-1">
             <Label htmlFor="paper-color">Couleur des traits</Label>
             <div className="flex items-center gap-2">
-              <input id="paper-color" type="color" value={options.color} onChange={(e) => patch({ color: e.target.value })} className="h-10 w-14 cursor-pointer rounded-md border border-input bg-surface p-1" />
-              <Button type="button" variant="ghost" size="sm" onClick={() => patch({ color: "#9aa3b2" })}>
+              <input
+                id="paper-color"
+                type="color"
+                value={options.color}
+                onChange={(e) => patch({ color: e.target.value })}
+                className="h-10 w-14 cursor-pointer rounded-md border border-input bg-surface p-1"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => patch({ color: "#9aa3b2" })}
+              >
                 Gris clair
               </Button>
             </div>
           </div>
           <div className="space-y-1 sm:col-span-2 lg:col-span-3">
             <Label htmlFor="paper-title">Titre en haut de page (facultatif)</Label>
-            <Input id="paper-title" value={options.title ?? ""} onChange={(e) => patch({ title: e.target.value })} placeholder="Nom, matière, date…" maxLength={120} />
+            <Input
+              id="paper-title"
+              value={options.title ?? ""}
+              onChange={(e) => patch({ title: e.target.value })}
+              placeholder="Nom, matière, date…"
+              maxLength={120}
+            />
           </div>
         </div>
-        <Button type="button" size="lg" className="w-full" onClick={() => void op.run(async () => paperPdf(options))} data-testid="paper-run">
+        <Button
+          type="button"
+          size="lg"
+          className="w-full"
+          onClick={() => void op.run(async () => paperPdf(options))}
+          data-testid="paper-run"
+        >
           <Printer aria-hidden="true" /> Créer le PDF
         </Button>
       </ToolPanel>
-      <p className="text-xs text-muted-foreground">Imprimez à l&apos;échelle 100 % (sans « ajuster à la page ») pour conserver les dimensions exactes des carreaux.</p>
+      <p className="text-xs text-muted-foreground">
+        Imprimez à l&apos;échelle 100 % (sans « ajuster à la page ») pour conserver les dimensions
+        exactes des carreaux.
+      </p>
     </div>
   );
 }
@@ -123,8 +244,21 @@ export function CalendarTool() {
   const patch = (p: Partial<CalendarOptions>) => setOptions((o) => ({ ...o, ...p }));
 
   if (op.state.status === "busy") return <BusyPanel progress={op.state.progress} />;
-  if (op.state.status === "error") return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={op.reset} />;
-  if (op.state.status === "done") return <Done bytes={op.state.result} name={view === "month" ? `calendrier-${options.year}-${String(options.month).padStart(2, "0")}.pdf` : `calendrier-${options.year}.pdf`} toolId="doc-calendar" onBack={op.reset} />;
+  if (op.state.status === "error")
+    return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={op.reset} />;
+  if (op.state.status === "done")
+    return (
+      <Done
+        bytes={op.state.result}
+        name={
+          view === "month"
+            ? `calendrier-${options.year}-${String(options.month).padStart(2, "0")}.pdf`
+            : `calendrier-${options.year}.pdf`
+        }
+        toolId="doc-calendar"
+        onBack={op.reset}
+      />
+    );
 
   return (
     <div className="space-y-4">
@@ -133,21 +267,38 @@ export function CalendarTool() {
         value={view}
         onChange={(v) => {
           setView(v);
-          patch({ month: v === "month" ? options.month ?? new Date().getMonth() + 1 : null, page: v === "month" ? "a4-landscape" : "a4" });
+          patch({
+            month: v === "month" ? (options.month ?? new Date().getMonth() + 1) : null,
+            page: v === "month" ? "a4-landscape" : "a4",
+          });
         }}
         className="sm:grid-cols-2"
-        options={[{ value: "month", label: "Un mois par page", description: "Cases larges, zone de notes" }, { value: "year", label: "Année complète", description: "12 mois sur une page" }]}
+        options={[
+          { value: "month", label: "Un mois par page", description: "Cases larges, zone de notes" },
+          { value: "year", label: "Année complète", description: "12 mois sur une page" },
+        ]}
       />
       <ToolPanel className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1">
             <Label htmlFor="cal-year">Année</Label>
-            <Input id="cal-year" type="number" min={1900} max={2199} value={options.year} onChange={(e) => patch({ year: Number(e.target.value) || new Date().getFullYear() })} data-testid="cal-year" />
+            <Input
+              id="cal-year"
+              type="number"
+              min={1900}
+              max={2199}
+              value={options.year}
+              onChange={(e) => patch({ year: Number(e.target.value) || new Date().getFullYear() })}
+              data-testid="cal-year"
+            />
           </div>
           {view === "month" ? (
             <div className="space-y-1">
               <Label htmlFor="cal-month">Mois</Label>
-              <Select value={String(options.month ?? 1)} onValueChange={(v) => patch({ month: Number(v) })}>
+              <Select
+                value={String(options.month ?? 1)}
+                onValueChange={(v) => patch({ month: Number(v) })}
+              >
                 <SelectTrigger id="cal-month">
                   <SelectValue />
                 </SelectTrigger>
@@ -161,22 +312,48 @@ export function CalendarTool() {
               </Select>
             </div>
           ) : null}
-          <PageFormatField id="cal-format" value={options.page} onChange={(page) => patch({ page })} />
+          <PageFormatField
+            id="cal-format"
+            value={options.page}
+            onChange={(page) => patch({ page })}
+          />
         </div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           <label className="flex items-center gap-2">
-            <Checkbox checked={options.holidays} onCheckedChange={(v) => patch({ holidays: v === true })} /> Marquer les jours fériés français
+            <Checkbox
+              checked={options.holidays}
+              onCheckedChange={(v) => patch({ holidays: v === true })}
+            />{" "}
+            Marquer les jours fériés français
           </label>
           <label className="flex items-center gap-2">
-            <Checkbox checked={options.alsaceMoselle ?? false} onCheckedChange={(v) => patch({ alsaceMoselle: v === true })} /> Alsace-Moselle
+            <Checkbox
+              checked={options.alsaceMoselle ?? false}
+              onCheckedChange={(v) => patch({ alsaceMoselle: v === true })}
+            />{" "}
+            Alsace-Moselle
           </label>
           {view === "month" ? (
             <label className="flex items-center gap-2">
-              <Checkbox checked={options.notes} onCheckedChange={(v) => patch({ notes: v === true })} /> Colonne de notes
+              <Checkbox
+                checked={options.notes}
+                onCheckedChange={(v) => patch({ notes: v === true })}
+              />{" "}
+              Colonne de notes
             </label>
           ) : null}
         </div>
-        <Button type="button" size="lg" className="w-full" onClick={() => void op.run(async () => calendarPdf({ ...options, month: view === "month" ? options.month ?? 1 : null }))} data-testid="cal-run">
+        <Button
+          type="button"
+          size="lg"
+          className="w-full"
+          onClick={() =>
+            void op.run(async () =>
+              calendarPdf({ ...options, month: view === "month" ? (options.month ?? 1) : null }),
+            )
+          }
+          data-testid="cal-run"
+        >
           <Printer aria-hidden="true" /> Créer le calendrier
         </Button>
       </ToolPanel>
@@ -190,8 +367,22 @@ export function CoverPageTool() {
   const patch = (p: Partial<CoverPageOptions>) => setOptions((o) => ({ ...o, ...p }));
 
   if (op.state.status === "busy") return <BusyPanel progress={op.state.progress} />;
-  if (op.state.status === "error") return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={op.reset} />;
-  if (op.state.status === "done") return <Done bytes={op.state.result.bytes} name="page-de-garde.pdf" toolId="doc-cover" onBack={op.reset} note={op.state.result.replaced ? "Certains caractères (emoji, alphabets non latins) ont été remplacés par « ? »." : undefined} />;
+  if (op.state.status === "error")
+    return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={op.reset} />;
+  if (op.state.status === "done")
+    return (
+      <Done
+        bytes={op.state.result.bytes}
+        name="page-de-garde.pdf"
+        toolId="doc-cover"
+        onBack={op.reset}
+        note={
+          op.state.result.replaced
+            ? "Certains caractères (emoji, alphabets non latins) ont été remplacés par « ? »."
+            : undefined
+        }
+      />
+    );
 
   return (
     <div className="space-y-4">
@@ -199,39 +390,97 @@ export function CoverPageTool() {
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1 sm:col-span-2">
             <Label htmlFor="cover-title">Titre</Label>
-            <Textarea id="cover-title" value={options.title} onChange={(e) => patch({ title: e.target.value })} rows={2} maxLength={200} placeholder="Rapport de stage" data-testid="cover-title" />
+            <Textarea
+              id="cover-title"
+              value={options.title}
+              onChange={(e) => patch({ title: e.target.value })}
+              rows={2}
+              maxLength={200}
+              placeholder="Rapport de stage"
+              data-testid="cover-title"
+            />
           </div>
           <div className="space-y-1 sm:col-span-2">
             <Label htmlFor="cover-subtitle">Sous-titre</Label>
-            <Input id="cover-subtitle" value={options.subtitle ?? ""} onChange={(e) => patch({ subtitle: e.target.value })} maxLength={200} placeholder="Développement d'une plateforme d'outils en ligne" />
+            <Input
+              id="cover-subtitle"
+              value={options.subtitle ?? ""}
+              onChange={(e) => patch({ subtitle: e.target.value })}
+              maxLength={200}
+              placeholder="Développement d'une plateforme d'outils en ligne"
+            />
           </div>
           <div className="space-y-1">
             <Label htmlFor="cover-author">Auteur</Label>
-            <Input id="cover-author" value={options.author ?? ""} onChange={(e) => patch({ author: e.target.value })} maxLength={120} placeholder="Prénom Nom" />
+            <Input
+              id="cover-author"
+              value={options.author ?? ""}
+              onChange={(e) => patch({ author: e.target.value })}
+              maxLength={120}
+              placeholder="Prénom Nom"
+            />
           </div>
           <div className="space-y-1">
             <Label htmlFor="cover-institution">Organisation / établissement</Label>
-            <Input id="cover-institution" value={options.institution ?? ""} onChange={(e) => patch({ institution: e.target.value })} maxLength={120} placeholder="Université, entreprise, classe…" />
+            <Input
+              id="cover-institution"
+              value={options.institution ?? ""}
+              onChange={(e) => patch({ institution: e.target.value })}
+              maxLength={120}
+              placeholder="Université, entreprise, classe…"
+            />
           </div>
           <div className="space-y-1">
             <Label htmlFor="cover-date">Date</Label>
-            <Input id="cover-date" value={options.date ?? ""} onChange={(e) => patch({ date: e.target.value })} maxLength={60} placeholder="Juin 2026" />
+            <Input
+              id="cover-date"
+              value={options.date ?? ""}
+              onChange={(e) => patch({ date: e.target.value })}
+              maxLength={60}
+              placeholder="Juin 2026"
+            />
           </div>
           <div className="space-y-1">
             <Label htmlFor="cover-footer">Pied de page</Label>
-            <Input id="cover-footer" value={options.footer ?? ""} onChange={(e) => patch({ footer: e.target.value })} maxLength={160} placeholder="Confidentiel · Version 1.0" />
+            <Input
+              id="cover-footer"
+              value={options.footer ?? ""}
+              onChange={(e) => patch({ footer: e.target.value })}
+              maxLength={160}
+              placeholder="Confidentiel · Version 1.0"
+            />
           </div>
-          <PageFormatField id="cover-format" value={options.page} onChange={(page) => patch({ page })} />
+          <PageFormatField
+            id="cover-format"
+            value={options.page}
+            onChange={(page) => patch({ page })}
+          />
           <div className="space-y-1">
             <Label htmlFor="cover-accent">Couleur d&apos;accent</Label>
-            <input id="cover-accent" type="color" value={options.accent} onChange={(e) => patch({ accent: e.target.value })} className="h-10 w-16 cursor-pointer rounded-md border border-input bg-surface p-1" />
+            <input
+              id="cover-accent"
+              type="color"
+              value={options.accent}
+              onChange={(e) => patch({ accent: e.target.value })}
+              className="h-10 w-16 cursor-pointer rounded-md border border-input bg-surface p-1"
+            />
           </div>
         </div>
-        <Button type="button" size="lg" className="w-full" onClick={() => void op.run(async () => coverPagePdf(options))} disabled={!options.title.trim()} data-testid="cover-run">
+        <Button
+          type="button"
+          size="lg"
+          className="w-full"
+          onClick={() => void op.run(async () => coverPagePdf(options))}
+          disabled={!options.title.trim()}
+          data-testid="cover-run"
+        >
           <Printer aria-hidden="true" /> Créer la page de garde
         </Button>
       </ToolPanel>
-      <p className="text-xs text-muted-foreground">Fusionnez ensuite la page de garde avec votre document grâce à l&apos;outil « Fusionner des PDF ».</p>
+      <p className="text-xs text-muted-foreground">
+        Fusionnez ensuite la page de garde avec votre document grâce à l&apos;outil « Fusionner des
+        PDF ».
+      </p>
     </div>
   );
 }

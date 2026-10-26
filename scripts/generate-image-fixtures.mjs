@@ -68,7 +68,12 @@ const sheet = await render(
   0.9,
 );
 await browser.close();
-for (const [name, bytes] of [["photo-800x600.jpg", photo], ["logo-alpha.png", logo], ["text-french.png", text], ["sheet-perspective.jpg", sheet]]) {
+for (const [name, bytes] of [
+  ["photo-800x600.jpg", photo],
+  ["logo-alpha.png", logo],
+  ["text-french.png", text],
+  ["sheet-perspective.jpg", sheet],
+]) {
   await writeFile(path.join(outDir, name), bytes);
   console.log(`wrote ${name} (${bytes.length} bytes)`);
 }

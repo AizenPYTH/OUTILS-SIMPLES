@@ -7,7 +7,8 @@ export function detectDelimiter(text: string): Delimiter {
   let best: Delimiter = ",";
   let bestCount = -1;
   for (const d of candidates) {
-    const count = (sample.match(new RegExp(d === "|" ? "\\|" : d === "\t" ? "\t" : d, "g")) ?? []).length;
+    const count = (sample.match(new RegExp(d === "|" ? "\\|" : d === "\t" ? "\t" : d, "g")) ?? [])
+      .length;
     if (count > bestCount) {
       best = d;
       bestCount = count;
@@ -62,12 +63,17 @@ function coerce(value: string, infer: boolean): unknown {
   return value;
 }
 
-export function csvToJson(text: string, options: { delimiter?: Delimiter; header: boolean; inferTypes: boolean }): unknown[] {
+export function csvToJson(
+  text: string,
+  options: { delimiter?: Delimiter; header: boolean; inferTypes: boolean },
+): unknown[] {
   const rows = parseCsv(text, options.delimiter ?? detectDelimiter(text));
   if (rows.length === 0) return [];
   if (!options.header) return rows.map((r) => r.map((v) => coerce(v, options.inferTypes)));
   const [headerRow, ...body] = rows;
-  const headers = (headerRow ?? []).map((h, i) => (h.trim() === "" ? `colonne_${i + 1}` : h.trim()));
+  const headers = (headerRow ?? []).map((h, i) =>
+    h.trim() === "" ? `colonne_${i + 1}` : h.trim(),
+  );
   return body.map((r) => {
     const obj: Record<string, unknown> = {};
     headers.forEach((h, i) => {
@@ -78,7 +84,12 @@ export function csvToJson(text: string, options: { delimiter?: Delimiter; header
 }
 
 export function escapeCsvField(value: unknown, delimiter: Delimiter): string {
-  const text = value === null || value === undefined ? "" : typeof value === "object" ? JSON.stringify(value) : String(value);
+  const text =
+    value === null || value === undefined
+      ? ""
+      : typeof value === "object"
+        ? JSON.stringify(value)
+        : String(value);
   return /["\n\r]/.test(text) || text.includes(delimiter) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
@@ -88,14 +99,18 @@ export function jsonToCsv(value: unknown, delimiter: Delimiter = ";"): string {
   if (!list) throw new Error("Le JSON doit être un tableau d'objets (ou un objet).");
   if (list.length === 0) return "";
   if (list.every((item) => Array.isArray(item))) {
-    return (list as unknown[][]).map((row) => row.map((v) => escapeCsvField(v, delimiter)).join(delimiter)).join("\n");
+    return (list as unknown[][])
+      .map((row) => row.map((v) => escapeCsvField(v, delimiter)).join(delimiter))
+      .join("\n");
   }
   const headers: string[] = [];
   for (const item of list) {
-    if (!item || typeof item !== "object" || Array.isArray(item)) throw new Error("Chaque élément du tableau doit être un objet.");
+    if (!item || typeof item !== "object" || Array.isArray(item))
+      throw new Error("Chaque élément du tableau doit être un objet.");
     for (const key of Object.keys(item as object)) if (!headers.includes(key)) headers.push(key);
   }
   const lines = [headers.map((h) => escapeCsvField(h, delimiter)).join(delimiter)];
-  for (const item of list as Record<string, unknown>[]) lines.push(headers.map((h) => escapeCsvField(item[h], delimiter)).join(delimiter));
+  for (const item of list as Record<string, unknown>[])
+    lines.push(headers.map((h) => escapeCsvField(item[h], delimiter)).join(delimiter));
   return lines.join("\n");
 }

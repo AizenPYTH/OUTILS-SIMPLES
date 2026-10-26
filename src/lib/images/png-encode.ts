@@ -14,7 +14,8 @@ const CRC_TABLE = (() => {
 
 export function crc32(bytes: Uint8Array): number {
   let crc = 0xffffffff;
-  for (let i = 0; i < bytes.length; i += 1) crc = CRC_TABLE[(crc ^ bytes[i]!) & 0xff]! ^ (crc >>> 8);
+  for (let i = 0; i < bytes.length; i += 1)
+    crc = CRC_TABLE[(crc ^ bytes[i]!) & 0xff]! ^ (crc >>> 8);
   return (crc ^ 0xffffffff) >>> 0;
 }
 
@@ -23,7 +24,12 @@ export function crc32(bytes: Uint8Array): number {
  * where no canvas is available (extracting raw images from a PDF in a worker
  * or in tests). Filter type 0 on every scanline; zlib level 6.
  */
-export function encodePng(width: number, height: number, channels: PngChannels, samples: Uint8Array): Uint8Array {
+export function encodePng(
+  width: number,
+  height: number,
+  channels: PngChannels,
+  samples: Uint8Array,
+): Uint8Array {
   if (width <= 0 || height <= 0) throw new Error("Dimensions PNG invalides.");
   const rowBytes = width * channels;
   if (samples.length < rowBytes * height) throw new Error("Données d'image incomplètes.");
@@ -42,7 +48,12 @@ export function encodePng(width: number, height: number, channels: PngChannels, 
   ihdr[11] = 0;
   ihdr[12] = 0;
   const idat = zlibSync(raw, { level: 6 });
-  return concat([new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk("IHDR", ihdr), chunk("IDAT", idat), chunk("IEND", new Uint8Array(0))]);
+  return concat([
+    new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk("IHDR", ihdr),
+    chunk("IDAT", idat),
+    chunk("IEND", new Uint8Array(0)),
+  ]);
 }
 
 function chunk(type: string, data: Uint8Array): Uint8Array {

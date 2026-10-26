@@ -40,7 +40,13 @@ async function loadForCompare(file: File, maxBytes: number, maxPages: number): P
     assertPageCount(opened.pageCount, maxPages);
     const text = await extractText(opened.doc);
     const meta = await readMetadata(bytes).catch(() => null);
-    return { file, pageCount: opened.pageCount, texts: text.pages.map((p) => p.text), producer: meta?.producer ?? "", modified: meta?.modificationDate ?? "" };
+    return {
+      file,
+      pageCount: opened.pageCount,
+      texts: text.pages.map((p) => p.text),
+      producer: meta?.producer ?? "",
+      modified: meta?.modificationDate ?? "",
+    };
   } finally {
     void opened.destroy();
   }
@@ -72,7 +78,10 @@ export function ComparePdfTool() {
     }
   };
 
-  const result = React.useMemo<CompareResult | null>(() => (a && b ? comparePageTexts(a.texts, b.texts, { mode }) : null), [a, b, mode]);
+  const result = React.useMemo<CompareResult | null>(
+    () => (a && b ? comparePageTexts(a.texts, b.texts, { mode }) : null),
+    [a, b, mode],
+  );
   React.useEffect(() => {
     if (result) track("tool_success", { tool: TOOL_ID, resultCount: result.changedPages });
   }, [result]);
@@ -84,13 +93,34 @@ export function ComparePdfTool() {
   };
 
   if (error) return <ErrorPanel error={error} onReset={reset} />;
-  if (loading) return <BusyPanel progress={{ current: 0, total: 0, label: `Lecture du document ${loading === "a" ? "original" : "modifié"}…` }} />;
+  if (loading)
+    return (
+      <BusyPanel
+        progress={{
+          current: 0,
+          total: 0,
+          label: `Lecture du document ${loading === "a" ? "original" : "modifié"}…`,
+        }}
+      />
+    );
 
   if (!a || !b || !result) {
     return (
       <div className="grid gap-4 md:grid-cols-2" data-testid="compare-dropzones">
-        <Slot label="Document original" loaded={a} onFile={(f) => void load("a", f)} maxBytes={maxBytes} testId="compare-a" />
-        <Slot label="Document modifié" loaded={b} onFile={(f) => void load("b", f)} maxBytes={maxBytes} testId="compare-b" />
+        <Slot
+          label="Document original"
+          loaded={a}
+          onFile={(f) => void load("a", f)}
+          maxBytes={maxBytes}
+          testId="compare-a"
+        />
+        <Slot
+          label="Document modifié"
+          loaded={b}
+          onFile={(f) => void load("b", f)}
+          maxBytes={maxBytes}
+          testId="compare-b"
+        />
       </div>
     );
   }
@@ -102,7 +132,9 @@ export function ComparePdfTool() {
       <div className="grid gap-3 md:grid-cols-2">
         {[a, b].map((doc, i) => (
           <div key={i} className="rounded-[14px] border border-border bg-surface px-4 py-3 text-sm">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">{i === 0 ? "Original" : "Modifié"}</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">
+              {i === 0 ? "Original" : "Modifié"}
+            </p>
             <p className="truncate font-medium" title={doc.file.name}>
               {doc.file.name}
             </p>
@@ -113,44 +145,106 @@ export function ComparePdfTool() {
           </div>
         ))}
       </div>
-      {result.noText ? <Alert variant="warning" title="Aucun texte à comparer">Les deux documents ne contiennent pas de texte sélectionnable (scans). Passez-les d&apos;abord dans l&apos;outil OCR, ou comparez-les visuellement.</Alert> : null}
+      {result.noText ? (
+        <Alert variant="warning" title="Aucun texte à comparer">
+          Les deux documents ne contiennent pas de texte sélectionnable (scans). Passez-les
+          d&apos;abord dans l&apos;outil OCR, ou comparez-les visuellement.
+        </Alert>
+      ) : null}
       <StatGrid
         items={[
           { label: "Pages comparées", value: result.pages.length },
           { label: "Pages modifiées", value: result.changedPages },
-          { label: "Ajouts", value: <span className="text-success-foreground">+{result.totalAdded}</span>, hint: mode === "lines" ? "lignes" : mode === "words" ? "caractères (mots ajoutés)" : "caractères" },
-          { label: "Suppressions", value: <span className="text-destructive">−{result.totalRemoved}</span> },
+          {
+            label: "Ajouts",
+            value: <span className="text-success-foreground">+{result.totalAdded}</span>,
+            hint:
+              mode === "lines"
+                ? "lignes"
+                : mode === "words"
+                  ? "caractères (mots ajoutés)"
+                  : "caractères",
+          },
+          {
+            label: "Suppressions",
+            value: <span className="text-destructive">−{result.totalRemoved}</span>,
+          },
         ]}
       />
-      {result.identical ? <Alert variant="success" data-testid="compare-identical">Le texte des deux documents est identique{a.pageCount !== b.pageCount ? ", mais le nombre de pages diffère" : ""}. Les images, la mise en page et les polices ne sont pas comparées.</Alert> : null}
+      {result.identical ? (
+        <Alert variant="success" data-testid="compare-identical">
+          Le texte des deux documents est identique
+          {a.pageCount !== b.pageCount ? ", mais le nombre de pages diffère" : ""}. Les images, la
+          mise en page et les polices ne sont pas comparées.
+        </Alert>
+      ) : null}
       <ToolPanel className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <Segmented label="Granularité" value={mode} onChange={setMode} className="sm:grid-cols-3 sm:w-[420px]" options={[{ value: "words", label: "Mots" }, { value: "lines", label: "Lignes" }, { value: "chars", label: "Caractères" }]} />
+          <Segmented
+            label="Granularité"
+            value={mode}
+            onChange={setMode}
+            className="sm:grid-cols-3 sm:w-[420px]"
+            options={[
+              { value: "words", label: "Mots" },
+              { value: "lines", label: "Lignes" },
+              { value: "chars", label: "Caractères" },
+            ]}
+          />
           <div className="flex flex-wrap items-center gap-3">
             <label className="flex items-center gap-2 text-sm">
-              <Checkbox checked={onlyChanged} onCheckedChange={(v) => setOnlyChanged(v === true)} /> Pages modifiées seulement
+              <Checkbox checked={onlyChanged} onCheckedChange={(v) => setOnlyChanged(v === true)} />{" "}
+              Pages modifiées seulement
             </label>
-            <DownloadTextButton text={compareReport(result, a.file.name, b.file.name)} filename="comparaison.txt" label="Rapport (TXT)" toolId={TOOL_ID} />
+            <DownloadTextButton
+              text={compareReport(result, a.file.name, b.file.name)}
+              filename="comparaison.txt"
+              label="Rapport (TXT)"
+              toolId={TOOL_ID}
+            />
             <Button type="button" variant="outline" size="sm" onClick={reset}>
               <RefreshCw aria-hidden="true" /> Autres documents
             </Button>
           </div>
         </div>
-        {shown.length === 0 ? <p className="text-sm text-muted-foreground">Aucune page modifiée.</p> : null}
+        {shown.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Aucune page modifiée.</p>
+        ) : null}
         <ol className="space-y-3" data-testid="compare-pages">
           {shown.map((page) => (
-            <li key={page.pageIndex} className={cn("rounded-[12px] border p-3", page.status === "identical" ? "border-border" : "border-warning/50")} data-testid="compare-page" data-status={page.status}>
+            <li
+              key={page.pageIndex}
+              className={cn(
+                "rounded-[12px] border p-3",
+                page.status === "identical" ? "border-border" : "border-warning/50",
+              )}
+              data-testid="compare-page"
+              data-status={page.status}
+            >
               <p className="mb-2 flex items-center gap-2 text-sm font-medium">
                 <ArrowLeftRight className="size-4 text-muted-foreground" aria-hidden="true" />
                 Page {page.pageIndex + 1}
                 <span className="text-xs font-normal text-muted-foreground">
-                  {page.status === "identical" ? "identique" : page.status === "added" ? "ajoutée dans le document modifié" : page.status === "removed" ? "absente du document modifié" : `+${page.added} / −${page.removed}`}
+                  {page.status === "identical"
+                    ? "identique"
+                    : page.status === "added"
+                      ? "ajoutée dans le document modifié"
+                      : page.status === "removed"
+                        ? "absente du document modifié"
+                        : `+${page.added} / −${page.removed}`}
                 </span>
               </p>
               {page.status === "identical" ? null : (
                 <pre className="max-h-80 overflow-auto whitespace-pre-wrap break-words rounded-md bg-muted/40 p-3 font-sans text-[13px] leading-relaxed">
                   {page.changes.map((change, i) => (
-                    <span key={i} className={cn(change.added && "bg-success-soft text-success-foreground", change.removed && "bg-destructive-soft text-destructive line-through decoration-destructive/60")}>
+                    <span
+                      key={i}
+                      className={cn(
+                        change.added && "bg-success-soft text-success-foreground",
+                        change.removed &&
+                          "bg-destructive-soft text-destructive line-through decoration-destructive/60",
+                      )}
+                    >
                       {change.value}
                     </span>
                   ))}
@@ -164,7 +258,19 @@ export function ComparePdfTool() {
   );
 }
 
-function Slot({ label, loaded, onFile, maxBytes, testId }: { label: string; loaded: Loaded | null; onFile: (file: File) => void; maxBytes: number; testId: string }) {
+function Slot({
+  label,
+  loaded,
+  onFile,
+  maxBytes,
+  testId,
+}: {
+  label: string;
+  loaded: Loaded | null;
+  onFile: (file: File) => void;
+  maxBytes: number;
+  testId: string;
+}) {
   return (
     <div className="space-y-2" data-testid={testId}>
       <p className="text-sm font-medium">{label}</p>
@@ -178,7 +284,12 @@ function Slot({ label, loaded, onFile, maxBytes, testId }: { label: string; load
           </p>
         </div>
       ) : (
-        <PdfDropzone onFiles={(files) => files[0] && onFile(files[0])} maxFileSizeBytes={maxBytes} compact title={label} />
+        <PdfDropzone
+          onFiles={(files) => files[0] && onFile(files[0])}
+          maxFileSizeBytes={maxBytes}
+          compact
+          title={label}
+        />
       )}
     </div>
   );

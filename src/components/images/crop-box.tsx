@@ -19,10 +19,21 @@ const HANDLES: Handle[] = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
  * Interactive crop rectangle over an image, in image pixel coordinates.
  * Pointer events (mouse + touch), keyboard nudging, optional fixed ratio.
  */
-export function CropBox({ imageUrl, imageWidth, imageHeight, crop, onChange, ratio }: CropBoxProps) {
+export function CropBox({
+  imageUrl,
+  imageWidth,
+  imageHeight,
+  crop,
+  onChange,
+  ratio,
+}: CropBoxProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [scale, setScale] = React.useState(1);
-  const dragRef = React.useRef<{ kind: "move" | Handle; start: { x: number; y: number }; origin: CropRect } | null>(null);
+  const dragRef = React.useRef<{
+    kind: "move" | Handle;
+    start: { x: number; y: number };
+    origin: CropRect;
+  } | null>(null);
 
   React.useEffect(() => {
     const el = containerRef.current;
@@ -74,7 +85,8 @@ export function CropBox({ imageUrl, imageWidth, imageHeight, crop, onChange, rat
     if (drag.kind.includes("s")) height = Math.max(8, o.height + dy);
     if (ratio) {
       const horizontal = drag.kind === "e" || drag.kind === "w";
-      if (horizontal || (drag.kind.length === 2 && Math.abs(dx) >= Math.abs(dy))) height = width / ratio;
+      if (horizontal || (drag.kind.length === 2 && Math.abs(dx) >= Math.abs(dy)))
+        height = width / ratio;
       else width = height * ratio;
       if (drag.kind.includes("n")) y = bottom - height;
       if (drag.kind.includes("w")) x = right - width;
@@ -88,7 +100,12 @@ export function CropBox({ imageUrl, imageWidth, imageHeight, crop, onChange, rat
 
   const onKey = (e: React.KeyboardEvent) => {
     const step = e.shiftKey ? 10 : 1;
-    const map: Record<string, Partial<CropRect>> = { ArrowLeft: { x: crop.x - step }, ArrowRight: { x: crop.x + step }, ArrowUp: { y: crop.y - step }, ArrowDown: { y: crop.y + step } };
+    const map: Record<string, Partial<CropRect>> = {
+      ArrowLeft: { x: crop.x - step },
+      ArrowRight: { x: crop.x + step },
+      ArrowUp: { y: crop.y - step },
+      ArrowDown: { y: crop.y + step },
+    };
     const patch = map[e.key];
     if (patch) {
       e.preventDefault();
@@ -96,7 +113,12 @@ export function CropBox({ imageUrl, imageWidth, imageHeight, crop, onChange, rat
     }
   };
 
-  const box = { left: crop.x * scale, top: crop.y * scale, width: crop.width * scale, height: crop.height * scale };
+  const box = {
+    left: crop.x * scale,
+    top: crop.y * scale,
+    width: crop.width * scale,
+    height: crop.height * scale,
+  };
   const handlePos: Record<Handle, React.CSSProperties> = {
     nw: { left: 0, top: 0, cursor: "nwse-resize" },
     n: { left: "50%", top: 0, cursor: "ns-resize" },
@@ -109,10 +131,29 @@ export function CropBox({ imageUrl, imageWidth, imageHeight, crop, onChange, rat
   };
 
   return (
-    <div ref={containerRef} data-crop-root className="relative mx-auto w-full max-w-3xl select-none overflow-hidden rounded-[6px] bg-muted checkerboard" style={{ aspectRatio: `${imageWidth} / ${imageHeight}` }} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} data-testid="crop-box">
+    <div
+      ref={containerRef}
+      data-crop-root
+      className="relative mx-auto w-full max-w-3xl select-none overflow-hidden rounded-[6px] bg-muted checkerboard"
+      style={{ aspectRatio: `${imageWidth} / ${imageHeight}` }}
+      onPointerMove={onMove}
+      onPointerUp={onUp}
+      onPointerCancel={onUp}
+      data-testid="crop-box"
+    >
       {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
-      <img src={imageUrl} alt="Image à recadrer" className="block h-full w-full" draggable={false} />
-      <div className="pointer-events-none absolute inset-0 bg-black/45" style={{ clipPath: `polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 ${box.top}px, ${box.left}px ${box.top}px, ${box.left}px ${box.top + box.height}px, ${box.left + box.width}px ${box.top + box.height}px, ${box.left + box.width}px ${box.top}px, 0 ${box.top}px)` }} />
+      <img
+        src={imageUrl}
+        alt="Image à recadrer"
+        className="block h-full w-full"
+        draggable={false}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 bg-black/45"
+        style={{
+          clipPath: `polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 ${box.top}px, ${box.left}px ${box.top}px, ${box.left}px ${box.top + box.height}px, ${box.left + box.width}px ${box.top + box.height}px, ${box.left + box.width}px ${box.top}px, 0 ${box.top}px)`,
+        }}
+      />
       <div
         role="application"
         aria-label={`Zone de recadrage : ${Math.round(crop.width)} × ${Math.round(crop.height)} pixels. Utilisez les flèches pour déplacer.`}
@@ -128,7 +169,14 @@ export function CropBox({ imageUrl, imageWidth, imageHeight, crop, onChange, rat
           ))}
         </div>
         {HANDLES.map((h) => (
-          <button key={h} type="button" aria-label={`Redimensionner (${h})`} onPointerDown={(e) => startDrag(h, e)} className="absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary bg-white shadow-sm sm:size-4" style={{ ...handlePos[h], touchAction: "none" }} />
+          <button
+            key={h}
+            type="button"
+            aria-label={`Redimensionner (${h})`}
+            onPointerDown={(e) => startDrag(h, e)}
+            className="absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary bg-white shadow-sm sm:size-4"
+            style={{ ...handlePos[h], touchAction: "none" }}
+          />
         ))}
       </div>
     </div>

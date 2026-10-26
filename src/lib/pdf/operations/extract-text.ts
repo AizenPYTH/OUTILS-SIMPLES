@@ -29,12 +29,20 @@ interface TextItemLike {
 export function assembleTextItems(items: TextItemLike[]): string {
   const positioned = items
     .filter((i) => i.str.length > 0)
-    .map((i) => ({ str: i.str, x: i.transform[4] ?? 0, y: i.transform[5] ?? 0, h: Math.abs(i.transform[3] ?? i.height) || i.height || 10, w: i.width }));
+    .map((i) => ({
+      str: i.str,
+      x: i.transform[4] ?? 0,
+      y: i.transform[5] ?? 0,
+      h: Math.abs(i.transform[3] ?? i.height) || i.height || 10,
+      w: i.width,
+    }));
   if (positioned.length === 0) return "";
   // Group by baseline with a tolerance relative to the font height.
   const lines: { y: number; h: number; items: typeof positioned }[] = [];
   for (const item of positioned.sort((a, b) => b.y - a.y || a.x - b.x)) {
-    const line = lines.find((l) => Math.abs(l.y - item.y) <= Math.max(2, Math.min(l.h, item.h) * 0.5));
+    const line = lines.find(
+      (l) => Math.abs(l.y - item.y) <= Math.max(2, Math.min(l.h, item.h) * 0.5),
+    );
     if (line) line.items.push(item);
     else lines.push({ y: item.y, h: item.h, items: [item] });
   }
@@ -60,19 +68,28 @@ export function assembleTextItems(items: TextItemLike[]): string {
   return out.join("\n").trim();
 }
 
-export async function extractText(doc: PDFDocumentProxy, onProgress?: (current: number, total: number) => void): Promise<ExtractedText> {
+export async function extractText(
+  doc: PDFDocumentProxy,
+  onProgress?: (current: number, total: number) => void,
+): Promise<ExtractedText> {
   const pages: PageText[] = [];
   let totalCharacters = 0;
   for (let i = 1; i <= doc.numPages; i += 1) {
     onProgress?.(i, doc.numPages);
     const page = await doc.getPage(i);
     const content = await page.getTextContent();
-    const text = assembleTextItems(content.items.filter((item) => "str" in item) as unknown as TextItemLike[]);
+    const text = assembleTextItems(
+      content.items.filter((item) => "str" in item) as unknown as TextItemLike[],
+    );
     pages.push({ pageIndex: i - 1, text, empty: text.length === 0 });
     totalCharacters += text.length;
     page.cleanup();
   }
-  return { pages, totalCharacters, emptyPages: pages.filter((p) => p.empty).map((p) => p.pageIndex) };
+  return {
+    pages,
+    totalCharacters,
+    emptyPages: pages.filter((p) => p.empty).map((p) => p.pageIndex),
+  };
 }
 
 export function pagesToPlainText(pages: PageText[], withSeparators = true): string {
@@ -87,13 +104,22 @@ export function pagesToMarkdown(pages: PageText[], title?: string): string {
   const out: string[] = [];
   if (title) out.push(`# ${title}`, "");
   for (const p of pages) {
-    out.push(`## Page ${p.pageIndex + 1}`, "", p.text.length ? p.text : "_(aucun texte détecté sur cette page)_", "");
+    out.push(
+      `## Page ${p.pageIndex + 1}`,
+      "",
+      p.text.length ? p.text : "_(aucun texte détecté sur cette page)_",
+      "",
+    );
   }
   return out.join("\n").trim() + "\n";
 }
 
 /** Case-insensitive, accent-insensitive search across pages. */
-export function searchPages(pages: PageText[], query: string, maxHits = 500): { pageIndex: number; snippet: string }[] {
+export function searchPages(
+  pages: PageText[],
+  query: string,
+  maxHits = 500,
+): { pageIndex: number; snippet: string }[] {
   const needle = normalize(query);
   if (!needle) return [];
   const hits: { pageIndex: number; snippet: string }[] = [];
@@ -105,7 +131,13 @@ export function searchPages(pages: PageText[], query: string, maxHits = 500): { 
       if (index === -1) break;
       const start = Math.max(0, index - 60);
       const end = Math.min(page.text.length, index + needle.length + 60);
-      hits.push({ pageIndex: page.pageIndex, snippet: (start > 0 ? "…" : "") + page.text.slice(start, end).replace(/\s+/g, " ") + (end < page.text.length ? "…" : "") });
+      hits.push({
+        pageIndex: page.pageIndex,
+        snippet:
+          (start > 0 ? "…" : "") +
+          page.text.slice(start, end).replace(/\s+/g, " ") +
+          (end < page.text.length ? "…" : ""),
+      });
       from = index + needle.length;
     }
   }
@@ -113,8 +145,5 @@ export function searchPages(pages: PageText[], query: string, maxHits = 500): { 
 }
 
 function normalize(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 }

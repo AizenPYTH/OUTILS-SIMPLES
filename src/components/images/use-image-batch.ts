@@ -26,7 +26,11 @@ export interface BatchItem {
   resultUrl?: string;
 }
 
-export type BatchProcessor = (item: BatchItem, decoded: DecodedImage, signal: AbortSignal) => Promise<BatchResult>;
+export type BatchProcessor = (
+  item: BatchItem,
+  decoded: DecodedImage,
+  signal: AbortSignal,
+) => Promise<BatchResult>;
 
 export interface UseImageBatchOptions {
   toolId: string;
@@ -61,7 +65,14 @@ export function useImageBatch({ toolId, maxFiles }: UseImageBatchOptions) {
     async (files: File[]) => {
       const room = Math.max(0, maxFiles - itemsRef.current.length);
       const accepted = files.slice(0, room);
-      const created: BatchItem[] = accepted.map((file) => ({ id: uid("img"), file, previewUrl: URL.createObjectURL(file), width: null, height: null, status: "pending" }));
+      const created: BatchItem[] = accepted.map((file) => ({
+        id: uid("img"),
+        file,
+        previewUrl: URL.createObjectURL(file),
+        width: null,
+        height: null,
+        status: "pending",
+      }));
       setItems((list) => [...list, ...created]);
       track("tool_start", { tool: toolId, resultCount: accepted.length });
       // Read dimensions lazily (one decode per file).
@@ -69,9 +80,19 @@ export function useImageBatch({ toolId, maxFiles }: UseImageBatchOptions) {
         try {
           const decoded = await decodeImage(item.file);
           decoded.bitmap.close();
-          setItems((list) => list.map((i) => (i.id === item.id ? { ...i, width: decoded.width, height: decoded.height } : i)));
+          setItems((list) =>
+            list.map((i) =>
+              i.id === item.id ? { ...i, width: decoded.width, height: decoded.height } : i,
+            ),
+          );
         } catch {
-          setItems((list) => list.map((i) => (i.id === item.id ? { ...i, status: "error", error: "Image illisible par ce navigateur." } : i)));
+          setItems((list) =>
+            list.map((i) =>
+              i.id === item.id
+                ? { ...i, status: "error", error: "Image illisible par ce navigateur." }
+                : i,
+            ),
+          );
         }
       }
       return files.length - accepted.length;
@@ -103,7 +124,13 @@ export function useImageBatch({ toolId, maxFiles }: UseImageBatchOptions) {
     setItems((list) =>
       list.map((i) => {
         if (i.resultUrl) URL.revokeObjectURL(i.resultUrl);
-        return { ...i, status: i.error && !i.result ? i.status : "pending", result: undefined, resultUrl: undefined, error: i.result ? undefined : i.error };
+        return {
+          ...i,
+          status: i.error && !i.result ? i.status : "pending",
+          result: undefined,
+          resultUrl: undefined,
+          error: i.result ? undefined : i.error,
+        };
       }),
     );
   }, []);
@@ -121,7 +148,11 @@ export function useImageBatch({ toolId, maxFiles }: UseImageBatchOptions) {
       let errors = 0;
       for (const item of pending) {
         if (controller.signal.aborted) break;
-        setItems((list) => list.map((i) => (i.id === item.id ? { ...i, status: "processing", error: undefined } : i)));
+        setItems((list) =>
+          list.map((i) =>
+            i.id === item.id ? { ...i, status: "processing", error: undefined } : i,
+          ),
+        );
         // Yield so the UI paints between files.
         await new Promise((r) => setTimeout(r, 0));
         let decoded: DecodedImage | null = null;
@@ -140,7 +171,9 @@ export function useImageBatch({ toolId, maxFiles }: UseImageBatchOptions) {
         } catch (error) {
           errors += 1;
           const message = error instanceof Error ? error.message : "Traitement impossible.";
-          setItems((list) => list.map((i) => (i.id === item.id ? { ...i, status: "error", error: message } : i)));
+          setItems((list) =>
+            list.map((i) => (i.id === item.id ? { ...i, status: "error", error: message } : i)),
+          );
         } finally {
           decoded?.bitmap.close();
         }
