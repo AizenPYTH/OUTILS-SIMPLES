@@ -14,8 +14,9 @@ export default function MentionsLegalesPage() {
   return (
     <LegalPage title="Mentions légales" path="/mentions-legales/">
       <p className="rounded-md border border-warning/40 bg-warning-soft p-4 text-sm text-warning-foreground">
-        Les informations encadrées ci-dessous doivent être renseignées dans{" "}
-        <code>src/config/site.ts</code> avant la mise en ligne. Ce modèle ne constitue pas un
+        Les informations encadrées ci-dessous doivent être renseignées via les variables
+        d&apos;environnement <code>NEXT_PUBLIC_LEGAL_*</code> (voir{" "}
+        <code>docs/MISE_EN_LIGNE.md</code>) avant la mise en ligne. Ce modèle ne constitue pas un
         conseil juridique et ne garantit pas, à lui seul, la conformité du site aux obligations
         légales (loi pour la confiance dans l&apos;économie numérique, RGPD, etc.).
       </p>

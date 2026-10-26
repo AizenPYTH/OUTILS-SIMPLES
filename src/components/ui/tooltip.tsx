@@ -11,7 +11,14 @@ function TooltipProvider({
   return <TooltipPrimitive.Provider delayDuration={delayDuration} {...props} />;
 }
 
-const Tooltip = TooltipPrimitive.Root;
+/** Each tooltip carries its own provider (300 ms delay) so pages without tooltips ship no Radix code. */
+function Tooltip(props: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+  return (
+    <TooltipProvider>
+      <TooltipPrimitive.Root {...props} />
+    </TooltipProvider>
+  );
+}
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
 function TooltipContent({

@@ -6,16 +6,16 @@ import { publicEnv } from "@/config/env";
 import { Button } from "@/components/ui/button";
 import { useConsent } from "@/lib/consent/use-consent";
 import { t } from "@/lib/i18n";
+import { consentRequired } from "@/lib/consent/required";
 import { ConsentPreferencesDialog } from "./consent-preferences";
+
+export { consentRequired };
 
 /**
  * Shown only when a third-party service that needs consent is configured and
  * the visitor has not decided yet. With the default configuration (no ads, no
  * analytics) the banner never appears because nothing needs consent.
  */
-export function consentRequired(): boolean {
-  return publicEnv.NEXT_PUBLIC_ANALYTICS_PROVIDER !== "none" || publicEnv.NEXT_PUBLIC_ADS_ENABLED;
-}
 
 export function ConsentBanner() {
   const { hydrated, decided, update } = useConsent();

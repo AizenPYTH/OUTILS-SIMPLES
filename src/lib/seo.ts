@@ -31,7 +31,7 @@ export function buildPageMetadata(input: PageMetadataInput): Metadata {
       type: input.type ?? "website",
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: input.title,
       description: input.description,
     },

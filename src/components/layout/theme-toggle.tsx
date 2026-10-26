@@ -1,40 +1,33 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+import * as React from "react";
+import dynamic from "next/dynamic";
+import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { t } from "@/lib/i18n";
 
+const LazyThemeMenu = dynamic(() => import("./theme-menu").then((m) => m.ThemeMenu), {
+  ssr: false,
+});
+
+/**
+ * Header button: rendered on the server; the dropdown is downloaded on the first
+ * click and opens immediately in place of the placeholder button.
+ */
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const [loaded, setLoaded] = React.useState(false);
+  if (loaded) return <LazyThemeMenu defaultOpen />;
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={t.nav.theme} data-testid="theme-toggle">
-          <Sun className="size-5 dark:hidden" aria-hidden="true" />
-          <Moon className="hidden size-5 dark:block" aria-hidden="true" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuRadioGroup value={theme ?? "system"} onValueChange={setTheme}>
-          <DropdownMenuRadioItem value="light">
-            <Sun aria-hidden="true" /> {t.nav.themeLight}
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">
-            <Moon aria-hidden="true" /> {t.nav.themeDark}
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">
-            <Monitor aria-hidden="true" /> {t.nav.themeSystem}
-          </DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label={t.nav.theme}
+      aria-haspopup="menu"
+      data-testid="theme-toggle"
+      onClick={() => setLoaded(true)}
+    >
+      <Sun className="size-5 dark:hidden" aria-hidden="true" />
+      <Moon className="hidden size-5 dark:block" aria-hidden="true" />
+    </Button>
   );
 }

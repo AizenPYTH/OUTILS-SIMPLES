@@ -21,19 +21,20 @@ export const siteConfig = {
   twitterHandle: "",
   /**
    * Publisher identity: MUST be completed by the site owner before launch.
-   * These values are rendered on the legal pages with an explicit "à compléter"
-   * marker when left empty — nothing is invented.
+   * These values come from the NEXT_PUBLIC_LEGAL_* environment variables (see
+   * .env.example and docs/MISE_EN_LIGNE.md) and are rendered on the legal pages
+   * with an explicit "à compléter" marker when left empty — nothing is invented.
    */
   legal: {
-    publisherName: "",
-    publisherStatus: "",
-    publisherAddress: "",
-    registrationNumber: "",
-    vatNumber: "",
-    publicationDirector: "",
-    contactEmail: "",
-    hostingProvider: "",
-    hostingAddress: "",
+    publisherName: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_NAME,
+    publisherStatus: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS,
+    publisherAddress: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS,
+    registrationNumber: publicEnv.NEXT_PUBLIC_LEGAL_REGISTRATION_NUMBER,
+    vatNumber: publicEnv.NEXT_PUBLIC_LEGAL_VAT_NUMBER,
+    publicationDirector: publicEnv.NEXT_PUBLIC_LEGAL_PUBLICATION_DIRECTOR,
+    contactEmail: publicEnv.NEXT_PUBLIC_LEGAL_CONTACT_EMAIL,
+    hostingProvider: publicEnv.NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER,
+    hostingAddress: publicEnv.NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS,
   },
   /** Repository URL shown nowhere publicly by default. */
   links: {

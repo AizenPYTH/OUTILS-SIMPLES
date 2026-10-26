@@ -1,59 +1,116 @@
-import { z } from "zod";
-
 /**
  * Public (client-safe) environment variables, validated once at module load.
  * Only NEXT_PUBLIC_* values are read here: they are inlined in the client
  * bundle by Next.js, so they must never contain secrets.
+ *
+ * Validation is hand-written (no schema library): this module is imported by
+ * client components on every page, so it must stay a few hundred bytes.
  */
-const booleanString = z
-  .enum(["true", "false"])
-  .default("false")
-  .transform((v) => v === "true");
+const CONSENT_MODES = ["builtin", "external"] as const;
+const ANALYTICS_PROVIDERS = ["none", "plausible", "gtag"] as const;
 
-const publicEnvSchema = z.object({
-  NEXT_PUBLIC_SITE_URL: z
-    .string()
-    .url()
-    .default("http://localhost:3000")
-    .transform((v) => v.replace(/\/+$/, "")),
-  NEXT_PUBLIC_ADS_ENABLED: booleanString,
-  NEXT_PUBLIC_ADSENSE_CLIENT: z.string().default(""),
-  NEXT_PUBLIC_ADSENSE_SLOT_DIRECTORY: z.string().default(""),
-  NEXT_PUBLIC_ADSENSE_SLOT_TOOL_BOTTOM: z.string().default(""),
-  NEXT_PUBLIC_ADSENSE_SLOT_GUIDE_BOTTOM: z.string().default(""),
-  NEXT_PUBLIC_CONSENT_MODE: z.enum(["builtin", "external"]).default("builtin"),
-  NEXT_PUBLIC_ANALYTICS_PROVIDER: z.enum(["none", "plausible", "gtag"]).default("none"),
-  NEXT_PUBLIC_PLAUSIBLE_DOMAIN: z.string().default(""),
-  NEXT_PUBLIC_PLAUSIBLE_HOST: z.string().default(""),
-  NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().default(""),
-  NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: z.string().default(""),
-});
+export interface PublicEnv {
+  NEXT_PUBLIC_SITE_URL: string;
+  NEXT_PUBLIC_ADS_ENABLED: boolean;
+  NEXT_PUBLIC_ADSENSE_CLIENT: string;
+  NEXT_PUBLIC_ADSENSE_SLOT_DIRECTORY: string;
+  NEXT_PUBLIC_ADSENSE_SLOT_TOOL_BOTTOM: string;
+  NEXT_PUBLIC_ADSENSE_SLOT_GUIDE_BOTTOM: string;
+  NEXT_PUBLIC_CONSENT_MODE: (typeof CONSENT_MODES)[number];
+  NEXT_PUBLIC_ANALYTICS_PROVIDER: (typeof ANALYTICS_PROVIDERS)[number];
+  NEXT_PUBLIC_PLAUSIBLE_DOMAIN: string;
+  NEXT_PUBLIC_PLAUSIBLE_HOST: string;
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: string;
+  NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: string;
+  /** Legal identity shown on the legal pages (empty = "à compléter" placeholder, never invented). */
+  NEXT_PUBLIC_LEGAL_PUBLISHER_NAME: string;
+  NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS: string;
+  NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS: string;
+  NEXT_PUBLIC_LEGAL_REGISTRATION_NUMBER: string;
+  NEXT_PUBLIC_LEGAL_VAT_NUMBER: string;
+  NEXT_PUBLIC_LEGAL_PUBLICATION_DIRECTOR: string;
+  NEXT_PUBLIC_LEGAL_CONTACT_EMAIL: string;
+  NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER: string;
+  NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS: string;
+}
 
-export type PublicEnv = z.infer<typeof publicEnvSchema>;
+class PublicEnvError extends Error {
+  constructor(name: string, detail: string) {
+    super(`Invalid public environment configuration: ${name} ${detail}`);
+  }
+}
 
-function emptyToUndefined(value: string | undefined): string | undefined {
-  return value === "" ? undefined : value;
+function str(value: string | undefined): string {
+  return value ?? "";
+}
+
+function oneOf<T extends string>(
+  name: string,
+  value: string | undefined,
+  allowed: readonly T[],
+  fallback: T,
+): T {
+  if (value === undefined || value === "") return fallback;
+  if ((allowed as readonly string[]).includes(value)) return value as T;
+  throw new PublicEnvError(name, `must be one of ${allowed.join(", ")} (got "${value}")`);
+}
+
+function bool(name: string, value: string | undefined): boolean {
+  return oneOf(name, value, ["true", "false"] as const, "false") === "true";
+}
+
+function url(name: string, value: string | undefined, fallback: string): string {
+  const candidate = value === undefined || value === "" ? fallback : value;
+  let parsed: URL;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    throw new PublicEnvError(name, `must be an absolute URL (got "${candidate}")`);
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new PublicEnvError(name, `must use http(s) (got "${candidate}")`);
+  }
+  return candidate.replace(/\/+$/, "");
 }
 
 export function parsePublicEnv(raw: Record<string, string | undefined>): PublicEnv {
-  const result = publicEnvSchema.safeParse({
-    NEXT_PUBLIC_SITE_URL: emptyToUndefined(raw.NEXT_PUBLIC_SITE_URL),
-    NEXT_PUBLIC_ADS_ENABLED: emptyToUndefined(raw.NEXT_PUBLIC_ADS_ENABLED),
-    NEXT_PUBLIC_ADSENSE_CLIENT: raw.NEXT_PUBLIC_ADSENSE_CLIENT,
-    NEXT_PUBLIC_ADSENSE_SLOT_DIRECTORY: raw.NEXT_PUBLIC_ADSENSE_SLOT_DIRECTORY,
-    NEXT_PUBLIC_ADSENSE_SLOT_TOOL_BOTTOM: raw.NEXT_PUBLIC_ADSENSE_SLOT_TOOL_BOTTOM,
-    NEXT_PUBLIC_ADSENSE_SLOT_GUIDE_BOTTOM: raw.NEXT_PUBLIC_ADSENSE_SLOT_GUIDE_BOTTOM,
-    NEXT_PUBLIC_CONSENT_MODE: emptyToUndefined(raw.NEXT_PUBLIC_CONSENT_MODE),
-    NEXT_PUBLIC_ANALYTICS_PROVIDER: emptyToUndefined(raw.NEXT_PUBLIC_ANALYTICS_PROVIDER),
-    NEXT_PUBLIC_PLAUSIBLE_DOMAIN: raw.NEXT_PUBLIC_PLAUSIBLE_DOMAIN,
-    NEXT_PUBLIC_PLAUSIBLE_HOST: raw.NEXT_PUBLIC_PLAUSIBLE_HOST,
-    NEXT_PUBLIC_GA_MEASUREMENT_ID: raw.NEXT_PUBLIC_GA_MEASUREMENT_ID,
-    NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: raw.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
-  });
-  if (!result.success) {
-    throw new Error(`Invalid public environment configuration: ${result.error.message}`);
-  }
-  return result.data;
+  return {
+    NEXT_PUBLIC_SITE_URL: url(
+      "NEXT_PUBLIC_SITE_URL",
+      raw.NEXT_PUBLIC_SITE_URL,
+      "http://localhost:3000",
+    ),
+    NEXT_PUBLIC_ADS_ENABLED: bool("NEXT_PUBLIC_ADS_ENABLED", raw.NEXT_PUBLIC_ADS_ENABLED),
+    NEXT_PUBLIC_ADSENSE_CLIENT: str(raw.NEXT_PUBLIC_ADSENSE_CLIENT),
+    NEXT_PUBLIC_ADSENSE_SLOT_DIRECTORY: str(raw.NEXT_PUBLIC_ADSENSE_SLOT_DIRECTORY),
+    NEXT_PUBLIC_ADSENSE_SLOT_TOOL_BOTTOM: str(raw.NEXT_PUBLIC_ADSENSE_SLOT_TOOL_BOTTOM),
+    NEXT_PUBLIC_ADSENSE_SLOT_GUIDE_BOTTOM: str(raw.NEXT_PUBLIC_ADSENSE_SLOT_GUIDE_BOTTOM),
+    NEXT_PUBLIC_CONSENT_MODE: oneOf(
+      "NEXT_PUBLIC_CONSENT_MODE",
+      raw.NEXT_PUBLIC_CONSENT_MODE,
+      CONSENT_MODES,
+      "builtin",
+    ),
+    NEXT_PUBLIC_ANALYTICS_PROVIDER: oneOf(
+      "NEXT_PUBLIC_ANALYTICS_PROVIDER",
+      raw.NEXT_PUBLIC_ANALYTICS_PROVIDER,
+      ANALYTICS_PROVIDERS,
+      "none",
+    ),
+    NEXT_PUBLIC_PLAUSIBLE_DOMAIN: str(raw.NEXT_PUBLIC_PLAUSIBLE_DOMAIN),
+    NEXT_PUBLIC_PLAUSIBLE_HOST: str(raw.NEXT_PUBLIC_PLAUSIBLE_HOST),
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: str(raw.NEXT_PUBLIC_GA_MEASUREMENT_ID),
+    NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: str(raw.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION),
+    NEXT_PUBLIC_LEGAL_PUBLISHER_NAME: str(raw.NEXT_PUBLIC_LEGAL_PUBLISHER_NAME),
+    NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS: str(raw.NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS),
+    NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS: str(raw.NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS),
+    NEXT_PUBLIC_LEGAL_REGISTRATION_NUMBER: str(raw.NEXT_PUBLIC_LEGAL_REGISTRATION_NUMBER),
+    NEXT_PUBLIC_LEGAL_VAT_NUMBER: str(raw.NEXT_PUBLIC_LEGAL_VAT_NUMBER),
+    NEXT_PUBLIC_LEGAL_PUBLICATION_DIRECTOR: str(raw.NEXT_PUBLIC_LEGAL_PUBLICATION_DIRECTOR),
+    NEXT_PUBLIC_LEGAL_CONTACT_EMAIL: str(raw.NEXT_PUBLIC_LEGAL_CONTACT_EMAIL),
+    NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER: str(raw.NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER),
+    NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS: str(raw.NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS),
+  };
 }
 
 /*
@@ -73,4 +130,13 @@ export const publicEnv: PublicEnv = parsePublicEnv({
   NEXT_PUBLIC_PLAUSIBLE_HOST: process.env.NEXT_PUBLIC_PLAUSIBLE_HOST,
   NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
   NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  NEXT_PUBLIC_LEGAL_PUBLISHER_NAME: process.env.NEXT_PUBLIC_LEGAL_PUBLISHER_NAME,
+  NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS: process.env.NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS,
+  NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS: process.env.NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS,
+  NEXT_PUBLIC_LEGAL_REGISTRATION_NUMBER: process.env.NEXT_PUBLIC_LEGAL_REGISTRATION_NUMBER,
+  NEXT_PUBLIC_LEGAL_VAT_NUMBER: process.env.NEXT_PUBLIC_LEGAL_VAT_NUMBER,
+  NEXT_PUBLIC_LEGAL_PUBLICATION_DIRECTOR: process.env.NEXT_PUBLIC_LEGAL_PUBLICATION_DIRECTOR,
+  NEXT_PUBLIC_LEGAL_CONTACT_EMAIL: process.env.NEXT_PUBLIC_LEGAL_CONTACT_EMAIL,
+  NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER: process.env.NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER,
+  NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS: process.env.NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS,
 });
