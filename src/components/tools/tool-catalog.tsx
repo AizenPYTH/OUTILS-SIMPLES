@@ -3,10 +3,11 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Search, SearchX, X } from "lucide-react";
+import { SearchX, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ToolIcon } from "@/components/tools/tool-icon";
 import { ToolCard } from "@/components/tools/tool-card";
+import { SearchField } from "@/components/tools/search-field";
 import { AdSlot } from "@/components/monetization/ad-slot";
 import {
   getCategories,
@@ -33,7 +34,6 @@ function catalogData() {
     publishedTools,
     activeCategories: categories.filter((c) => getToolsByCategory(c.id).length > 0),
     plannedCategories: categories.filter((c) => getToolsByCategory(c.id).length === 0),
-    popularTools: publishedTools.filter((x) => x.featured).slice(0, 8),
   };
 }
 
@@ -86,7 +86,7 @@ function UrlQuerySync({ onChange }: { onChange: (query: string) => void }) {
 }
 
 export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategory["id"] }) {
-  const { publishedTools, activeCategories, plannedCategories, popularTools } = React.useMemo(
+  const { publishedTools, activeCategories, plannedCategories } = React.useMemo(
     () => catalogData(),
     [],
   );
@@ -175,43 +175,34 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
       <React.Suspense fallback={null}>
         <UrlQuerySync onChange={setQuery} />
       </React.Suspense>
-      <form role="search" onSubmit={onSubmit} className="relative">
-        <label htmlFor="catalog-search" className="sr-only">
-          {t.nav.search}
-        </label>
-        <Search
-          className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
-          aria-hidden="true"
-        />
-        <input
-          id="catalog-search"
-          ref={inputRef}
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t.home.searchPlaceholder(publishedTools.length)}
-          className="h-[52px] w-full rounded-[16px] border border-border bg-surface pl-12 pr-[116px] text-base shadow-md outline-hidden transition-colors placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-[3px] focus-visible:ring-ring"
-          autoComplete="off"
-          aria-controls={resultsId}
-          data-testid="catalog-search"
-        />
-        {query ? (
-          <button
-            type="button"
-            onClick={() => setQuery("")}
-            aria-label={tr("Effacer la recherche")}
-            className="absolute right-[100px] top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted"
-          >
-            <X className="size-4" aria-hidden="true" />
-          </button>
-        ) : null}
-        <Button
-          type="submit"
-          className="absolute right-1.5 top-1/2 h-10 -translate-y-1/2 rounded-[12px] px-4"
-        >
-          {t.home.searchButton}
-        </Button>
-      </form>
+      <SearchField
+        id="catalog-search"
+        ref={inputRef}
+        label={t.nav.search}
+        buttonLabel={t.home.searchButton}
+        onSubmit={onSubmit}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={
+          initialCategory
+            ? t.directory.categorySearchPlaceholder(countFor(initialCategory))
+            : t.home.searchPlaceholder(publishedTools.length)
+        }
+        aria-controls={resultsId}
+        data-testid="catalog-search"
+        trailing={
+          query ? (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label={tr("Effacer la recherche")}
+              className="absolute right-[52px] top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted sm:right-[116px]"
+            >
+              <X className="size-4" aria-hidden="true" />
+            </button>
+          ) : null
+        }
+      />
 
       <div className="grid min-w-0 gap-6 lg:grid-cols-[230px_1fr]">
         <nav
@@ -249,7 +240,12 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
             results.length > 0 ? (
               <section aria-labelledby="results-heading">
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <h2 id="results-heading" className="text-xl">
+                  {/* On a family page the H1 already names the family: the
+                      heading stays for the outline but is not repeated visually. */}
+                  <h2
+                    id="results-heading"
+                    className={cn("text-xl", !trimmed && category === initialCategory && "sr-only")}
+                  >
                     {trimmed
                       ? tr("Résultats pour « {query} »", { query: trimmed })
                       : (activeCategories.find((c) => c.id === category)?.name ??
@@ -292,14 +288,6 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
             )
           ) : (
             <>
-              <section aria-labelledby="popular-heading">
-                <div className="mb-4 flex items-baseline justify-between gap-3">
-                  <h2 id="popular-heading" className="text-xl">
-                    {t.home.featuredTitle}
-                  </h2>
-                </div>
-                <ToolGrid tools={popularTools} />
-              </section>
               {activeCategories.map((c) => {
                 const tools = publishedTools.filter((x) => x.category === c.id);
                 return (
@@ -353,12 +341,12 @@ function GroupedCategory({ category, tools }: { category: ToolCategory; tools: T
 function ToolGrid({ tools }: { tools: ToolDefinition[] }) {
   return (
     <ul
-      className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(250px,1fr))]"
+      className="grid gap-2.5 [grid-template-columns:repeat(auto-fill,minmax(250px,1fr))] sm:gap-3"
       data-testid="tool-grid"
     >
       {tools.map((tool) => (
         <li key={tool.id}>
-          <ToolCard tool={tool} />
+          <ToolCard tool={tool} dense />
         </li>
       ))}
     </ul>

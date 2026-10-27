@@ -111,7 +111,7 @@ export const en: Dictionary = {
       },
     ],
     heroCta: "See all tools",
-    searchPlaceholder: (n: number) => `Search ${n} tools (e.g. merge, sign, compress)…`,
+    searchPlaceholder: (n: number) => `Search ${n} tools…`,
     searchButton: "Search",
     allToolsLink: (n: number) => `See all ${n} tools`,
     heroSecondaryCta: "Open the PDF editor",
@@ -150,6 +150,8 @@ export const en: Dictionary = {
     plannedBody:
       "These categories are planned but not available yet. We only publish a tool once it really works.",
     categoryToolsTitle: (name: string) => `${name} tools`,
+    categorySearchPlaceholder: (n: number) =>
+      n === 1 ? "Search this family…" : `Search these ${n} tools…`,
   },
   tool: {
     about: "About this tool",

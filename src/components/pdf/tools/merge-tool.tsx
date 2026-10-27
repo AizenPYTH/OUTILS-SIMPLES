@@ -19,7 +19,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ArrowDown, ArrowUp, FileText, GripVertical, Merge, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { PdfDropzone } from "@/components/pdf/shared/pdf-dropzone";
 import { BusyPanel, DonePanel, ErrorPanel } from "@/components/pdf/shared/processing-panel";
@@ -49,6 +48,7 @@ export function MergeTool() {
   const tool = getToolById(TOOL_ID)!;
   const [files, setFiles] = React.useState<QueuedFile[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [addError, setAddError] = React.useState<string | null>(null);
   const op = useOperation<MergeResult>(TOOL_ID);
   const editor = getToolById("pdf-edit");
   const sensors = useSensors(
@@ -58,6 +58,7 @@ export function MergeTool() {
 
   const addFiles = async (incoming: File[]) => {
     setLoading(true);
+    const problems: string[] = [];
     try {
       const next: QueuedFile[] = [];
       for (const file of incoming) {
@@ -69,7 +70,7 @@ export function MergeTool() {
               f.file.lastModified === file.lastModified,
           )
         ) {
-          toast.info(t.upload.fileRejected(file.name, t.errors.duplicateFile));
+          problems.push(t.upload.fileRejected(file.name, t.errors.duplicateFile));
           continue;
         }
         try {
@@ -77,7 +78,7 @@ export function MergeTool() {
           const pageCount = await countPages(bytes);
           next.push({ id: uid("file"), file, bytes, pageCount });
         } catch (error) {
-          toast.error(
+          problems.push(
             t.upload.fileRejected(file.name, isPdfError(error) ? error.message : t.errors.notPdf),
           );
         }
@@ -92,17 +93,14 @@ export function MergeTool() {
           },
         );
       } catch (error) {
-        toast.error(toPdfError(error).message);
+        problems.push(toPdfError(error).message);
         return;
       }
+      // The new rows and the "n files · n pages" summary confirm the addition:
+      // no toast on top of the content.
       setFiles(combined);
-      if (next.length)
-        toast.success(
-          next.length === 1
-            ? t.upload.fileAdded(next[0]!.file.name)
-            : t.upload.filesAdded(next.length),
-        );
     } finally {
+      setAddError(problems.length ? problems.join(" · ") : null);
       setLoading(false);
     }
   };
@@ -129,7 +127,7 @@ export function MergeTool() {
 
   const merge = () => {
     if (files.length < 2) {
-      toast.error(t.errors.needTwoFiles);
+      setAddError(t.errors.needTwoFiles);
       return;
     }
     void op.run((report) =>
@@ -173,6 +171,7 @@ export function MergeTool() {
           maxFileSizeBytes={tool.limits.maxFileSizeBytes}
           maxFileCount={tool.limits.maxFileCount}
           disabled={loading}
+          error={addError}
         />
       ) : (
         <>
@@ -204,6 +203,7 @@ export function MergeTool() {
             maxFileSizeBytes={tool.limits.maxFileSizeBytes}
             maxFileCount={tool.limits.maxFileCount}
             disabled={loading}
+            error={addError}
           />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">

@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+/* Short viewports (laptops around 900 px tall, 768 px): the PDF editor rail
+   tightens so that every tool stays reachable without scrolling. */
+@custom-variant short (@media (max-height: 940px));
+@custom-variant shorter (@media (max-height: 820px));
 
 /* -------------------------------------------------------------------------
    Design tokens — the single source of truth for colors, radii, shadows.

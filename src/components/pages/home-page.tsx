@@ -117,15 +117,15 @@ export function HomePage() {
             <HomeSearch toolCount={tools.length} />
           </div>
           <ul
-            className="mx-auto mt-5 flex max-w-3xl flex-wrap items-center justify-center gap-2"
+            className="-mx-5 mt-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-auto sm:max-w-4xl sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0 sm:pb-0"
             data-testid="home-journeys"
             aria-label={t.homePage.shortcuts}
           >
             {journeys.map((journey) => (
-              <li key={journey.label}>
+              <li key={journey.label} className="shrink-0">
                 <Link
                   href={journey.href}
-                  className="inline-flex h-9 items-center gap-2 rounded-full border border-border bg-surface px-3.5 text-sm font-medium shadow-sm hover:bg-muted"
+                  className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full border border-border bg-surface px-3.5 text-sm font-medium shadow-sm hover:bg-muted"
                 >
                   <journey.icon className="size-4 text-link" aria-hidden="true" />
                   {journey.label}
@@ -242,7 +242,10 @@ export function HomePage() {
             {t.home.categoriesTitle}
           </h2>
         </div>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="home-categories">
+        <ul
+          className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3"
+          data-testid="home-categories"
+        >
           {categories.map((category) => {
             const tone = categoryTone[category.id];
             const family = getToolsByCategory(category.id);
@@ -251,12 +254,12 @@ export function HomePage() {
               <li key={category.id}>
                 <Link
                   href={getCategoryPath(category)}
-                  className="card-interactive flex h-full flex-col gap-3 rounded-[16px] border border-border bg-surface p-5 shadow-sm"
+                  className="card-interactive flex h-full flex-col gap-3 rounded-[16px] border border-border bg-surface p-3.5 shadow-sm sm:p-5"
                 >
                   <span className="flex items-center gap-3">
                     <span
                       className={cn(
-                        "flex size-11 shrink-0 items-center justify-center rounded-[12px]",
+                        "flex size-10 shrink-0 items-center justify-center rounded-[12px] sm:size-11",
                         tone.tile,
                       )}
                     >
@@ -269,7 +272,7 @@ export function HomePage() {
                       </span>
                     </span>
                   </span>
-                  <span className="line-clamp-2 text-sm text-muted-foreground">
+                  <span className="hidden text-sm text-muted-foreground sm:line-clamp-2">
                     {examples.join(" · ")}
                     {family.length > 2 ? " · …" : ""}
                   </span>

@@ -139,6 +139,15 @@ export const toolLabels: Record<WorkspaceTool, string> = {
   signature: tr("Signature"),
 };
 
+/**
+ * One-word labels shown under the rail icons, so that every label holds on a
+ * single line. The full label stays the accessible name and the tooltip.
+ */
+export const toolRailLabels: Partial<Record<WorkspaceTool, string>> = {
+  editText: tr("Modifier"),
+  text: tr("Texte"),
+};
+
 export const toolHints: Record<WorkspaceTool, string> = {
   select: tr(
     "Cliquez sur un élément pour le sélectionner ; glissez pour le déplacer ; double-cliquez sur un texte pour le modifier.",

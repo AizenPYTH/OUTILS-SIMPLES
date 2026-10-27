@@ -20,7 +20,9 @@ test.describe("editor", () => {
     // Text tool is active by default in editor mode.
     await page.getByTestId("tool-text").filter({ visible: true }).click();
     const box = (await overlay.boundingBox())!;
-    await page.mouse.click(box.x + box.width * 0.2, box.y + box.height * 0.5);
+    // Points in the upper part of the page: the width fit can leave the lower
+    // half below the fold on a 720 px tall window.
+    await page.mouse.click(box.x + box.width * 0.2, box.y + box.height * 0.3);
     const editor = page.getByTestId("text-annotation-editor");
     await expect(editor).toBeVisible();
     await editor.fill("Bonjour OUTILIA");
@@ -29,10 +31,10 @@ test.describe("editor", () => {
 
     // Freehand drawing.
     await page.getByTestId("tool-pen").filter({ visible: true }).click();
-    await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.7);
+    await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.4);
     await page.mouse.down();
-    await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.75, { steps: 8 });
-    await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.65, { steps: 8 });
+    await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.45, { steps: 8 });
+    await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.35, { steps: 8 });
     await page.mouse.up();
     await expect(shell).toContainText("2 éléments");
 

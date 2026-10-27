@@ -25,8 +25,11 @@ function ToastHost() {
   }, []);
   if (!ready) return null;
   return (
+    // Bottom-right on large screens: away from the centred content column and
+    // its primary buttons. Toasts are kept for actions without a visible
+    // result (copy, download started); file errors are shown inline.
     <Toaster
-      position="bottom-center"
+      position="bottom-right"
       closeButton
       toastOptions={{
         classNames: {

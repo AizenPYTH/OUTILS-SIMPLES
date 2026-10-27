@@ -55,6 +55,13 @@ const toneClass: Record<DocumentStatus["tone"], string> = {
   warning: "bg-warning-soft text-warning-foreground",
 };
 
+/** "rapport.final.pdf" → { base: "rapport.final", ext: ".pdf" } (no extension: ext is ""). */
+function splitName(name: string): { base: string; ext: string } {
+  const dot = name.lastIndexOf(".");
+  if (dot <= 0 || name.length - dot > 6) return { base: name, ext: "" };
+  return { base: name.slice(0, dot), ext: name.slice(dot) };
+}
+
 /** Compact header: back, document name and state, undo/redo, export, secondary menu. */
 export function EditorHeader({
   title,
@@ -85,11 +92,20 @@ export function EditorHeader({
         <ArrowLeft aria-hidden="true" />
       </Button>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold leading-tight" title={fileName}>
-          {fileName}
-          {dirty ? <span className="text-muted-foreground"> · {tr("modifié")}</span> : null}
+        {/* The extension stays visible when a long name is cut ("rapport-annu….pdf"). */}
+        <p
+          className="flex min-w-0 text-[13px] font-semibold leading-tight sm:text-sm"
+          title={fileName}
+          data-testid="editor-file-name"
+        >
+          <span className="truncate">{splitName(fileName).base}</span>
+          <span className="shrink-0">{splitName(fileName).ext}</span>
+          {dirty ? (
+            <span className="shrink-0 text-muted-foreground"> · {tr("modifié")}</span>
+          ) : null}
         </p>
-        <p className="truncate text-[11px] leading-tight text-muted-foreground">
+        {/* On phones the state line is kept for screen readers and moves to the "⋯" menu. */}
+        <p className="truncate text-[11px] leading-tight text-muted-foreground max-sm:sr-only">
           <span className="sr-only">{title} · </span>
           <span
             className={cn("rounded-full px-1.5 py-px font-medium", toneClass[status.tone])}
@@ -127,10 +143,18 @@ export function EditorHeader({
         <Redo2 aria-hidden="true" />
       </Button>
       <div className="mx-0.5 hidden h-6 w-px bg-border sm:block" />
-      <Button type="button" size="sm" onClick={onExport} data-testid="editor-download">
+      {/* Icon-only on phones so that the file name stays readable; same name for all. */}
+      <Button
+        type="button"
+        size="sm"
+        onClick={onExport}
+        aria-label={tr("Télécharger le PDF modifié")}
+        title={tr("Télécharger le PDF modifié")}
+        className="max-sm:size-9 max-sm:px-0"
+        data-testid="editor-download"
+      >
         <Download aria-hidden="true" />
         <span className="hidden sm:inline">{tr("Télécharger le PDF modifié")}</span>
-        <span className="sm:hidden">{t.common.download}</span>
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -145,8 +169,11 @@ export function EditorHeader({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
-          <DropdownMenuLabel className="truncate text-xs text-muted-foreground">
-            {fileName}
+          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+            <span className="block truncate font-medium text-foreground">{fileName}</span>
+            <span className="mt-0.5 block truncate sm:hidden">
+              {status.label} · {summary}
+            </span>
           </DropdownMenuLabel>
           {menu.map((item) => (
             <React.Fragment key={item.id}>

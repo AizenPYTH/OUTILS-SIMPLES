@@ -35,6 +35,7 @@ export function OfflineControl({ toolId, groups }: OfflineControlProps) {
   const [manifest, setManifest] = React.useState<OfflineManifest | null>(null);
   const [progress, setProgress] = React.useState<{ done: number; total: number } | null>(null);
   const [supported, setSupported] = React.useState(true);
+  const hintId = React.useId();
 
   React.useEffect(() => {
     let cancelled = false;
@@ -92,8 +93,9 @@ export function OfflineControl({ toolId, groups }: OfflineControlProps) {
     );
   }
 
+  const sizeLabel = status === "ready" && bytes > 0 ? formatMegabytes(bytes) : null;
   return (
-    <span className="inline-flex flex-wrap items-center gap-2">
+    <span className="inline-flex flex-wrap items-center justify-end gap-2">
       <Button
         type="button"
         variant="outline"
@@ -101,7 +103,17 @@ export function OfflineControl({ toolId, groups }: OfflineControlProps) {
         onClick={save}
         disabled={status === "saving" || status === "checking" || status === "idle" || !online}
         data-testid="offline-save"
-        title={online ? undefined : t.offline.needsConnection}
+        // The download size stays visible in the button; the sentence that
+        // explains it is attached as its description instead of a second,
+        // wrapping line of small grey text (design audit T5).
+        aria-describedby={sizeLabel ? hintId : undefined}
+        title={
+          online
+            ? sizeLabel
+              ? t.offline.sizeHint(sizeLabel)
+              : undefined
+            : t.offline.needsConnection
+        }
       >
         {status === "saving" ? (
           <Loader2 className="animate-spin" aria-hidden="true" />
@@ -115,10 +127,15 @@ export function OfflineControl({ toolId, groups }: OfflineControlProps) {
             ? t.offline.savingProgress(progress.done, progress.total)
             : t.offline.saving
           : t.offline.makeAvailable}
+        {status !== "saving" && sizeLabel ? (
+          <span className="font-normal text-muted-foreground" data-testid="offline-size">
+            · {sizeLabel}
+          </span>
+        ) : null}
       </Button>
-      {status === "ready" && bytes > 0 ? (
-        <span className="text-xs text-muted-foreground">
-          {t.offline.sizeHint(formatMegabytes(bytes))}
+      {sizeLabel ? (
+        <span id={hintId} className="sr-only">
+          {t.offline.sizeHint(sizeLabel)}
         </span>
       ) : null}
       {status === "failed" ? (

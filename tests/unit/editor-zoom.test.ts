@@ -4,6 +4,7 @@ import {
   ZOOM_MAX_PERCENT,
   ZOOM_MIN_PERCENT,
   anchoredScroll,
+  FIT_WIDTH_MAX_CSS_PX,
   fitScaleFor,
   percentOf,
   scaleOfPercent,
@@ -59,7 +60,11 @@ describe("zoom model", () => {
     const container = { width: 1000, height: 700 };
     const width = fitScaleFor("width", a4, container);
     const page = fitScaleFor("page", a4, container);
-    expect(width).toBeCloseTo(Math.min(1000 / 595, (700 * 1.3) / 842), 6);
+    // Width fit: fills the width up to a readable maximum, whatever the height.
+    expect(width).toBeCloseTo(Math.min(1000 / 595, FIT_WIDTH_MAX_CSS_PX / 595, 1400 / 842), 6);
+    expect(fitScaleFor("width", a4, { width: 500, height: 600 })).toBeCloseTo(500 / 595, 6);
+    // Short display: at least half of the page stays visible.
+    expect(fitScaleFor("width", a4, { width: 1200, height: 300 })).toBeCloseTo(600 / 842, 6);
     expect(page).toBeCloseTo(700 / 842, 6);
     expect(width).toBeGreaterThan(page);
     // Landscape page in a narrow container: width-bound in both modes.

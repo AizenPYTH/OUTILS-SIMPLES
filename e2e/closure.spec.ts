@@ -60,7 +60,8 @@ test.describe("clôture — résultat réel des outils partiellement vérifiés"
     await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.45, { steps: 5 });
     await page.mouse.up();
     await page.getByTestId("tool-comment").filter({ visible: true }).click();
-    await page.mouse.click(box.x + box.width * 0.3, box.y + box.height * 0.6);
+    // Upper half of the page: the width fit may leave the lower half below the fold.
+    await page.mouse.click(box.x + box.width * 0.7, box.y + box.height * 0.4);
     const editor = page.getByTestId("text-annotation-editor");
     await expect(editor).toBeVisible();
     await editor.fill("NOTE AUDIT");

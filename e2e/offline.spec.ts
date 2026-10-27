@@ -21,7 +21,9 @@ test.describe("mode hors ligne", () => {
     await page.evaluate(() => navigator.serviceWorker.ready);
     const save = page.getByTestId("offline-save");
     await expect(save).toBeEnabled({ timeout: 20_000 });
-    await expect(page.getByText("à télécharger une seule fois")).toBeVisible();
+    // Size shown in the button; the explanation is its accessible description.
+    await expect(page.getByTestId("offline-size")).toContainText(/\d.*Mo/);
+    await expect(save).toHaveAccessibleDescription(/à télécharger une seule fois/);
     await save.click();
     await expect(page.getByTestId("offline-available")).toBeVisible({ timeout: 120_000 });
 

@@ -1252,7 +1252,7 @@ export function AnnotationWorkspace({
 
       <div className="relative flex min-h-0 flex-1">
         {/* B. Desktop tool rail */}
-        <aside className="hidden w-[76px] shrink-0 overflow-y-auto border-r border-border bg-surface p-1.5 sm:block">
+        <aside className="hidden w-[88px] shrink-0 overflow-y-auto border-r border-border bg-surface p-1.5 sm:block">
           <Toolbar
             tools={tools}
             active={tool}
@@ -1263,7 +1263,7 @@ export function AnnotationWorkspace({
         </aside>
         {/* D. Pages panel: docked on large screens, overlay below */}
         {pagesOpen ? (
-          <aside className="absolute inset-y-0 left-0 z-20 w-[180px] shadow-xl lg:static lg:shadow-none">
+          <aside className="absolute inset-y-0 left-0 z-20 w-[204px] shadow-xl lg:static lg:shadow-none">
             <PagesPanel
               doc={pdf.opened.doc}
               pages={pdf.pages}
@@ -1283,7 +1283,7 @@ export function AnnotationWorkspace({
         <div className="relative min-w-0 flex-1" data-testid="editor-workspace">
           <div
             ref={containerRef}
-            className="absolute inset-0 overflow-auto bg-muted/60"
+            className="absolute inset-0 overflow-auto bg-muted/60 dark:bg-background"
             onScroll={(e) =>
               setScroll({ left: e.currentTarget.scrollLeft, top: e.currentTarget.scrollTop })
             }
@@ -1569,13 +1569,18 @@ export function AnnotationWorkspace({
             </Button>
           </div>
         </div>
-        <div className="h-[72px] border-t border-border py-1 sm:hidden">
+        <div className="relative h-[72px] border-t border-border py-1 sm:hidden">
           <Toolbar
             tools={tools}
             active={tool}
             onChange={setTool}
             orientation="horizontal"
             extras={extras}
+          />
+          {/* Fade on the right edge: the row scrolls, more tools follow. */}
+          <span
+            className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-surface to-transparent"
+            aria-hidden="true"
           />
         </div>
       </footer>

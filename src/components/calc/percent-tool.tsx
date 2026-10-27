@@ -256,9 +256,24 @@ export function VatTool() {
           value={mode}
           onChange={setMode}
           options={[
-            { value: "ht", label: tr("Hors taxes (HT)"), description: tr("Je connais le HT") },
-            { value: "ttc", label: tr("Toutes taxes (TTC)"), description: tr("Je connais le TTC") },
-            { value: "tva", label: tr("Montant de TVA"), description: tr("Je connais la TVA") },
+            {
+              value: "ht",
+              label: tr("Hors taxes (HT)"),
+              shortLabel: tr("HT"),
+              description: tr("Je connais le HT"),
+            },
+            {
+              value: "ttc",
+              label: tr("Toutes taxes (TTC)"),
+              shortLabel: tr("TTC"),
+              description: tr("Je connais le TTC"),
+            },
+            {
+              value: "tva",
+              label: tr("Montant de TVA"),
+              shortLabel: tr("TVA"),
+              description: tr("Je connais la TVA"),
+            },
           ]}
         />
         <div className="grid gap-3 sm:grid-cols-3">

@@ -18,7 +18,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { tr } from "@/lib/i18n/messages";
-import { TOOL_GROUPS, toolLabels, toolShortcuts, type WorkspaceTool } from "./types";
+import {
+  TOOL_GROUPS,
+  toolLabels,
+  toolRailLabels,
+  toolShortcuts,
+  type WorkspaceTool,
+} from "./types";
 
 const icons: Record<WorkspaceTool, React.ComponentType<{ className?: string }>> = {
   select: MousePointer2,
@@ -73,26 +79,36 @@ export function Toolbar({ tools, active, onChange, orientation, extras = [] }: T
         role="toolbar"
         aria-label={tr("Outils d'édition")}
         aria-orientation="vertical"
-        className="flex h-full flex-col gap-2"
+        className="flex h-full flex-col gap-2 short:gap-1.5"
       >
         {groups.map((group, index) => (
           <div
             key={group.id}
-            className={cn("flex flex-col gap-0.5", index > 0 && "border-t border-border pt-2")}
+            className={cn(
+              // Under 820 px of height the rail shows icons only, two per row.
+              "flex flex-col gap-0.5 shorter:grid shorter:grid-cols-2",
+              index > 0 && "border-t border-border pt-2 short:pt-1.5",
+            )}
           >
             {groups.length > 1 ? (
-              <p className="px-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="col-span-2 px-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground short:hidden">
                 {group.label}
               </p>
             ) : null}
             {group.tools.map((tool) => (
-              <ToolButton key={tool} tool={tool} active={tool === active} onChange={onChange} />
+              <ToolButton
+                key={tool}
+                tool={tool}
+                active={tool === active}
+                onChange={onChange}
+                vertical
+              />
             ))}
           </div>
         ))}
         {extras.length ? (
           <div className="mt-auto flex flex-col gap-0.5 border-t border-border pt-2">
-            <p className="px-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="px-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground short:hidden">
               {tr("Document")}
             </p>
             <div className="grid grid-cols-2 gap-0.5">
@@ -133,11 +149,14 @@ export function Toolbar({ tools, active, onChange, orientation, extras = [] }: T
   );
 }
 
-const buttonClass = (active: boolean) =>
+const buttonClass = (active: boolean, vertical = false) =>
   cn(
-    "relative flex h-12 min-w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-[10px] text-[10px] font-medium leading-tight transition-colors sm:h-[46px]",
+    "relative flex h-12 min-w-16 shrink-0 flex-col items-center justify-center gap-0.5 whitespace-nowrap rounded-[10px] text-[10px] font-medium leading-tight transition-colors sm:h-[46px]",
+    vertical && "short:h-[38px] shorter:h-9 shorter:min-w-0",
     active
-      ? "bg-primary-soft text-link"
+      ? // Active tool: outlined, so that the filled indigo stays reserved for
+        // the download button (design audit E6).
+        "bg-muted text-link ring-1 ring-inset ring-primary/45"
       : "text-muted-foreground hover:bg-muted hover:text-foreground",
   );
 
@@ -145,25 +164,31 @@ function ToolButton({
   tool,
   active,
   onChange,
+  vertical = false,
 }: {
   tool: WorkspaceTool;
   active: boolean;
   onChange: (tool: WorkspaceTool) => void;
+  vertical?: boolean;
 }) {
   const Icon = icons[tool];
   const key = toolShortcuts[tool];
+  const label = toolLabels[tool];
+  const shortLabel = toolRailLabels[tool];
   return (
     <button
       type="button"
       aria-pressed={active}
       aria-keyshortcuts={key}
-      title={key ? `${toolLabels[tool]} (${key})` : toolLabels[tool]}
+      // The short visible word is contained in the full name (WCAG 2.5.3).
+      aria-label={shortLabel ? label : undefined}
+      title={key ? `${label} (${key})` : label}
       onClick={() => onChange(tool)}
-      className={buttonClass(active)}
+      className={buttonClass(active, vertical)}
       data-testid={`tool-${tool}`}
     >
       <Icon className="size-5" />
-      {toolLabels[tool]}
+      <span className={cn(vertical && "shorter:sr-only")}>{shortLabel ?? label}</span>
     </button>
   );
 }

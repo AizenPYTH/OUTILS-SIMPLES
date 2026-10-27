@@ -53,17 +53,29 @@ export interface Size {
 }
 
 /**
+ * Widest page, in CSS px, that the "width" fit produces: beyond it lines get
+ * too long to read on large monitors, so the page stays centred instead.
+ */
+export const FIT_WIDTH_MAX_CSS_PX = 920;
+
+/**
  * Scale that fits a page (visual size in points) into the container (CSS px
- * available for content). "width" fills the width but keeps the page under
- * 1.3 × the visible height so most of it stays on screen; "page" shows the
- * whole page. Both are capped at 400 % and never below 25 %.
+ * available for content). "width" (the default) fills the available width, up
+ * to FIT_WIDTH_MAX_CSS_PX, and lets the page scroll vertically like a reader,
+ * while keeping at least half of the page on screen on short displays;
+ * "page" shows the whole page. Both are capped at 400 % and never below 25 %.
+ * Only the display scale changes: document and annotation coordinates are in
+ * PDF points and do not depend on it.
  */
 export function fitScaleFor(mode: Exclude<FitMode, null>, page: Size, container: Size): number {
   const width = Math.max(100, container.width);
   const height = Math.max(100, container.height);
   const byWidth = width / page.width;
-  const byHeight = (mode === "page" ? height : height * 1.3) / page.height;
-  return clampScale(Math.min(byWidth, byHeight));
+  if (mode === "width")
+    return clampScale(
+      Math.min(byWidth, FIT_WIDTH_MAX_CSS_PX / page.width, (2 * height) / page.height),
+    );
+  return clampScale(Math.min(byWidth, height / page.height));
 }
 
 export interface ScrollState {

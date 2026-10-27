@@ -159,8 +159,8 @@ export function PagesPanel({
       className="flex h-full w-full flex-col border-r border-border bg-muted/40"
       data-testid="pages-panel"
     >
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-border px-3">
-        <p className="text-xs font-semibold">
+      <div className="flex h-10 shrink-0 items-center justify-between gap-1 border-b border-border px-3">
+        <p className="whitespace-nowrap text-xs font-semibold">
           {plan.length} {plan.length > 1 ? t.common.pages : tr("page")}
         </p>
         {onInsertDocument ? (
@@ -182,12 +182,13 @@ export function PagesPanel({
             <button
               type="button"
               onClick={() => insertInputRef.current?.click()}
-              className="ml-auto mr-1 inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium text-link hover:bg-muted"
+              className="ml-auto inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-md px-2 text-xs font-medium text-link hover:bg-muted"
               title={tr("Insérer les pages d'un autre PDF après la page {n}", { n: current + 1 })}
+              aria-label={tr("Insérer un PDF")}
               data-testid="pages-insert"
             >
               <FilePlus className="size-3.5" aria-hidden="true" />
-              {tr("Insérer un PDF")}
+              {tr("Insérer")}
             </button>
           </>
         ) : null}
@@ -290,8 +291,15 @@ const PageItem = React.forwardRef<
           className="relative flex-1 overflow-hidden rounded-[4px]"
           data-testid={`thumb-${position}`}
         >
-          <div className="mx-auto flex h-[104px] w-[80px] items-center justify-center bg-white">
-            <PageThumbnail doc={doc} page={page} width={80} height={104} extraRotation={rotation} />
+          <div className="mx-auto flex h-[156px] w-[120px] items-center justify-center">
+            <PageThumbnail
+              doc={doc}
+              page={page}
+              width={120}
+              height={156}
+              extraRotation={rotation}
+              className="bg-transparent"
+            />
           </div>
           <span className="absolute bottom-1 left-1 rounded-full bg-foreground/80 px-1.5 text-[11px] text-background">
             {position + 1}
@@ -306,7 +314,7 @@ const PageItem = React.forwardRef<
       </div>
       <div
         className={cn(
-          "mt-1 flex flex-wrap items-center justify-center gap-0.5",
+          "mt-1 flex flex-nowrap items-center justify-center gap-px",
           !current && "opacity-0 focus-within:opacity-100 group-hover:opacity-100",
         )}
         role="group"
@@ -386,7 +394,7 @@ function PageActionButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "flex size-7 items-center justify-center rounded-md transition-colors disabled:opacity-40",
+        "flex size-[26px] shrink-0 items-center justify-center rounded-md transition-colors disabled:opacity-40",
         destructive
           ? "text-muted-foreground hover:bg-destructive-soft hover:text-destructive"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",

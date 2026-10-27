@@ -126,7 +126,6 @@ export function ImageBatchTool({
         />
       ) : (
         <>
-          <div data-testid="batch-options">{options}</div>
           <ul className="space-y-2" aria-label={tr("Images à traiter")} data-testid="batch-list">
             {items.map((item) => (
               <li
@@ -221,6 +220,8 @@ export function ImageBatchTool({
               testId="image-dropzone-more"
             />
           ) : null}
+          {/* Settings come after the files they apply to, right above the action. */}
+          <div data-testid="batch-options">{options}</div>
           {batch.running ? (
             <ToolPanel className="space-y-2" role="status" aria-live="polite">
               <div className="flex items-center justify-between text-sm">
@@ -262,12 +263,15 @@ export function ImageBatchTool({
                 </>
               ) : null}
             </p>
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
+              {/* Secondary action as a quiet button: the run button is the only primary. */}
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 onClick={batch.clear}
                 disabled={batch.running}
+                className="text-muted-foreground"
+                data-testid="batch-clear"
               >
                 {tr("Tout retirer")}
               </Button>

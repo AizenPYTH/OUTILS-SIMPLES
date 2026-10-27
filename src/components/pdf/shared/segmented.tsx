@@ -6,6 +6,12 @@ export interface SegmentedOption<V extends string> {
   value: V;
   label: string;
   description?: string;
+  /**
+   * Word shown on phones. When every option has one, the control stays a
+   * single row of segments on small screens instead of stacking full-width
+   * cards (the full label stays the accessible name).
+   */
+  shortLabel?: string;
   disabled?: boolean;
 }
 
@@ -25,11 +31,21 @@ export function Segmented<V extends string>({
   label,
   className,
 }: SegmentedProps<V>) {
+  const compactOnPhones = options.length <= 4 && options.every((o) => o.shortLabel);
   return (
     <div
       role="radiogroup"
       aria-label={label}
-      className={cn("grid gap-2 sm:grid-cols-3", className)}
+      className={cn(
+        "grid gap-2 sm:grid-cols-3",
+        compactOnPhones &&
+          (options.length === 2
+            ? "grid-cols-2"
+            : options.length === 4
+              ? "grid-cols-4"
+              : "grid-cols-3"),
+        className,
+      )}
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -49,10 +65,23 @@ export function Segmented<V extends string>({
             )}
             data-testid={`segmented-${option.value}`}
           >
-            <span className="font-medium">{option.label}</span>
+            {compactOnPhones ? (
+              <>
+                <span className="w-full text-center font-medium sm:hidden" aria-hidden="true">
+                  {option.shortLabel}
+                </span>
+                <span className="font-medium max-sm:sr-only">{option.label}</span>
+              </>
+            ) : (
+              <span className="font-medium">{option.label}</span>
+            )}
             {option.description ? (
               <span
-                className={cn("text-xs", active ? "text-foreground/80" : "text-muted-foreground")}
+                className={cn(
+                  "text-xs",
+                  active ? "text-foreground/80" : "text-muted-foreground",
+                  compactOnPhones && "max-sm:hidden",
+                )}
               >
                 {option.description}
               </span>

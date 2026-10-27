@@ -284,8 +284,8 @@ export function ImagesToPdfTool() {
               )}
             </p>
           </ToolPanel>
-          <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-            <Button type="button" variant="outline" onClick={clear}>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <Button type="button" variant="ghost" onClick={clear} className="text-muted-foreground">
               {tr("Tout retirer")}
             </Button>
             <Button type="button" size="lg" onClick={run} data-testid="images-to-pdf-run">

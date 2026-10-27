@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { FileUp, Upload } from "lucide-react";
-import { toast } from "sonner";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { formatBytes } from "@/lib/files/format";
 import { takeHandoff } from "@/lib/files/handoff";
@@ -21,6 +21,12 @@ interface PdfDropzoneProps {
   disabled?: boolean;
   className?: string;
   title?: string;
+  /**
+   * Error found by the tool after this pre-check (unreadable or protected
+   * file, duplicate…), shown in the same inline alert: one notification per
+   * problem, next to where the file was dropped.
+   */
+  error?: string | null;
 }
 
 /**
@@ -37,6 +43,7 @@ export function PdfDropzone({
   disabled = false,
   className,
   title,
+  error,
 }: PdfDropzoneProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = React.useState(false);
@@ -70,7 +77,6 @@ export function PdfDropzone({
     }
     if (rejected.length) {
       setInlineError(rejected.join(" · "));
-      for (const message of rejected) toast.error(message);
     } else {
       setInlineError(null);
     }
@@ -138,6 +144,8 @@ export function PdfDropzone({
         <Button
           type="button"
           size={compact ? "default" : "lg"}
+          // "Add more" zones sit next to the tool's main action: outlined.
+          variant={compact ? "outline" : "default"}
           onClick={() => inputRef.current?.click()}
           disabled={disabled}
           data-testid="pdf-browse"
@@ -156,10 +164,10 @@ export function PdfDropzone({
           tabIndex={-1}
         />
       </div>
-      {inlineError ? (
-        <p role="alert" className="mt-3 text-sm text-destructive">
-          {inlineError}
-        </p>
+      {inlineError || error ? (
+        <Alert variant="destructive" className="mt-3" data-testid="dropzone-error">
+          {[inlineError, error].filter(Boolean).join(" · ")}
+        </Alert>
       ) : null}
     </div>
   );

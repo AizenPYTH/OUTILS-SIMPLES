@@ -33,6 +33,7 @@ import {
 import { toast } from "sonner";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -104,6 +105,9 @@ export function ScannerTool() {
     TOOL_ID,
   );
   const hasCamera = React.useMemo(() => cameraSupported(), []);
+  // One main action: the camera on touch devices, the file import elsewhere.
+  const touch = useCoarsePointer();
+  const cameraFirst = hasCamera && touch;
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } }),
@@ -323,7 +327,7 @@ export function ScannerTool() {
   return (
     <div className="space-y-5">
       {pages.length === 0 ? (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <FileDropzone
             onFiles={(f) => void addFiles(f)}
             accept="image/*"
@@ -335,14 +339,16 @@ export function ScannerTool() {
               pages: MAX_PAGES,
             })}
             buttonLabel={tr("Importer des photos")}
+            buttonVariant={cameraFirst ? "outline" : "default"}
             capture={hasCamera ? undefined : "environment"}
             testId="scan-dropzone"
           />
           {hasCamera ? (
-            <div className="text-center">
+            <div className={cn("text-center", cameraFirst && "order-first")}>
               <Button
                 type="button"
                 size="lg"
+                variant={cameraFirst ? "default" : "outline"}
                 onClick={() => setCameraOpen(true)}
                 data-testid="scan-camera"
               >
@@ -731,5 +737,20 @@ function SortableThumb({
         </span>
       </button>
     </li>
+  );
+}
+
+const coarseQuery = "(pointer: coarse)";
+function subscribeCoarse(onChange: () => void) {
+  const mql = window.matchMedia(coarseQuery);
+  mql.addEventListener("change", onChange);
+  return () => mql.removeEventListener("change", onChange);
+}
+/** True on touch-first devices (phones, tablets); false during server rendering. */
+function useCoarsePointer(): boolean {
+  return React.useSyncExternalStore(
+    subscribeCoarse,
+    () => window.matchMedia(coarseQuery).matches,
+    () => false,
   );
 }

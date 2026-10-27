@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { FileUp, Upload } from "lucide-react";
-import { toast } from "sonner";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { takeHandoff } from "@/lib/files/handoff";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,10 @@ interface FileDropzoneProps {
   /** Mobile camera capture hint for image inputs. */
   capture?: "environment" | "user";
   testId?: string;
+  /** Error found by the tool after this pre-check, shown in the same inline alert. */
+  error?: string | null;
+  /** "outline" when another button of the tool is the main action (e.g. camera on phones). */
+  buttonVariant?: "default" | "outline";
 }
 
 /** Generic accessible drop area (same look as the PDF dropzone) for images and text files. */
@@ -39,6 +43,8 @@ export function FileDropzone({
   className,
   capture,
   testId = "file-dropzone",
+  error,
+  buttonVariant,
 }: FileDropzoneProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = React.useState(false);
@@ -66,7 +72,6 @@ export function FileDropzone({
     }
     if (rejected.length) {
       setInlineError(rejected.join(" · "));
-      for (const message of rejected) toast.error(message);
     } else setInlineError(null);
     if (!multiple && accepted.length > 1) accepted.splice(1);
     if (accepted.length) onFiles(accepted);
@@ -122,6 +127,8 @@ export function FileDropzone({
         <Button
           type="button"
           size={compact ? "default" : "lg"}
+          // "Add more" zones sit next to the tool's main action: outlined by default.
+          variant={buttonVariant ?? (compact ? "outline" : "default")}
           onClick={() => inputRef.current?.click()}
           disabled={disabled}
           data-testid={`${testId}-browse`}
@@ -141,10 +148,10 @@ export function FileDropzone({
           data-testid={`${testId}-input`}
         />
       </div>
-      {inlineError ? (
-        <p role="alert" className="mt-3 text-sm text-destructive">
-          {inlineError}
-        </p>
+      {inlineError || error ? (
+        <Alert variant="destructive" className="mt-3" data-testid="dropzone-error">
+          {[inlineError, error].filter(Boolean).join(" · ")}
+        </Alert>
       ) : null}
     </div>
   );

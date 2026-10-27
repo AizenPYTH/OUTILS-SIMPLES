@@ -113,8 +113,7 @@ export const fr = {
       },
     ],
     heroCta: "Voir tous les outils",
-    searchPlaceholder: (n: number) =>
-      `Rechercher parmi ${n} outils (ex. fusionner, signer, compresser)…`,
+    searchPlaceholder: (n: number) => `Rechercher parmi ${n} outils…`,
     searchButton: "Rechercher",
     allToolsLink: (n: number) => `Voir les ${n} outils`,
     heroSecondaryCta: "Ouvrir l'éditeur PDF",
@@ -155,6 +154,8 @@ export const fr = {
     plannedBody:
       "Ces catégories sont prévues mais pas encore disponibles. Nous ne publions un outil que lorsqu'il fonctionne réellement.",
     categoryToolsTitle: (name: string) => `Outils ${name}`,
+    categorySearchPlaceholder: (n: number) =>
+      n === 1 ? "Rechercher dans cette famille…" : `Rechercher parmi ces ${n} outils…`,
   },
   tool: {
     about: "À propos de cet outil",
@@ -327,10 +328,10 @@ export const fr = {
     orSearch: "ou cherchez un outil",
     shortcuts: "Raccourcis",
     journeys: {
-      editor: "Modifier ou signer un PDF",
+      editor: "Modifier un PDF",
       scan: "Scanner un document",
       image: "Convertir une image",
-      ocr: "Reconnaître du texte (OCR)",
+      ocr: "Reconnaître du texte",
     },
     flagship: "Produit phare",
     editorTitle: "Le modificateur PDF, sans logiciel ni envoi",
