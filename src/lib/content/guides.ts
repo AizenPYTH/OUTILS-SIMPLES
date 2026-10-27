@@ -11,6 +11,8 @@ export interface GuideSection {
 
 export interface Guide {
   slug: string;
+  /** For a translated guide: slug of the French original (alternate link). */
+  frSlug?: string;
   title: string;
   seoTitle: string;
   description: string;
@@ -351,10 +353,25 @@ export const guides: readonly Guide[] = [
   },
 ];
 
-export function getGuideBySlug(slug: string): Guide | undefined {
-  return guides.find((g) => g.slug === slug);
+import { getLocale, type Locale } from "@/lib/i18n/locale";
+import { guidesEn } from "./guides-en";
+
+/** Guides of a locale (French list is the reference; English ones are hand-written translations). */
+export function getGuides(locale: Locale = getLocale()): readonly Guide[] {
+  return locale === "en" ? guidesEn : guides;
 }
 
-export function getGuidesForTool(toolId: string): Guide[] {
-  return guides.filter((g) => g.toolId === toolId);
+export function getGuideBySlug(slug: string, locale: Locale = getLocale()): Guide | undefined {
+  return getGuides(locale).find((g) => g.slug === slug);
+}
+
+export function getGuidesForTool(toolId: string, locale: Locale = getLocale()): Guide[] {
+  return getGuides(locale).filter((g) => g.toolId === toolId);
+}
+
+/** Slug of the same guide in another locale, when it exists. */
+export function alternateGuideSlug(guide: Guide, target: Locale): string | undefined {
+  if (target === "fr")
+    return guide.frSlug ?? (guides.some((g) => g.slug === guide.slug) ? guide.slug : undefined);
+  return guidesEn.find((g) => g.frSlug === (guide.frSlug ?? guide.slug))?.slug;
 }

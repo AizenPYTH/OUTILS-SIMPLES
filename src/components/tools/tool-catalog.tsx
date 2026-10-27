@@ -16,15 +16,24 @@ import {
   toolRegistry,
   type ToolCategory,
   type ToolDefinition,
+  getCategoryPath,
 } from "@/lib/tools";
 import { categoryTone, getToolGroups } from "@/lib/tools/groups";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 
-const publishedTools = getPublishedTools();
-const activeCategories = toolCategories.filter((c) => getToolsByCategory(c.id).length > 0);
-const plannedCategories = toolCategories.filter((c) => getToolsByCategory(c.id).length === 0);
-const popularTools = publishedTools.filter((x) => x.featured).slice(0, 8);
+// Read at render time (not at module evaluation): the English registry is
+// registered by a sibling client module whose evaluation order is not fixed.
+function catalogData() {
+  const publishedTools = getPublishedTools();
+  return {
+    publishedTools,
+    activeCategories: toolCategories.filter((c) => getToolsByCategory(c.id).length > 0),
+    plannedCategories: toolCategories.filter((c) => getToolsByCategory(c.id).length === 0),
+    popularTools: publishedTools.filter((x) => x.featured).slice(0, 8),
+  };
+}
 
 /** Suggest tools for a query that matched nothing, searching planned tools as a hint only. */
 function suggestAlternatives(query: string): ToolDefinition[] {
@@ -34,7 +43,7 @@ function suggestAlternatives(query: string): ToolDefinition[] {
     3,
   ).map((r) => r.tool);
   const sameCategory = planned.flatMap((p) => getToolsByCategory(p.category));
-  const popular = publishedTools.filter((x) => x.featured);
+  const popular = getPublishedTools().filter((x) => x.featured);
   const merged = [...sameCategory, ...popular];
   return merged.filter((tool, i) => merged.findIndex((x) => x.id === tool.id) === i).slice(0, 4);
 }
@@ -59,6 +68,10 @@ function groupsOf(category: ToolCategory, tools: ToolDefinition[]) {
 }
 
 export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategory["id"] }) {
+  const { publishedTools, activeCategories, plannedCategories, popularTools } = React.useMemo(
+    () => catalogData(),
+    [],
+  );
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -83,7 +96,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
       category === "all" ? publishedTools : publishedTools.filter((x) => x.category === category);
     if (trimmed.length === 0) return pool;
     return searchTools(pool, trimmed).map((r) => r.tool);
-  }, [category, trimmed]);
+  }, [category, trimmed, publishedTools]);
 
   const alternatives = React.useMemo(
     () => (results.length === 0 && trimmed ? suggestAlternatives(trimmed) : []),
@@ -174,7 +187,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
           <button
             type="button"
             onClick={() => setQuery("")}
-            aria-label="Effacer la recherche"
+            aria-label={tr("Effacer la recherche")}
             className="absolute right-[100px] top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted"
           >
             <X className="size-4" aria-hidden="true" />
@@ -226,7 +239,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h2 id="results-heading" className="text-xl">
                     {trimmed
-                      ? `Résultats pour « ${trimmed} »`
+                      ? tr("Résultats pour « {query} »", { query: trimmed })
                       : (activeCategories.find((c) => c.id === category)?.name ??
                         t.directory.title)}
                   </h2>
@@ -261,7 +274,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
                   </div>
                 ) : null}
                 <Button variant="outline" className="mt-6" onClick={reset}>
-                  Réinitialiser la recherche
+                  {tr("Réinitialiser la recherche")}
                 </Button>
               </div>
             )
@@ -289,7 +302,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
                         >
                           <ToolIcon name={c.icon} className="size-4" />
                         </span>
-                        <Link href={`/${c.slug}/`} className="hover:text-link">
+                        <Link href={getCategoryPath(c)} className="hover:text-link">
                           {c.name}
                         </Link>
                       </h2>

@@ -11,11 +11,12 @@ import {
 } from "@/lib/tools";
 import { toSlimTool } from "@/lib/tools/search-index";
 import { t } from "@/lib/i18n";
-import { LanguageSelector } from "./language-selector";
+import { LanguageSwitcher } from "./language-switcher";
 import { Logo } from "./logo";
 import { MobileNav } from "./mobile-nav";
 import { SearchDialog } from "./search-dialog";
 import { ThemeToggle } from "./theme-toggle";
+import { localizedPath } from "@/lib/i18n/routes";
 
 /**
  * Header: logo, three family links, Guides, search, theme/language and the
@@ -46,23 +47,23 @@ export function SiteHeader() {
         >
           {quick.map((category) => (
             <Button key={category.id} variant="ghost" size="sm" asChild>
-              <Link href={`/${category.slug}/`}>{category.shortName}</Link>
+              <Link href={getCategoryPath(category)}>{category.shortName}</Link>
             </Button>
           ))}
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/guides/">{t.nav.guides}</Link>
+            <Link href={localizedPath("/guides/")}>{t.nav.guides}</Link>
           </Button>
         </nav>
         <div className="ml-auto flex min-w-0 flex-1 items-center justify-end gap-1 sm:gap-2">
           <SearchDialog variant="field" index={searchIndex} />
           <Button size="sm" variant="secondary" asChild className="hidden shrink-0 md:inline-flex">
-            <Link href="/outils/" data-testid="header-all-tools">
+            <Link href={localizedPath("/outils/")} data-testid="header-all-tools">
               <LayoutGrid aria-hidden="true" />
               {t.nav.tools}
             </Link>
           </Button>
           <div className="hidden shrink-0 items-center md:flex">
-            <LanguageSelector />
+            <LanguageSwitcher />
             <ThemeToggle />
           </div>
           <MobileNav categories={navCategories} editorPath={editorPath} />

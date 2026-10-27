@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import type { OperationProgress } from "@/components/pdf/hooks/use-operation";
 import type { PdfError } from "@/lib/pdf/errors";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 export function BusyPanel({
   progress,
@@ -98,7 +99,7 @@ export function DonePanel({
             className="inline-flex items-center gap-1.5 font-medium text-link hover:underline"
           >
             <SquarePen className="size-4" aria-hidden="true" />
-            Continuer dans l&apos;éditeur PDF
+            {tr("Continuer dans l'éditeur PDF")}
           </Link>
         </p>
       ) : null}
@@ -124,7 +125,7 @@ export function ErrorPanel({ error, onRetry, onReset }: ErrorPanelProps) {
           <AlertCircle className="size-7" aria-hidden="true" />
         </span>
         <h2 className="font-heading text-xl font-bold">{t.errors.title}</h2>
-        <p className="max-w-md text-sm text-foreground/90">{error.message}</p>
+        <p className="max-w-md text-sm text-foreground/90">{tr(error.message)}</p>
         {!error.recoverable ? (
           <p className="text-xs text-muted-foreground">{t.errors.needsReload}</p>
         ) : null}

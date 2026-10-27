@@ -21,6 +21,7 @@ import {
   type WatermarkDiagnostic,
 } from "@/lib/pdf/operations/watermark";
 import { getToolById, getToolPath } from "@/lib/tools";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-manage-watermark";
 
@@ -47,7 +48,8 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
       .then((d) => !cancelled && setDiagnostic(d))
       .catch(
         (e: unknown) =>
-          !cancelled && setAnalysisError(e instanceof Error ? e.message : "Analyse impossible."),
+          !cancelled &&
+          setAnalysisError(e instanceof Error ? e.message : tr("Analyse impossible.")),
       );
     return () => {
       cancelled = true;
@@ -61,7 +63,11 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
     const { bytes, removedBlocks, removedAnnotations } = op.state.result;
     return (
       <DonePanel
-        summary={`${removedBlocks} filigrane(s) OUTILIA et ${removedAnnotations} annotation(s) retiré(s) · ${formatBytes(bytes.byteLength)}`}
+        summary={tr("{blocks} filigrane(s) OUTILIA et {annots} annotation(s) retiré(s) · {size}", {
+          blocks: removedBlocks,
+          annots: removedAnnotations,
+          size: formatBytes(bytes.byteLength),
+        })}
         onDownload={() => downloadPdf(bytes, pdf.file.name, "sans-filigrane", TOOL_ID)}
         onStartOver={() => {
           op.reset();
@@ -73,12 +79,12 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
 
   if (analysisError)
     return (
-      <Alert variant="destructive" title="Analyse impossible">
-        {analysisError}
+      <Alert variant="destructive" title={tr("Analyse impossible")}>
+        {tr(analysisError)}
       </Alert>
     );
   if (!diagnostic)
-    return <BusyPanel progress={{ current: 0, total: 0, label: "Analyse du document…" }} />;
+    return <BusyPanel progress={{ current: 0, total: 0, label: tr("Analyse du document…") }} />;
 
   const hasOutilia = diagnostic.outiliaPages.length > 0;
   const hasAnnots = diagnostic.watermarkAnnotations.length > 0;
@@ -99,7 +105,7 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
         data-testid="watermark-diagnostic"
       >
         <h2 id="diag-heading" className="text-lg">
-          Diagnostic
+          {tr("Diagnostic")}
         </h2>
         <ul className="space-y-2 text-sm">
           <li className="flex items-start gap-3">
@@ -111,11 +117,14 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
               className="mt-0.5"
             />
             <Label htmlFor="rm-outilia" className="flex-col items-start gap-0.5 font-normal">
-              <span className="font-medium">Filigranes ajoutés avec OUTILIA</span>
+              <span className="font-medium">{tr("Filigranes ajoutés avec OUTILIA")}</span>
               <span className="text-muted-foreground">
                 {hasOutilia
-                  ? `Détectés sur les pages ${formatPageIndices(diagnostic.outiliaPages)} — retrait fiable grâce au marqueur technique.`
-                  : "Aucun marqueur OUTILIA trouvé."}
+                  ? tr(
+                      "Détectés sur les pages {pages} — retrait fiable grâce au marqueur technique.",
+                      { pages: formatPageIndices(diagnostic.outiliaPages) },
+                    )
+                  : tr("Aucun marqueur OUTILIA trouvé.")}
               </span>
             </Label>
           </li>
@@ -128,37 +137,43 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
               className="mt-0.5"
             />
             <Label htmlFor="rm-annots" className="flex-col items-start gap-0.5 font-normal">
-              <span className="font-medium">Annotations PDF de type « Watermark »</span>
+              <span className="font-medium">{tr("Annotations PDF de type « Watermark »")}</span>
               <span className="text-muted-foreground">
                 {hasAnnots
-                  ? `${diagnostic.watermarkAnnotations.reduce((s, a) => s + a.count, 0)} annotation(s) sur les pages ${formatPageIndices(diagnostic.watermarkAnnotations.map((a) => a.pageIndex))}.`
-                  : "Aucune annotation de ce type."}
+                  ? tr("{n} annotation(s) sur les pages {pages}.", {
+                      n: diagnostic.watermarkAnnotations.reduce((s, a) => s + a.count, 0),
+                      pages: formatPageIndices(
+                        diagnostic.watermarkAnnotations.map((a) => a.pageIndex),
+                      ),
+                    })
+                  : tr("Aucune annotation de ce type.")}
               </span>
             </Label>
           </li>
         </ul>
         {diagnostic.recordedButMissing.length ? (
           <p className="text-sm text-muted-foreground">
-            Le document indique un filigrane OUTILIA sur les pages{" "}
-            {formatPageIndices(diagnostic.recordedButMissing)} mais le marqueur n&apos;y est plus :
-            le fichier a probablement été modifié par un autre logiciel.
+            {tr(
+              "Le document indique un filigrane OUTILIA sur les pages {pages} mais le marqueur n'y est plus : le fichier a probablement été modifié par un autre logiciel.",
+              { pages: formatPageIndices(diagnostic.recordedButMissing) },
+            )}
           </p>
         ) : null}
       </section>
 
       {nothing ? (
-        <Alert variant="warning" title="Aucun filigrane retirable de manière fiable">
-          Si ce document comporte un filigrane visible, il est fondu dans le contenu de la page ou
-          incrusté dans une image. Le retirer supposerait de deviner et de réécrire le contenu, avec
-          un risque réel d&apos;endommager le document : OUTILIA ne le fait pas.
+        <Alert variant="warning" title={tr("Aucun filigrane retirable de manière fiable")}>
+          {tr(
+            "Si ce document comporte un filigrane visible, il est fondu dans le contenu de la page ou incrusté dans une image. Le retirer supposerait de deviner et de réécrire le contenu, avec un risque réel d'endommager le document : OUTILIA ne le fait pas.",
+          )}
           {watermarkTool ? (
             <>
               {" "}
-              Les filigranes ajoutés avec{" "}
+              {tr("Les filigranes ajoutés avec")}{" "}
               <a href={getToolPath(watermarkTool)} className="font-medium underline">
-                notre outil
+                {tr("notre outil")}
               </a>{" "}
-              restent retirables.
+              {tr("restent retirables.")}
             </>
           ) : null}
         </Alert>
@@ -181,9 +196,9 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
                 htmlFor="authorized"
                 className="font-normal leading-relaxed text-warning-foreground"
               >
-                Je confirme être l&apos;auteur de ce document ou être autorisé à le modifier. Cet
-                outil n&apos;est pas destiné à retirer des mentions de droits d&apos;auteur, de
-                propriété ou des protections de documents.
+                {tr(
+                  "Je confirme être l'auteur de ce document ou être autorisé à le modifier. Cet outil n'est pas destiné à retirer des mentions de droits d'auteur, de propriété ou des protections de documents.",
+                )}
               </Label>
             </div>
           </div>
@@ -202,7 +217,7 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
             }
             data-testid="remove-watermark-button"
           >
-            <Eraser aria-hidden="true" /> Retirer les éléments sélectionnés
+            <Eraser aria-hidden="true" /> {tr("Retirer les éléments sélectionnés")}
           </Button>
         </>
       )}

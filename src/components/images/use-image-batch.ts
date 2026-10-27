@@ -4,6 +4,7 @@ import * as React from "react";
 import { decodeImage, type DecodedImage } from "@/lib/images/canvas";
 import { track } from "@/lib/analytics/events";
 import { uid } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 
 export interface BatchResult {
   blob: Blob;
@@ -89,7 +90,7 @@ export function useImageBatch({ toolId, maxFiles }: UseImageBatchOptions) {
           setItems((list) =>
             list.map((i) =>
               i.id === item.id
-                ? { ...i, status: "error", error: "Image illisible par ce navigateur." }
+                ? { ...i, status: "error", error: tr("Image illisible par ce navigateur.") }
                 : i,
             ),
           );
@@ -170,7 +171,7 @@ export function useImageBatch({ toolId, maxFiles }: UseImageBatchOptions) {
           done += 1;
         } catch (error) {
           errors += 1;
-          const message = error instanceof Error ? error.message : "Traitement impossible.";
+          const message = error instanceof Error ? error.message : tr("Traitement impossible.");
           setItems((list) =>
             list.map((i) => (i.id === item.id ? { ...i, status: "error", error: message } : i)),
           );

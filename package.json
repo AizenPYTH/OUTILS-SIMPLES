@@ -15,6 +15,8 @@
     "test:e2e": "playwright test",
     "fixtures": "node scripts/generate-fixtures.mjs",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "check:launch": "node scripts/check-launch-env.mjs",
+    "i18n:scan": "node scripts/i18n-scan.mjs src/components src/lib",
     "postinstall": "node scripts/copy-pdfjs-assets.mjs && node scripts/build-sw.mjs",
     "prebuild": "node scripts/copy-pdfjs-assets.mjs && node scripts/build-sw.mjs",
     "pdfjs:assets": "node scripts/copy-pdfjs-assets.mjs"

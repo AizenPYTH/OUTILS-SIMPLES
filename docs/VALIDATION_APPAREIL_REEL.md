@@ -62,3 +62,22 @@ natif, recherche du nouveau mot.
 Parcourir : accueil, catalogue, un outil PDF (fusion), scanner (import), OCR (image), éditeur
 (texte ajouté + export). Points connus à surveiller : encodeur WebP absent sur Safari (repli JPEG
 prévu), variante SIMD du moteur OCR (repli prévu), `createImageBitmap` avec `imageOrientation`.
+
+## 6. Version anglaise (toutes plateformes)
+
+Rien de ce qui suit n'a été vérifié sur un appareil réel : l'anglais a été testé avec Playwright
+(Chromium desktop et émulation Pixel 7) uniquement.
+
+1. Ouvrir `/en/` : interface, accueil et pied de page en anglais ; aucun texte français visible.
+2. Sélecteur FR/EN (en-tête sur ordinateur, menu sur mobile) : depuis `/en/pdf/merge/`, passer en
+   français doit ouvrir `/pdf/fusionner/` et inversement ; depuis un guide, son équivalent.
+3. `/en/pdf/merge/` : déposer deux PDF, fusionner, télécharger ; tous les libellés, messages de
+   progression et d'erreur (fichier non PDF, mot de passe) doivent être en anglais.
+4. `/en/pdf/edit/` : ouvrir un PDF, utiliser texte, formes, signature, pages, export ; raccourcis
+   clavier (aide `?`) en anglais ; les menus contextuels aussi.
+5. `/en/scanning/ocr/` sur téléphone : la langue de reconnaissance « English » doit être
+   proposée ; vérifier que le modèle anglais se télécharge (connexion requise la première fois).
+6. Hors ligne : enregistrer un outil anglais (« Use offline »), couper le réseau, recharger ; une page
+   anglaise jamais visitée doit mener à `/en/offline/`, pas à `/hors-ligne/`.
+7. Lecteur d'écran (VoiceOver iOS / NVDA) : le sélecteur de langue annonce « Français » / « English »,
+   la page annonce la langue (`lang`) et les états « busy » / erreurs en anglais.

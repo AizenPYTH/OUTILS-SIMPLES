@@ -7,6 +7,7 @@ import { pdfToViewport, viewportScale, type ViewportLike } from "@/lib/pdf/coord
 import { fontFamilies } from "@/lib/pdf/fonts";
 import type { PageTextStatus, TextEdit, TextRun } from "@/lib/pdf/text-edit/types";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 
 export type RunVisual = NonNullable<TextEdit["visual"]>;
 
@@ -153,11 +154,17 @@ export function TextEditLayer({
             key={run.id}
             type="button"
             disabled={!run.editable}
-            title={run.editable ? (ocr ? `Texte reconnu : ${run.text}` : run.text) : run.reason}
+            title={
+              run.editable
+                ? ocr
+                  ? tr("Texte reconnu : {text}", { text: run.text })
+                  : run.text
+                : run.reason && tr(run.reason)
+            }
             aria-label={
               run.editable
-                ? `Modifier « ${run.text} »`
-                : `${run.text} : ${run.reason ?? "non modifiable"}`
+                ? tr("Modifier « {text} »", { text: run.text })
+                : `${run.text} : ${tr(run.reason ?? "non modifiable")}`
             }
             onClick={() => setActive({ run, value: run.text, visual: false })}
             className={cn(
@@ -287,7 +294,7 @@ function ActiveEditor({
             return;
           onCommit();
         }}
-        aria-label="Nouveau texte"
+        aria-label={tr("Nouveau texte")}
         className="block rounded-[3px] border-2 border-primary bg-white px-1 text-black shadow-md outline-none"
         style={{
           position: "absolute",
@@ -311,8 +318,12 @@ function ActiveEditor({
       >
         <span>
           {ocr
-            ? "Texte reconnu par OCR : Entrée corrige la couche de texte (recherche, copie) ; l'image reste telle quelle."
-            : "Entrée : valider · Échap : annuler · le texte qui suit sur la ligne n'est pas décalé"}
+            ? tr(
+                "Texte reconnu par OCR : Entrée corrige la couche de texte (recherche, copie) ; l'image reste telle quelle.",
+              )
+            : tr(
+                "Entrée : valider · Échap : annuler · le texte qui suit sur la ligne n'est pas décalé",
+              )}
         </span>
         {ocr ? (
           <label className="inline-flex items-center gap-1.5 text-foreground">
@@ -323,11 +334,11 @@ function ActiveEditor({
               className="accent-primary"
               data-testid="text-run-visual"
             />
-            Réécrire visiblement (fond uni, police standard)
+            {tr("Réécrire visiblement (fond uni, police standard)")}
           </label>
         ) : null}
         {!run.fontUsable && !ocr ? (
-          <span>Police d&apos;origine non réutilisable : police standard proche.</span>
+          <span>{tr("Police d'origine non réutilisable : police standard proche.")}</span>
         ) : null}
         {edited ? (
           <button
@@ -337,7 +348,7 @@ function ActiveEditor({
             onClick={onRevert}
             data-testid="text-run-revert"
           >
-            <RotateCcw className="size-3" aria-hidden="true" /> Texte d&apos;origine
+            <RotateCcw className="size-3" aria-hidden="true" /> {tr("Texte d'origine")}
           </button>
         ) : null}
       </div>
@@ -366,31 +377,33 @@ function Banner({
   if (busy)
     body = (
       <span className="inline-flex items-center gap-2">
-        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> Application de la
-        modification…
+        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />{" "}
+        {tr("Application de la modification…")}
       </span>
     );
   else if (ocrRunning)
     body = (
       <span className="inline-flex items-center gap-2">
-        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> Reconnaissance du texte en
-        cours : les passages seront modifiables une fois l&apos;OCR terminé.
+        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />{" "}
+        {tr(
+          "Reconnaissance du texte en cours : les passages seront modifiables une fois l'OCR terminé.",
+        )}
       </span>
     );
   else if (status === null)
     body = (
       <span className="inline-flex items-center gap-2">
-        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> Analyse du texte de la
-        page…
+        <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />{" "}
+        {tr("Analyse du texte de la page…")}
       </span>
     );
   else if (status.kind === "scanned")
     body = (
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <span>
-          Cette page est une image (document scanné) : son texte ne peut pas être modifié
-          directement. Reconnaissez-le ici, ou ajoutez du texte par-dessus avec « Ajouter du texte
-          ».
+          {tr(
+            "Cette page est une image (document scanné) : son texte ne peut pas être modifié directement. Reconnaissez-le ici, ou ajoutez du texte par-dessus avec « Ajouter du texte ».",
+          )}
         </span>
         <button
           type="button"
@@ -398,7 +411,7 @@ function Banner({
           className="inline-flex items-center gap-1 rounded-md bg-primary px-2 py-1 font-medium text-primary-foreground"
           data-testid="text-edit-run-ocr"
         >
-          <ScanText className="size-3.5" aria-hidden="true" /> Lancer l&apos;OCR
+          <ScanText className="size-3.5" aria-hidden="true" /> {tr("Lancer l'OCR")}
         </button>
         <Link
           href="/numerisation/ocr/"
@@ -406,31 +419,40 @@ function Banner({
           target="_blank"
           rel="noopener"
         >
-          outil OCR complet
+          {tr("outil OCR complet")}
         </Link>
       </span>
     );
   else if (status.kind === "empty")
-    body = <span>Aucun texte sur cette page. Utilisez « Ajouter du texte » pour en ajouter.</span>;
+    body = (
+      <span>
+        {tr("Aucun texte sur cette page. Utilisez « Ajouter du texte » pour en ajouter.")}
+      </span>
+    );
   else if (status.kind === "mismatch")
     body = (
       <span>
-        Le texte de cette page ne peut pas être modifié en toute sécurité (structure inhabituelle :{" "}
-        {status.detail}). Vous pouvez toujours ajouter du texte par-dessus.
+        {tr(
+          "Le texte de cette page ne peut pas être modifié en toute sécurité (structure inhabituelle : {detail}). Vous pouvez toujours ajouter du texte par-dessus.",
+          { detail: status.detail },
+        )}
       </span>
     );
   else if (editableCount === 0)
     body = (
       <span>
-        Aucun passage modifiable sur cette page (police particulière ou écriture verticale).
+        {tr("Aucun passage modifiable sur cette page (police particulière ou écriture verticale).")}
       </span>
     );
   else if (ocrCount > 0)
     body = (
       <span>
-        Texte reconnu par OCR{ocrQuality !== null ? ` (qualité estimée ${ocrQuality} %)` : ""} :{" "}
-        {ocrCount} passage{ocrCount > 1 ? "s" : ""}. Cliquez pour corriger la couche de texte ;
-        cochez « réécrire visiblement » pour changer l&apos;image.
+        {tr("Texte reconnu par OCR")}
+        {ocrQuality !== null ? " " + tr("(qualité estimée {q} %)", { q: ocrQuality }) : ""} :{" "}
+        {ocrCount > 1 ? tr("{n} passages", { n: ocrCount }) : tr("{n} passage", { n: ocrCount })}.{" "}
+        {tr(
+          "Cliquez pour corriger la couche de texte ; cochez « réécrire visiblement » pour changer l'image.",
+        )}
       </span>
     );
   if (!body) return null;

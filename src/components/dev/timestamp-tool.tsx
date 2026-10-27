@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { CopyButton } from "@/components/tools/shared/copy-button";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { describeInstant, parseInstant, toDateTimeLocal } from "@/lib/dev/timestamp";
+import { tr } from "@/lib/i18n/messages";
 
 export function TimestampTool() {
   const [input, setInput] = React.useState(() => String(Math.floor(Date.now() / 1000)));
@@ -23,15 +24,21 @@ export function TimestampTool() {
 
   const rows: { label: string; value: string }[] = description?.valid
     ? [
-        { label: "Timestamp Unix (secondes)", value: String(description.unixSeconds) },
-        { label: "Timestamp (millisecondes)", value: String(description.unixMilliseconds) },
+        { label: tr("Timestamp Unix (secondes)"), value: String(description.unixSeconds) },
+        { label: tr("Timestamp (millisecondes)"), value: String(description.unixMilliseconds) },
         { label: "ISO 8601 (UTC)", value: description.iso },
-        { label: `Heure locale (${description.localZone})`, value: description.local },
-        { label: "UTC", value: description.utc },
-        { label: "Relatif", value: description.relative },
         {
-          label: "Jour de l'année · semaine ISO",
-          value: `${description.dayOfYear} · semaine ${description.isoWeek}`,
+          label: tr("Heure locale ({zone})", { zone: description.localZone }),
+          value: description.local,
+        },
+        { label: "UTC", value: description.utc },
+        { label: tr("Relatif"), value: description.relative },
+        {
+          label: tr("Jour de l'année · semaine ISO"),
+          value: tr("{day} · semaine {week}", {
+            day: description.dayOfYear,
+            week: description.isoWeek,
+          }),
         },
       ]
     : [];
@@ -42,7 +49,7 @@ export function TimestampTool() {
         <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
           <div className="space-y-1">
             <Label htmlFor="ts-input">
-              Timestamp (secondes ou millisecondes) ou date (ISO, JJ/MM/AAAA)
+              {tr("Timestamp (secondes ou millisecondes) ou date (ISO, JJ/MM/AAAA)")}
             </Label>
             <Input
               id="ts-input"
@@ -54,7 +61,7 @@ export function TimestampTool() {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="ts-picker">Choisir une date</Label>
+            <Label htmlFor="ts-picker">{tr("Choisir une date")}</Label>
             <input
               id="ts-picker"
               type="datetime-local"
@@ -73,22 +80,26 @@ export function TimestampTool() {
               onClick={() => setInput(String(Math.floor(Date.now() / 1000)))}
               data-testid="ts-now"
             >
-              <Clock aria-hidden="true" /> Maintenant
+              <Clock aria-hidden="true" /> {tr("Maintenant")}
             </Button>
           </div>
         </div>
         {parsed?.source === "seconds" ? (
           <p className="text-xs text-muted-foreground">
-            Interprété en secondes (10 chiffres). Saisissez 13 chiffres pour des millisecondes.
+            {tr(
+              "Interprété en secondes (10 chiffres). Saisissez 13 chiffres pour des millisecondes.",
+            )}
           </p>
         ) : null}
         {!parsed && input.trim() ? (
           <Alert variant="destructive">
-            Valeur non reconnue. Exemples : 1700000000, 2026-03-12T10:00:00Z, 12/03/2026 14:30.
+            {tr(
+              "Valeur non reconnue. Exemples : 1700000000, 2026-03-12T10:00:00Z, 12/03/2026 14:30.",
+            )}
           </Alert>
         ) : null}
         {description && !description.valid ? (
-          <Alert variant="destructive">Date hors des limites représentables.</Alert>
+          <Alert variant="destructive">{tr("Date hors des limites représentables.")}</Alert>
         ) : null}
       </ToolPanel>
       {rows.length ? (
@@ -100,16 +111,18 @@ export function TimestampTool() {
                   {row.label}
                 </dt>
                 <dd className="min-w-0 flex-1 break-all font-mono text-sm">{row.value}</dd>
-                <CopyButton text={row.value} label="Copier" />
+                <CopyButton text={row.value} label={tr("Copier")} />
               </div>
             ))}
           </dl>
         </ToolPanel>
       ) : null}
       <p className="text-xs text-muted-foreground">
-        Heure actuelle : <span className="font-mono">{Math.floor(now / 1000)}</span> · fuseau
-        détecté : {Intl.DateTimeFormat().resolvedOptions().timeZone}. Le timestamp Unix compte les
-        secondes écoulées depuis le 1er janvier 1970 à 00:00 UTC.
+        {tr("Heure actuelle :")} <span className="font-mono">{Math.floor(now / 1000)}</span>{" "}
+        {tr(
+          "· fuseau détecté : {zone}. Le timestamp Unix compte les secondes écoulées depuis le 1er janvier 1970 à 00:00 UTC.",
+          { zone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+        )}
       </p>
     </div>
   );

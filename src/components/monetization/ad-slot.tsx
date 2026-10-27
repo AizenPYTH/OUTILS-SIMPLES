@@ -5,6 +5,7 @@ import Script from "next/script";
 import { publicEnv } from "@/config/env";
 import { useConsent } from "@/lib/consent/use-consent";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 
 export type AdPlacement = "directory-footer" | "tool-aside" | "tool-bottom" | "guide-bottom";
 
@@ -65,10 +66,12 @@ export function AdSlot({ placement, className }: AdSlotProps) {
     <div
       className={cn("mx-auto flex w-full max-w-full flex-col items-center gap-1", className)}
       style={{ minHeight: config.height + 20 }}
-      aria-label="Publicité"
+      aria-label={tr("Publicité")}
       data-testid={`ad-slot-${placement}`}
     >
-      <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Publicité</span>
+      <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+        {tr("Publicité")}
+      </span>
       {canLoad ? (
         <>
           <Script

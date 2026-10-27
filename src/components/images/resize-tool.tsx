@@ -14,6 +14,7 @@ import {
 } from "@/lib/images/canvas";
 import { fitDimensions, outputExtensions, supportsTransparency } from "@/lib/images/types";
 import { deriveOutputName } from "@/lib/files/filename";
+import { tr } from "@/lib/i18n/messages";
 import { ImageBatchTool } from "./image-batch-tool";
 import {
   FormatOptions,
@@ -54,13 +55,13 @@ export function ResizeImageTool() {
         const flat = flattenOnBackground(canvas, format.background);
         releaseCanvas(canvas);
         canvas = flat;
-        note = "transparence aplatie";
+        note = tr("transparence aplatie");
       }
       if (
         mode === "exact" &&
         Math.abs(dims.width / dims.height - source.width / source.height) > 0.01
       )
-        note = (note ? `${note} · ` : "") + "proportions modifiées";
+        note = (note ? `${note} · ` : "") + tr("proportions modifiées");
       const encoded = await encodeCanvas(canvas, target, format.quality);
       releaseCanvas(canvas);
       return {
@@ -96,33 +97,33 @@ export function ResizeImageTool() {
   return (
     <ImageBatchTool
       toolId={TOOL_ID}
-      actionLabel="Redimensionner"
+      actionLabel={tr("Redimensionner")}
       zipName="images-redimensionnees"
       processor={processor}
       options={
         <ToolPanel className="space-y-4">
           <Segmented
-            label="Méthode"
+            label={tr("Méthode")}
             value={mode}
             onChange={setMode}
             className="sm:grid-cols-5"
             options={[
-              { value: "width", label: "Largeur", description: "Hauteur proportionnelle" },
-              { value: "height", label: "Hauteur", description: "Largeur proportionnelle" },
-              { value: "max", label: "Tenir dans", description: "Largeur × hauteur max" },
-              { value: "percent", label: "Pourcentage", description: "Échelle" },
-              { value: "exact", label: "Exact", description: "Peut déformer" },
+              { value: "width", label: tr("Largeur"), description: tr("Hauteur proportionnelle") },
+              { value: "height", label: tr("Hauteur"), description: tr("Largeur proportionnelle") },
+              { value: "max", label: tr("Tenir dans"), description: tr("Largeur × hauteur max") },
+              { value: "percent", label: tr("Pourcentage"), description: tr("Échelle") },
+              { value: "exact", label: tr("Exact"), description: tr("Peut déformer") },
             ]}
           />
           <div className="flex flex-wrap items-end gap-4">
             {mode === "percent"
-              ? numberField("resize-percent", "Échelle (%)", percent, setPercent)
+              ? numberField("resize-percent", tr("Échelle (%)"), percent, setPercent)
               : null}
             {mode !== "percent" && mode !== "height"
-              ? numberField("resize-width", "Largeur (px)", width, setWidth)
+              ? numberField("resize-width", tr("Largeur (px)"), width, setWidth)
               : null}
             {mode !== "percent" && mode !== "width"
-              ? numberField("resize-height", "Hauteur (px)", height, setHeight)
+              ? numberField("resize-height", tr("Hauteur (px)"), height, setHeight)
               : null}
             {mode === "width" || mode === "height" ? (
               <div className="flex items-center gap-2 pb-2">
@@ -132,7 +133,7 @@ export function ResizeImageTool() {
                   onCheckedChange={(c) => setAllowUpscale(c === true)}
                 />
                 <Label htmlFor="resize-upscale" className="font-normal">
-                  Autoriser l&apos;agrandissement (perte de netteté)
+                  {tr("Autoriser l'agrandissement (perte de netteté)")}
                 </Label>
               </div>
             ) : null}

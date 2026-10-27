@@ -9,6 +9,7 @@ import { DownloadTextButton } from "@/components/tools/shared/download-text-butt
 import { Segmented } from "@/components/pdf/shared/segmented";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { computeDiff, formatUnified, type DiffMode } from "@/lib/text/diff";
+import { tr } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 export function TextDiffTool() {
@@ -27,18 +28,34 @@ export function TextDiffTool() {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-2">
-        <TextInputPanel id="diff-a" label="Texte original" value={a} onChange={setA} rows={10} />
-        <TextInputPanel id="diff-b" label="Texte modifié" value={b} onChange={setB} rows={10} />
+        <TextInputPanel
+          id="diff-a"
+          label={tr("Texte original")}
+          value={a}
+          onChange={setA}
+          rows={10}
+        />
+        <TextInputPanel
+          id="diff-b"
+          label={tr("Texte modifié")}
+          value={b}
+          onChange={setB}
+          rows={10}
+        />
       </div>
       <ToolPanel className="space-y-3">
         <Segmented
-          label="Granularité"
+          label={tr("Granularité")}
           value={mode}
           onChange={setMode}
           options={[
-            { value: "lines", label: "Lignes", description: "Idéal pour du code ou des listes" },
-            { value: "words", label: "Mots", description: "Idéal pour du texte" },
-            { value: "chars", label: "Caractères", description: "Détail maximal" },
+            {
+              value: "lines",
+              label: tr("Lignes"),
+              description: tr("Idéal pour du code ou des listes"),
+            },
+            { value: "words", label: tr("Mots"), description: tr("Idéal pour du texte") },
+            { value: "chars", label: tr("Caractères"), description: tr("Détail maximal") },
           ]}
         />
         <div className="flex flex-wrap gap-4">
@@ -49,7 +66,7 @@ export function TextDiffTool() {
               onCheckedChange={(c) => setIgnoreCase(c === true)}
             />
             <Label htmlFor="diff-case" className="font-normal">
-              Ignorer la casse
+              {tr("Ignorer la casse")}
             </Label>
           </div>
           <div className="flex items-center gap-2">
@@ -60,7 +77,7 @@ export function TextDiffTool() {
               disabled={mode !== "lines"}
             />
             <Label htmlFor="diff-ws" className="font-normal">
-              Ignorer les espaces (mode lignes)
+              {tr("Ignorer les espaces (mode lignes)")}
             </Label>
           </div>
         </div>
@@ -71,7 +88,7 @@ export function TextDiffTool() {
             <p className="text-sm" aria-live="polite">
               {identical ? (
                 <span className="font-medium text-success-foreground">
-                  Les deux textes sont identiques.
+                  {tr("Les deux textes sont identiques.")}
                 </span>
               ) : (
                 <>
@@ -82,13 +99,15 @@ export function TextDiffTool() {
                     −{result.summary.removed}
                   </span>{" "}
                   <span className="text-muted-foreground">
-                    {mode === "lines" ? "lignes" : "caractères"} ajoutés / supprimés
+                    {mode === "lines"
+                      ? tr("lignes ajoutés / supprimés")
+                      : tr("caractères ajoutés / supprimés")}
                   </span>
                 </>
               )}
             </p>
             <div className="flex gap-1">
-              <CopyButton text={unified} label="Copier le diff" />
+              <CopyButton text={unified} label={tr("Copier le diff")} />
               <DownloadTextButton text={unified} filename="comparaison.diff" toolId="text-diff" />
             </div>
           </div>

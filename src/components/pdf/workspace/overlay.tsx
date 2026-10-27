@@ -24,6 +24,7 @@ import {
 import { fontInfo } from "@/lib/pdf/fonts";
 import { ensureFontFace } from "@/lib/pdf/fonts-embed";
 import { clamp, uid } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 import { ONE_SHOT_TOOLS, type ToolSettings, type WorkspaceTool } from "./types";
 
 export interface OverlayProps {
@@ -360,7 +361,7 @@ export function AnnotationOverlay(props: OverlayProps) {
               dash: settings.dash,
             },
           ],
-          "Dessin ajouté",
+          tr("Dessin ajouté"),
         );
         return;
       }
@@ -382,10 +383,10 @@ export function AnnotationOverlay(props: OverlayProps) {
             dash: settings.dash,
           },
           tool === "arrow"
-            ? "Flèche ajoutée"
+            ? tr("Flèche ajoutée")
             : tool === "underline"
-              ? "Soulignement ajouté"
-              : "Ligne ajoutée",
+              ? tr("Soulignement ajouté")
+              : tr("Ligne ajoutée"),
         );
         return;
       }
@@ -403,7 +404,7 @@ export function AnnotationOverlay(props: OverlayProps) {
               color: settings.color,
               opacity: Math.min(settings.opacity, 0.5),
             },
-            "Surlignage ajouté",
+            tr("Surlignage ajouté"),
           );
         } else if (tool === "mask") {
           finishShape(
@@ -418,7 +419,7 @@ export function AnnotationOverlay(props: OverlayProps) {
               opacity: 1,
               mask: true,
             },
-            "Masque ajouté",
+            tr("Masque ajouté"),
           );
         } else if (tool === "rect" || tool === "ellipse") {
           finishShape(
@@ -433,22 +434,22 @@ export function AnnotationOverlay(props: OverlayProps) {
               opacity: settings.opacity,
               dash: settings.dash,
             },
-            tool === "rect" ? "Rectangle ajouté" : "Ellipse ajoutée",
+            tool === "rect" ? tr("Rectangle ajouté") : tr("Ellipse ajoutée"),
           );
         }
         return;
       }
       case "move":
-        onEndInteraction(liveRef.current, "Élément déplacé");
+        onEndInteraction(liveRef.current, tr("Élément déplacé"));
         return;
       case "resize":
         onEndInteraction(
           liveRef.current,
-          d.origin.type === "text" ? "Taille du texte" : "Élément redimensionné",
+          d.origin.type === "text" ? tr("Taille du texte") : tr("Élément redimensionné"),
         );
         return;
       case "endpoint":
-        onEndInteraction(liveRef.current, "Extrémité déplacée");
+        onEndInteraction(liveRef.current, tr("Extrémité déplacée"));
         return;
     }
   };
@@ -515,7 +516,7 @@ export function AnnotationOverlay(props: OverlayProps) {
       onDoubleClick={onDoubleClick}
       data-testid="annotation-overlay"
       role="application"
-      aria-label="Zone d'annotation de la page"
+      aria-label={tr("Zone d'annotation de la page")}
     >
       <svg
         className="absolute inset-0 overflow-visible"
@@ -589,10 +590,10 @@ export function AnnotationOverlay(props: OverlayProps) {
                 if (final.text.trim().length === 0) {
                   onEndInteraction(
                     liveRef.current.filter((x) => x.id !== a.id),
-                    "Texte vide retiré",
+                    tr("Texte vide retiré"),
                   );
                   onSelect(null);
-                } else onEndInteraction(liveRef.current, "Texte saisi");
+                } else onEndInteraction(liveRef.current, tr("Texte saisi"));
               }}
             />
           );
@@ -603,7 +604,7 @@ export function AnnotationOverlay(props: OverlayProps) {
             <img
               key={a.id}
               src={a.previewUrl}
-              alt={a.role === "signature" ? "Signature" : "Image ajoutée"}
+              alt={a.role === "signature" ? tr("Signature") : tr("Image ajoutée")}
               draggable={false}
               className="pointer-events-none absolute"
               style={{
@@ -910,7 +911,7 @@ function TextView({
     return (
       <textarea
         autoFocus
-        aria-label="Texte de l'annotation"
+        aria-label={tr("Texte de l'annotation")}
         className="absolute resize-none overflow-hidden rounded-none border border-primary bg-transparent outline-hidden"
         style={{
           ...style,
@@ -977,7 +978,7 @@ function SelectionFrame({
         />
         <button
           type="button"
-          aria-label="Déplacer le début de la ligne"
+          aria-label={tr("Déplacer le début de la ligne")}
           className={handleClass}
           style={{ left: s.x, top: s.y, cursor: "move" }}
           onPointerDown={(ev) => onEndpointStart(ev, "start")}
@@ -985,7 +986,7 @@ function SelectionFrame({
         />
         <button
           type="button"
-          aria-label="Déplacer la fin de la ligne"
+          aria-label={tr("Déplacer la fin de la ligne")}
           className={handleClass}
           style={{ left: e.x, top: e.y, cursor: "move" }}
           onPointerDown={(ev) => onEndpointStart(ev, "end")}
@@ -1019,7 +1020,7 @@ function SelectionFrame({
             <button
               key={h.id}
               type="button"
-              aria-label={`Redimensionner (${h.id})`}
+              aria-label={tr("Redimensionner ({handle})", { handle: h.id })}
               className={handleClass}
               style={{ left: h.x, top: h.y, cursor: h.cursor }}
               onPointerDown={(e) => onResizeStart(e, h.id)}

@@ -12,6 +12,7 @@ import {
 import { TextInputPanel, TextOutputPanel } from "@/components/tools/shared/text-io";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { slugify } from "@/lib/text/transform";
+import { tr } from "@/lib/i18n/messages";
 
 type Separator = "-" | "_" | ".";
 
@@ -41,38 +42,38 @@ export function SlugTool() {
     <div className="space-y-4">
       <TextInputPanel
         id="slug-input"
-        label="Titre(s) à transformer (un par ligne)"
+        label={tr("Titre(s) à transformer (un par ligne)")}
         value={text}
         onChange={setText}
-        placeholder="Été 2026 : les 10 meilleurs outils PDF gratuits !"
+        placeholder={tr("Été 2026 : les 10 meilleurs outils PDF gratuits !")}
         rows={5}
-        hint="Accents retirés, minuscules, ponctuation remplacée par le séparateur."
+        hint={tr("Accents retirés, minuscules, ponctuation remplacée par le séparateur.")}
       />
       <ToolPanel className="flex flex-wrap items-end gap-4">
         <div className="space-y-1">
-          <Label htmlFor="slug-separator">Séparateur</Label>
+          <Label htmlFor="slug-separator">{tr("Séparateur")}</Label>
           <Select value={separator} onValueChange={(v) => setSeparator(v as Separator)}>
             <SelectTrigger id="slug-separator" className="w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="-">Tiret (-) recommandé</SelectItem>
-              <SelectItem value="_">Tiret bas (_)</SelectItem>
-              <SelectItem value=".">Point (.)</SelectItem>
+              <SelectItem value="-">{tr("Tiret (-) recommandé")}</SelectItem>
+              <SelectItem value="_">{tr("Tiret bas (_)")}</SelectItem>
+              <SelectItem value=".">{tr("Point (.)")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1">
-          <Label htmlFor="slug-max">Longueur maximale</Label>
+          <Label htmlFor="slug-max">{tr("Longueur maximale")}</Label>
           <Select value={maxLength} onValueChange={(v) => setMaxLength(v as typeof maxLength)}>
             <SelectTrigger id="slug-max" className="w-44">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="0">Sans limite</SelectItem>
-              <SelectItem value="50">50 caractères</SelectItem>
-              <SelectItem value="75">75 caractères</SelectItem>
-              <SelectItem value="100">100 caractères</SelectItem>
+              <SelectItem value="0">{tr("Sans limite")}</SelectItem>
+              <SelectItem value="50">{tr("50 caractères")}</SelectItem>
+              <SelectItem value="75">{tr("75 caractères")}</SelectItem>
+              <SelectItem value="100">{tr("100 caractères")}</SelectItem>
             </SelectContent>
           </Select>
         </div>

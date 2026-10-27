@@ -18,6 +18,7 @@ import {
   unescapeHtml,
 } from "@/lib/dev/encoding";
 import { formatBytes } from "@/lib/files/format";
+import { tr } from "@/lib/i18n/messages";
 
 export type EncoderKind = "base64" | "url" | "html";
 type Direction = "encode" | "decode";
@@ -27,24 +28,24 @@ const LABELS: Record<
   { encode: string; decode: string; inputEncode: string; inputDecode: string; file: string }
 > = {
   base64: {
-    encode: "Encoder en Base64",
-    decode: "Décoder du Base64",
-    inputEncode: "Texte à encoder",
-    inputDecode: "Base64 à décoder",
+    encode: tr("Encoder en Base64"),
+    decode: tr("Décoder du Base64"),
+    inputEncode: tr("Texte à encoder"),
+    inputDecode: tr("Base64 à décoder"),
     file: "texte-base64.txt",
   },
   url: {
-    encode: "Encoder pour une URL",
-    decode: "Décoder une URL",
-    inputEncode: "Texte ou URL à encoder",
-    inputDecode: "Texte encodé (%20, %C3%A9…)",
+    encode: tr("Encoder pour une URL"),
+    decode: tr("Décoder une URL"),
+    inputEncode: tr("Texte ou URL à encoder"),
+    inputDecode: tr("Texte encodé (%20, %C3%A9…)"),
     file: "texte-url.txt",
   },
   html: {
-    encode: "Échapper (texte → HTML)",
-    decode: "Déséchapper (HTML → texte)",
-    inputEncode: "Texte contenant <, >, &, guillemets…",
-    inputDecode: "HTML avec entités (&amp;, &eacute;, &#233;…)",
+    encode: tr("Échapper (texte → HTML)"),
+    decode: tr("Déséchapper (HTML → texte)"),
+    inputEncode: tr("Texte contenant <, >, &, guillemets…"),
+    inputDecode: tr("HTML avec entités (&amp;, &eacute;, &#233;…)"),
     file: "texte-html.txt",
   },
 };
@@ -95,7 +96,7 @@ export function EncoderTool({ kind }: { kind: EncoderKind }) {
     } catch (e) {
       return {
         output: "",
-        error: e instanceof Error ? e.message : "Décodage impossible : entrée invalide.",
+        error: e instanceof Error ? e.message : tr("Décodage impossible : entrée invalide."),
       };
     }
   }, [input, kind, direction, urlSafe, wrap, fullUrl]);
@@ -110,7 +111,7 @@ export function EncoderTool({ kind }: { kind: EncoderKind }) {
         dataUri: `data:${mime};base64,${bytesToBase64(bytes)}`,
       });
     } catch {
-      toast.error("Lecture du fichier impossible.");
+      toast.error(tr("Lecture du fichier impossible."));
     }
   };
 
@@ -119,7 +120,7 @@ export function EncoderTool({ kind }: { kind: EncoderKind }) {
   return (
     <div className="space-y-4">
       <Segmented
-        label="Sens de conversion"
+        label={tr("Sens de conversion")}
         value={direction}
         onChange={setDirection}
         className="sm:grid-cols-2"
@@ -141,36 +142,37 @@ export function EncoderTool({ kind }: { kind: EncoderKind }) {
             <>
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox checked={urlSafe} onCheckedChange={(v) => setUrlSafe(v === true)} />{" "}
-                Variante URL-safe (- et _ au lieu de + et /)
+                {tr("Variante URL-safe (- et _ au lieu de + et /)")}
               </label>
               {direction === "encode" ? (
                 <label className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={wrap} onCheckedChange={(v) => setWrap(v === true)} /> Couper en
-                  lignes de 76 caractères (MIME)
+                  <Checkbox checked={wrap} onCheckedChange={(v) => setWrap(v === true)} />{" "}
+                  {tr("Couper en lignes de 76 caractères (MIME)")}
                 </label>
               ) : null}
             </>
           ) : direction === "encode" ? (
             <label className="flex items-center gap-2 text-sm">
-              <Checkbox checked={fullUrl} onCheckedChange={(v) => setFullUrl(v === true)} /> URL
-              complète (conserver : / ? & = #)
+              <Checkbox checked={fullUrl} onCheckedChange={(v) => setFullUrl(v === true)} />{" "}
+              {tr("URL complète (conserver : / ? & = #)")}
             </label>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Les « + » sont convertis en espaces (formulaires) et les séquences %XX décodées en
-              UTF-8.
+              {tr(
+                "Les « + » sont convertis en espaces (formulaires) et les séquences %XX décodées en UTF-8.",
+              )}
             </p>
           )}
         </ToolPanel>
       ) : null}
       {result.error ? (
         <Alert variant="destructive" data-testid={`${kind}-error`}>
-          {result.error}
+          {tr(result.error)}
         </Alert>
       ) : null}
       <TextOutputPanel
         id={`${kind}-output`}
-        label="Résultat"
+        label={tr("Résultat")}
         value={result.output}
         filename={labels.file}
         rows={7}
@@ -178,17 +180,21 @@ export function EncoderTool({ kind }: { kind: EncoderKind }) {
       />
       {kind === "base64" ? (
         <ToolPanel className="space-y-3">
-          <p className="text-sm font-medium">Fichier vers Data URI (image, police, PDF…)</p>
+          <p className="text-sm font-medium">{tr("Fichier vers Data URI (image, police, PDF…)")}</p>
           <FileDropzone
             onFiles={(f) => f[0] && void onFile(f[0])}
             accept="*/*"
             compact
             validate={(f) =>
-              f.size > FILE_MAX ? `fichier trop volumineux (max ${formatBytes(FILE_MAX)})` : null
+              f.size > FILE_MAX
+                ? tr("fichier trop volumineux (max {max})", { max: formatBytes(FILE_MAX) })
+                : null
             }
-            title="Déposez un fichier à encoder en Base64"
-            hint={`Jusqu'à ${formatBytes(FILE_MAX)} · résultat sous forme de data: URI`}
-            buttonLabel="Choisir un fichier"
+            title={tr("Déposez un fichier à encoder en Base64")}
+            hint={tr("Jusqu'à {max} · résultat sous forme de data: URI", {
+              max: formatBytes(FILE_MAX),
+            })}
+            buttonLabel={tr("Choisir un fichier")}
             testId="base64-file"
           />
           {fileResult ? (

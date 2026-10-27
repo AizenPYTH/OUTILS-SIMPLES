@@ -1,6 +1,7 @@
 import { PdfError } from "../errors";
 import { loadPdfDocument, savePdfDocument } from "../load";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 /** Margins to remove, in points, expressed in the page's visual (rotated) orientation. */
 export interface CropMargins {
@@ -41,7 +42,7 @@ export async function cropPages(
     if (newWidth < 20 || newHeight < 20) {
       throw new PdfError(
         "INVALID_RANGE",
-        "Les marges à retirer laissent une page trop petite (moins de 20 pt).",
+        tr("Les marges à retirer laissent une page trop petite (moins de 20 pt)."),
         { recoverable: true },
       );
     }

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { CopyButton } from "@/components/tools/shared/copy-button";
 import { ToolPanel, StatGrid } from "@/components/tools/shared/tool-panel";
 import { generatePassword, passwordEntropyBits, type PasswordOptions } from "@/lib/dev/random";
+import { tr } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 const DEFAULTS: PasswordOptions = {
@@ -20,10 +21,10 @@ const DEFAULTS: PasswordOptions = {
 };
 
 function strength(bits: number): { label: string; className: string; width: string } {
-  if (bits < 40) return { label: "Faible", className: "bg-destructive", width: "25%" };
-  if (bits < 60) return { label: "Moyen", className: "bg-warning", width: "50%" };
-  if (bits < 80) return { label: "Fort", className: "bg-success", width: "75%" };
-  return { label: "Très fort", className: "bg-success", width: "100%" };
+  if (bits < 40) return { label: tr("Faible"), className: "bg-destructive", width: "25%" };
+  if (bits < 60) return { label: tr("Moyen"), className: "bg-warning", width: "50%" };
+  if (bits < 80) return { label: tr("Fort"), className: "bg-success", width: "75%" };
+  return { label: tr("Très fort"), className: "bg-success", width: "100%" };
 }
 
 function safeGenerate(options: PasswordOptions, count: number): string[] {
@@ -52,7 +53,9 @@ export function PasswordTool() {
       <ToolPanel className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1">
-            <Label htmlFor="pw-length">Longueur : {options.length} caractères</Label>
+            <Label htmlFor="pw-length">
+              {tr("Longueur : {n} caractères", { n: options.length })}
+            </Label>
             <input
               id="pw-length"
               type="range"
@@ -65,7 +68,7 @@ export function PasswordTool() {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="pw-count">Nombre de propositions : {count}</Label>
+            <Label htmlFor="pw-count">{tr("Nombre de propositions : {n}", { n: count })}</Label>
             <input
               id="pw-count"
               type="range"
@@ -84,11 +87,11 @@ export function PasswordTool() {
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           {(
             [
-              ["lowercase", "minuscules (a-z)"],
-              ["uppercase", "MAJUSCULES (A-Z)"],
-              ["digits", "chiffres (0-9)"],
-              ["symbols", "symboles (!@#$…)"],
-              ["excludeAmbiguous", "éviter les caractères ambigus (0/O, 1/l/I)"],
+              ["lowercase", tr("minuscules (a-z)")],
+              ["uppercase", tr("MAJUSCULES (A-Z)")],
+              ["digits", tr("chiffres (0-9)")],
+              ["symbols", tr("symboles (!@#$…)")],
+              ["excludeAmbiguous", tr("éviter les caractères ambigus (0/O, 1/l/I)")],
             ] as const
           ).map(([key, label]) => (
             <label key={key} className="flex items-center gap-2">
@@ -103,10 +106,10 @@ export function PasswordTool() {
         <div className="space-y-1">
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-1.5 font-medium">
-              <ShieldCheck className="size-4" aria-hidden="true" /> Robustesse :{" "}
+              <ShieldCheck className="size-4" aria-hidden="true" /> {tr("Robustesse :")}{" "}
               {noPool ? "—" : meter.label}
             </span>
-            <span className="text-muted-foreground">{bits} bits d&apos;entropie</span>
+            <span className="text-muted-foreground">{tr("{bits} bits d'entropie", { bits })}</span>
           </div>
           <div
             className="h-2 overflow-hidden rounded-full bg-muted"
@@ -114,7 +117,7 @@ export function PasswordTool() {
             aria-valuemin={0}
             aria-valuemax={128}
             aria-valuenow={bits}
-            aria-label="Robustesse du mot de passe"
+            aria-label={tr("Robustesse du mot de passe")}
           >
             <div
               className={cn("h-full rounded-full transition-all", meter.className)}
@@ -128,13 +131,15 @@ export function PasswordTool() {
           disabled={noPool}
           data-testid="pw-regenerate"
         >
-          <RefreshCw aria-hidden="true" /> Générer de nouveaux mots de passe
+          <RefreshCw aria-hidden="true" /> {tr("Générer de nouveaux mots de passe")}
         </Button>
       </ToolPanel>
       {noPool ? (
-        <p className="text-sm text-destructive">Sélectionnez au moins un type de caractères.</p>
+        <p className="text-sm text-destructive">
+          {tr("Sélectionnez au moins un type de caractères.")}
+        </p>
       ) : null}
-      <ul className="space-y-2" aria-label="Mots de passe proposés" data-testid="pw-list">
+      <ul className="space-y-2" aria-label={tr("Mots de passe proposés")} data-testid="pw-list">
         {list.map((pw, i) => (
           <li
             key={`${i}-${pw}`}
@@ -143,22 +148,22 @@ export function PasswordTool() {
             <code className="min-w-0 flex-1 break-all font-mono text-sm" data-testid="pw-item">
               {pw}
             </code>
-            <CopyButton text={pw} label="Copier" />
+            <CopyButton text={pw} label={tr("Copier")} />
           </li>
         ))}
       </ul>
       <StatGrid
         items={[
-          { label: "Entropie", value: `${bits} bits` },
-          { label: "Combinaisons", value: bits > 0 ? `2^${bits}` : "—" },
-          { label: "Conseil", value: options.length >= 14 ? "OK" : "≥ 14 car." },
+          { label: tr("Entropie"), value: `${bits} bits` },
+          { label: tr("Combinaisons"), value: bits > 0 ? `2^${bits}` : "—" },
+          { label: tr("Conseil"), value: options.length >= 14 ? "OK" : tr("≥ 14 car.") },
         ]}
         className="sm:grid-cols-3 lg:grid-cols-3"
       />
       <p className="text-xs text-muted-foreground">
-        Générés localement avec l&apos;API Web Crypto (aléatoire cryptographique, sans biais de
-        modulo). Utilisez un gestionnaire de mots de passe pour les conserver ; ne réutilisez jamais
-        un mot de passe.
+        {tr(
+          "Générés localement avec l'API Web Crypto (aléatoire cryptographique, sans biais de modulo). Utilisez un gestionnaire de mots de passe pour les conserver ; ne réutilisez jamais un mot de passe.",
+        )}
       </p>
     </div>
   );

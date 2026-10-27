@@ -20,6 +20,7 @@ import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { CopyButton } from "@/components/tools/shared/copy-button";
 import { triggerDownload } from "@/lib/files/download";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 import { buildQrPayload, type QrKind, type WifiPayload, type VCardPayload } from "@/lib/codes/qr";
 
 const TOOL_ID = "qr-generate";
@@ -83,7 +84,7 @@ export function QrGeneratorTool() {
           setError(
             e instanceof Error
               ? e.message
-              : "Impossible de générer ce QR code (contenu trop long ?).",
+              : tr("Impossible de générer ce QR code (contenu trop long ?)."),
           );
       }
     })();
@@ -115,24 +116,24 @@ export function QrGeneratorTool() {
       <div className="space-y-4">
         <Tabs value={kind} onValueChange={(v) => setKind(v as QrKind)}>
           <TabsList className="w-full">
-            <TabsTrigger value="url">Lien</TabsTrigger>
-            <TabsTrigger value="text">Texte</TabsTrigger>
+            <TabsTrigger value="url">{tr("Lien")}</TabsTrigger>
+            <TabsTrigger value="text">{tr("Texte")}</TabsTrigger>
             <TabsTrigger value="wifi">Wi-Fi</TabsTrigger>
             <TabsTrigger value="vcard">Contact</TabsTrigger>
           </TabsList>
           <TabsContent value="url" className="space-y-1">
-            <Label htmlFor="qr-url">Adresse web</Label>
+            <Label htmlFor="qr-url">{tr("Adresse web")}</Label>
             <Input
               id="qr-url"
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://exemple.fr"
+              placeholder={tr("https://exemple.fr")}
               data-testid="qr-url"
             />
           </TabsContent>
           <TabsContent value="text" className="space-y-1">
-            <Label htmlFor="qr-text">Texte</Label>
+            <Label htmlFor="qr-text">{tr("Texte")}</Label>
             <Textarea
               id="qr-text"
               value={text}
@@ -143,7 +144,7 @@ export function QrGeneratorTool() {
           </TabsContent>
           <TabsContent value="wifi" className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label htmlFor="wifi-ssid">Nom du réseau (SSID)</Label>
+              <Label htmlFor="wifi-ssid">{tr("Nom du réseau (SSID)")}</Label>
               <Input
                 id="wifi-ssid"
                 value={wifi.ssid}
@@ -151,7 +152,7 @@ export function QrGeneratorTool() {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="wifi-pass">Mot de passe</Label>
+              <Label htmlFor="wifi-pass">{tr("Mot de passe")}</Label>
               <Input
                 id="wifi-pass"
                 value={wifi.password}
@@ -160,7 +161,7 @@ export function QrGeneratorTool() {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="wifi-sec">Sécurité</Label>
+              <Label htmlFor="wifi-sec">{tr("Sécurité")}</Label>
               <Select
                 value={wifi.security}
                 onValueChange={(v) => setWifi({ ...wifi, security: v as WifiPayload["security"] })}
@@ -171,7 +172,7 @@ export function QrGeneratorTool() {
                 <SelectContent>
                   <SelectItem value="WPA">WPA / WPA2 / WPA3</SelectItem>
                   <SelectItem value="WEP">WEP</SelectItem>
-                  <SelectItem value="nopass">Aucune (réseau ouvert)</SelectItem>
+                  <SelectItem value="nopass">{tr("Aucune (réseau ouvert)")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -182,18 +183,18 @@ export function QrGeneratorTool() {
                 onChange={(e) => setWifi({ ...wifi, hidden: e.target.checked })}
                 className="accent-primary"
               />{" "}
-              Réseau masqué
+              {tr("Réseau masqué")}
             </label>
           </TabsContent>
           <TabsContent value="vcard" className="grid gap-3 sm:grid-cols-2">
             {(
               [
-                ["firstName", "Prénom"],
-                ["lastName", "Nom"],
-                ["phone", "Téléphone"],
-                ["email", "E-mail"],
-                ["organization", "Organisation"],
-                ["url", "Site web"],
+                ["firstName", tr("Prénom")],
+                ["lastName", tr("Nom")],
+                ["phone", tr("Téléphone")],
+                ["email", tr("E-mail")],
+                ["organization", tr("Organisation")],
+                ["url", tr("Site web")],
               ] as const
             ).map(([key, label]) => (
               <div key={key} className="space-y-1">
@@ -207,10 +208,10 @@ export function QrGeneratorTool() {
             ))}
           </TabsContent>
         </Tabs>
-        {payload.error ? <p className="text-sm text-destructive">{payload.error}</p> : null}
+        {payload.error ? <p className="text-sm text-destructive">{tr(payload.error)}</p> : null}
         <ToolPanel className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-1">
-            <Label htmlFor="qr-size">Taille (px)</Label>
+            <Label htmlFor="qr-size">{tr("Taille (px)")}</Label>
             <Input
               id="qr-size"
               type="number"
@@ -224,7 +225,7 @@ export function QrGeneratorTool() {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="qr-margin">Marge (modules)</Label>
+            <Label htmlFor="qr-margin">{tr("Marge (modules)")}</Label>
             <Input
               id="qr-margin"
               type="number"
@@ -235,21 +236,21 @@ export function QrGeneratorTool() {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="qr-level">Correction d&apos;erreur</Label>
+            <Label htmlFor="qr-level">{tr("Correction d'erreur")}</Label>
             <Select value={level} onValueChange={(v) => setLevel(v as typeof level)}>
               <SelectTrigger id="qr-level">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="L">L (7 %) – plus petit</SelectItem>
-                <SelectItem value="M">M (15 %) – standard</SelectItem>
-                <SelectItem value="Q">Q (25 %)</SelectItem>
-                <SelectItem value="H">H (30 %) – plus robuste</SelectItem>
+                <SelectItem value="L">{tr("L (7 %) – plus petit")}</SelectItem>
+                <SelectItem value="M">{tr("M (15 %) – standard")}</SelectItem>
+                <SelectItem value="Q">{tr("Q (25 %)")}</SelectItem>
+                <SelectItem value="H">{tr("H (30 %) – plus robuste")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex items-center gap-3">
-            <Label htmlFor="qr-dark">Couleur des modules</Label>
+            <Label htmlFor="qr-dark">{tr("Couleur des modules")}</Label>
             <input
               id="qr-dark"
               type="color"
@@ -259,7 +260,7 @@ export function QrGeneratorTool() {
             />
           </div>
           <div className="flex items-center gap-3">
-            <Label htmlFor="qr-light">Couleur de fond</Label>
+            <Label htmlFor="qr-light">{tr("Couleur de fond")}</Label>
             <input
               id="qr-light"
               type="color"
@@ -270,9 +271,9 @@ export function QrGeneratorTool() {
           </div>
         </ToolPanel>
         <Alert variant="info">
-          Gardez un bon contraste (modules sombres sur fond clair) et testez le QR code avec votre
-          téléphone avant impression. Un contenu long produit un code plus dense, donc plus
-          difficile à lire en petit format.
+          {tr(
+            "Gardez un bon contraste (modules sombres sur fond clair) et testez le QR code avec votre téléphone avant impression. Un contenu long produit un code plus dense, donc plus difficile à lire en petit format.",
+          )}
         </Alert>
       </div>
       <aside className="space-y-3">
@@ -283,12 +284,12 @@ export function QrGeneratorTool() {
           <canvas
             ref={canvasRef}
             className="max-h-full max-w-full"
-            aria-label="Aperçu du QR code"
+            aria-label={tr("Aperçu du QR code")}
             style={{ display: payload.value && !error ? "block" : "none" }}
           />
           {!payload.value ? (
             <p className="text-center text-sm text-muted-foreground">
-              Saisissez un contenu pour générer le QR code.
+              {tr("Saisissez un contenu pour générer le QR code.")}
             </p>
           ) : null}
           {error ? <p className="text-center text-sm text-destructive">{error}</p> : null}
@@ -301,7 +302,7 @@ export function QrGeneratorTool() {
             disabled={!pngUrl}
             data-testid="qr-download-png"
           >
-            <Download aria-hidden="true" /> Télécharger en PNG
+            <Download aria-hidden="true" /> {tr("Télécharger en PNG")}
           </Button>
           <Button
             type="button"
@@ -310,11 +311,11 @@ export function QrGeneratorTool() {
             disabled={!svg}
             data-testid="qr-download-svg"
           >
-            <Download aria-hidden="true" /> Télécharger en SVG
+            <Download aria-hidden="true" /> {tr("Télécharger en SVG")}
           </Button>
           <CopyButton
             text={payload.value}
-            label="Copier le contenu encodé"
+            label={tr("Copier le contenu encodé")}
             className="justify-center"
           />
         </div>

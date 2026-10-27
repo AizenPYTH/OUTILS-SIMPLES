@@ -4,6 +4,7 @@ import * as React from "react";
 import type { Annotation } from "@/lib/pdf/annotations/types";
 import type { TextEdit } from "@/lib/pdf/text-edit/types";
 import type { PagePlan } from "@/lib/pdf/operations/page-plan";
+import { tr } from "@/lib/i18n/messages";
 
 /** Everything the user changed, as one snapshot: undo/redo covers all of it. */
 export interface EditorSnapshot {
@@ -90,7 +91,12 @@ function reducer(state: HistoryState, action: Action): HistoryState {
       };
     }
     case "reset":
-      return { present: action.snapshot, presentLabel: "Document ouvert", past: [], future: [] };
+      return {
+        present: action.snapshot,
+        presentLabel: tr("Document ouvert"),
+        past: [],
+        future: [],
+      };
   }
 }
 
@@ -102,7 +108,7 @@ function reducer(state: HistoryState, action: Action): HistoryState {
 export function useEditorHistory(initial: EditorSnapshot) {
   const [state, dispatch] = React.useReducer(reducer, {
     present: initial,
-    presentLabel: "Document ouvert",
+    presentLabel: tr("Document ouvert"),
     past: [],
     future: [],
   });
@@ -120,7 +126,7 @@ export function useEditorHistory(initial: EditorSnapshot) {
   const beginLive = React.useCallback((current: Annotation[]) => {
     dragStartRef.current = current;
   }, []);
-  const endLive = React.useCallback((final: Annotation[], label = "Déplacement") => {
+  const endLive = React.useCallback((final: Annotation[], label = tr("Déplacement")) => {
     const start = dragStartRef.current;
     dragStartRef.current = null;
     if (!start) return;

@@ -1,4 +1,5 @@
 import { StandardFonts } from "pdf-lib";
+import { tr } from "@/lib/i18n/messages";
 
 /**
  * Font palette of the text tools. Three kinds of families:
@@ -50,8 +51,8 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "Helvetica, Arial, sans-serif",
     kind: "standard",
     category: "sans",
-    note: "police standard PDF, non incorporée",
-    licence: "Police standard PDF",
+    note: tr("police standard PDF, non incorporée"),
+    licence: tr("Police standard PDF"),
   },
   {
     id: "liberation-sans",
@@ -59,7 +60,7 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "'Liberation Sans', Arial, sans-serif",
     kind: "embedded",
     category: "sans",
-    note: "métriques compatibles Arial",
+    note: tr("métriques compatibles Arial"),
     licence: "SIL OFL 1.1",
     files: {
       regular: "LiberationSans-Regular.ttf",
@@ -74,7 +75,7 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "Carlito, Calibri, sans-serif",
     kind: "embedded",
     category: "sans",
-    note: "métriques compatibles Calibri",
+    note: tr("métriques compatibles Calibri"),
     licence: "SIL OFL 1.1",
     files: {
       regular: "Carlito-Regular.ttf",
@@ -89,7 +90,7 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "'Open Sans', sans-serif",
     kind: "embedded",
     category: "sans",
-    note: "sans-serif moderne",
+    note: tr("sans-serif moderne"),
     licence: "SIL OFL 1.1",
     files: {
       regular: "OpenSans-Regular.ttf",
@@ -104,7 +105,7 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "'Fira Sans', 'Trebuchet MS', sans-serif",
     kind: "embedded",
     category: "sans",
-    note: "sans-serif humaniste (proche de Trebuchet MS)",
+    note: tr("sans-serif humaniste (proche de Trebuchet MS)"),
     licence: "SIL OFL 1.1",
     files: {
       regular: "FiraSans-Regular.ttf",
@@ -119,8 +120,8 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "'DejaVu Sans', Verdana, sans-serif",
     kind: "embedded",
     category: "sans",
-    note: "large et lisible (proche de Verdana) ; pas d'italique",
-    licence: "Bitstream Vera (libre)",
+    note: tr("large et lisible (proche de Verdana) ; pas d'italique"),
+    licence: tr("Bitstream Vera (libre)"),
     files: { regular: "DejaVuSans.ttf", bold: "DejaVuSans-Bold.ttf" },
   },
   {
@@ -129,8 +130,8 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "'Times New Roman', Times, serif",
     kind: "standard",
     category: "serif",
-    note: "police standard PDF, non incorporée",
-    licence: "Police standard PDF",
+    note: tr("police standard PDF, non incorporée"),
+    licence: tr("Police standard PDF"),
   },
   {
     id: "liberation-serif",
@@ -138,7 +139,7 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "'Liberation Serif', 'Times New Roman', serif",
     kind: "embedded",
     category: "serif",
-    note: "métriques compatibles Times New Roman",
+    note: tr("métriques compatibles Times New Roman"),
     licence: "SIL OFL 1.1",
     files: {
       regular: "LiberationSerif-Regular.ttf",
@@ -153,7 +154,7 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "Caladea, Cambria, serif",
     kind: "embedded",
     category: "serif",
-    note: "métriques compatibles Cambria",
+    note: tr("métriques compatibles Cambria"),
     licence: "SIL OFL 1.1",
     files: {
       regular: "Caladea-Regular.ttf",
@@ -168,7 +169,7 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "Gelasio, Georgia, serif",
     kind: "embedded",
     category: "serif",
-    note: "métriques compatibles Georgia",
+    note: tr("métriques compatibles Georgia"),
     licence: "SIL OFL 1.1",
     files: {
       regular: "Gelasio-Regular.ttf",
@@ -183,8 +184,8 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "'Courier New', Courier, monospace",
     kind: "standard",
     category: "mono",
-    note: "police standard PDF, non incorporée",
-    licence: "Police standard PDF",
+    note: tr("police standard PDF, non incorporée"),
+    licence: tr("Police standard PDF"),
   },
   {
     id: "liberation-mono",
@@ -192,7 +193,7 @@ export const fontFamilies: FontFamilyInfo[] = [
     css: "'Liberation Mono', 'Courier New', monospace",
     kind: "embedded",
     category: "mono",
-    note: "métriques compatibles Courier New",
+    note: tr("métriques compatibles Courier New"),
     licence: "SIL OFL 1.1",
     files: {
       regular: "LiberationMono-Regular.ttf",

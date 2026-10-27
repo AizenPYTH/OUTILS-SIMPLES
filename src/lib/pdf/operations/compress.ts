@@ -13,6 +13,7 @@ import { createPdfDocument, loadPdfDocument, savePdfDocument } from "../load";
 import { copyAllPages } from "./merge";
 import type { ProgressReporter } from "./merge";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 export type CompressionLevel = "structure" | "balanced" | "strong";
 
@@ -235,7 +236,7 @@ export async function compressPdf(
       onProgress?.({
         current: i + 1,
         total: candidates.length,
-        label: `Image ${i + 1} sur ${candidates.length}…`,
+        label: tr("Image {n} sur {total}…", { n: i + 1, total: candidates.length }),
       });
       const sourceImage = toSourceImage(candidate, output);
       if (!sourceImage) {

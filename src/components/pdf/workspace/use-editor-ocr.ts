@@ -8,6 +8,7 @@ import { addOcrLayer } from "@/lib/ocr/searchable-pdf";
 import type { OcrLanguage, OcrPageResult } from "@/lib/ocr/types";
 import type { RgbaImage } from "@/lib/images/pixels";
 import { encodeCanvas, putRgba, releaseCanvas } from "@/lib/images/canvas";
+import { tr } from "@/lib/i18n/messages";
 
 /** Result of an OCR run on the editor's document: the layer and what it holds. */
 export interface OcrLayerInfo {
@@ -36,15 +37,15 @@ export type EditorOcrState =
   | { status: "error"; message: string };
 
 const STATUS_LABELS: Record<string, string> = {
-  "pass-0": "Lecture à l'endroit",
-  "pass-90": "Lecture du texte tourné à 90°",
-  "pass-180": "Lecture du texte à l'envers",
-  "pass-270": "Lecture du texte tourné à 270°",
-  "recognizing text": "Reconnaissance",
-  "loading tesseract core": "Chargement du moteur",
-  "initializing tesseract": "Initialisation du moteur",
-  "loading language traineddata": "Chargement du modèle de langue",
-  "initializing api": "Préparation",
+  "pass-0": tr("Lecture à l'endroit"),
+  "pass-90": tr("Lecture du texte tourné à 90°"),
+  "pass-180": tr("Lecture du texte à l'envers"),
+  "pass-270": tr("Lecture du texte tourné à 270°"),
+  "recognizing text": tr("Reconnaissance"),
+  "loading tesseract core": tr("Chargement du moteur"),
+  "initializing tesseract": tr("Initialisation du moteur"),
+  "loading language traineddata": tr("Chargement du modèle de langue"),
+  "initializing api": tr("Préparation"),
 };
 
 async function encodeWorkingImage(img: RgbaImage): Promise<Blob> {
@@ -94,7 +95,7 @@ export function useEditorOcr() {
         if (!controller.signal.aborted)
           setState({ status: "running", pages, current, pageProgress, label });
       };
-      progress(0, 0, "Chargement du moteur OCR…");
+      progress(0, 0, tr("Chargement du moteur OCR…"));
       try {
         if (engineRef.current && engineRef.current.language !== language) {
           await engineRef.current.engine.terminate();
@@ -119,7 +120,7 @@ export function useEditorOcr() {
         for (let i = 0; i < pages.length; i += 1) {
           const pageIndex = pages[i]!;
           if (controller.signal.aborted) throw new DOMException("cancelled", "AbortError");
-          progress(i, 0, `Rendu de la page ${pageIndex + 1}`);
+          progress(i, 0, tr("Rendu de la page {n}", { n: pageIndex + 1 }));
           const raster = await renderPageToRaster(doc, pageIndex, 2600, controller.signal);
           if (controller.signal.aborted) throw new DOMException("cancelled", "AbortError");
           const ocr = await engine.recognize(
@@ -130,14 +131,17 @@ export function useEditorOcr() {
               progress(
                 i,
                 p.progress,
-                `${STATUS_LABELS[p.status] ?? p.status} · page ${pageIndex + 1}`,
+                tr("{label} · page {n}", {
+                  label: STATUS_LABELS[p.status] ?? p.status,
+                  n: pageIndex + 1,
+                }),
               ),
           );
           if (controller.signal.aborted) throw new DOMException("cancelled", "AbortError");
           results[pageIndex] = ocr;
           inputs.push({ pageIndex, ocr, imageWidth: raster.width, imageHeight: raster.height });
         }
-        progress(pages.length - 1, 1, "Écriture de la couche de texte…");
+        progress(pages.length - 1, 1, tr("Écriture de la couche de texte…"));
         const layer = await addOcrLayer(bytes, inputs);
         if (controller.signal.aborted) throw new DOMException("cancelled", "AbortError");
         let chars = 0;
@@ -167,7 +171,8 @@ export function useEditorOcr() {
         }
         setState({
           status: "error",
-          message: error instanceof Error ? error.message : "La reconnaissance du texte a échoué.",
+          message:
+            error instanceof Error ? error.message : tr("La reconnaissance du texte a échoué."),
         });
         return null;
       } finally {

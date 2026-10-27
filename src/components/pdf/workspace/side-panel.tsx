@@ -16,15 +16,16 @@ import type { DocumentDiagnosis } from "@/lib/pdf/browser/diagnose";
 import { ocrLanguages, type OcrLanguage } from "@/lib/ocr/types";
 import { formatBytes } from "@/lib/files/format";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 import type { EditorOcrState, OcrLayerInfo } from "./use-editor-ocr";
 import { SHORTCUTS, type EditorPanel } from "./types";
 
 const PANEL_TITLES: Record<EditorPanel, string> = {
-  ocr: "Reconnaissance de texte (OCR)",
-  document: "Document",
-  history: "Historique",
-  shortcuts: "Raccourcis clavier",
-  search: "Rechercher dans le document",
+  ocr: tr("Reconnaissance de texte (OCR)"),
+  document: tr("Document"),
+  history: tr("Historique"),
+  shortcuts: tr("Raccourcis clavier"),
+  search: tr("Rechercher dans le document"),
 };
 
 /** Shell of the right-hand panels: one at a time, closable, full width on small screens. */
@@ -48,7 +49,7 @@ export function SidePanel({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fermer le panneau"
+          aria-label={tr("Fermer le panneau")}
           className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
           data-testid="side-panel-close"
         >
@@ -97,20 +98,29 @@ export function OcrPanel({
       {diagnosis ? (
         <p className="text-muted-foreground">
           {diagnosis.kind === "scanned" &&
-            "Ce document est un scan : ses pages sont des images, sans texte sélectionnable."}
+            tr("Ce document est un scan : ses pages sont des images, sans texte sélectionnable.")}
           {diagnosis.kind === "mixed" &&
-            `${scanned.length} page(s) sur ${pageCount} sont des images sans texte sélectionnable.`}
+            tr("{n} page(s) sur {total} sont des images sans texte sélectionnable.", {
+              n: scanned.length,
+              total: pageCount,
+            })}
           {diagnosis.kind === "native" &&
             (diagnosis.ocrLayerPages > 0
-              ? "Ce document contient déjà une couche de texte reconnu (OCR)."
-              : "Ce document contient du texte natif : l'OCR n'est utile que pour des pages images.")}
-          {diagnosis.kind === "empty" && "Aucun texte ni image détectés sur les pages analysées."}
-          {diagnosis.sampled ? " Seul un échantillon de pages a été analysé (document long)." : ""}
+              ? tr("Ce document contient déjà une couche de texte reconnu (OCR).")
+              : tr(
+                  "Ce document contient du texte natif : l'OCR n'est utile que pour des pages images.",
+                ))}
+          {diagnosis.kind === "empty" &&
+            tr("Aucun texte ni image détectés sur les pages analysées.")}
+          {diagnosis.sampled
+            ? " " + tr("Seul un échantillon de pages a été analysé (document long).")
+            : ""}
         </p>
       ) : (
         <p className="text-muted-foreground">
-          Le document n&apos;a pas pu être analysé ; vous pouvez lancer l&apos;OCR sur toutes les
-          pages.
+          {tr(
+            "Le document n'a pas pu être analysé ; vous pouvez lancer l'OCR sur toutes les pages.",
+          )}
         </p>
       )}
 
@@ -120,18 +130,27 @@ export function OcrPanel({
           data-testid="ocr-layer-summary"
         >
           <p className="flex items-center gap-2 font-medium">
-            <CheckCircle2 className="size-4 text-success" aria-hidden="true" /> OCR terminé
+            <CheckCircle2 className="size-4 text-success" aria-hidden="true" /> {tr("OCR terminé")}
           </p>
           <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground">
             <li>
-              {layer.pages.length} page{layer.pages.length > 1 ? "s" : ""} reconnue
-              {layer.pages.length > 1 ? "s" : ""} · {layer.words} mot{layer.words > 1 ? "s" : ""}
+              {layer.pages.length > 1
+                ? tr("{n} pages reconnues", { n: layer.pages.length })
+                : tr("{n} page reconnue", { n: layer.pages.length })}{" "}
+              ·{" "}
+              {layer.words > 1
+                ? tr("{n} mots", { n: layer.words })
+                : tr("{n} mot", { n: layer.words })}
             </li>
             <li>
-              Langue : {ocrLanguages.find((l) => l.id === layer.language)?.label ?? layer.language}
+              {tr("Langue : {lang}", {
+                lang: tr(
+                  ocrLanguages.find((l) => l.id === layer.language)?.label ?? layer.language,
+                ),
+              })}
             </li>
             <li>
-              Qualité estimée :{" "}
+              {tr("Qualité estimée :")}{" "}
               <span
                 className={cn(
                   "font-medium",
@@ -144,13 +163,15 @@ export function OcrPanel({
               >
                 {layer.confidence} %
               </span>
-              {layer.confidence < 80 ? " — vérifiez le texte avec « Modifier le texte »" : ""}
+              {layer.confidence < 80
+                ? " — " + tr("vérifiez le texte avec « Modifier le texte »")
+                : ""}
             </li>
           </ul>
           <p className="mt-2 text-xs text-muted-foreground">
-            Le texte reconnu est une couche invisible alignée sur l&apos;image (recherche, copie,
-            correction). L&apos;image d&apos;origine est conservée ; l&apos;éditeur ne reproduit pas
-            la police du scan.
+            {tr(
+              "Le texte reconnu est une couche invisible alignée sur l'image (recherche, copie, correction). L'image d'origine est conservée ; l'éditeur ne reproduit pas la police du scan.",
+            )}
           </p>
           <Button
             type="button"
@@ -160,7 +181,7 @@ export function OcrPanel({
             onClick={onRevert}
             data-testid="ocr-revert"
           >
-            Revenir au document sans OCR
+            {tr("Revenir au document sans OCR")}
           </Button>
         </div>
       ) : null}
@@ -169,13 +190,16 @@ export function OcrPanel({
         <div className="space-y-2" role="status" aria-live="polite" data-testid="ocr-progress">
           <p className="flex items-center gap-2">
             <Loader2 className="size-4 animate-spin text-link" aria-hidden="true" />
-            Page {Math.min(state.current + 1, state.pages.length)} sur {state.pages.length}
+            {tr("Page {n} sur {total}", {
+              n: Math.min(state.current + 1, state.pages.length),
+              total: state.pages.length,
+            })}
           </p>
           <Progress
             value={Math.round(
               ((state.current + state.pageProgress) / Math.max(1, state.pages.length)) * 100,
             )}
-            label="Progression de l'OCR"
+            label={tr("Progression de l'OCR")}
           />
           <p className="text-xs text-muted-foreground">{state.label}</p>
           <Button
@@ -185,13 +209,13 @@ export function OcrPanel({
             onClick={onCancel}
             data-testid="ocr-cancel"
           >
-            Interrompre
+            {tr("Interrompre")}
           </Button>
         </div>
       ) : (
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label htmlFor="editor-ocr-lang">Langue du document</Label>
+            <Label htmlFor="editor-ocr-lang">{tr("Langue du document")}</Label>
             <Select value={language} onValueChange={(v) => onLanguage(v as OcrLanguage)}>
               <SelectTrigger id="editor-ocr-lang" className="h-9">
                 <SelectValue />
@@ -199,14 +223,14 @@ export function OcrPanel({
               <SelectContent>
                 {ocrLanguages.map((l) => (
                   <SelectItem key={l.id} value={l.id}>
-                    {l.label}
+                    {tr(l.label)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <fieldset className="space-y-1.5">
-            <legend className="text-sm font-medium">Pages à reconnaître</legend>
+            <legend className="text-sm font-medium">{tr("Pages à reconnaître")}</legend>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="radio"
@@ -216,7 +240,7 @@ export function OcrPanel({
                 disabled={scanned.length === 0}
                 className="accent-primary"
               />
-              Pages sans texte ({scanned.length})
+              {tr("Pages sans texte ({n})", { n: scanned.length })}
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -226,7 +250,7 @@ export function OcrPanel({
                 onChange={() => onScope("all")}
                 className="accent-primary"
               />
-              Toutes les pages ({pageCount})
+              {tr("Toutes les pages ({n})", { n: pageCount })}
             </label>
           </fieldset>
           {state.status === "error" ? (
@@ -237,7 +261,7 @@ export function OcrPanel({
           ) : null}
           {state.status === "cancelled" ? (
             <p className="text-sm text-muted-foreground">
-              OCR interrompu : le document est inchangé.
+              {tr("OCR interrompu : le document est inchangé.")}
             </p>
           ) : null}
           <Button
@@ -247,12 +271,16 @@ export function OcrPanel({
             className="w-full"
             data-testid="ocr-run"
           >
-            <ScanText aria-hidden="true" /> {layer ? "Relancer l'OCR" : "Lancer l'OCR"} (
-            {targetCount} page{targetCount > 1 ? "s" : ""})
+            <ScanText aria-hidden="true" /> {layer ? tr("Relancer l'OCR") : tr("Lancer l'OCR")} (
+            {targetCount > 1
+              ? tr("{n} pages", { n: targetCount })
+              : tr("{n} page", { n: targetCount })}
+            )
           </Button>
           <p className="text-xs text-muted-foreground">
-            Moteur Tesseract exécuté dans votre navigateur (≈ 15 Mo chargés une fois) ; comptez
-            quelques secondes par page. Rien n&apos;est envoyé sur un serveur.
+            {tr(
+              "Moteur Tesseract exécuté dans votre navigateur (≈ 15 Mo chargés une fois) ; comptez quelques secondes par page. Rien n'est envoyé sur un serveur.",
+            )}
           </p>
         </div>
       )}
@@ -291,28 +319,42 @@ export function DocumentPanel({
   );
   return (
     <dl data-testid="document-panel">
-      {row("Fichier", <span className="break-all">{fileName}</span>)}
-      {row("Taille", formatBytes(size))}
-      {row("Pages", pageCount)}
+      {row(tr("Fichier"), <span className="break-all">{fileName}</span>)}
+      {row(tr("Taille"), formatBytes(size))}
+      {row(tr("Pages"), pageCount)}
       {row(
-        "Contenu",
+        tr("Contenu"),
         diagnosis
           ? {
-              native: diagnosis.ocrLayerPages > 0 ? "Texte reconnu (OCR)" : "Texte natif",
-              mixed: `Mixte : ${diagnosis.textPages} avec texte, ${diagnosis.scannedPages} image(s)`,
-              scanned: "Scanné (images)",
-              empty: "Pages vides",
+              native: diagnosis.ocrLayerPages > 0 ? tr("Texte reconnu (OCR)") : tr("Texte natif"),
+              mixed: tr("Mixte : {text} avec texte, {scanned} image(s)", {
+                text: diagnosis.textPages,
+                scanned: diagnosis.scannedPages,
+              }),
+              scanned: tr("Scanné (images)"),
+              empty: tr("Pages vides"),
             }[diagnosis.kind]
-          : "Non analysé",
+          : tr("Non analysé"),
       )}
-      {unlocked ? row("Protection", "Mot de passe retiré pour l'édition (copie locale)") : null}
-      {layer ? row("OCR", `${layer.pages.length} page(s), qualité ${layer.confidence} %`) : null}
-      {row("Textes modifiés", textEdits)}
-      {row("Éléments ajoutés", annotations)}
-      {planSummary ? row("Pages", planSummary) : null}
+      {unlocked
+        ? row(tr("Protection"), tr("Mot de passe retiré pour l'édition (copie locale)"))
+        : null}
+      {layer
+        ? row(
+            "OCR",
+            tr("{n} page(s), qualité {confidence} %", {
+              n: layer.pages.length,
+              confidence: layer.confidence,
+            }),
+          )
+        : null}
+      {row(tr("Textes modifiés"), textEdits)}
+      {row(tr("Éléments ajoutés"), annotations)}
+      {planSummary ? row(tr("Pages"), planSummary) : null}
       <p className="pt-3 text-xs text-muted-foreground">
-        Le fichier d&apos;origine n&apos;est jamais modifié : le PDF téléchargé est une nouvelle
-        copie.
+        {tr(
+          "Le fichier d'origine n'est jamais modifié : le PDF téléchargé est une nouvelle copie.",
+        )}
       </p>
     </dl>
   );
@@ -336,7 +378,7 @@ export function HistoryPanel({ steps, futureCount }: { steps: string[]; futureCo
       ))}
       {futureCount > 0 ? (
         <li className="px-2 pt-2 text-xs text-muted-foreground">
-          {futureCount} étape(s) annulée(s) : Rétablir pour les reprendre.
+          {tr("{n} étape(s) annulée(s) : Rétablir pour les reprendre.", { n: futureCount })}
         </li>
       ) : null}
     </ol>
@@ -402,13 +444,13 @@ export function SearchPanel({
   return (
     <div className="space-y-3" data-testid="search-panel">
       <div className="space-y-1.5">
-        <Label htmlFor="editor-search">Rechercher</Label>
+        <Label htmlFor="editor-search">{tr("Rechercher")}</Label>
         <input
           id="editor-search"
           type="search"
           value={query}
           onChange={(e) => onQuery(e.target.value)}
-          placeholder="Mot ou expression"
+          placeholder={tr("Mot ou expression")}
           autoFocus
           className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
           data-testid="search-input"
@@ -416,7 +458,7 @@ export function SearchPanel({
       </div>
       {canReplace ? (
         <div className="space-y-1.5">
-          <Label htmlFor="editor-replace">Remplacer par</Label>
+          <Label htmlFor="editor-replace">{tr("Remplacer par")}</Label>
           <input
             id="editor-replace"
             type="text"
@@ -426,9 +468,9 @@ export function SearchPanel({
             data-testid="replace-input"
           />
           <p className="text-xs text-muted-foreground">
-            Le remplacement réécrit le passage dans la page comme « Modifier le texte » (même police
-            quand c&apos;est possible, sans reflux). Les passages scannés ou non modifiables sont
-            signalés.
+            {tr(
+              "Le remplacement réécrit le passage dans la page comme « Modifier le texte » (même police quand c'est possible, sans reflux). Les passages scannés ou non modifiables sont signalés.",
+            )}
           </p>
           <Button
             type="button"
@@ -438,7 +480,7 @@ export function SearchPanel({
             disabled={results.length === 0 || replacement.length === 0}
             data-testid="replace-all"
           >
-            Remplacer partout ({results.length})
+            {tr("Remplacer partout ({n})", { n: results.length })}
           </Button>
         </div>
       ) : null}
@@ -449,16 +491,21 @@ export function SearchPanel({
         data-testid="search-status"
       >
         {searching
-          ? `Recherche… ${progress ? `page ${progress.done} / ${progress.total}` : ""}`
+          ? `${tr("Recherche…")} ${progress ? tr("page {done} / {total}", { done: progress.done, total: progress.total }) : ""}`
           : query.trim().length === 0
-            ? "Saisissez un texte à chercher. La recherche ignore la casse et les accents ; un mot coupé entre deux fragments n'est pas trouvé."
-            : `${results.length} résultat${results.length > 1 ? "s" : ""}${results.length >= 500 ? " (affichage limité)" : ""}`}
+            ? tr(
+                "Saisissez un texte à chercher. La recherche ignore la casse et les accents ; un mot coupé entre deux fragments n'est pas trouvé.",
+              )
+            : (results.length > 1
+                ? tr("{n} résultats", { n: results.length })
+                : tr("{n} résultat", { n: results.length })) +
+              (results.length >= 500 ? " " + tr("(affichage limité)") : "")}
       </p>
       <ol className="space-y-1" data-testid="search-results">
         {[...byPage.entries()].map(([pageIndex, indices]) => (
           <li key={pageIndex}>
             <p className="px-1 pt-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Page {pageIndex + 1}
+              {tr("Page {n}", { n: pageIndex + 1 })}
             </p>
             <ul className="space-y-0.5">
               {indices.map((i) => {
@@ -494,10 +541,10 @@ export function SearchPanel({
                         onClick={() => onReplaceOne(i)}
                         disabled={replacement.length === 0}
                         className="shrink-0 rounded-md px-1.5 py-1 text-[11px] text-link hover:bg-muted disabled:opacity-40"
-                        title="Remplacer ce passage"
+                        title={tr("Remplacer ce passage")}
                         data-testid="replace-one"
                       >
-                        Remplacer
+                        {tr("Remplacer")}
                       </button>
                     ) : null}
                   </li>

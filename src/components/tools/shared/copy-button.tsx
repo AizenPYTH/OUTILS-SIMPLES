@@ -4,10 +4,11 @@ import * as React from "react";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { Button, type ButtonProps } from "@/components/ui/button";
+import { tr } from "@/lib/i18n/messages";
 
 export function CopyButton({
   text,
-  label = "Copier",
+  label,
   ...props
 }: { text: string; label?: string } & Omit<ButtonProps, "onClick" | "children">) {
   const [copied, setCopied] = React.useState(false);
@@ -15,11 +16,13 @@ export function CopyButton({
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      toast.success("Copié dans le presse-papiers");
+      toast.success(tr("Copié dans le presse-papiers"));
       window.setTimeout(() => setCopied(false), 1500);
     } catch {
       toast.error(
-        "Impossible d'accéder au presse-papiers. Sélectionnez le texte et copiez-le manuellement.",
+        tr(
+          "Impossible d'accéder au presse-papiers. Sélectionnez le texte et copiez-le manuellement.",
+        ),
       );
     }
   };
@@ -34,7 +37,7 @@ export function CopyButton({
       data-testid="copy-button"
     >
       {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-      {copied ? "Copié" : label}
+      {copied ? tr("Copié") : (label ?? tr("Copier"))}
     </Button>
   );
 }

@@ -11,6 +11,7 @@ import {
 } from "@/components/pdf/hooks/use-pdf-document";
 import { getToolById, type ToolDefinition } from "@/lib/tools";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 interface SingleFileToolProps {
   toolId: string;
@@ -21,9 +22,9 @@ interface SingleFileToolProps {
 
 const PHASE_LABELS: Record<LoadPhase, string> = {
   reading: t.upload.reading,
-  opening: "Ouverture du document…",
-  unlocking: "Déverrouillage du document…",
-  analysing: "Analyse de votre document…",
+  opening: tr("Ouverture du document…"),
+  unlocking: tr("Déverrouillage du document…"),
+  analysing: tr("Analyse de votre document…"),
 };
 
 /** Shared idle → loading → password? → ready/error flow for every single-document tool. */
@@ -65,7 +66,16 @@ function SingleFileToolInner({
     const progress = state.progress;
     const label =
       progress && progress.total > 0
-        ? `${PHASE_LABELS[state.phase]} ${state.phase === "analysing" ? "page" : "pages"} ${progress.done} / ${progress.total}`
+        ? tr(
+            state.phase === "analysing"
+              ? "{label} page {done} / {total}"
+              : "{label} pages {done} / {total}",
+            {
+              label: PHASE_LABELS[state.phase],
+              done: progress.done,
+              total: progress.total,
+            },
+          )
         : PHASE_LABELS[state.phase];
     return (
       <BusyPanel

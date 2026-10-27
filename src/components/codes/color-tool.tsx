@@ -28,6 +28,8 @@ import { decodeImage, getRgba, releaseCanvas, resizeCanvas } from "@/lib/images/
 import { extractPalette, type PaletteColor } from "@/lib/images/pixels";
 import { formatBytes } from "@/lib/files/format";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
+import { currentLanguageTag } from "@/lib/i18n";
 
 function Swatch({ rgb, label }: { rgb: Rgb; label?: string }) {
   const hex = rgbToHex(rgb);
@@ -42,7 +44,7 @@ function Swatch({ rgb, label }: { rgb: Rgb; label?: string }) {
         {label ? <p className="truncate text-xs text-muted-foreground">{label}</p> : null}
         <p className="font-mono">{hex}</p>
       </div>
-      <CopyButton text={hex} label="Copier" />
+      <CopyButton text={hex} label={tr("Copier")} />
     </div>
   );
 }
@@ -69,7 +71,7 @@ export function ColorTool() {
       <ToolPanel className="space-y-3">
         <div className="grid gap-3 sm:grid-cols-[auto_1fr]">
           <div className="space-y-1">
-            <Label htmlFor="color-picker">Pipette</Label>
+            <Label htmlFor="color-picker">{tr("Pipette")}</Label>
             <input
               id="color-picker"
               type="color"
@@ -79,7 +81,7 @@ export function ColorTool() {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="color-input">Couleur (HEX, rgb(), hsl() ou nom CSS)</Label>
+            <Label htmlFor="color-input">{tr("Couleur (HEX, rgb(), hsl() ou nom CSS)")}</Label>
             <Input
               id="color-input"
               value={input}
@@ -92,7 +94,9 @@ export function ColorTool() {
         </div>
         {!rgb && input.trim() ? (
           <Alert variant="destructive">
-            Couleur non reconnue. Exemples : #5146e5, rgb(81, 70, 229), hsl(244, 75%, 59%), tomato.
+            {tr(
+              "Couleur non reconnue. Exemples : #5146e5, rgb(81, 70, 229), hsl(244, 75%, 59%), tomato.",
+            )}
           </Alert>
         ) : null}
       </ToolPanel>
@@ -117,24 +121,24 @@ export function ColorTool() {
                     >
                       {value}
                     </dd>
-                    <CopyButton text={value} label="Copier" />
+                    <CopyButton text={value} label={tr("Copier")} />
                   </div>
                 ))}
               </dl>
             </ToolPanel>
           </div>
           <ToolPanel className="space-y-3">
-            <p className="text-sm font-medium">Nuances et complémentaire</p>
+            <p className="text-sm font-medium">{tr("Nuances et complémentaire")}</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {colorVariants(rgb).map((v) => (
-                <Swatch key={v.label} rgb={v.rgb} label={v.label} />
+                <Swatch key={v.label} rgb={v.rgb} label={tr(v.label)} />
               ))}
             </div>
           </ToolPanel>
           <ToolPanel className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
               <div className="space-y-1">
-                <Label htmlFor="color-bg">Contraste avec un fond (WCAG 2.1)</Label>
+                <Label htmlFor="color-bg">{tr("Contraste avec un fond (WCAG 2.1)")}</Label>
                 <Input
                   id="color-bg"
                   value={background}
@@ -145,7 +149,7 @@ export function ColorTool() {
               </div>
               <input
                 type="color"
-                aria-label="Choisir la couleur de fond"
+                aria-label={tr("Choisir la couleur de fond")}
                 value={bg ? rgbToHex(bg) : "#ffffff"}
                 onChange={(e) => setBackground(e.target.value)}
                 className="h-10 w-16 cursor-pointer rounded-md border border-input bg-surface p-1"
@@ -157,15 +161,17 @@ export function ColorTool() {
                   className="flex items-center justify-center rounded-md p-4 text-lg font-semibold"
                   style={{ backgroundColor: rgbToHex(bg), color: rgbToHex(rgb) }}
                 >
-                  Exemple de texte · ratio {contrast.ratio.toLocaleString("fr-FR")}:1
+                  {tr("Exemple de texte · ratio {ratio}:1", {
+                    ratio: contrast.ratio.toLocaleString(currentLanguageTag()),
+                  })}
                 </div>
                 <ul className="space-y-1 text-sm" data-testid="color-contrast">
                   {[
-                    ["AA texte normal (≥ 4,5)", contrast.aaNormal],
-                    ["AA grand texte (≥ 3)", contrast.aaLarge],
-                    ["AAA texte normal (≥ 7)", contrast.aaaNormal],
-                    ["AAA grand texte (≥ 4,5)", contrast.aaaLarge],
-                    ["Composants d'interface (≥ 3)", contrast.uiComponents],
+                    [tr("AA texte normal (≥ 4,5)"), contrast.aaNormal],
+                    [tr("AA grand texte (≥ 3)"), contrast.aaLarge],
+                    [tr("AAA texte normal (≥ 7)"), contrast.aaaNormal],
+                    [tr("AAA grand texte (≥ 4,5)"), contrast.aaaLarge],
+                    [tr("Composants d'interface (≥ 3)"), contrast.uiComponents],
                   ].map(([label, ok]) => (
                     <li key={label as string} className="flex items-center gap-2">
                       {ok ? (
@@ -174,7 +180,10 @@ export function ColorTool() {
                         <XCircle className="size-4 text-destructive" aria-hidden="true" />
                       )}
                       <span>
-                        {label as string} : {ok ? "conforme" : "insuffisant"}
+                        {tr("{label} : {status}", {
+                          label: label as string,
+                          status: tr(ok ? "conforme" : "insuffisant"),
+                        })}
                       </span>
                     </li>
                   ))}
@@ -222,7 +231,7 @@ export function ImagePaletteTool() {
       setPalette(compute(decoded.bitmap, count));
       track("tool_success", { tool: "image-palette" });
     } catch {
-      toast.error("Image illisible.");
+      toast.error(tr("Image illisible."));
     }
   };
 
@@ -240,9 +249,9 @@ export function ImagePaletteTool() {
         accept="image/*"
         validate={validateImageFile}
         compact={!!file}
-        title="Déposez une image pour en extraire les couleurs"
-        hint={`JPG, PNG, WebP · ${formatBytes(IMAGE_MAX_SIZE)} max`}
-        buttonLabel="Choisir une image"
+        title={tr("Déposez une image pour en extraire les couleurs")}
+        hint={tr("JPG, PNG, WebP · {size} max", { size: formatBytes(IMAGE_MAX_SIZE) })}
+        buttonLabel={tr("Choisir une image")}
         testId="palette-dropzone"
       />
       {file && palette ? (
@@ -256,7 +265,8 @@ export function ImagePaletteTool() {
           <ToolPanel className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
               <Label htmlFor="palette-count" className="flex items-center gap-2">
-                <Pipette className="size-4" aria-hidden="true" /> Nombre de couleurs : {count}
+                <Pipette className="size-4" aria-hidden="true" />{" "}
+                {tr("Nombre de couleurs : {n}", { n: count })}
               </Label>
               <input
                 id="palette-count"
@@ -282,13 +292,13 @@ export function ImagePaletteTool() {
                       rgb({c.r}, {c.g}, {c.b}) · {Math.round(c.share * 100)} %
                     </p>
                   </div>
-                  <CopyButton text={c.hex} label="Copier" />
+                  <CopyButton text={c.hex} label={tr("Copier")} />
                 </li>
               ))}
             </ul>
             <TextOutputPanel
               id="palette-css"
-              label="Variables CSS"
+              label={tr("Variables CSS")}
               value={css}
               filename="palette.css"
               mimeType="text/css"
@@ -301,7 +311,7 @@ export function ImagePaletteTool() {
               size="sm"
               onClick={() => bitmapRef.current && setPalette(compute(bitmapRef.current, count))}
             >
-              Recalculer
+              {tr("Recalculer")}
             </Button>
           </ToolPanel>
         </div>

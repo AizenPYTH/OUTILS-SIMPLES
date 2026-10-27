@@ -25,6 +25,7 @@ import {
 } from "@/lib/pdf/page-ranges";
 import { splitPdf, type SplitMode, type SplitOutput } from "@/lib/pdf/operations/pages";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-split";
 type Strategy = "custom" | "every-n" | "each-page";
@@ -159,16 +160,24 @@ function SplitWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
         <div className="space-y-5">
           <Segmented
-            label="Mode de découpage"
+            label={tr("Mode de découpage")}
             value={strategy}
             onChange={setStrategy}
             options={[
-              { value: "custom", label: "Plages personnalisées", description: "ex. 1-3, 5, 8-10" },
-              { value: "every-n", label: "Toutes les N pages", description: "Découpage régulier" },
+              {
+                value: "custom",
+                label: tr("Plages personnalisées"),
+                description: tr("ex. 1-3, 5, 8-10"),
+              },
+              {
+                value: "every-n",
+                label: tr("Toutes les N pages"),
+                description: tr("Découpage régulier"),
+              },
               {
                 value: "each-page",
-                label: "Une page par fichier",
-                description: `${pdf.pageCount} fichiers`,
+                label: tr("Une page par fichier"),
+                description: tr("{n} fichiers", { n: pdf.pageCount }),
               },
             ]}
           />
@@ -184,20 +193,20 @@ function SplitWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
                 }}
               />
               <Segmented
-                label="Fichiers produits"
+                label={tr("Fichiers produits")}
                 value={mode}
                 onChange={setMode}
                 className="sm:grid-cols-2"
                 options={[
                   {
                     value: "one-file-per-range",
-                    label: "Un fichier par plage",
-                    description: "Chaque plage devient un PDF",
+                    label: tr("Un fichier par plage"),
+                    description: tr("Chaque plage devient un PDF"),
                   },
                   {
                     value: "single-file",
-                    label: "Un seul fichier",
-                    description: "Pages retenues, sans doublon",
+                    label: tr("Un seul fichier"),
+                    description: tr("Pages retenues, sans doublon"),
                   },
                 ]}
               />
@@ -205,7 +214,7 @@ function SplitWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           ) : null}
           {strategy === "every-n" ? (
             <div className="max-w-xs space-y-1.5">
-              <Label htmlFor="chunk-size">Pages par fichier</Label>
+              <Label htmlFor="chunk-size">{tr("Pages par fichier")}</Label>
               <Input
                 id="chunk-size"
                 type="number"
@@ -228,11 +237,11 @@ function SplitWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
             data-testid="split-button"
           >
             <Scissors aria-hidden="true" />
-            Diviser le PDF
+            {tr("Diviser le PDF")}
           </Button>
         </div>
         <aside className="hidden lg:block">
-          <p className="mb-2 text-sm font-medium">Aperçu</p>
+          <p className="mb-2 text-sm font-medium">{tr("Aperçu")}</p>
           <div className="grid grid-cols-2 gap-2">
             {pdf.pages.slice(0, 6).map((page) => (
               <div
@@ -248,7 +257,7 @@ function SplitWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           </div>
           {pdf.pageCount > 6 ? (
             <p className="mt-2 text-xs text-muted-foreground">
-              … et {pdf.pageCount - 6} autres pages
+              {tr("… et {n} autres pages", { n: pdf.pageCount - 6 })}
             </p>
           ) : null}
         </aside>
@@ -275,22 +284,27 @@ function OutputPreview({
     ).sort((a, b) => a - b);
     return (
       <p className="rounded-md bg-muted px-3 py-2 text-sm" data-testid="split-preview">
-        1 fichier contenant {t.result.pages(indices.length)} sur {pageCount} : pages{" "}
-        {formatPageIndices(indices)}
+        {tr("1 fichier contenant {pages} sur {total} : pages {list}", {
+          pages: t.result.pages(indices.length),
+          total: pageCount,
+          list: formatPageIndices(indices),
+        })}
       </p>
     );
   }
   const shown = ranges.slice(0, 12);
   return (
     <div className="rounded-md bg-muted px-3 py-2 text-sm" data-testid="split-preview">
-      <p className="font-medium">{ranges.length} fichier(s) à produire</p>
+      <p className="font-medium">{tr("{n} fichier(s) à produire", { n: ranges.length })}</p>
       <ul className="mt-1 flex flex-wrap gap-1.5">
         {shown.map((r, i) => (
           <li
             key={i}
             className="rounded-full border border-border bg-surface px-2 py-0.5 text-xs tabular-nums"
           >
-            {r.from === r.to ? `p. ${r.from}` : `p. ${r.from}-${r.to}`}
+            {r.from === r.to
+              ? tr("p. {n}", { n: r.from })
+              : tr("p. {from}-{to}", { from: r.from, to: r.to })}
           </li>
         ))}
         {ranges.length > shown.length ? (

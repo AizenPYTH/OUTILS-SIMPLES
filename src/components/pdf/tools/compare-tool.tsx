@@ -23,6 +23,7 @@ import { formatBytes } from "@/lib/files/format";
 import { getToolById } from "@/lib/tools";
 import { track } from "@/lib/analytics/events";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-compare";
 
@@ -103,7 +104,10 @@ export function ComparePdfTool() {
         progress={{
           current: 0,
           total: 0,
-          label: `Lecture du document ${loading === "a" ? "original" : "modifié"}…`,
+          label:
+            loading === "a"
+              ? tr("Lecture du document original…")
+              : tr("Lecture du document modifié…"),
         }}
       />
     );
@@ -112,14 +116,14 @@ export function ComparePdfTool() {
     return (
       <div className="grid gap-4 md:grid-cols-2" data-testid="compare-dropzones">
         <Slot
-          label="Document original"
+          label={tr("Document original")}
           loaded={a}
           onFile={(f) => void load("a", f)}
           maxBytes={maxBytes}
           testId="compare-a"
         />
         <Slot
-          label="Document modifié"
+          label={tr("Document modifié")}
           loaded={b}
           onFile={(f) => void load("b", f)}
           maxBytes={maxBytes}
@@ -137,59 +141,67 @@ export function ComparePdfTool() {
         {[a, b].map((doc, i) => (
           <div key={i} className="rounded-[14px] border border-border bg-surface px-4 py-3 text-sm">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
-              {i === 0 ? "Original" : "Modifié"}
+              {i === 0 ? tr("Original") : tr("Modifié")}
             </p>
             <p className="truncate font-medium" title={doc.file.name}>
               {doc.file.name}
             </p>
             <p className="text-muted-foreground">
-              {doc.pageCount} page(s) · {formatBytes(doc.file.size)}
-              {doc.modified ? ` · modifié le ${doc.modified.slice(0, 10)}` : ""}
+              {tr("{n} page(s)", { n: doc.pageCount })} · {formatBytes(doc.file.size)}
+              {doc.modified
+                ? ` · ${tr("modifié le {date}", { date: doc.modified.slice(0, 10) })}`
+                : ""}
             </p>
           </div>
         ))}
       </div>
       {result.noText ? (
-        <Alert variant="warning" title="Aucun texte à comparer">
-          Les deux documents ne contiennent pas de texte sélectionnable (scans). Passez-les
-          d&apos;abord dans l&apos;outil OCR, ou comparez-les visuellement.
+        <Alert variant="warning" title={tr("Aucun texte à comparer")}>
+          {tr(
+            "Les deux documents ne contiennent pas de texte sélectionnable (scans). Passez-les d'abord dans l'outil OCR, ou comparez-les visuellement.",
+          )}
         </Alert>
       ) : null}
       <StatGrid
         items={[
-          { label: "Pages comparées", value: result.pages.length },
-          { label: "Pages modifiées", value: result.changedPages },
+          { label: tr("Pages comparées"), value: result.pages.length },
+          { label: tr("Pages modifiées"), value: result.changedPages },
           {
-            label: "Ajouts",
+            label: tr("Ajouts"),
             value: <span className="text-success-foreground">+{result.totalAdded}</span>,
             hint:
               mode === "lines"
-                ? "lignes"
+                ? tr("lignes")
                 : mode === "words"
-                  ? "caractères (mots ajoutés)"
-                  : "caractères",
+                  ? tr("caractères (mots ajoutés)")
+                  : tr("caractères"),
           },
           {
-            label: "Suppressions",
+            label: tr("Suppressions"),
             value: <span className="text-destructive">−{result.totalRemoved}</span>,
           },
         ]}
       />
       {result.identical ? (
         <Alert variant="success" data-testid="compare-identical">
-          Le texte des deux documents est identique
-          {a.pageCount !== b.pageCount ? ", mais le nombre de pages diffère" : ""}. Les images, la
-          mise en page et les polices ne sont pas comparées.
+          {a.pageCount !== b.pageCount
+            ? tr("Le texte des deux documents est identique, mais le nombre de pages diffère.")
+            : tr("Le texte des deux documents est identique.")}{" "}
+          {tr("Les images, la mise en page et les polices ne sont pas comparées.")}
         </Alert>
       ) : null}
       <Segmented
-        label="Mode de comparaison"
+        label={tr("Mode de comparaison")}
         value={view}
         onChange={setView}
         className="sm:grid-cols-2 sm:w-[420px]"
         options={[
-          { value: "text", label: "Texte", description: "Mots, lignes ou caractères" },
-          { value: "visual", label: "Visuel", description: "Rendu des pages pixel par pixel" },
+          { value: "text", label: tr("Texte"), description: tr("Mots, lignes ou caractères") },
+          {
+            value: "visual",
+            label: tr("Visuel"),
+            description: tr("Rendu des pages pixel par pixel"),
+          },
         ]}
       />
       {view === "visual" ? (
@@ -204,34 +216,34 @@ export function ComparePdfTool() {
       <ToolPanel className={cn("space-y-4", view !== "text" && "hidden")}>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <Segmented
-            label="Granularité"
+            label={tr("Granularité")}
             value={mode}
             onChange={setMode}
             className="sm:grid-cols-3 sm:w-[420px]"
             options={[
-              { value: "words", label: "Mots" },
-              { value: "lines", label: "Lignes" },
-              { value: "chars", label: "Caractères" },
+              { value: "words", label: tr("Mots") },
+              { value: "lines", label: tr("Lignes") },
+              { value: "chars", label: tr("Caractères") },
             ]}
           />
           <div className="flex flex-wrap items-center gap-3">
             <label className="flex items-center gap-2 text-sm">
               <Checkbox checked={onlyChanged} onCheckedChange={(v) => setOnlyChanged(v === true)} />{" "}
-              Pages modifiées seulement
+              {tr("Pages modifiées seulement")}
             </label>
             <DownloadTextButton
               text={compareReport(result, a.file.name, b.file.name)}
               filename="comparaison.txt"
-              label="Rapport (TXT)"
+              label={tr("Rapport (TXT)")}
               toolId={TOOL_ID}
             />
             <Button type="button" variant="outline" size="sm" onClick={reset}>
-              <RefreshCw aria-hidden="true" /> Autres documents
+              <RefreshCw aria-hidden="true" /> {tr("Autres documents")}
             </Button>
           </div>
         </div>
         {shown.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Aucune page modifiée.</p>
+          <p className="text-sm text-muted-foreground">{tr("Aucune page modifiée.")}</p>
         ) : null}
         <ol className="space-y-3" data-testid="compare-pages">
           {shown.map((page) => (
@@ -246,14 +258,14 @@ export function ComparePdfTool() {
             >
               <p className="mb-2 flex items-center gap-2 text-sm font-medium">
                 <ArrowLeftRight className="size-4 text-muted-foreground" aria-hidden="true" />
-                Page {page.pageIndex + 1}
+                {tr("Page {n}", { n: page.pageIndex + 1 })}
                 <span className="text-xs font-normal text-muted-foreground">
                   {page.status === "identical"
-                    ? "identique"
+                    ? tr("identique")
                     : page.status === "added"
-                      ? "ajoutée dans le document modifié"
+                      ? tr("ajoutée dans le document modifié")
                       : page.status === "removed"
-                        ? "absente du document modifié"
+                        ? tr("absente du document modifié")
                         : `+${page.added} / −${page.removed}`}
                 </span>
               </p>
@@ -303,7 +315,8 @@ function Slot({
             {loaded.file.name}
           </p>
           <p className="text-muted-foreground">
-            {loaded.pageCount} page(s) · {formatBytes(loaded.file.size)} · texte lu
+            {tr("{n} page(s)", { n: loaded.pageCount })} · {formatBytes(loaded.file.size)} ·{" "}
+            {tr("texte lu")}
           </p>
         </div>
       ) : (

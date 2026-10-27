@@ -3,18 +3,19 @@
 import * as React from "react";
 import { TextInputPanel, TextOutputPanel } from "@/components/tools/shared/text-io";
 import { changeCase, type CaseMode } from "@/lib/text/transform";
+import { tr } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 const modes: { id: CaseMode; label: string; example: string }[] = [
-  { id: "upper", label: "MAJUSCULES", example: "BONJOUR LE MONDE" },
-  { id: "lower", label: "minuscules", example: "bonjour le monde" },
-  { id: "sentence", label: "Phrase", example: "Bonjour le monde. Ça va ?" },
-  { id: "capitalize-words", label: "Chaque Mot", example: "Bonjour Le Monde" },
-  { id: "title", label: "Titre", example: "Bonjour le Monde" },
-  { id: "invert", label: "iNVERSER", example: "bONJOUR lE mONDE" },
-  { id: "snake", label: "snake_case", example: "bonjour_le_monde" },
-  { id: "kebab", label: "kebab-case", example: "bonjour-le-monde" },
-  { id: "camel", label: "camelCase", example: "bonjourLeMonde" },
+  { id: "upper", label: tr("MAJUSCULES"), example: tr("BONJOUR LE MONDE") },
+  { id: "lower", label: tr("minuscules"), example: tr("bonjour le monde") },
+  { id: "sentence", label: tr("Phrase"), example: tr("Bonjour le monde. Ça va ?") },
+  { id: "capitalize-words", label: tr("Chaque Mot"), example: tr("Bonjour Le Monde") },
+  { id: "title", label: tr("Titre"), example: tr("Bonjour le Monde") },
+  { id: "invert", label: tr("iNVERSER"), example: tr("bONJOUR lE mONDE") },
+  { id: "snake", label: "snake_case", example: tr("bonjour_le_monde") },
+  { id: "kebab", label: "kebab-case", example: tr("bonjour-le-monde") },
+  { id: "camel", label: "camelCase", example: tr("bonjourLeMonde") },
 ];
 
 export function CaseConverterTool() {
@@ -25,12 +26,16 @@ export function CaseConverterTool() {
     <div className="space-y-4">
       <TextInputPanel
         id="case-input"
-        label="Texte à convertir"
+        label={tr("Texte à convertir")}
         value={text}
         onChange={setText}
         rows={8}
       />
-      <div role="radiogroup" aria-label="Type de conversion" className="grid gap-2 sm:grid-cols-3">
+      <div
+        role="radiogroup"
+        aria-label={tr("Type de conversion")}
+        className="grid gap-2 sm:grid-cols-3"
+      >
         {modes.map((m) => (
           <button
             key={m.id}
@@ -53,7 +58,7 @@ export function CaseConverterTool() {
       </div>
       <TextOutputPanel
         id="case-output"
-        label="Résultat"
+        label={tr("Résultat")}
         value={output}
         filename="texte-converti.txt"
         rows={8}

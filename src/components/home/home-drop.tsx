@@ -5,14 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, FileUp, Loader2, X } from "lucide-react";
 import { ToolIcon } from "@/components/tools/tool-icon";
-import {
-  DETECT_HEAD_BYTES,
-  detectFileKind,
-  KIND_LABELS,
-  KIND_NOTES,
-  KIND_TOOLS,
-  type FileKind,
-} from "@/lib/files/detect";
+import { DETECT_HEAD_BYTES, detectFileKind, KIND_TOOLS, type FileKind } from "@/lib/files/detect";
+import { t } from "@/lib/i18n";
+import { localizedPath } from "@/lib/i18n/routes";
 import { formatBytes } from "@/lib/files/format";
 import { setHandoff } from "@/lib/files/handoff";
 import type { SlimTool } from "@/lib/tools/search-index";
@@ -34,6 +29,11 @@ interface Detected {
  * tool they pick (src/lib/files/handoff.ts). Nothing is read beyond 64 KiB
  * here and nothing leaves the browser.
  */
+function noteFor(kind: FileKind): string | null {
+  const notes = t.homeDrop.notes as Partial<Record<FileKind, string>>;
+  return notes[kind] ?? null;
+}
+
 export function HomeDrop({ tools }: HomeDropProps) {
   const router = useRouter();
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -60,14 +60,16 @@ export function HomeDrop({ tools }: HomeDropProps) {
   };
 
   const suggestions = detected
-    ? KIND_TOOLS[detected.kind].map((id) => tools[id]).filter((t): t is SlimTool => Boolean(t))
+    ? KIND_TOOLS[detected.kind]
+        .map((id) => tools[id])
+        .filter((tool): tool is SlimTool => Boolean(tool))
     : [];
 
   return (
     <div className="mx-auto max-w-2xl" data-testid="home-drop">
       <div
         role="group"
-        aria-label="Déposer un fichier pour trouver l'outil adapté"
+        aria-label={t.homeDrop.region}
         onDragOver={(e) => {
           e.preventDefault();
           setDragActive(true);
@@ -93,18 +95,13 @@ export function HomeDrop({ tools }: HomeDropProps) {
             if (file) void inspect(file);
           }}
           data-testid="home-drop-input"
-          aria-label="Choisir un fichier"
+          aria-label={t.homeDrop.chooseFile}
         />
         {!detected ? (
           <>
             <FileUp className="mx-auto size-8 text-primary" aria-hidden="true" />
-            <p className="mt-3 text-base font-semibold sm:text-lg">
-              Déposez un fichier ici, nous vous proposons les bons outils
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              PDF, image, photo HEIC, Word, Excel, CSV, Markdown ou texte · le fichier reste sur
-              votre appareil
-            </p>
+            <p className="mt-3 text-base font-semibold sm:text-lg">{t.homeDrop.title}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t.homeDrop.hint}</p>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
@@ -113,7 +110,7 @@ export function HomeDrop({ tools }: HomeDropProps) {
               data-testid="home-drop-browse"
             >
               {busy ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : null}
-              Choisir un fichier
+              {t.homeDrop.browse}
             </button>
           </>
         ) : (
@@ -122,7 +119,7 @@ export function HomeDrop({ tools }: HomeDropProps) {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{detected.file.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  <span data-testid="home-drop-kind">{KIND_LABELS[detected.kind]}</span> ·{" "}
+                  <span data-testid="home-drop-kind">{t.homeDrop.kinds[detected.kind]}</span> ·{" "}
                   {formatBytes(detected.file.size)}
                 </p>
               </div>
@@ -130,7 +127,7 @@ export function HomeDrop({ tools }: HomeDropProps) {
                 type="button"
                 onClick={() => setDetected(null)}
                 className="rounded-md p-1.5 text-muted-foreground hover:bg-muted"
-                aria-label="Retirer ce fichier"
+                aria-label={t.homeDrop.remove}
               >
                 <X className="size-4" aria-hidden="true" />
               </button>
@@ -168,17 +165,17 @@ export function HomeDrop({ tools }: HomeDropProps) {
                 ))}
               </ul>
             ) : null}
-            {KIND_NOTES[detected.kind] ? (
+            {noteFor(detected.kind) ? (
               <p className="mt-3 text-sm text-muted-foreground" role="status">
-                {KIND_NOTES[detected.kind]}
+                {noteFor(detected.kind)}
               </p>
             ) : null}
             {suggestions.length === 0 ? (
               <Link
-                href="/outils/"
+                href={localizedPath("/outils/")}
                 className="mt-2 inline-block text-sm font-medium text-link hover:underline"
               >
-                Parcourir tous les outils
+                {t.homeDrop.browseAll}
               </Link>
             ) : null}
           </div>

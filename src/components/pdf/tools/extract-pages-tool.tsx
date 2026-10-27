@@ -16,6 +16,7 @@ import { formatBytes } from "@/lib/files/format";
 import { formatPageIndices, type ParsedRanges } from "@/lib/pdf/page-ranges";
 import { extractPages } from "@/lib/pdf/operations/pages";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-extract-pages";
 
@@ -86,7 +87,7 @@ function ExtractWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void })
             pageCount={pdf.pageCount}
             value={rangeText}
             onChange={onRange}
-            label="Pages à extraire (ou cliquez sur les vignettes)"
+            label={tr("Pages à extraire (ou cliquez sur les vignettes)")}
           />
         </div>
         <div className="flex gap-2">
@@ -105,7 +106,7 @@ function ExtractWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void })
       </div>
       <ul
         className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(112px,1fr))]"
-        aria-label="Pages du document"
+        aria-label={tr("Pages du document")}
         data-testid="page-grid"
       >
         {pdf.pages.map((page) => (
@@ -114,7 +115,7 @@ function ExtractWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void })
               pageNumber={page.index + 1}
               selected={selected.has(page.index)}
               onClick={() => toggle(page.index)}
-              ariaLabel={`${t.common.page} ${page.index + 1}${selected.has(page.index) ? " (sélectionnée)" : ""}`}
+              ariaLabel={`${t.common.page} ${page.index + 1}${selected.has(page.index) ? ` ${tr("(sélectionnée)")}` : ""}`}
             >
               <PageThumbnail doc={pdf.opened.doc} page={page} width={96} height={136} />
             </PageTile>
@@ -136,7 +137,7 @@ function ExtractWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void })
           data-testid="extract-button"
         >
           <FileOutput aria-hidden="true" />
-          Extraire {indices.length > 0 ? t.result.pages(indices.length) : ""}
+          {tr("Extraire")} {indices.length > 0 ? t.result.pages(indices.length) : ""}
         </Button>
       </div>
     </div>

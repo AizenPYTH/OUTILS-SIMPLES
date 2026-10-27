@@ -1,4 +1,6 @@
 /** Shared types for browser image processing (canvas-based). */
+import { tr } from "@/lib/i18n/messages";
+
 export type ImageOutputFormat = "image/jpeg" | "image/png" | "image/webp";
 
 export const outputFormatLabels: Record<ImageOutputFormat, string> = {
@@ -84,13 +86,13 @@ export function fitDimensions(
 export type AspectPreset = { label: string; ratio: number | null };
 
 export const aspectPresets: AspectPreset[] = [
-  { label: "Libre", ratio: null },
-  { label: "Carré 1:1", ratio: 1 },
+  { label: tr("Libre"), ratio: null },
+  { label: tr("Carré 1:1"), ratio: 1 },
   { label: "4:3", ratio: 4 / 3 },
   { label: "3:2", ratio: 3 / 2 },
   { label: "16:9", ratio: 16 / 9 },
-  { label: "Portrait 3:4", ratio: 3 / 4 },
-  { label: "A4 (portrait)", ratio: 210 / 297 },
+  { label: tr("Portrait 3:4"), ratio: 3 / 4 },
+  { label: tr("A4 (portrait)"), ratio: 210 / 297 },
 ];
 
 export interface CropRect {

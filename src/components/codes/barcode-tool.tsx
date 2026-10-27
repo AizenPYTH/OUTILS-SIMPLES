@@ -25,6 +25,7 @@ import {
 } from "@/lib/codes/barcode";
 import { triggerDownload } from "@/lib/files/download";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "barcode-generate";
 const SAMPLES: Record<BarcodeType, string> = {
@@ -42,7 +43,7 @@ export async function svgToPngBlob(svg: string, scale = 2): Promise<Blob> {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
       const el = new Image();
       el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error("Rendu PNG impossible."));
+      el.onerror = () => reject(new Error(tr("Rendu PNG impossible.")));
       el.src = url;
     });
     const canvas = document.createElement("canvas");
@@ -54,7 +55,7 @@ export async function svgToPngBlob(svg: string, scale = 2): Promise<Blob> {
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     return await new Promise<Blob>((resolve, reject) =>
       canvas.toBlob(
-        (b) => (b ? resolve(b) : reject(new Error("Export PNG impossible."))),
+        (b) => (b ? resolve(b) : reject(new Error(tr("Export PNG impossible.")))),
         "image/png",
       ),
     );
@@ -86,7 +87,7 @@ export function BarcodeTool() {
         <ToolPanel className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-[14rem_1fr]">
             <div className="space-y-1">
-              <Label htmlFor="bc-type">Type de code</Label>
+              <Label htmlFor="bc-type">{tr("Type de code")}</Label>
               <Select
                 value={type}
                 onValueChange={(v) => {
@@ -108,7 +109,7 @@ export function BarcodeTool() {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="bc-value">Contenu — {info.hint}</Label>
+              <Label htmlFor="bc-value">{tr("Contenu — {hint}", { hint: tr(info.hint) })}</Label>
               <Input
                 id="bc-value"
                 value={value}
@@ -121,14 +122,16 @@ export function BarcodeTool() {
           </div>
           {!result.ok ? (
             <Alert variant="destructive" data-testid="bc-error">
-              {result.error}
+              {tr(result.error)}
             </Alert>
           ) : null}
           {result.ok &&
           (type === "ean13" || type === "ean8" || type === "upca") &&
           result.barcode.text !== value.replace(/\s/g, "") ? (
             <p className="text-sm text-muted-foreground">
-              Clé de contrôle calculée : le code complet est {result.barcode.text}.
+              {tr("Clé de contrôle calculée : le code complet est {code}.", {
+                code: result.barcode.text,
+              })}
             </p>
           ) : null}
         </ToolPanel>
@@ -139,19 +142,24 @@ export function BarcodeTool() {
           {svg ? (
             <div
               dangerouslySetInnerHTML={{ __html: svg }}
-              aria-label={`Code-barres ${info.label} : ${result.ok ? result.barcode.text : ""}`}
+              aria-label={tr("Code-barres {type} : {code}", {
+                type: info.label,
+                code: result.ok ? result.barcode.text : "",
+              })}
               role="img"
             />
           ) : (
             <p className="text-sm text-muted-foreground">
-              Saisissez un contenu valide pour afficher le code-barres.
+              {tr("Saisissez un contenu valide pour afficher le code-barres.")}
             </p>
           )}
         </div>
       </div>
       <ToolPanel className="space-y-4">
         <div className="space-y-1">
-          <Label htmlFor="bc-width">Largeur d&apos;un module : {render.moduleWidth} px</Label>
+          <Label htmlFor="bc-width">
+            {tr("Largeur d'un module : {n} px", { n: render.moduleWidth })}
+          </Label>
           <input
             id="bc-width"
             type="range"
@@ -163,7 +171,9 @@ export function BarcodeTool() {
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="bc-height">Hauteur des barres : {render.height} px</Label>
+          <Label htmlFor="bc-height">
+            {tr("Hauteur des barres : {n} px", { n: render.height })}
+          </Label>
           <input
             id="bc-height"
             type="range"
@@ -180,11 +190,11 @@ export function BarcodeTool() {
             checked={render.showText}
             onCheckedChange={(v) => setRender({ ...render, showText: v === true })}
           />{" "}
-          Afficher le texte sous les barres
+          {tr("Afficher le texte sous les barres")}
         </label>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
-            <Label htmlFor="bc-fg">Barres</Label>
+            <Label htmlFor="bc-fg">{tr("Barres")}</Label>
             <input
               id="bc-fg"
               type="color"
@@ -194,7 +204,7 @@ export function BarcodeTool() {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="bc-bg">Fond</Label>
+            <Label htmlFor="bc-bg">{tr("Fond")}</Label>
             <input
               id="bc-bg"
               type="color"
@@ -211,7 +221,7 @@ export function BarcodeTool() {
             disabled={!svg}
             data-testid="bc-download-png"
           >
-            <Download aria-hidden="true" /> Télécharger en PNG
+            <Download aria-hidden="true" /> {tr("Télécharger en PNG")}
           </Button>
           <Button
             type="button"
@@ -220,13 +230,13 @@ export function BarcodeTool() {
             disabled={!svg}
             data-testid="bc-download-svg"
           >
-            <Download aria-hidden="true" /> Télécharger en SVG
+            <Download aria-hidden="true" /> {tr("Télécharger en SVG")}
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Pour l&apos;impression, gardez un fort contraste (barres sombres sur fond clair) et une
-          zone blanche autour du code. Testez toujours le code avec une douchette ou
-          l&apos;application du destinataire.
+          {tr(
+            "Pour l'impression, gardez un fort contraste (barres sombres sur fond clair) et une zone blanche autour du code. Testez toujours le code avec une douchette ou l'application du destinataire.",
+          )}
         </p>
       </ToolPanel>
     </div>

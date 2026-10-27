@@ -59,6 +59,7 @@ import {
 import type { ParsedRanges } from "@/lib/pdf/page-ranges";
 import { isPdfError } from "@/lib/pdf/errors";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
 const TOOL_ID = "scan-ocr";
@@ -108,15 +109,15 @@ async function decodeToRgba(page: SourcePage): Promise<RgbaImage> {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  "pass-0": "Reconnaissance à l'endroit",
-  "pass-90": "Reconnaissance du texte tourné à 90°",
-  "pass-180": "Reconnaissance du texte à l'envers",
-  "pass-270": "Reconnaissance du texte tourné à 270°",
-  "recognizing text": "Reconnaissance",
-  "loading tesseract core": "Chargement du moteur",
-  "initializing tesseract": "Initialisation du moteur",
-  "loading language traineddata": "Chargement du modèle de langue",
-  "initializing api": "Préparation",
+  "pass-0": tr("Reconnaissance à l'endroit"),
+  "pass-90": tr("Reconnaissance du texte tourné à 90°"),
+  "pass-180": tr("Reconnaissance du texte à l'envers"),
+  "pass-270": tr("Reconnaissance du texte tourné à 270°"),
+  "recognizing text": tr("Reconnaissance"),
+  "loading tesseract core": tr("Chargement du moteur"),
+  "initializing tesseract": tr("Initialisation du moteur"),
+  "loading language traineddata": tr("Chargement du modèle de langue"),
+  "initializing api": tr("Préparation"),
 };
 
 export function OcrTool() {
@@ -157,7 +158,7 @@ export function OcrTool() {
   );
 
   const load = async (file: File) => {
-    setLoading("Lecture du fichier…");
+    setLoading(tr("Lecture du fichier…"));
     try {
       const bytes = new Uint8Array(await file.arrayBuffer());
       const pages: SourcePage[] = [];
@@ -165,15 +166,17 @@ export function OcrTool() {
         assertPdfBytes(bytes);
         if (file.size > pdfLimits.maxFileSizeBytes)
           throw new Error(
-            `Fichier trop volumineux (max ${formatBytes(pdfLimits.maxFileSizeBytes)}).`,
+            tr("Fichier trop volumineux (max {max}).", {
+              max: formatBytes(pdfLimits.maxFileSizeBytes),
+            }),
           );
         const opened: OpenedPdf = await openPdf(bytes);
         try {
           const count = Math.min(opened.pageCount, MAX_OCR_PAGES);
           if (opened.pageCount > MAX_OCR_PAGES)
-            toast.info(`Seules les ${MAX_OCR_PAGES} premières pages seront traitées.`);
+            toast.info(tr("Seules les {n} premières pages seront traitées.", { n: MAX_OCR_PAGES }));
           for (let i = 0; i < count; i += 1) {
-            setLoading(`Préparation de la page ${i + 1} sur ${count}…`);
+            setLoading(tr("Préparation de la page {n} sur {total}…", { n: i + 1, total: count }));
             const page = opened.pages[i]!;
             const size = visualSize(page);
             const scale = Math.min(OCR_DPI / 72, 3000 / Math.max(size.width, size.height));
@@ -234,7 +237,11 @@ export function OcrTool() {
       track("tool_start", { tool: TOOL_ID, pagesBucket: pages.length > 10 ? "gt10" : "le10" });
     } catch (e) {
       toast.error(
-        isPdfError(e) ? e.message : e instanceof Error ? e.message : "Fichier illisible.",
+        isPdfError(e)
+          ? tr(e.message)
+          : e instanceof Error
+            ? tr(e.message)
+            : tr("Fichier illisible."),
       );
     } finally {
       setLoading(null);
@@ -263,7 +270,7 @@ export function OcrTool() {
     abortRef.current = false;
     try {
       if (!engineRef.current) {
-        setEngineStatus({ status: "Chargement du moteur OCR…", progress: 0 });
+        setEngineStatus({ status: tr("Chargement du moteur OCR…"), progress: 0 });
         engineRef.current = await createOcrEngine(language, {
           encode: encodeWorkingImage,
           onProgress: (p) => setEngineStatus({ status: p.status, progress: p.progress }),
@@ -281,7 +288,10 @@ export function OcrTool() {
           const rgba = await decodeToRgba(page);
           const result = await engine.recognize(rgba, index, options, (p) =>
             setEngineStatus({
-              status: `${STATUS_LABELS[p.status] ?? p.status} · page ${index + 1}`,
+              status: tr("{status} · page {n}", {
+                status: STATUS_LABELS[p.status] ?? p.status,
+                n: index + 1,
+              }),
               progress: p.progress,
             }),
           );
@@ -297,7 +307,7 @@ export function OcrTool() {
                 ? {
                     ...st,
                     status: "error",
-                    error: e instanceof Error ? e.message : "Reconnaissance impossible.",
+                    error: e instanceof Error ? e.message : tr("Reconnaissance impossible."),
                   }
                 : st,
             ),
@@ -307,7 +317,9 @@ export function OcrTool() {
       track("tool_success", { tool: TOOL_ID, option: language });
     } catch (e) {
       toast.error(
-        e instanceof Error ? `Moteur OCR indisponible : ${e.message}` : "Moteur OCR indisponible.",
+        e instanceof Error
+          ? tr("Moteur OCR indisponible : {message}", { message: e.message })
+          : tr("Moteur OCR indisponible."),
       );
       track("tool_error", { tool: TOOL_ID, errorCode: "OCR_ENGINE" });
     } finally {
@@ -355,9 +367,9 @@ export function OcrTool() {
         title: stripExtension(source.name),
       });
       downloadPdf(bytes, source.name, "ocr", TOOL_ID);
-      toast.success(`PDF recherchable créé : ${wordsPlaced} mots indexés.`);
+      toast.success(tr("PDF recherchable créé : {n} mots indexés.", { n: wordsPlaced }));
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Création du PDF impossible.");
+      toast.error(e instanceof Error ? tr(e.message) : tr("Création du PDF impossible."));
     } finally {
       setExporting(false);
     }
@@ -367,7 +379,7 @@ export function OcrTool() {
     return (
       <ToolPanel className="space-y-3 text-center" role="status" aria-live="polite">
         <p className="font-heading text-lg font-bold">{loading}</p>
-        <Progress label="Préparation" />
+        <Progress label={tr("Préparation")} />
       </ToolPanel>
     );
   }
@@ -380,20 +392,23 @@ export function OcrTool() {
           accept="application/pdf,image/jpeg,image/png,image/webp"
           validate={(f) =>
             f.size === 0
-              ? "fichier vide"
+              ? tr("fichier vide")
               : f.size > pdfLimits.maxFileSizeBytes
-                ? "fichier trop volumineux"
+                ? tr("fichier trop volumineux")
                 : null
           }
-          title="Déposez un PDF scanné ou une image"
-          hint={`PDF, JPG, PNG, WebP · ${formatBytes(pdfLimits.maxFileSizeBytes)} max · ${MAX_OCR_PAGES} pages max`}
-          buttonLabel="Choisir un fichier"
+          title={tr("Déposez un PDF scanné ou une image")}
+          hint={tr("PDF, JPG, PNG, WebP · {max} max · {pages} pages max", {
+            max: formatBytes(pdfLimits.maxFileSizeBytes),
+            pages: MAX_OCR_PAGES,
+          })}
+          buttonLabel={tr("Choisir un fichier")}
           testId="ocr-dropzone"
         />
-        <Alert variant="info" title="Premier lancement : téléchargement du moteur">
-          Le moteur Tesseract (≈ 4 Mo) et le modèle de langue (≈ 6 Mo pour le français, ≈ 11 Mo pour
-          l&apos;anglais) sont téléchargés depuis ce site puis gardés en cache par votre navigateur.
-          La reconnaissance prend quelques secondes par page selon votre appareil.
+        <Alert variant="info" title={tr("Premier lancement : téléchargement du moteur")}>
+          {tr(
+            "Le moteur Tesseract (≈ 4 Mo) et le modèle de langue (≈ 6 Mo pour le français, ≈ 11 Mo pour l'anglais) sont téléchargés depuis ce site puis gardés en cache par votre navigateur. La reconnaissance prend quelques secondes par page selon votre appareil.",
+          )}
         </Alert>
       </div>
     );
@@ -420,14 +435,17 @@ export function OcrTool() {
             </p>
             <p className="text-xs text-muted-foreground">
               {source.kind === "pdf"
-                ? `${source.pageCount} page(s)`
+                ? tr("{n} page(s)", { n: source.pageCount })
                 : `${currentPage.width}×${currentPage.height} px`}{" "}
-              · {doneCount} / {source.pages.length} reconnue(s)
-              {donePages.length ? ` · confiance moyenne ${avgConfidence} %` : ""}
+              ·{" "}
+              {tr("{done} / {total} reconnue(s)", { done: doneCount, total: source.pages.length })}
+              {donePages.length
+                ? ` · ${tr("confiance moyenne {value} %", { value: avgConfidence })}`
+                : ""}
             </p>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="ocr-lang">Langue</Label>
+            <Label htmlFor="ocr-lang">{tr("Langue")}</Label>
             <Select
               value={language}
               onValueChange={(v) => void changeLanguage(v as OcrLanguage)}
@@ -448,13 +466,17 @@ export function OcrTool() {
           {source.pages.length > 1 ? (
             <div className="w-full sm:w-auto">
               <Segmented
-                label="Pages"
+                label={tr("Pages")}
                 value={pageMode}
                 onChange={setPageMode}
                 className="sm:grid-cols-2"
                 options={[
-                  { value: "all", label: "Toutes", description: `${source.pages.length} pages` },
-                  { value: "range", label: "Choisies", description: "ex. 1-3" },
+                  {
+                    value: "all",
+                    label: tr("Toutes"),
+                    description: tr("{n} pages", { n: source.pages.length }),
+                  },
+                  { value: "range", label: tr("Choisies"), description: tr("ex. 1-3") },
                 ]}
               />
             </div>
@@ -471,7 +493,7 @@ export function OcrTool() {
           <div className="flex gap-2">
             {running ? (
               <Button type="button" variant="outline" onClick={() => (abortRef.current = true)}>
-                <Square aria-hidden="true" /> Arrêter
+                <Square aria-hidden="true" /> {tr("Arrêter")}
               </Button>
             ) : (
               <Button
@@ -482,11 +504,11 @@ export function OcrTool() {
                 data-testid="ocr-run"
               >
                 <Play aria-hidden="true" />{" "}
-                {doneCount > 0 ? "Relancer la reconnaissance" : "Lancer la reconnaissance"}
+                {doneCount > 0 ? tr("Relancer la reconnaissance") : tr("Lancer la reconnaissance")}
               </Button>
             )}
             <Button type="button" variant="ghost" onClick={() => void reset()} disabled={running}>
-              Autre fichier
+              {tr("Autre fichier")}
             </Button>
           </div>
         </div>
@@ -503,15 +525,20 @@ export function OcrTool() {
               className={cn("size-4 transition-transform", advancedOpen && "rotate-180")}
               aria-hidden="true"
             />
-            Options avancées : orientation{" "}
-            {ocrOrientationModes.find((m) => m.id === options.orientation)?.label.toLowerCase()},
-            prétraitement{" "}
-            {ocrPreprocessModes.find((m) => m.id === options.preprocess)?.label.toLowerCase()}
+            {tr("Options avancées : orientation {orientation}, prétraitement {preprocess}", {
+              orientation:
+                ocrOrientationModes
+                  .find((m) => m.id === options.orientation)
+                  ?.label.toLowerCase() ?? "",
+              preprocess:
+                ocrPreprocessModes.find((m) => m.id === options.preprocess)?.label.toLowerCase() ??
+                "",
+            })}
           </button>
           {advancedOpen ? (
             <div className="mt-3 grid gap-4 sm:grid-cols-2" data-testid="ocr-advanced">
               <div className="space-y-1">
-                <Label htmlFor="ocr-orientation">Orientation du texte</Label>
+                <Label htmlFor="ocr-orientation">{tr("Orientation du texte")}</Label>
                 <Select
                   value={options.orientation}
                   onValueChange={(v) =>
@@ -536,7 +563,7 @@ export function OcrTool() {
               </div>
               <div className="space-y-1">
                 <Label htmlFor="ocr-preprocess">
-                  Prétraitement (copie de travail, l&apos;original est conservé)
+                  {tr("Prétraitement (copie de travail, l'original est conservé)")}
                 </Label>
                 <Select
                   value={options.preprocess}
@@ -567,7 +594,9 @@ export function OcrTool() {
                   onCheckedChange={(checked) => setOptions((o) => ({ ...o, deskew: checked }))}
                   disabled={running}
                 />
-                <Label htmlFor="ocr-deskew">Redresser les lignes légèrement inclinées (± 6°)</Label>
+                <Label htmlFor="ocr-deskew">
+                  {tr("Redresser les lignes légèrement inclinées (± 6°)")}
+                </Label>
               </div>
             </div>
           ) : null}
@@ -583,26 +612,29 @@ export function OcrTool() {
         >
           <p className="text-sm">
             {engineStatus
-              ? `${STATUS_LABELS[engineStatus.status] ?? engineStatus.status} · ${Math.round(engineStatus.progress * 100)} %`
-              : "Démarrage…"}
+              ? tr("{status} · {percent} %", {
+                  status: STATUS_LABELS[engineStatus.status] ?? engineStatus.status,
+                  percent: Math.round(engineStatus.progress * 100),
+                })
+              : tr("Démarrage…")}
           </p>
-          <Progress value={progressValue} label="Progression OCR" />
+          <Progress value={progressValue} label={tr("Progression OCR")} />
         </ToolPanel>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-medium">Page {currentPage.index + 1}</p>
+            <p className="text-sm font-medium">{tr("Page {n}", { n: currentPage.index + 1 })}</p>
             <div className="flex items-center gap-3">
               {currentResult ? (
                 <label className="inline-flex items-center gap-2 text-xs text-muted-foreground">
                   <Switch
                     checked={showZones}
                     onCheckedChange={setShowZones}
-                    aria-label="Afficher les zones reconnues"
+                    aria-label={tr("Afficher les zones reconnues")}
                   />
-                  Zones reconnues
+                  {tr("Zones reconnues")}
                 </label>
               ) : null}
               {source.pages.length > 1 ? (
@@ -614,7 +646,7 @@ export function OcrTool() {
                     disabled={current === 0}
                     onClick={() => setCurrent((c) => c - 1)}
                   >
-                    Précédente
+                    {tr("Précédente")}
                   </Button>
                   <Button
                     type="button"
@@ -623,7 +655,7 @@ export function OcrTool() {
                     disabled={current >= source.pages.length - 1}
                     onClick={() => setCurrent((c) => c + 1)}
                   >
-                    Suivante
+                    {tr("Suivante")}
                   </Button>
                 </div>
               ) : null}
@@ -634,7 +666,7 @@ export function OcrTool() {
               {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
               <img
                 src={currentPage.canvasUrl}
-                alt={`Page ${currentPage.index + 1}`}
+                alt={tr("Page {n}", { n: currentPage.index + 1 })}
                 className="block max-h-[60vh] max-w-full rounded-[4px] shadow-sm"
               />
               {currentResult && showZones ? (
@@ -679,24 +711,36 @@ export function OcrTool() {
               data-testid="ocr-page-meta"
             >
               <span>
-                {currentResult.passes.length} passe{currentResult.passes.length > 1 ? "s" : ""} (
-                {currentResult.passes.map((p) => `${p}°`).join(", ")})
+                {tr(
+                  currentResult.passes.length > 1
+                    ? "{n} passes ({angles})"
+                    : "{n} passe ({angles})",
+                  {
+                    n: currentResult.passes.length,
+                    angles: currentResult.passes.map((p) => `${p}°`).join(", "),
+                  },
+                )}
               </span>
               {currentResult.mixedOrientation ? (
                 <span className="inline-flex items-center gap-1 font-medium text-warning-foreground">
-                  <RotateCw className="size-3" aria-hidden="true" /> Orientations mixtes : le texte
-                  tourné est restitué en sections séparées
+                  <RotateCw className="size-3" aria-hidden="true" />{" "}
+                  {tr("Orientations mixtes : le texte tourné est restitué en sections séparées")}
                 </span>
               ) : currentResult.dominantAngle !== 0 ? (
-                <span>Texte lu à {currentResult.dominantAngle}°</span>
+                <span>{tr("Texte lu à {angle}°", { angle: currentResult.dominantAngle })}</span>
               ) : null}
               {currentResult.skewCorrected ? (
-                <span>Inclinaison corrigée : {currentResult.skewCorrected.toFixed(1)}°</span>
+                <span>
+                  {tr("Inclinaison corrigée : {value}°", {
+                    value: currentResult.skewCorrected.toFixed(1),
+                  })}
+                </span>
               ) : null}
               {weakWords ? (
                 <span className="text-destructive">
-                  {weakWords} mot{weakWords > 1 ? "s" : ""} peu fiable{weakWords > 1 ? "s" : ""}{" "}
-                  (zones rouges)
+                  {weakWords > 1
+                    ? tr("{n} mots peu fiables (zones rouges)", { n: weakWords })
+                    : tr("{n} mot peu fiable (zones rouges)", { n: weakWords })}
                 </span>
               ) : null}
             </p>
@@ -704,8 +748,10 @@ export function OcrTool() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="ocr-page-text" className="text-sm font-medium">
-            Texte reconnu{" "}
-            {currentResult ? `· confiance ${Math.round(currentResult.confidence)} %` : ""}
+            {tr("Texte reconnu")}{" "}
+            {currentResult
+              ? tr("· confiance {value} %", { value: Math.round(currentResult.confidence) })
+              : ""}
           </Label>
           <Textarea
             id="ocr-page-text"
@@ -720,22 +766,24 @@ export function OcrTool() {
             rows={18}
             placeholder={
               currentState?.status === "error"
-                ? currentState.error
+                ? tr(currentState.error ?? "")
                 : currentState?.status === "running"
-                  ? "Reconnaissance en cours…"
-                  : "Lancez la reconnaissance pour afficher le texte de cette page. Vous pourrez le corriger ici."
+                  ? tr("Reconnaissance en cours…")
+                  : tr(
+                      "Lancez la reconnaissance pour afficher le texte de cette page. Vous pourrez le corriger ici.",
+                    )
             }
             className="font-mono text-[13px] leading-relaxed"
             data-testid="ocr-page-text"
           />
           {currentState?.status === "error" ? (
-            <Alert variant="destructive">{currentState.error}</Alert>
+            <Alert variant="destructive">{tr(currentState.error ?? "")}</Alert>
           ) : null}
           {currentResult && currentResult.confidence < 60 ? (
             <Alert variant="warning">
-              Confiance faible : vérifiez le texte. Une image plus nette, bien éclairée et à plat
-              améliore nettement la reconnaissance ; pour une page tournée, choisissez
-              l&apos;orientation dans les options avancées.
+              {tr(
+                "Confiance faible : vérifiez le texte. Une image plus nette, bien éclairée et à plat améliore nettement la reconnaissance ; pour une page tournée, choisissez l'orientation dans les options avancées.",
+              )}
             </Alert>
           ) : null}
         </div>
@@ -744,14 +792,14 @@ export function OcrTool() {
       {donePages.length ? (
         <Tabs defaultValue="txt">
           <TabsList>
-            <TabsTrigger value="txt">Texte brut</TabsTrigger>
+            <TabsTrigger value="txt">{tr("Texte brut")}</TabsTrigger>
             <TabsTrigger value="md">Markdown</TabsTrigger>
-            <TabsTrigger value="pdf">PDF recherchable</TabsTrigger>
+            <TabsTrigger value="pdf">{tr("PDF recherchable")}</TabsTrigger>
           </TabsList>
           <TabsContent value="txt">
             <TextOutputPanel
               id="ocr-text"
-              label={`Texte complet (${donePages.length} page(s))`}
+              label={tr("Texte complet ({n} page(s))", { n: donePages.length })}
               value={plain}
               filename={deriveOutputName(source.name, "ocr", "txt")}
               toolId={TOOL_ID}
@@ -772,11 +820,9 @@ export function OcrTool() {
           <TabsContent value="pdf" className="space-y-3">
             <ToolPanel className="space-y-3">
               <p className="text-sm">
-                Le PDF recherchable conserve l&apos;image d&apos;origine de chaque page reconnue et
-                y ajoute une couche de texte invisible positionnée sur les mots, dans leur
-                orientation (texte tourné compris) : vous pouvez sélectionner, copier et rechercher
-                le texte dans n&apos;importe quel lecteur. Les mots dont la confiance est inférieure
-                à 30 % sont ignorés.
+                {tr(
+                  "Le PDF recherchable conserve l'image d'origine de chaque page reconnue et y ajoute une couche de texte invisible positionnée sur les mots, dans leur orientation (texte tourné compris) : vous pouvez sélectionner, copier et rechercher le texte dans n'importe quel lecteur. Les mots dont la confiance est inférieure à 30 % sont ignorés.",
+                )}
               </p>
               <Button
                 type="button"
@@ -785,8 +831,10 @@ export function OcrTool() {
                 loading={exporting}
                 data-testid="ocr-export-pdf"
               >
-                <Download aria-hidden="true" /> Télécharger le PDF recherchable ({donePages.length}{" "}
-                page{donePages.length > 1 ? "s" : ""})
+                <Download aria-hidden="true" />{" "}
+                {donePages.length > 1
+                  ? tr("Télécharger le PDF recherchable ({n} pages)", { n: donePages.length })
+                  : tr("Télécharger le PDF recherchable ({n} page)", { n: donePages.length })}
               </Button>
             </ToolPanel>
           </TabsContent>
@@ -794,10 +842,9 @@ export function OcrTool() {
       ) : null}
       <p className="flex items-start gap-2 text-xs text-muted-foreground">
         <FileSearch className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-        La qualité dépend du document : texte imprimé net à 200–300 dpi ≈ très bonne ; photo floue,
-        texte manuscrit ou mise en page complexe ≈ résultats à vérifier (zones rouges). Les
-        orientations 0°, 90°, 180° et 270° sont reconnues ; un texte en biais au-delà de 6° doit
-        être redressé avant (outil « Corriger un document photographié »).
+        {tr(
+          "La qualité dépend du document : texte imprimé net à 200–300 dpi ≈ très bonne ; photo floue, texte manuscrit ou mise en page complexe ≈ résultats à vérifier (zones rouges). Les orientations 0°, 90°, 180° et 270° sont reconnues ; un texte en biais au-delà de 6° doit être redressé avant (outil « Corriger un document photographié »).",
+        )}
       </p>
     </div>
   );

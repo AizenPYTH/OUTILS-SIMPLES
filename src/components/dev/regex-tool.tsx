@@ -21,10 +21,13 @@ import {
   runRegex,
   segmentMatches,
 } from "@/lib/dev/regex";
+import { tr } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
-const SAMPLE =
-  "Contactez jean.dupont@exemple.fr ou marie@site.org avant le 12/03/2026.\nTéléphone : 06 12 34 56 78 — code postal 75011.";
+const SAMPLE = [
+  tr("Contactez jean.dupont@exemple.fr ou marie@site.org avant le 12/03/2026."),
+  tr("Téléphone : 06 12 34 56 78 — code postal 75011."),
+].join("\n");
 
 export function RegexTool() {
   const [pattern, setPattern] = React.useState("[\\w.+-]+@[\\w-]+\\.[\\w.-]+");
@@ -45,7 +48,7 @@ export function RegexTool() {
       <ToolPanel className="space-y-3">
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
           <div className="space-y-1">
-            <Label htmlFor="regex-pattern">Expression régulière</Label>
+            <Label htmlFor="regex-pattern">{tr("Expression régulière")}</Label>
             <div className="flex items-center gap-1 font-mono text-sm">
               <span className="text-muted-foreground">/</span>
               <Input
@@ -60,7 +63,7 @@ export function RegexTool() {
             </div>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="regex-preset">Exemples</Label>
+            <Label htmlFor="regex-preset">{tr("Exemples")}</Label>
             <Select
               onValueChange={(v) => {
                 const preset = REGEX_PRESETS[Number(v)];
@@ -71,7 +74,7 @@ export function RegexTool() {
               }}
             >
               <SelectTrigger id="regex-preset" className="w-52">
-                <SelectValue placeholder="Choisir un modèle" />
+                <SelectValue placeholder={tr("Choisir un modèle")} />
               </SelectTrigger>
               <SelectContent>
                 {REGEX_PRESETS.map((p, i) => (
@@ -96,13 +99,13 @@ export function RegexTool() {
         </div>
         {!result.ok ? (
           <Alert variant="destructive" data-testid="regex-error">
-            {result.error}
+            {tr(result.error)}
           </Alert>
         ) : null}
       </ToolPanel>
       <TextInputPanel
         id="regex-text"
-        label="Texte de test"
+        label={tr("Texte de test")}
         value={text}
         onChange={setText}
         rows={6}
@@ -110,10 +113,12 @@ export function RegexTool() {
       {result.ok ? (
         <ToolPanel className="space-y-3" data-testid="regex-results">
           <p className="text-sm font-medium">
-            {result.matches.length} correspondance{result.matches.length > 1 ? "s" : ""}
-            {result.truncated ? " (affichage limité)" : ""}
+            {tr(result.matches.length > 1 ? "{n} correspondances" : "{n} correspondance", {
+              n: result.matches.length,
+            })}
+            {result.truncated ? " " + tr("(affichage limité)") : ""}
             {!result.global && result.matches.length === 1
-              ? " — ajoutez le drapeau g pour toutes les occurrences"
+              ? " " + tr("— ajoutez le drapeau g pour toutes les occurrences")
               : ""}
           </p>
           <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words rounded-md bg-muted/40 p-3 font-mono text-[13px] leading-relaxed">
@@ -133,12 +138,12 @@ export function RegexTool() {
             Object.keys(result.matches[0]!.named).length > 0) ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <caption className="sr-only">Correspondances et groupes capturés</caption>
+                <caption className="sr-only">{tr("Correspondances et groupes capturés")}</caption>
                 <thead>
                   <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
                     <th className="py-1 pr-3 font-semibold">#</th>
-                    <th className="py-1 pr-3 font-semibold">Correspondance</th>
-                    <th className="py-1 font-semibold">Groupes</th>
+                    <th className="py-1 pr-3 font-semibold">{tr("Correspondance")}</th>
+                    <th className="py-1 font-semibold">{tr("Groupes")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -172,14 +177,14 @@ export function RegexTool() {
       <ToolPanel className="space-y-3">
         <div className="space-y-1">
           <Label htmlFor="regex-replacement">
-            Remplacement (facultatif) — $1, $2 ou $&lt;nom&gt; pour les groupes
+            {tr("Remplacement (facultatif) — $1, $2 ou $<nom> pour les groupes")}
           </Label>
           <Input
             id="regex-replacement"
             value={replacement}
             onChange={(e) => setReplacement(e.target.value)}
             className="font-mono"
-            placeholder="ex. [$&]"
+            placeholder={tr("ex. [$&]")}
             data-testid="regex-replacement"
           />
         </div>
@@ -187,20 +192,20 @@ export function RegexTool() {
           replaced.ok ? (
             <TextOutputPanel
               id="regex-replaced"
-              label="Texte remplacé"
+              label={tr("Texte remplacé")}
               value={replaced.result}
               filename="texte-remplace.txt"
               rows={5}
             />
           ) : (
-            <Alert variant="destructive">{replaced.error}</Alert>
+            <Alert variant="destructive">{tr(replaced.error)}</Alert>
           )
         ) : null}
       </ToolPanel>
       <p className="text-xs text-muted-foreground">
-        Syntaxe JavaScript (ECMAScript) : la même que dans les navigateurs et Node.js. Les
-        expressions sont exécutées localement ; une expression très coûteuse peut ralentir
-        l&apos;onglet.
+        {tr(
+          "Syntaxe JavaScript (ECMAScript) : la même que dans les navigateurs et Node.js. Les expressions sont exécutées localement ; une expression très coûteuse peut ralentir l'onglet.",
+        )}
       </p>
     </div>
   );

@@ -1,7 +1,6 @@
 /**
- * French UI dictionary. Every interface string lives here so that an English
- * dictionary with the same shape can be added later (see src/lib/i18n/index.ts).
- * Tool-specific marketing content lives in the registry, not here.
+ * French UI dictionary (reference shape). The English dictionary (`en.ts`) must
+ * expose the same keys. Tool-specific editorial content lives in the registry.
  */
 export const fr = {
   common: {
@@ -43,6 +42,7 @@ export const fr = {
     yes: "Oui",
     no: "Non",
     optional: "facultatif",
+    breadcrumb: "Fil d'Ariane",
   },
   nav: {
     home: "Accueil",
@@ -295,6 +295,89 @@ export const fr = {
     rights: (year: number) => `© ${year} OUTILIA. Tous droits réservés.`,
     openSource: "Construit avec pdf.js et pdf-lib, deux bibliothèques open source.",
   },
+  site: {
+    tagline: "Outils en ligne simples, rapides et privés",
+    description:
+      "Outils en ligne gratuits pour vos PDF, images, scans et textes, traités dans votre navigateur : rien n'est envoyé sur un serveur, aucun compte à créer.",
+    ogLocale: "fr_FR",
+    languageTag: "fr-FR",
+  },
+  legal: {
+    updatedAt: (date: string) => `Dernière mise à jour : ${date}`,
+    placeholder: (label: string) => `[${label} — à compléter par l'éditeur du site]`,
+    openTool: (name: string) => `Ouvrir l'outil : ${name}`,
+    tool: "Outil",
+  },
+  languageSwitcher: {
+    label: "Langue",
+    french: "Français",
+    english: "English",
+    partial:
+      "Les textes de cette page sont en anglais, mais l'interface de cet outil contient encore des éléments en français.",
+  },
+  homePage: {
+    label: "Outils en ligne gratuits · traitement local",
+    orSearch: "ou cherchez un outil",
+    shortcuts: "Raccourcis",
+    journeys: {
+      editor: "Modifier ou signer un PDF",
+      scan: "Scanner un document",
+      image: "Convertir une image",
+      ocr: "Reconnaître du texte (OCR)",
+    },
+    flagship: "Produit phare",
+    editorTitle: "Le modificateur PDF, sans logiciel ni envoi",
+    allPdfTools: "Tous les outils PDF",
+    editorAlt:
+      "Le modificateur PDF : panneau des pages, texte sélectionné avec sa barre de propriétés (police, taille, style), formes et flèche sur la page.",
+    editorCaption: "Capture réelle de l'outil sur un document de test.",
+    mostUsed: "Les plus utilisés",
+    byFamily: "Par famille",
+    goFurther: "Pour aller plus loin",
+    allGuides: "Tous les guides",
+    offlineLink: "Fonctionne aussi hors connexion",
+    verifyLink: "Vérifiez-le vous-même",
+  },
+  homeDrop: {
+    region: "Déposer un fichier pour trouver l'outil adapté",
+    title: "Déposez un fichier ici, nous vous proposons les bons outils",
+    hint: "PDF, image, photo HEIC, Word, Excel, CSV, Markdown ou texte · le fichier reste sur votre appareil",
+    browse: "Choisir un fichier",
+    chooseFile: "Choisir un fichier",
+    remove: "Retirer ce fichier",
+    browseAll: "Parcourir tous les outils",
+    kinds: {
+      pdf: "Document PDF",
+      image: "Image",
+      heic: "Photo HEIC / HEIF",
+      docx: "Document Word (.docx)",
+      xlsx: "Classeur Excel (.xlsx)",
+      pptx: "Présentation PowerPoint (.pptx)",
+      csv: "Fichier CSV",
+      markdown: "Texte Markdown",
+      text: "Fichier texte",
+      zip: "Archive ZIP",
+      unknown: "Type non reconnu",
+    },
+    notes: {
+      pptx: "Les présentations PowerPoint ne sont pas prises en charge : exportez-la en PDF depuis PowerPoint ou LibreOffice, puis utilisez les outils PDF.",
+      zip: "Les archives ne sont pas traitées : extrayez les fichiers puis déposez-les un par un.",
+      unknown:
+        "Ce type de fichier n'est pas reconnu. Les outils acceptent les PDF, les images (PNG, JPEG, WebP, HEIC), les documents Word, Excel, CSV, Markdown et texte.",
+      heic: "Les photos HEIC sont converties en JPEG ou PNG par l'outil « Convertir une image » (navigateurs récents ; décodeur libheif chargé à la demande).",
+    },
+  },
+  guidesPage: {
+    title: "Guides pratiques",
+    seoTitle: "Guides pratiques PDF : fusion, compression, signature, organisation",
+    seoDescription: (site: string) =>
+      `Guides pas à pas rédigés par ${site} pour fusionner, alléger, signer et réorganiser vos PDF en toute sécurité.`,
+    intro:
+      "Des explications concrètes, rédigées à la main, pour résoudre les problèmes courants et bien utiliser les outils.",
+    updatedOn: (date: string) => `Mis à jour le ${date}`,
+    takeAction: "Passer à l'action",
+    empty: "Aucun guide n'est encore disponible dans cette langue.",
+  },
   notFound: {
     title: "Page introuvable",
     body: "La page que vous cherchez n'existe pas ou a été déplacée.",
@@ -306,6 +389,7 @@ export const fr = {
     body: "Une erreur inattendue est survenue. Vos fichiers n'ont pas quitté votre navigateur.",
     retry: "Réessayer",
   },
-} as const;
+};
 
+/** Shape shared by every locale; `en` must provide every key (TypeScript enforces it). */
 export type Dictionary = typeof fr;

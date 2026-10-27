@@ -28,6 +28,7 @@ import { encodeCanvas, releaseCanvas } from "@/lib/images/canvas";
 import { formatBytes } from "@/lib/files/format";
 import { uid } from "@/lib/utils";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-redact";
 const PREVIEW_MAX_WIDTH = 760;
@@ -72,7 +73,8 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
     setSearching(true);
     try {
       const found = await findTextRects(pdf.opened.doc, pdf.pageCount, needle);
-      if (found.length === 0) toast.info("Aucune occurrence trouvée dans le texte du document.");
+      if (found.length === 0)
+        toast.info(tr("Aucune occurrence trouvée dans le texte du document."));
       else {
         setBoxes((b) => {
           const next = { ...b };
@@ -87,11 +89,14 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           return next;
         });
         toast.success(
-          `${found.length} occurrence(s) marquée(s) sur ${new Set(found.map((f) => f.pageIndex)).size} page(s).`,
+          tr("{hits} occurrence(s) marquée(s) sur {pages} page(s).", {
+            hits: found.length,
+            pages: new Set(found.map((f) => f.pageIndex)).size,
+          }),
         );
       }
     } catch {
-      toast.error("Recherche impossible dans ce document.");
+      toast.error(tr("Recherche impossible dans ce document."));
     } finally {
       setSearching(false);
     }
@@ -137,7 +142,11 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         });
         await new Promise((r) => setTimeout(r, 0));
       }
-      report({ current: touched.length, total: touched.length, label: "Reconstruction du PDF…" });
+      report({
+        current: touched.length,
+        total: touched.length,
+        label: tr("Reconstruction du PDF…"),
+      });
       return replacePagesWithImages(pdf.bytes, rasterized);
     });
 
@@ -148,16 +157,19 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
     const bytes = op.state.result;
     return (
       <DonePanel
-        title="PDF caviardé"
-        summary={`${total} zone(s) sur ${pagesTouched} page(s) · ${formatBytes(bytes.byteLength)} · métadonnées supprimées`}
+        title={tr("PDF caviardé")}
+        summary={tr("{zones} zone(s) sur {pages} page(s) · {size} · métadonnées supprimées", {
+          zones: total,
+          pages: pagesTouched,
+          size: formatBytes(bytes.byteLength),
+        })}
         onDownload={() => downloadPdf(bytes, pdf.file.name, "caviarde", TOOL_ID)}
         onStartOver={() => (op.reset(), reset())}
       >
         <Alert variant="info">
-          Les pages caviardées ont été converties en images : leur texte d&apos;origine
-          n&apos;existe plus dans le fichier (il n&apos;est plus sélectionnable ni recherchable).
-          Les autres pages sont inchangées. Ouvrez le résultat et vérifiez chaque zone avant de le
-          partager.
+          {tr(
+            "Les pages caviardées ont été converties en images : leur texte d'origine n'existe plus dans le fichier (il n'est plus sélectionnable ni recherchable). Les autres pages sont inchangées. Ouvrez le résultat et vérifiez chaque zone avant de le partager.",
+          )}
         </Alert>
       </DonePanel>
     );
@@ -173,8 +185,8 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       />
       <ToolPanel className="space-y-3">
         <Label htmlFor="redact-search" className="flex items-center gap-2">
-          <Search className="size-4" aria-hidden="true" /> Marquer automatiquement un mot, un nom ou
-          un numéro
+          <Search className="size-4" aria-hidden="true" />{" "}
+          {tr("Marquer automatiquement un mot, un nom ou un numéro")}
         </Label>
         <form
           className="flex flex-col gap-2 sm:flex-row"
@@ -187,7 +199,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
             id="redact-search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="ex. Dupont, 1 85 03 75 123 456 78, IBAN"
+            placeholder={tr("ex. Dupont, 1 85 03 75 123 456 78, IBAN")}
             data-testid="redact-search"
           />
           <Button
@@ -197,16 +209,16 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
             disabled={!query.trim()}
             data-testid="redact-search-run"
           >
-            Rechercher et marquer
+            {tr("Rechercher et marquer")}
           </Button>
         </form>
         <p className="text-xs text-muted-foreground">
-          Dessinez aussi des rectangles directement sur les pages (souris ou doigt). Un clic sur une
-          zone la supprime. Les documents scannés n&apos;ont pas de texte : dessinez les zones à la
-          main.
+          {tr(
+            "Dessinez aussi des rectangles directement sur les pages (souris ou doigt). Un clic sur une zone la supprime. Les documents scannés n'ont pas de texte : dessinez les zones à la main.",
+          )}
         </p>
       </ToolPanel>
-      <ol className="space-y-6" aria-label="Pages du document" data-testid="redact-pages">
+      <ol className="space-y-6" aria-label={tr("Pages du document")} data-testid="redact-pages">
         {pdf.pages.map((page) => (
           <RedactPage
             key={page.index}
@@ -221,28 +233,34 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       </ol>
       <ToolPanel className="space-y-4">
         <Segmented
-          label="Qualité des pages caviardées"
+          label={tr("Qualité des pages caviardées")}
           value={dpi}
           onChange={setDpi}
           options={[
-            { value: "150", label: "150 dpi", description: "Léger" },
-            { value: "200", label: "200 dpi", description: "Lecture et impression" },
-            { value: "300", label: "300 dpi", description: "Impression fine, plus lourd" },
+            { value: "150", label: "150 dpi", description: tr("Léger") },
+            { value: "200", label: "200 dpi", description: tr("Lecture et impression") },
+            { value: "300", label: "300 dpi", description: tr("Impression fine, plus lourd") },
           ]}
         />
         <Segmented
-          label="Encodage"
+          label={tr("Encodage")}
           value={quality}
           onChange={setQuality}
           className="sm:grid-cols-2"
           options={[
-            { value: "image/jpeg", label: "JPEG", description: "Fichier plus léger" },
-            { value: "image/png", label: "PNG", description: "Texte très net, fichier plus lourd" },
+            { value: "image/jpeg", label: "JPEG", description: tr("Fichier plus léger") },
+            {
+              value: "image/png",
+              label: "PNG",
+              description: tr("Texte très net, fichier plus lourd"),
+            },
           ]}
         />
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground" data-testid="redact-summary">
-            {total === 0 ? "Aucune zone marquée." : `${total} zone(s) sur ${pagesTouched} page(s).`}
+            {total === 0
+              ? tr("Aucune zone marquée.")
+              : tr("{zones} zone(s) sur {pages} page(s).", { zones: total, pages: pagesTouched })}
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <Button
@@ -252,7 +270,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
               onClick={() => setBoxes({})}
               disabled={total === 0}
             >
-              <Trash2 aria-hidden="true" /> Tout effacer
+              <Trash2 aria-hidden="true" /> {tr("Tout effacer")}
             </Button>
             <Button
               type="button"
@@ -262,7 +280,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
               disabled={total === 0}
               data-testid="redact-run"
             >
-              <EyeOff aria-hidden="true" /> Caviarder et créer le PDF
+              <EyeOff aria-hidden="true" /> {tr("Caviarder et créer le PDF")}
             </Button>
           </div>
         </div>
@@ -360,10 +378,10 @@ function RedactPage({ doc, pageIndex, size, boxes, onAdd, onRemove }: RedactPage
   return (
     <li ref={wrapperRef} className="space-y-1.5" data-testid="redact-page">
       <p className="text-sm font-medium">
-        Page {pageIndex + 1}{" "}
+        {tr("Page {n}", { n: pageIndex + 1 })}{" "}
         {boxes.length ? (
           <span className="text-xs font-normal text-muted-foreground">
-            · {boxes.length} zone(s)
+            · {tr("{n} zone(s)", { n: boxes.length })}
           </span>
         ) : null}
       </p>
@@ -379,13 +397,16 @@ function RedactPage({ doc, pageIndex, size, boxes, onAdd, onRemove }: RedactPage
         <canvas
           ref={canvasRef}
           className="block"
-          aria-label={`Aperçu de la page ${pageIndex + 1}`}
+          aria-label={tr("Aperçu de la page {n}", { n: pageIndex + 1 })}
         />
         {boxes.map((box) => (
           <button
             key={box.id}
             type="button"
-            aria-label={`Supprimer la zone caviardée ${Math.round(box.width)}×${Math.round(box.height)} points`}
+            aria-label={tr("Supprimer la zone caviardée {w}×{h} points", {
+              w: Math.round(box.width),
+              h: Math.round(box.height),
+            })}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={() => onRemove(box.id)}
             className="group absolute bg-black outline-2 outline-offset-0 outline-transparent hover:outline-destructive focus-visible:outline-primary"

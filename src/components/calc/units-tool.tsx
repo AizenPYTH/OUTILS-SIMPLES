@@ -15,6 +15,7 @@ import {
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { UNIT_CATEGORIES, convertUnit, formatConverted, getUnitCategory } from "@/lib/calc/units";
 import { parseNumber } from "@/lib/calc/percent";
+import { tr } from "@/lib/i18n/messages";
 
 export function UnitsTool({ initialCategory = "length" }: { initialCategory?: string }) {
   const [categoryId, setCategoryId] = React.useState(initialCategory);
@@ -40,7 +41,7 @@ export function UnitsTool({ initialCategory = "length" }: { initialCategory?: st
     <div className="space-y-4">
       <ToolPanel className="space-y-4">
         <div className="space-y-1">
-          <Label htmlFor="units-category">Grandeur</Label>
+          <Label htmlFor="units-category">{tr("Grandeur")}</Label>
           <Select value={category.id} onValueChange={changeCategory}>
             <SelectTrigger id="units-category" className="w-full sm:w-64">
               <SelectValue />
@@ -56,7 +57,7 @@ export function UnitsTool({ initialCategory = "length" }: { initialCategory?: st
         </div>
         <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto_1fr] sm:items-end">
           <div className="space-y-1">
-            <Label htmlFor="units-value">Valeur</Label>
+            <Label htmlFor="units-value">{tr("Valeur")}</Label>
             <Input
               id="units-value"
               inputMode="decimal"
@@ -66,7 +67,7 @@ export function UnitsTool({ initialCategory = "length" }: { initialCategory?: st
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="units-from">De</Label>
+            <Label htmlFor="units-from">{tr("De")}</Label>
             <Select value={from} onValueChange={setFrom}>
               <SelectTrigger id="units-from">
                 <SelectValue />
@@ -84,14 +85,14 @@ export function UnitsTool({ initialCategory = "length" }: { initialCategory?: st
             type="button"
             variant="outline"
             size="icon"
-            aria-label="Inverser les unités"
+            aria-label={tr("Inverser les unités")}
             onClick={() => (setFrom(to), setTo(from))}
             className="mb-0.5"
           >
             <ArrowLeftRight aria-hidden="true" />
           </Button>
           <div className="space-y-1">
-            <Label htmlFor="units-to">Vers</Label>
+            <Label htmlFor="units-to">{tr("Vers")}</Label>
             <Select value={to} onValueChange={setTo}>
               <SelectTrigger id="units-to">
                 <SelectValue />
@@ -108,7 +109,7 @@ export function UnitsTool({ initialCategory = "length" }: { initialCategory?: st
         </div>
       </ToolPanel>
       <ToolPanel>
-        <p className="text-xs text-muted-foreground">Résultat</p>
+        <p className="text-xs text-muted-foreground">{tr("Résultat")}</p>
         <p
           className="font-heading text-2xl font-bold tabular-nums"
           data-testid="units-result"
@@ -126,7 +127,10 @@ export function UnitsTool({ initialCategory = "length" }: { initialCategory?: st
       {number !== null ? (
         <ToolPanel>
           <p className="mb-2 text-sm font-medium">
-            {formatConverted(number)} {fromUnit?.symbol} dans toutes les unités
+            {tr("{value} {symbol} dans toutes les unités", {
+              value: formatConverted(number),
+              symbol: fromUnit?.symbol ?? "",
+            })}
           </p>
           <table className="w-full text-sm">
             <tbody>

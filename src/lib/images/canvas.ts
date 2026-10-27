@@ -2,6 +2,7 @@
  * Browser-side image operations built on canvas. Every function returns a new
  * canvas or encoded bytes; callers must release object URLs they create.
  */
+import { tr } from "@/lib/i18n/messages";
 import type { CropRect, ImageOutputFormat } from "./types";
 import type { RgbaImage } from "./pixels";
 import { isHeic } from "./heic";
@@ -39,7 +40,7 @@ export async function decodeImage(file: Blob): Promise<DecodedImage> {
       const img = await new Promise<HTMLImageElement>((resolve, reject) => {
         const el = new Image();
         el.onload = () => resolve(el);
-        el.onerror = () => reject(new Error("Image illisible"));
+        el.onerror = () => reject(new Error(tr("Image illisible")));
         el.src = url;
       });
       const bitmap = await createImageBitmap(img);
@@ -59,7 +60,7 @@ export function createCanvas(width: number, height: number): HTMLCanvasElement {
 
 export function context2d(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
-  if (!ctx) throw new Error("Canvas 2D indisponible dans ce navigateur.");
+  if (!ctx) throw new Error(tr("Canvas 2D indisponible dans ce navigateur."));
   return ctx;
 }
 
@@ -171,10 +172,12 @@ export async function encodeCanvas(
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, format, format === "image/png" ? undefined : quality),
   );
-  if (!blob) throw new Error("Encodage de l'image impossible.");
+  if (!blob) throw new Error(tr("Encodage de l'image impossible."));
   // Some browsers silently fall back to PNG when WebP is unsupported.
   if (blob.type !== format)
-    throw new Error(`Le format ${format} n'est pas pris en charge par ce navigateur.`);
+    throw new Error(
+      tr("Le format {format} n'est pas pris en charge par ce navigateur.", { format }),
+    );
   return { blob, bytes: blob.size, format };
 }
 

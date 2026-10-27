@@ -4,6 +4,8 @@ import { siteConfig } from "@/config/site";
 import { getActiveCategories, getCategoryPath, getToolsByCategory } from "@/lib/tools";
 import { t } from "@/lib/i18n";
 import { Logo } from "./logo";
+import { localizedPath } from "@/lib/i18n/routes";
+import { tr } from "@/lib/i18n/messages";
 
 /** Four-column footer: brand and trust, families, resources, legal; bottom bar. */
 export function SiteFooter() {
@@ -37,7 +39,10 @@ export function SiteFooter() {
               </li>
             ))}
             <li>
-              <Link href="/outils/" className="text-sm font-medium text-link hover:underline">
+              <Link
+                href={localizedPath("/outils/")}
+                className="text-sm font-medium text-link hover:underline"
+              >
                 {t.nav.tools}
               </Link>
             </li>
@@ -47,28 +52,28 @@ export function SiteFooter() {
           <h2 className="mb-3 text-sm font-semibold">{t.footer.siteHeading}</h2>
           <ul className="space-y-2">
             <li>
-              <Link href="/guides/" className={linkClass}>
+              <Link href={localizedPath("/guides/")} className={linkClass}>
                 {t.nav.guides}
               </Link>
             </li>
             <li>
-              <Link href="/a-propos/" className={linkClass}>
+              <Link href={localizedPath("/a-propos/")} className={linkClass}>
                 {t.nav.about}
               </Link>
             </li>
             <li>
-              <Link href="/contact/" className={linkClass}>
+              <Link href={localizedPath("/contact/")} className={linkClass}>
                 {t.nav.contact}
               </Link>
             </li>
             <li>
-              <Link href="/confidentialite/" className={linkClass}>
+              <Link href={localizedPath("/confidentialite/")} className={linkClass}>
                 {t.nav.privacy}
               </Link>
             </li>
             <li>
-              <Link href="/verifiez-le/" className={linkClass}>
-                Vérifiez-le vous-même
+              <Link href={localizedPath("/verifiez-le/")} className={linkClass}>
+                {tr("Vérifiez-le vous-même")}
               </Link>
             </li>
           </ul>
@@ -77,22 +82,22 @@ export function SiteFooter() {
           <h2 className="mb-3 text-sm font-semibold">{t.footer.legalHeading}</h2>
           <ul className="space-y-2">
             <li>
-              <Link href="/mentions-legales/" className={linkClass}>
+              <Link href={localizedPath("/mentions-legales/")} className={linkClass}>
                 {t.nav.legal}
               </Link>
             </li>
             <li>
-              <Link href="/conditions-utilisation/" className={linkClass}>
+              <Link href={localizedPath("/conditions-utilisation/")} className={linkClass}>
                 {t.nav.terms}
               </Link>
             </li>
             <li>
-              <Link href="/gestion-cookies/" className={linkClass}>
+              <Link href={localizedPath("/gestion-cookies/")} className={linkClass}>
                 {t.nav.cookies}
               </Link>
             </li>
             <li>
-              <Link href="/affiliation/" className={linkClass}>
+              <Link href={localizedPath("/affiliation/")} className={linkClass}>
                 {t.nav.affiliate}
               </Link>
             </li>

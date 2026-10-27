@@ -5,6 +5,7 @@
 import { PageSizes, StandardFonts, rgb, type PDFPage } from "pdf-lib";
 import { createPdfDocument, savePdfDocument } from "../load";
 import { sanitizeForStandardFont } from "../fonts";
+import { tr } from "@/lib/i18n/messages";
 import {
   FRENCH_MONTHS,
   FRENCH_WEEKDAYS_SHORT,
@@ -389,7 +390,9 @@ function drawMonth(
     );
     if (holidaysOfMonth.length) {
       const { text } = sanitizeForStandardFont(
-        `Jours fériés : ${holidaysOfMonth.map(([iso, name]) => `${Number(iso.slice(8))} ${name}`).join(" · ")}`,
+        tr("Jours fériés : {list}", {
+          list: holidaysOfMonth.map(([iso, name]) => `${Number(iso.slice(8))} ${name}`).join(" · "),
+        }),
       );
       page.drawText(text, { x: box.x, y: box.y - 14, size: 8, font: ctx.font, color: MUTED });
     }

@@ -35,6 +35,7 @@ import { deriveOutputName } from "@/lib/files/filename";
 import { triggerDownload } from "@/lib/files/download";
 import { formatBytes } from "@/lib/files/format";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 import { IMAGE_MAX_SIZE, validateImageFile } from "./image-batch-tool";
 import {
   FormatOptions,
@@ -87,7 +88,7 @@ export function CropImageTool() {
       setResult(null);
       track("tool_start", { tool: TOOL_ID });
     } catch {
-      toast.error("Image illisible par ce navigateur.");
+      toast.error(tr("Image illisible par ce navigateur."));
     }
   };
 
@@ -138,7 +139,7 @@ export function CropImageTool() {
       });
       track("tool_success", { tool: TOOL_ID });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Recadrage impossible.");
+      toast.error(error instanceof Error ? tr(error.message) : tr("Recadrage impossible."));
     } finally {
       setBusy(false);
     }
@@ -150,9 +151,11 @@ export function CropImageTool() {
         onFiles={(f) => f[0] && void load(f[0])}
         accept="image/*"
         validate={validateImageFile}
-        title="Déposez une image à recadrer"
-        hint={`JPG, PNG, WebP, GIF, BMP, AVIF, SVG · ${formatBytes(IMAGE_MAX_SIZE)} max`}
-        buttonLabel="Choisir une image"
+        title={tr("Déposez une image à recadrer")}
+        hint={tr("JPG, PNG, WebP, GIF, BMP, AVIF, SVG · {max} max", {
+          max: formatBytes(IMAGE_MAX_SIZE),
+        })}
+        buttonLabel={tr("Choisir une image")}
         testId="image-dropzone"
       />
     );
@@ -166,20 +169,20 @@ export function CropImageTool() {
           triggerDownload(result.blob, result.name);
           track("tool_download", { tool: TOOL_ID });
         }}
-        downloadLabel="Télécharger l'image"
+        downloadLabel={tr("Télécharger l'image")}
         onStartOver={reset}
       >
         <div className="flex justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
           <img
             src={result.url}
-            alt="Aperçu de l'image recadrée"
+            alt={tr("Aperçu de l'image recadrée")}
             className="max-h-80 max-w-full rounded-md border border-border checkerboard"
           />
         </div>
         <div className="mt-4 text-center">
           <Button type="button" variant="ghost" size="sm" onClick={() => setResult(null)}>
-            Ajuster le recadrage
+            {tr("Ajuster le recadrage")}
           </Button>
         </div>
       </DonePanel>
@@ -193,7 +196,7 @@ export function CropImageTool() {
           {file.name} · {decoded.width}×{decoded.height} px
         </p>
         <Button type="button" variant="outline" size="sm" onClick={reset}>
-          <RefreshCw aria-hidden="true" /> Autre image
+          <RefreshCw aria-hidden="true" /> {tr("Autre image")}
         </Button>
       </div>
       <CropBox
@@ -207,7 +210,7 @@ export function CropImageTool() {
       <ToolPanel className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-[1fr_auto_auto_auto_auto]">
           <div className="space-y-1">
-            <Label htmlFor="crop-ratio">Proportions</Label>
+            <Label htmlFor="crop-ratio">{tr("Proportions")}</Label>
             <Select value={String(ratioIndex)} onValueChange={(v) => applyRatio(Number(v))}>
               <SelectTrigger id="crop-ratio">
                 <SelectValue />
@@ -224,7 +227,7 @@ export function CropImageTool() {
           {(["x", "y", "width", "height"] as const).map((key) => (
             <div key={key} className="space-y-1">
               <Label htmlFor={`crop-${key}`}>
-                {{ x: "X", y: "Y", width: "Largeur", height: "Hauteur" }[key]}
+                {{ x: "X", y: "Y", width: tr("Largeur"), height: tr("Hauteur") }[key]}
               </Label>
               <Input
                 id={`crop-${key}`}
@@ -249,7 +252,8 @@ export function CropImageTool() {
           loading={busy}
           data-testid="crop-run"
         >
-          <Crop aria-hidden="true" /> Recadrer ({crop.width}×{crop.height} px)
+          <Crop aria-hidden="true" />{" "}
+          {tr("Recadrer ({width}×{height} px)", { width: crop.width, height: crop.height })}
         </Button>
       </ToolPanel>
     </div>

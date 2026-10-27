@@ -16,6 +16,7 @@ import {
 import { fitDimensions, outputExtensions, supportsTransparency } from "@/lib/images/types";
 import { deriveOutputName } from "@/lib/files/filename";
 import { formatPercent } from "@/lib/files/format";
+import { tr } from "@/lib/i18n/messages";
 import { ImageBatchTool } from "./image-batch-tool";
 import {
   FormatOptions,
@@ -56,7 +57,7 @@ export function CompressImageTool() {
         const flat = flattenOnBackground(canvas, format.background);
         releaseCanvas(canvas);
         canvas = flat;
-        note = "transparence aplatie";
+        note = tr("transparence aplatie");
       }
       const encoded = await encodeCanvas(canvas, target, format.quality);
       releaseCanvas(canvas);
@@ -71,7 +72,7 @@ export function CompressImageTool() {
           name: item.file.name,
           width: decoded.width,
           height: decoded.height,
-          note: "déjà optimisée : original conservé",
+          note: tr("déjà optimisée : original conservé"),
         };
       }
       return {
@@ -88,7 +89,7 @@ export function CompressImageTool() {
   return (
     <ImageBatchTool
       toolId={TOOL_ID}
-      actionLabel="Compresser"
+      actionLabel={tr("Compresser")}
       zipName="images-compressees"
       processor={processor}
       summary={(item) => {
@@ -96,7 +97,7 @@ export function CompressImageTool() {
         return delta > 0 ? (
           <span className="text-success-foreground">−{formatPercent(delta / item.file.size)}</span>
         ) : (
-          <span className="text-muted-foreground">sans gain</span>
+          <span className="text-muted-foreground">{tr("sans gain")}</span>
         );
       }}
       options={
@@ -111,9 +112,9 @@ export function CompressImageTool() {
                 className="mt-0.5"
               />
               <Label htmlFor="compress-limit" className="flex-col items-start gap-1 font-normal">
-                <span>Limiter la taille en pixels</span>
+                <span>{tr("Limiter la taille en pixels")}</span>
                 <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                  Côté max&nbsp;
+                  {tr("Côté max")}&nbsp;
                   <Input
                     type="number"
                     min={100}
@@ -123,7 +124,7 @@ export function CompressImageTool() {
                     onChange={(e) => setMaxDimension(Number(e.target.value) || 2048)}
                     className="h-8 w-24"
                     disabled={!limitSize}
-                    aria-label="Dimension maximale en pixels"
+                    aria-label={tr("Dimension maximale en pixels")}
                   />
                   px
                 </span>
@@ -137,14 +138,14 @@ export function CompressImageTool() {
                 className="mt-0.5"
               />
               <Label htmlFor="compress-keep" className="font-normal">
-                Conserver l&apos;original si la version compressée est plus lourde
+                {tr("Conserver l'original si la version compressée est plus lourde")}
               </Label>
             </div>
           </div>
           <Alert variant="info">
-            La compression JPG/WebP est avec perte : baissez la qualité pour gagner du poids,
-            vérifiez le rendu avant d&apos;utiliser l&apos;image. Le PNG reste sans perte (gain
-            limité).
+            {tr(
+              "La compression JPG/WebP est avec perte : baissez la qualité pour gagner du poids, vérifiez le rendu avant d'utiliser l'image. Le PNG reste sans perte (gain limité).",
+            )}
           </Alert>
         </ToolPanel>
       }

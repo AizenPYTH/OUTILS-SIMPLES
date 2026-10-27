@@ -40,6 +40,7 @@ import {
 import { detectImageType } from "@/lib/files/validation";
 import { formatBytes } from "@/lib/files/format";
 import { uid } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-from-images";
 
@@ -65,7 +66,7 @@ export function ImagesToPdfTool() {
   React.useEffect(() => () => itemsRef.current.forEach((i) => URL.revokeObjectURL(i.url)), []);
 
   const add = (files: File[]) => {
-    if (items.length + files.length > 100) toast.info("100 images maximum.");
+    if (items.length + files.length > 100) toast.info(tr("100 images maximum."));
     setItems((list) => [
       ...list,
       ...files
@@ -90,7 +91,11 @@ export function ImagesToPdfTool() {
       const inputs: ImageInput[] = [];
       for (let i = 0; i < items.length; i += 1) {
         const item = items[i]!;
-        report({ current: i + 1, total: items.length, label: `Préparation de ${item.file.name}…` });
+        report({
+          current: i + 1,
+          total: items.length,
+          label: tr("Préparation de {name}…", { name: item.file.name }),
+        });
         const bytes = new Uint8Array(await item.file.arrayBuffer());
         const type = detectImageType(bytes);
         if (type === "image/jpeg" || (type === "image/png" && item.file.size < 20 * 1024 * 1024)) {
@@ -133,7 +138,7 @@ export function ImagesToPdfTool() {
     const bytes = op.state.result;
     return (
       <DonePanel
-        summary={`${items.length} page(s) · ${formatBytes(bytes.byteLength)}`}
+        summary={`${tr("{n} page(s)", { n: items.length })} · ${formatBytes(bytes.byteLength)}`}
         onDownload={() =>
           downloadPdf(bytes, items[0]?.file.name ?? "images.pdf", "images", TOOL_ID)
         }
@@ -150,9 +155,11 @@ export function ImagesToPdfTool() {
           accept="image/*"
           validate={validateImageFile}
           multiple
-          title="Déposez vos images (JPG, PNG, WebP…)"
-          hint={`Une page par image · ${formatBytes(IMAGE_MAX_SIZE)} max par fichier · 100 images max`}
-          buttonLabel="Choisir des images"
+          title={tr("Déposez vos images (JPG, PNG, WebP…)")}
+          hint={tr("Une page par image · {size} max par fichier · 100 images max", {
+            size: formatBytes(IMAGE_MAX_SIZE),
+          })}
+          buttonLabel={tr("Choisir des images")}
           capture="environment"
           testId="image-dropzone"
         />
@@ -176,7 +183,7 @@ export function ImagesToPdfTool() {
             <SortableContext items={items.map((i) => i.id)} strategy={rectSortingStrategy}>
               <ul
                 className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(120px,1fr))]"
-                aria-label="Ordre des pages"
+                aria-label={tr("Ordre des pages")}
                 data-testid="images-list"
               >
                 {items.map((item, index) => (
@@ -196,28 +203,36 @@ export function ImagesToPdfTool() {
             validate={validateImageFile}
             multiple
             compact
-            title="Ajouter des images"
-            hint="Glissez d'autres images ou cliquez"
-            buttonLabel="Ajouter"
+            title={tr("Ajouter des images")}
+            hint={tr("Glissez d'autres images ou cliquez")}
+            buttonLabel={tr("Ajouter")}
             testId="image-dropzone-more"
           />
           <ToolPanel className="space-y-4">
             <Segmented
-              label="Taille des pages"
+              label={tr("Taille des pages")}
               value={options.pageSize}
               onChange={(pageSize) => setOptions((o) => ({ ...o, pageSize }))}
               className="sm:grid-cols-4"
               options={[
-                { value: "a4-portrait", label: "A4 portrait", description: "Image centrée" },
-                { value: "a4-landscape", label: "A4 paysage", description: "Image centrée" },
-                { value: "letter", label: "Lettre US", description: "216 × 279 mm" },
-                { value: "fit-image", label: "Taille de l'image", description: "Page = image" },
+                {
+                  value: "a4-portrait",
+                  label: tr("A4 portrait"),
+                  description: tr("Image centrée"),
+                },
+                {
+                  value: "a4-landscape",
+                  label: tr("A4 paysage"),
+                  description: tr("Image centrée"),
+                },
+                { value: "letter", label: tr("Lettre US"), description: "216 × 279 mm" },
+                { value: "fit-image", label: tr("Taille de l'image"), description: "Page = image" },
               ]}
             />
             <div className="flex flex-wrap gap-4">
               {options.pageSize !== "fit-image" ? (
                 <div className="space-y-1">
-                  <Label htmlFor="i2p-margin">Marge (pt)</Label>
+                  <Label htmlFor="i2p-margin">{tr("Marge (pt)")}</Label>
                   <Input
                     id="i2p-margin"
                     type="number"
@@ -232,7 +247,7 @@ export function ImagesToPdfTool() {
                 </div>
               ) : (
                 <div className="space-y-1">
-                  <Label htmlFor="i2p-dpi">Résolution (dpi)</Label>
+                  <Label htmlFor="i2p-dpi">{tr("Résolution (dpi)")}</Label>
                   <Input
                     id="i2p-dpi"
                     type="number"
@@ -248,7 +263,9 @@ export function ImagesToPdfTool() {
               )}
               <div className="space-y-1">
                 <Label htmlFor="i2p-quality">
-                  Qualité JPG des images converties ({Math.round(jpegQuality * 100)} %)
+                  {tr("Qualité JPG des images converties ({q} %)", {
+                    q: Math.round(jpegQuality * 100),
+                  })}
                 </Label>
                 <input
                   id="i2p-quality"
@@ -262,17 +279,20 @@ export function ImagesToPdfTool() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Les JPG et PNG sont intégrés tels quels (aucune recompression). Les autres formats
-              sont convertis en PNG (transparence conservée) ou JPG.
+              {tr(
+                "Les JPG et PNG sont intégrés tels quels (aucune recompression). Les autres formats sont convertis en PNG (transparence conservée) ou JPG.",
+              )}
             </p>
           </ToolPanel>
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
             <Button type="button" variant="outline" onClick={clear}>
-              Tout retirer
+              {tr("Tout retirer")}
             </Button>
             <Button type="button" size="lg" onClick={run} data-testid="images-to-pdf-run">
-              <FileText aria-hidden="true" /> Créer le PDF ({items.length} page
-              {items.length > 1 ? "s" : ""})
+              <FileText aria-hidden="true" />{" "}
+              {tr(items.length > 1 ? "Créer le PDF ({n} pages)" : "Créer le PDF ({n} page)", {
+                n: items.length,
+              })}
             </Button>
           </div>
         </>
@@ -302,7 +322,7 @@ function SortableImage({
     >
       <div
         className="relative cursor-grab touch-none overflow-hidden rounded-[6px] border-2 border-border bg-muted checkerboard active:cursor-grabbing"
-        aria-label={`Page ${index + 1} : ${item.file.name}`}
+        aria-label={tr("Page {n} : {name}", { n: index + 1, name: item.file.name })}
         {...attributes}
         {...listeners}
       >
@@ -317,7 +337,7 @@ function SortableImage({
         variant="ghost"
         size="icon-sm"
         onClick={onRemove}
-        aria-label={`Retirer ${item.file.name}`}
+        aria-label={tr("Retirer {name}", { name: item.file.name })}
         className="text-destructive hover:text-destructive"
       >
         <Trash2 aria-hidden="true" />

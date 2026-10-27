@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { previewCanvas } from "@/lib/scan/page-pipeline";
+import { tr } from "@/lib/i18n/messages";
 import type { ScanPage } from "./scanner-tool";
 
 /** Renders the page with its current settings (debounced) into a canvas. */
@@ -56,7 +57,7 @@ export function ScanPagePreview({
       <canvas
         ref={canvasRef}
         className="max-h-[70vh] max-w-full rounded-[4px] shadow-md"
-        aria-label="Aperçu de la page scannée"
+        aria-label={tr("Aperçu de la page scannée")}
       />
     </div>
   );

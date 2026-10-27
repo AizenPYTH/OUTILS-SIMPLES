@@ -25,6 +25,7 @@ import {
   type WatermarkSettings,
 } from "@/lib/images/watermark";
 import { deriveOutputName } from "@/lib/files/filename";
+import { tr } from "@/lib/i18n/messages";
 import { ImageBatchTool } from "./image-batch-tool";
 import {
   FormatOptions,
@@ -37,12 +38,12 @@ import type { BatchProcessor } from "./use-image-batch";
 const TOOL_ID = "image-watermark";
 
 const POSITIONS: { value: WatermarkPosition; label: string }[] = [
-  { value: "bottom-right", label: "Bas droite" },
-  { value: "bottom-left", label: "Bas gauche" },
-  { value: "top-right", label: "Haut droite" },
-  { value: "top-left", label: "Haut gauche" },
-  { value: "center", label: "Centre" },
-  { value: "tile", label: "Mosaïque (toute l'image)" },
+  { value: "bottom-right", label: tr("Bas droite") },
+  { value: "bottom-left", label: tr("Bas gauche") },
+  { value: "top-right", label: tr("Haut droite") },
+  { value: "top-left", label: tr("Haut gauche") },
+  { value: "center", label: tr("Centre") },
+  { value: "tile", label: tr("Mosaïque (toute l'image)") },
 ];
 
 export function WatermarkImageTool() {
@@ -81,7 +82,7 @@ export function WatermarkImageTool() {
   return (
     <ImageBatchTool
       toolId={TOOL_ID}
-      actionLabel="Appliquer le filigrane"
+      actionLabel={tr("Appliquer le filigrane")}
       zipName="images-filigrane"
       processor={processor}
       disabled={!settings.text.trim()}
@@ -89,18 +90,18 @@ export function WatermarkImageTool() {
         <ToolPanel className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1 sm:col-span-2">
-              <Label htmlFor="wm-text">Texte du filigrane</Label>
+              <Label htmlFor="wm-text">{tr("Texte du filigrane")}</Label>
               <Input
                 id="wm-text"
                 value={settings.text}
                 onChange={(e) => patch({ text: e.target.value })}
-                placeholder="© Votre nom · 2026"
+                placeholder={tr("© Votre nom · 2026")}
                 maxLength={120}
                 data-testid="wm-text"
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="wm-position">Position</Label>
+              <Label htmlFor="wm-position">{tr("Position")}</Label>
               <Select
                 value={settings.position}
                 onValueChange={(v) => patch({ position: v as WatermarkPosition })}
@@ -118,7 +119,7 @@ export function WatermarkImageTool() {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="wm-font">Police</Label>
+              <Label htmlFor="wm-font">{tr("Police")}</Label>
               <Select
                 value={settings.font}
                 onValueChange={(v) => patch({ font: v as WatermarkSettings["font"] })}
@@ -134,7 +135,9 @@ export function WatermarkImageTool() {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label htmlFor="wm-size">Taille ({settings.sizePercent} % de la largeur)</Label>
+              <Label htmlFor="wm-size">
+                {tr("Taille ({value} % de la largeur)", { value: settings.sizePercent })}
+              </Label>
               <input
                 id="wm-size"
                 type="range"
@@ -146,7 +149,9 @@ export function WatermarkImageTool() {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="wm-opacity">Opacité ({Math.round(settings.opacity * 100)} %)</Label>
+              <Label htmlFor="wm-opacity">
+                {tr("Opacité ({value} %)", { value: Math.round(settings.opacity * 100) })}
+              </Label>
               <input
                 id="wm-opacity"
                 type="range"
@@ -158,7 +163,9 @@ export function WatermarkImageTool() {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="wm-rotation">Inclinaison ({settings.rotation}°)</Label>
+              <Label htmlFor="wm-rotation">
+                {tr("Inclinaison ({value}°)", { value: settings.rotation })}
+              </Label>
               <input
                 id="wm-rotation"
                 type="range"
@@ -170,7 +177,7 @@ export function WatermarkImageTool() {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="wm-color">Couleur</Label>
+              <Label htmlFor="wm-color">{tr("Couleur")}</Label>
               <div className="flex items-center gap-2">
                 <input
                   id="wm-color"

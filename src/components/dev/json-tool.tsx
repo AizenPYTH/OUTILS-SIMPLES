@@ -16,6 +16,7 @@ import { TextInputPanel, TextOutputPanel } from "@/components/tools/shared/text-
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { describeJson, formatJson, minifyJson, validateJson, type JsonError } from "@/lib/dev/json";
 import { csvToJson, jsonToCsv, type Delimiter } from "@/lib/dev/csv";
+import { tr } from "@/lib/i18n/messages";
 
 type Mode = "format" | "minify" | "to-csv";
 
@@ -47,7 +48,7 @@ export function JsonTool({ initialMode = "format" }: { initialMode?: Mode }) {
     } catch (e) {
       return {
         output: "",
-        error: e instanceof Error ? e.message : "Conversion impossible.",
+        error: e instanceof Error ? e.message : tr("Conversion impossible."),
         summary: "",
       };
     }
@@ -63,17 +64,20 @@ export function JsonTool({ initialMode = "format" }: { initialMode?: Mode }) {
         label="JSON"
         value={input}
         onChange={setInput}
-        placeholder='{"exemple": [1, 2, 3]}'
+        placeholder={tr('{"exemple": [1, 2, 3]}')}
         rows={12}
         acceptFile=".json,application/json,text/plain"
       />
       {errorObj ? (
         <Alert
           variant="destructive"
-          title={`Erreur ligne ${errorObj.line}, colonne ${errorObj.column}`}
+          title={tr("Erreur ligne {line}, colonne {column}", {
+            line: errorObj.line,
+            column: errorObj.column,
+          })}
           data-testid="json-error"
         >
-          <p>{errorObj.message}</p>
+          <p>{tr(errorObj.message)}</p>
           <pre className="mt-2 overflow-x-auto rounded bg-background/60 px-2 py-1 font-mono text-xs">
             {lineText}
             {"\n"}
@@ -86,14 +90,14 @@ export function JsonTool({ initialMode = "format" }: { initialMode?: Mode }) {
             className="px-0"
             onClick={() => document.getElementById("json-input")?.focus()}
           >
-            Aller à l&apos;erreur
+            {tr("Aller à l'erreur")}
           </Button>
         </Alert>
       ) : typeof result.error === "string" ? (
-        <Alert variant="destructive">{result.error}</Alert>
+        <Alert variant="destructive">{tr(result.error)}</Alert>
       ) : result.summary ? (
         <Alert variant="success" data-testid="json-valid">
-          JSON valide : {result.summary}.
+          {tr("JSON valide : {summary}.", { summary: tr(result.summary) })}
         </Alert>
       ) : null}
       <ToolPanel className="flex flex-wrap items-end gap-4">
@@ -104,9 +108,9 @@ export function JsonTool({ initialMode = "format" }: { initialMode?: Mode }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="format">Formater (indenter)</SelectItem>
-              <SelectItem value="minify">Minifier</SelectItem>
-              <SelectItem value="to-csv">Convertir en CSV</SelectItem>
+              <SelectItem value="format">{tr("Formater (indenter)")}</SelectItem>
+              <SelectItem value="minify">{tr("Minifier")}</SelectItem>
+              <SelectItem value="to-csv">{tr("Convertir en CSV")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -119,9 +123,9 @@ export function JsonTool({ initialMode = "format" }: { initialMode?: Mode }) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2">2 espaces</SelectItem>
-                  <SelectItem value="4">4 espaces</SelectItem>
-                  <SelectItem value="tab">Tabulation</SelectItem>
+                  <SelectItem value="2">{tr("2 espaces")}</SelectItem>
+                  <SelectItem value="4">{tr("4 espaces")}</SelectItem>
+                  <SelectItem value="tab">{tr("Tabulation")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -132,22 +136,22 @@ export function JsonTool({ initialMode = "format" }: { initialMode?: Mode }) {
                 onCheckedChange={(c) => setSortKeys(c === true)}
               />
               <Label htmlFor="json-sort" className="font-normal">
-                Trier les clés
+                {tr("Trier les clés")}
               </Label>
             </div>
           </>
         ) : null}
         {mode === "to-csv" ? (
           <div className="space-y-1">
-            <Label htmlFor="json-delim">Séparateur CSV</Label>
+            <Label htmlFor="json-delim">{tr("Séparateur CSV")}</Label>
             <Select value={delimiter} onValueChange={(v) => setDelimiter(v as Delimiter)}>
               <SelectTrigger id="json-delim" className="w-44">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value=";">Point-virgule (Excel FR)</SelectItem>
-                <SelectItem value=",">Virgule</SelectItem>
-                <SelectItem value={"\t"}>Tabulation</SelectItem>
+                <SelectItem value=";">{tr("Point-virgule (Excel FR)")}</SelectItem>
+                <SelectItem value=",">{tr("Virgule")}</SelectItem>
+                <SelectItem value={"\t"}>{tr("Tabulation")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -155,7 +159,7 @@ export function JsonTool({ initialMode = "format" }: { initialMode?: Mode }) {
       </ToolPanel>
       <TextOutputPanel
         id="json-output"
-        label="Résultat"
+        label={tr("Résultat")}
         value={result.output}
         filename={
           mode === "to-csv"
@@ -184,7 +188,7 @@ export function CsvToJsonTool() {
     } catch (e) {
       return {
         output: "",
-        error: e instanceof Error ? e.message : "Conversion impossible.",
+        error: e instanceof Error ? e.message : tr("Conversion impossible."),
         rows: 0,
       };
     }
@@ -193,10 +197,10 @@ export function CsvToJsonTool() {
     <div className="space-y-4">
       <TextInputPanel
         id="csv-input"
-        label="CSV (séparateur détecté automatiquement : ; , tabulation ou |)"
+        label={tr("CSV (séparateur détecté automatiquement : ; , tabulation ou |)")}
         value={input}
         onChange={setInput}
-        placeholder={"nom;ville\nJeanne;Paris"}
+        placeholder={`${tr("nom;ville")}\nJeanne;Paris`}
         rows={10}
         acceptFile=".csv,.tsv,text/csv,text/plain"
       />
@@ -208,20 +212,20 @@ export function CsvToJsonTool() {
             onCheckedChange={(c) => setHeader(c === true)}
           />
           <Label htmlFor="csv-header" className="font-normal">
-            La première ligne contient les en-têtes
+            {tr("La première ligne contient les en-têtes")}
           </Label>
         </div>
         <div className="flex items-center gap-2">
           <Checkbox id="csv-infer" checked={infer} onCheckedChange={(c) => setInfer(c === true)} />
           <Label htmlFor="csv-infer" className="font-normal">
-            Convertir les nombres et booléens
+            {tr("Convertir les nombres et booléens")}
           </Label>
         </div>
       </ToolPanel>
-      {result.error ? <Alert variant="destructive">{result.error}</Alert> : null}
+      {result.error ? <Alert variant="destructive">{tr(result.error)}</Alert> : null}
       <TextOutputPanel
         id="csv-output"
-        label={result.rows ? `${result.rows} ligne(s) converties` : "JSON"}
+        label={result.rows ? tr("{n} ligne(s) converties", { n: result.rows }) : "JSON"}
         value={result.output}
         filename="donnees.json"
         mimeType="application/json"

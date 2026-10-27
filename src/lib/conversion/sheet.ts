@@ -1,6 +1,7 @@
 import { PdfError, toPdfError } from "@/lib/pdf/errors";
 import { parseCsv } from "@/lib/dev/csv";
 import { textToPdf } from "@/lib/pdf/operations/text-to-pdf";
+import { tr } from "@/lib/i18n/messages";
 import {
   defaultOfficeToPdfOptions,
   looksLikeZip,
@@ -21,6 +22,11 @@ export interface SheetToMarkdownOptions {
 }
 
 const MAX_ROWS = 5000;
+
+/** Name of the single table of a CSV file (its heading is omitted in the PDF). */
+function defaultTableName(): string {
+  return tr("Données");
+}
 
 /** fr-FR formatting; the narrow no-break spaces it uses do not exist in the standard PDF fonts. */
 function plainSpaces(text: string): string {
@@ -83,7 +89,9 @@ export async function workbookToTables(
   if (!looksLikeZip(bytes))
     throw new PdfError(
       "UNSUPPORTED",
-      "Ce fichier n'est pas un classeur Excel (.xlsx). Les anciens .xls ne sont pas pris en charge : enregistrez-le au format .xlsx, ou exportez-le en CSV.",
+      tr(
+        "Ce fichier n'est pas un classeur Excel (.xlsx). Les anciens .xls ne sont pas pris en charge : enregistrez-le au format .xlsx, ou exportez-le en CSV.",
+      ),
     );
   const ExcelJS = await import("exceljs");
   const workbook = new ExcelJS.Workbook();
@@ -94,7 +102,9 @@ export async function workbookToTables(
   } catch (error) {
     throw new PdfError(
       "CORRUPTED",
-      "Impossible de lire ce classeur : le fichier est peut-être endommagé ou protégé par un mot de passe.",
+      tr(
+        "Impossible de lire ce classeur : le fichier est peut-être endommagé ou protégé par un mot de passe.",
+      ),
       { cause: error },
     );
   }
@@ -122,28 +132,35 @@ export async function workbookToTables(
       if (cells.some((c) => c !== "")) rows.push(cells);
     });
     if (rows.length === 0) {
-      warnings.push(`Feuille « ${sheet.name} » vide : ignorée.`);
+      warnings.push(tr("Feuille « {name} » vide : ignorée.", { name: sheet.name }));
       return;
     }
     if (truncated)
       warnings.push(
-        `Feuille « ${sheet.name} » : seules les ${maxRows} premières lignes sont converties.`,
+        tr("Feuille « {name} » : seules les {max} premières lignes sont converties.", {
+          name: sheet.name,
+          max: maxRows,
+        }),
       );
     if (sheet.getImages().length > 0)
-      warnings.push(`Feuille « ${sheet.name} » : les images et graphiques ne sont pas convertis.`);
+      warnings.push(
+        tr("Feuille « {name} » : les images et graphiques ne sont pas convertis.", {
+          name: sheet.name,
+        }),
+      );
     tables.push({ name: sheet.name, rows });
   });
   if (tables.length === 0)
-    throw new PdfError("EMPTY", "Ce classeur ne contient aucune donnée convertible.");
+    throw new PdfError("EMPTY", tr("Ce classeur ne contient aucune donnée convertible."));
   return { tables, warnings };
 }
 
-export function csvToTable(text: string, name = "Données"): SheetTable {
+export function csvToTable(text: string, name = defaultTableName()): SheetTable {
   const rows = parseCsv(text.replace(/^﻿/, "")).map((r) =>
     r.map((c) => c.replace(/\s+/g, " ").trim()),
   );
   const kept = rows.filter((r) => r.some((c) => c !== ""));
-  if (kept.length === 0) throw new PdfError("EMPTY", "Ce fichier CSV est vide.");
+  if (kept.length === 0) throw new PdfError("EMPTY", tr("Ce fichier CSV est vide."));
   return { name, rows: kept };
 }
 
@@ -162,7 +179,8 @@ export function tablesToMarkdown(
     const columns = Math.max(...table.rows.map((r) => r.length));
     const pad = (r: string[]) => [...r, ...Array<string>(columns - r.length).fill("")];
     const line = (r: string[]) => `| ${pad(r).map(escapeCell).join(" | ")} |`;
-    if (tables.length > 1 || table.name !== "Données") out.push(`## ${escapeCell(table.name)}\n`);
+    if (tables.length > 1 || table.name !== defaultTableName())
+      out.push(`## ${escapeCell(table.name)}\n`);
     const rows = headerRow ? table.rows : [Array<string>(columns).fill(" "), ...table.rows];
     out.push(line(rows[0]!));
     out.push(`| ${Array<string>(columns).fill("---").join(" | ")} |`);
@@ -191,7 +209,10 @@ export async function sheetToPdf(
   const widest = Math.max(...tables.flatMap((t) => t.rows.map((r) => r.length)));
   if (widest > 12)
     warnings.push(
-      `${widest} colonnes : les colonnes sont étroites, préférez le format paysage ou scindez la feuille.`,
+      tr(
+        "{n} colonnes : les colonnes sont étroites, préférez le format paysage ou scindez la feuille.",
+        { n: widest },
+      ),
     );
   try {
     const result = await textToPdf(tablesToMarkdown(tables, tableOptions), {
@@ -201,7 +222,9 @@ export async function sheetToPdf(
     const notes = [...warnings, ...result.skipped];
     if (result.replacedCharacters)
       notes.push(
-        "Certains caractères (emoji, alphabets non latins, symboles) ont été remplacés par « ? ».",
+        tr(
+          "Certains caractères (emoji, alphabets non latins, symboles) ont été remplacés par « ? ».",
+        ),
       );
     return { ...result, tables, warnings: Array.from(new Set(notes)) };
   } catch (error) {

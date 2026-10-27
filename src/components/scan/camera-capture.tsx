@@ -4,6 +4,7 @@ import * as React from "react";
 import { Camera, Check, RotateCcw, SwitchCamera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { tr } from "@/lib/i18n/messages";
 
 interface CameraCaptureProps {
   open: boolean;
@@ -23,13 +24,16 @@ export function cameraSupported(): boolean {
 }
 
 const ERRORS = {
-  denied:
+  denied: tr(
     "Accès à la caméra refusé. Autorisez la caméra dans les réglages du navigateur ou importez une photo.",
-  unavailable: "Caméra indisponible sur cet appareil. Importez une photo à la place.",
-  noFrame:
+  ),
+  unavailable: tr("Caméra indisponible sur cet appareil. Importez une photo à la place."),
+  noFrame: tr(
     "La caméra n'a pas encore fourni d'image. Patientez une seconde puis réessayez, ou importez une photo.",
-  encode:
+  ),
+  encode: tr(
     "La photo n'a pas pu être enregistrée par le navigateur. Réessayez ou importez une photo.",
+  ),
 };
 
 /**
@@ -167,9 +171,9 @@ export function CameraCapture({
         showCloseButton={false}
         className="gap-2 bg-black p-2 text-white sm:rounded-[20px] max-sm:inset-0 max-sm:left-0 max-sm:top-0 max-sm:flex max-sm:h-dvh max-sm:max-h-none max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:flex-col max-sm:rounded-none max-sm:border-0"
       >
-        <DialogTitle className="sr-only">Prendre une photo</DialogTitle>
+        <DialogTitle className="sr-only">{tr("Prendre une photo")}</DialogTitle>
         <DialogDescription className="sr-only">
-          Cadrez la feuille, appuyez sur le déclencheur, puis gardez ou reprenez la photo.
+          {tr("Cadrez la feuille, appuyez sur le déclencheur, puis gardez ou reprenez la photo.")}
         </DialogDescription>
         <div className="flex h-9 items-center justify-between px-1 text-sm">
           <span
@@ -177,7 +181,11 @@ export function CameraCapture({
             aria-live="polite"
             data-testid="camera-page-count"
           >
-            {total === 0 ? "Aucune page" : total === 1 ? "1 page" : `${total} pages`}
+            {total === 0
+              ? tr("Aucune page")
+              : total === 1
+                ? tr("1 page")
+                : tr("{n} pages", { n: total })}
           </span>
           <Button
             type="button"
@@ -187,7 +195,7 @@ export function CameraCapture({
             className="text-white hover:bg-white/10 hover:text-white"
             data-testid="camera-done"
           >
-            {total > 0 ? "Terminer" : "Fermer"}
+            {total > 0 ? tr("Terminer") : tr("Fermer")}
           </Button>
         </div>
         <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[12px] bg-black max-sm:aspect-auto max-sm:min-h-0 max-sm:flex-1 sm:aspect-[4/3]">
@@ -196,13 +204,13 @@ export function CameraCapture({
             playsInline
             muted
             className={`h-full w-full object-contain ${review ? "invisible" : ""}`}
-            aria-label="Aperçu de la caméra"
+            aria-label={tr("Aperçu de la caméra")}
           />
           {review ? (
             // eslint-disable-next-line @next/next/no-img-element -- object URL preview, never optimised
             <img
               src={review.url}
-              alt="Photo prise, à vérifier"
+              alt={tr("Photo prise, à vérifier")}
               className="absolute inset-0 h-full w-full object-contain"
               data-testid="camera-review"
             />
@@ -218,7 +226,7 @@ export function CameraCapture({
           ) : null}
           {!ready && !error && !review ? (
             <p className="absolute inset-x-4 top-1/2 -translate-y-1/2 text-center text-sm text-white/80">
-              Ouverture de la caméra…
+              {tr("Ouverture de la caméra…")}
             </p>
           ) : null}
         </div>
@@ -232,7 +240,7 @@ export function CameraCapture({
               className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
               data-testid="camera-retake"
             >
-              <RotateCcw aria-hidden="true" /> Reprendre
+              <RotateCcw aria-hidden="true" /> {tr("Reprendre")}
             </Button>
             <Button
               type="button"
@@ -241,7 +249,7 @@ export function CameraCapture({
               className="flex-1"
               data-testid="camera-keep"
             >
-              <Check aria-hidden="true" /> Garder cette page
+              <Check aria-hidden="true" /> {tr("Garder cette page")}
             </Button>
           </div>
         ) : (
@@ -251,7 +259,7 @@ export function CameraCapture({
               variant="ghost"
               size="icon"
               onClick={() => onOpenChange(false)}
-              aria-label="Fermer la caméra"
+              aria-label={tr("Fermer la caméra")}
               className="text-white hover:bg-white/10 hover:text-white"
             >
               <X aria-hidden="true" />
@@ -260,7 +268,7 @@ export function CameraCapture({
               type="button"
               onClick={shoot}
               disabled={!ready || capturing}
-              aria-label="Prendre la photo"
+              aria-label={tr("Prendre la photo")}
               className="flex size-[72px] items-center justify-center rounded-full border-4 border-white bg-white/20 transition-transform active:scale-95 disabled:opacity-40"
               data-testid="camera-shutter"
             >
@@ -271,7 +279,7 @@ export function CameraCapture({
               variant="ghost"
               size="icon"
               onClick={() => setFacing(facing === "environment" ? "user" : "environment")}
-              aria-label="Changer de caméra"
+              aria-label={tr("Changer de caméra")}
               className="text-white hover:bg-white/10 hover:text-white"
             >
               <SwitchCamera aria-hidden="true" />

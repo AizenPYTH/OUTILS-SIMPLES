@@ -4,6 +4,7 @@ import { Download } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { triggerDownload } from "@/lib/files/download";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 
 interface DownloadTextButtonProps extends Omit<ButtonProps, "onClick" | "children"> {
   text: string;
@@ -17,7 +18,7 @@ export function DownloadTextButton({
   text,
   filename,
   mimeType = "text/plain;charset=utf-8",
-  label = "Télécharger",
+  label,
   toolId,
   ...props
 }: DownloadTextButtonProps) {
@@ -35,7 +36,7 @@ export function DownloadTextButton({
       data-testid="download-text-button"
     >
       <Download aria-hidden="true" />
-      {label}
+      {label ?? tr("Télécharger")}
     </Button>
   );
 }

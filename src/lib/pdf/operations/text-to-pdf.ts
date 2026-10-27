@@ -12,6 +12,7 @@ import { PdfError, toPdfError } from "../errors";
 import { createPdfDocument, savePdfDocument } from "../load";
 import { resolveStandardFont, sanitizeForStandardFont, type FontFamily } from "../fonts";
 import { unescapeHtml } from "@/lib/dev/encoding";
+import { tr } from "@/lib/i18n/messages";
 
 export interface TextToPdfOptions {
   /** Interpret the source as Markdown (GFM); otherwise plain text with preserved line breaks. */
@@ -88,7 +89,7 @@ export async function textToPdf(
   options: TextToPdfOptions = defaultTextToPdfOptions,
 ): Promise<TextToPdfResult> {
   if (!source.trim() && !options.title?.trim())
-    throw new PdfError("NO_SELECTION", "Le texte à convertir est vide.", { recoverable: true });
+    throw new PdfError("NO_SELECTION", tr("Le texte à convertir est vide."), { recoverable: true });
   const doc = await createPdfDocument();
   const fonts: Fonts = {
     regular: await doc.embedFont(
@@ -227,7 +228,11 @@ class Layout {
             : await this.doc.embedJpg(bytes);
         this.images.set(token.href, image);
       } catch {
-        this.skipped.push(`Image illisible ignorée${token.text ? ` : ${token.text}` : ""}`);
+        this.skipped.push(
+          token.text
+            ? tr("Image illisible ignorée : {text}", { text: token.text })
+            : tr("Image illisible ignorée"),
+        );
       }
     }
   }
@@ -329,7 +334,7 @@ class Layout {
       case "html": {
         const text = (token as Tokens.HTML).text.replace(/<[^>]+>/g, "").trim();
         if (text) this.paragraph([plainRun(unescapeHtml(text))], indent);
-        else this.skipped.push("Bloc HTML ignoré");
+        else this.skipped.push(tr("Bloc HTML ignoré"));
         break;
       }
       case "space":
@@ -586,9 +591,12 @@ class Layout {
           if (!this.images.has(image.href)) {
             const label = DATA_IMAGE.test(image.href) ? "" : image.href.slice(0, 80);
             this.skipped.push(
-              `Image ignorée${image.text || label ? ` : ${image.text || label}` : ""}`,
+              image.text || label
+                ? tr("Image ignorée : {text}", { text: image.text || label })
+                : tr("Image ignorée"),
             );
-          } else this.skipped.push("Image dans un tableau ou une liste remplacée par son texte");
+          } else
+            this.skipped.push(tr("Image dans un tableau ou une liste remplacée par son texte"));
           if (image.text) out.push({ ...plainRun(`[${image.text}]`), ...style, italic: true });
           break;
         }

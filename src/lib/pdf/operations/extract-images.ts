@@ -13,6 +13,7 @@ import {
 } from "pdf-lib";
 import { loadPdfDocument } from "../load";
 import { encodePng, type PngChannels } from "@/lib/images/png-encode";
+import { tr } from "@/lib/i18n/messages";
 
 export type ExtractedImageType = "image/jpeg" | "image/png" | "image/jp2";
 
@@ -90,7 +91,7 @@ export async function extractImages(
       } catch (error) {
         result.skipped.push({
           pageIndex,
-          reason: error instanceof Error ? error.message : "image illisible",
+          reason: error instanceof Error ? error.message : tr("image illisible"),
         });
       }
     }
@@ -139,11 +140,11 @@ function convertImageStream(
   const hasSMask = dict.has(PDFName.of("SMask"));
   const baseName = `page-${pageIndex + 1}-image-${index}`;
 
-  if (!(stream instanceof PDFRawStream)) throw new Error("flux d'image non lisible");
+  if (!(stream instanceof PDFRawStream)) throw new Error(tr("flux d'image non lisible"));
 
   const codec = filters[filters.length - 1];
   if (codec === "DCTDecode") {
-    if (filters.length > 1) throw new Error("JPEG encapsulé dans un second filtre");
+    if (filters.length > 1) throw new Error(tr("JPEG encapsulé dans un second filtre"));
     return {
       pageIndex,
       name: `${baseName}.jpg`,
@@ -151,11 +152,11 @@ function convertImageStream(
       mimeType: "image/jpeg",
       width,
       height,
-      note: hasSMask ? "transparence non conservée" : undefined,
+      note: hasSMask ? tr("transparence non conservée") : undefined,
     };
   }
   if (codec === "JPXDecode") {
-    if (filters.length > 1) throw new Error("JPEG 2000 encapsulé dans un second filtre");
+    if (filters.length > 1) throw new Error(tr("JPEG 2000 encapsulé dans un second filtre"));
     return {
       pageIndex,
       name: `${baseName}.jp2`,
@@ -163,13 +164,13 @@ function convertImageStream(
       mimeType: "image/jp2",
       width,
       height,
-      note: "JPEG 2000 : ouvrir avec un logiciel compatible",
+      note: tr("JPEG 2000 : ouvrir avec un logiciel compatible"),
     };
   }
   if (codec === "CCITTFaxDecode")
-    throw new Error("image fax CCITT non prise en charge (utilisez « PDF vers images »)");
+    throw new Error(tr("image fax CCITT non prise en charge (utilisez « PDF vers images »)"));
   if (codec === "JBIG2Decode")
-    throw new Error("image JBIG2 non prise en charge (utilisez « PDF vers images »)");
+    throw new Error(tr("image JBIG2 non prise en charge (utilisez « PDF vers images »)"));
   if (
     filters.some(
       (f) =>
@@ -182,7 +183,7 @@ function convertImageStream(
         ].includes(f),
     )
   )
-    throw new Error(`filtre ${codec} non pris en charge`);
+    throw new Error(tr("filtre {codec} non pris en charge", { codec: String(codec) }));
 
   const samples = filters.length ? decodePDFRawStream(stream).decode() : stream.contents;
   const isMask =
@@ -199,7 +200,7 @@ function convertImageStream(
     : describeColorSpace(context, context.lookup(dict.get(PDFName.of("ColorSpace"))));
   const rowBits = width * color.components * bpc;
   const rowBytes = Math.ceil(rowBits / 8);
-  if (samples.length < rowBytes * height) throw new Error("données d'image incomplètes");
+  if (samples.length < rowBytes * height) throw new Error(tr("données d'image incomplètes"));
 
   // Unpack to one 8-bit value per component.
   const unpacked = new Uint8Array(width * height * color.components);
@@ -283,7 +284,7 @@ function convertImageStream(
     }
     pixels = withAlpha;
     channels = (channels + 1) as PngChannels;
-  } else if (hasSMask) note = "transparence non conservée";
+  } else if (hasSMask) note = tr("transparence non conservée");
 
   return {
     pageIndex,
@@ -319,7 +320,7 @@ function describeColorSpace(context: Context, cs: unknown): ColorInfo {
       // Approximation: render the tint as a grey level (1 = full ink).
       const names = familyName === "DeviceN" ? context.lookup(cs.get(1)) : null;
       const count = names instanceof PDFArray ? names.size() : 1;
-      if (count !== 1) throw new Error("espace colorimétrique DeviceN non pris en charge");
+      if (count !== 1) throw new Error(tr("espace colorimétrique DeviceN non pris en charge"));
       return { components: 1, kind: "gray", palette: invertedGrayPalette(), paletteComponents: 1 };
     }
     if (familyName === "Indexed" || familyName === "I") {
@@ -328,11 +329,11 @@ function describeColorSpace(context: Context, cs: unknown): ColorInfo {
       let table: Uint8Array;
       if (lookup instanceof PDFHexString || lookup instanceof PDFString) table = lookup.asBytes();
       else if (lookup instanceof PDFRawStream) table = decodePDFRawStream(lookup).decode();
-      else throw new Error("palette Indexed illisible");
+      else throw new Error(tr("palette Indexed illisible"));
       return { components: 1, kind: base.kind, palette: table, paletteComponents: base.components };
     }
   }
-  throw new Error("espace colorimétrique non pris en charge");
+  throw new Error(tr("espace colorimétrique non pris en charge"));
 }
 
 function byName(name: string): ColorInfo {
@@ -347,7 +348,7 @@ function byName(name: string): ColorInfo {
     case "RGB":
       return { components: 3, kind: "rgb", palette: null, paletteComponents: 3 };
     case "Pattern":
-      throw new Error("motif (Pattern) non pris en charge");
+      throw new Error(tr("motif (Pattern) non pris en charge"));
     default:
       return { components: 3, kind: "rgb", palette: null, paletteComponents: 3 };
   }

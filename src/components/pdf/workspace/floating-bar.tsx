@@ -23,6 +23,7 @@ import {
   type TextAnnotation,
 } from "@/lib/pdf/annotations/types";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 
 export interface FloatingBarProps {
   annotation: Annotation;
@@ -77,7 +78,7 @@ export function FloatingBar({
     <div
       ref={ref}
       role="toolbar"
-      aria-label="Propriétés de l'élément sélectionné"
+      aria-label={tr("Propriétés de l'élément sélectionné")}
       className="absolute z-30 flex max-w-[calc(100%-16px)] flex-wrap items-center gap-1 rounded-[10px] border border-border bg-surface px-1.5 py-1 text-xs shadow-lg"
       style={{ left: position.x, top: position.y }}
       onPointerDown={(e) => e.stopPropagation()}
@@ -90,15 +91,15 @@ export function FloatingBar({
           {!(annotation.type === "rect" && annotation.mask) ? (
             <>
               <ColorField
-                label="Contour"
+                label={tr("Contour")}
                 value={annotation.strokeColor ?? { r: 0, g: 0, b: 0 }}
                 onChange={(c) =>
-                  update({ ...annotation, strokeColor: c }, "Couleur du contour", "stroke")
+                  update({ ...annotation, strokeColor: c }, tr("Couleur du contour"), "stroke")
                 }
                 testId="prop-stroke-color"
               />
               <NumberField
-                label="Épaisseur"
+                label={tr("Épaisseur")}
                 value={annotation.strokeWidth}
                 min={0}
                 max={20}
@@ -114,7 +115,7 @@ export function FloatingBar({
                           ? (annotation.strokeColor ?? { r: 0, g: 0, b: 0 })
                           : annotation.strokeColor,
                     },
-                    "Épaisseur du contour",
+                    tr("Épaisseur du contour"),
                     "width",
                   )
                 }
@@ -122,7 +123,7 @@ export function FloatingBar({
               />
               <DashField
                 value={annotation.dash ?? "solid"}
-                onChange={(d) => update({ ...annotation, dash: d }, "Style du trait")}
+                onChange={(d) => update({ ...annotation, dash: d }, tr("Style du trait"))}
               />
               <Divider />
               <FillField
@@ -130,41 +131,42 @@ export function FloatingBar({
                 onChange={(c) =>
                   update(
                     { ...annotation, fillColor: c },
-                    c ? "Remplissage" : "Remplissage retiré",
+                    c ? tr("Remplissage") : tr("Remplissage retiré"),
                     "fill",
                   )
                 }
               />
               <OpacityField
                 value={annotation.opacity}
-                onChange={(v) => update({ ...annotation, opacity: v }, "Opacité", "opacity")}
+                onChange={(v) => update({ ...annotation, opacity: v }, tr("Opacité"), "opacity")}
               />
             </>
           ) : (
             <>
               <ColorField
-                label="Couleur du masque"
+                label={tr("Couleur du masque")}
                 value={annotation.fillColor ?? { r: 0, g: 0, b: 0 }}
                 onChange={(c) =>
-                  update({ ...annotation, fillColor: c }, "Couleur du masque", "fill")
+                  update({ ...annotation, fillColor: c }, tr("Couleur du masque"), "fill")
                 }
                 testId="prop-fill-color"
               />
               <span className="max-w-56 px-1 text-[11px] leading-tight text-muted-foreground">
-                Masque visuel : le contenu reste dans le fichier. Suppression réelle : outil
-                Caviarder.
+                {tr(
+                  "Masque visuel : le contenu reste dans le fichier. Suppression réelle : outil Caviarder.",
+                )}
               </span>
             </>
           )}
           <Divider />
           <NumberField
-            label="L"
+            label={tr("L")}
             value={annotation.width}
             min={2}
             max={5000}
             step={1}
             unit="pt"
-            onChange={(v) => update({ ...annotation, width: v }, "Largeur", "w")}
+            onChange={(v) => update({ ...annotation, width: v }, tr("Largeur"), "w")}
             testId="prop-width"
           />
           <NumberField
@@ -174,7 +176,7 @@ export function FloatingBar({
             max={5000}
             step={1}
             unit="pt"
-            onChange={(v) => update({ ...annotation, height: v }, "Hauteur", "h")}
+            onChange={(v) => update({ ...annotation, height: v }, tr("Hauteur"), "h")}
             testId="prop-height"
           />
         </>
@@ -183,40 +185,40 @@ export function FloatingBar({
       {annotation.type === "line" ? (
         <>
           <ColorField
-            label="Couleur"
+            label={tr("Couleur")}
             value={annotation.color}
-            onChange={(c) => update({ ...annotation, color: c }, "Couleur", "stroke")}
+            onChange={(c) => update({ ...annotation, color: c }, tr("Couleur"), "stroke")}
             testId="prop-stroke-color"
           />
           <NumberField
-            label="Épaisseur"
+            label={tr("Épaisseur")}
             value={annotation.strokeWidth}
             min={0.5}
             max={20}
             step={0.5}
             unit="pt"
-            onChange={(v) => update({ ...annotation, strokeWidth: v }, "Épaisseur", "width")}
+            onChange={(v) => update({ ...annotation, strokeWidth: v }, tr("Épaisseur"), "width")}
             testId="prop-stroke-width"
           />
           <DashField
             value={annotation.dash ?? "solid"}
-            onChange={(d) => update({ ...annotation, dash: d }, "Style du trait")}
+            onChange={(d) => update({ ...annotation, dash: d }, tr("Style du trait"))}
           />
           <Toggle
             pressed={annotation.arrow}
-            label="Pointe de flèche"
+            label={tr("Pointe de flèche")}
             onClick={() =>
               update(
                 { ...annotation, arrow: !annotation.arrow },
-                annotation.arrow ? "Pointe retirée" : "Pointe ajoutée",
+                annotation.arrow ? tr("Pointe retirée") : tr("Pointe ajoutée"),
               )
             }
           >
-            <span className="px-1">Flèche</span>
+            <span className="px-1">{tr("Flèche")}</span>
           </Toggle>
           <OpacityField
             value={annotation.opacity}
-            onChange={(v) => update({ ...annotation, opacity: v }, "Opacité", "opacity")}
+            onChange={(v) => update({ ...annotation, opacity: v }, tr("Opacité"), "opacity")}
           />
         </>
       ) : null}
@@ -224,28 +226,28 @@ export function FloatingBar({
       {annotation.type === "path" ? (
         <>
           <ColorField
-            label="Couleur"
+            label={tr("Couleur")}
             value={annotation.color}
-            onChange={(c) => update({ ...annotation, color: c }, "Couleur", "stroke")}
+            onChange={(c) => update({ ...annotation, color: c }, tr("Couleur"), "stroke")}
             testId="prop-stroke-color"
           />
           <NumberField
-            label="Épaisseur"
+            label={tr("Épaisseur")}
             value={annotation.strokeWidth}
             min={0.5}
             max={20}
             step={0.5}
             unit="pt"
-            onChange={(v) => update({ ...annotation, strokeWidth: v }, "Épaisseur", "width")}
+            onChange={(v) => update({ ...annotation, strokeWidth: v }, tr("Épaisseur"), "width")}
             testId="prop-stroke-width"
           />
           <DashField
             value={annotation.dash ?? "solid"}
-            onChange={(d) => update({ ...annotation, dash: d }, "Style du trait")}
+            onChange={(d) => update({ ...annotation, dash: d }, tr("Style du trait"))}
           />
           <OpacityField
             value={annotation.opacity}
-            onChange={(v) => update({ ...annotation, opacity: v }, "Opacité", "opacity")}
+            onChange={(v) => update({ ...annotation, opacity: v }, tr("Opacité"), "opacity")}
           />
         </>
       ) : null}
@@ -253,15 +255,15 @@ export function FloatingBar({
       {annotation.type === "highlight" ? (
         <>
           <ColorField
-            label="Couleur"
+            label={tr("Couleur")}
             value={annotation.color}
-            onChange={(c) => update({ ...annotation, color: c }, "Couleur", "stroke")}
+            onChange={(c) => update({ ...annotation, color: c }, tr("Couleur"), "stroke")}
             testId="prop-stroke-color"
           />
           <OpacityField
             value={annotation.opacity}
             max={0.8}
-            onChange={(v) => update({ ...annotation, opacity: v }, "Opacité", "opacity")}
+            onChange={(v) => update({ ...annotation, opacity: v }, tr("Opacité"), "opacity")}
           />
         </>
       ) : null}
@@ -278,7 +280,7 @@ export function FloatingBar({
       {annotation.type === "image" ? (
         <>
           <NumberField
-            label="L"
+            label={tr("L")}
             value={annotation.width}
             min={4}
             max={5000}
@@ -291,7 +293,7 @@ export function FloatingBar({
                   width: v,
                   height: (v * annotation.height) / Math.max(1, annotation.width),
                 },
-                "Taille de l'image",
+                tr("Taille de l'image"),
                 "w",
               )
             }
@@ -311,25 +313,29 @@ export function FloatingBar({
                   height: v,
                   width: (v * annotation.width) / Math.max(1, annotation.height),
                 },
-                "Taille de l'image",
+                tr("Taille de l'image"),
                 "h",
               )
             }
             testId="prop-height"
           />
           <span className="px-1 text-[11px] text-muted-foreground">
-            {annotation.role === "signature" ? "Signature" : "Image"} · proportions conservées ·
-            rotation : celle de la page
+            {annotation.role === "signature" ? tr("Signature") : tr("Image")} ·{" "}
+            {tr("proportions conservées · rotation : celle de la page")}
           </span>
         </>
       ) : null}
 
       <Divider />
-      <IconButton label="Dupliquer (Ctrl + D)" onClick={onDuplicate} testId="duplicate-annotation">
+      <IconButton
+        label={tr("Dupliquer (Ctrl + D)")}
+        onClick={onDuplicate}
+        testId="duplicate-annotation"
+      >
         <Copy className="size-3.5" />
       </IconButton>
       <IconButton
-        label="Supprimer (Suppr)"
+        label={tr("Supprimer (Suppr)")}
         onClick={onDelete}
         destructive
         testId="delete-annotation"
@@ -391,12 +397,12 @@ function TextControls({
   return (
     <>
       <label className="flex items-center gap-1">
-        <span className="sr-only">Police</span>
+        <span className="sr-only">{tr("Police")}</span>
         <select
           value={a.fontFamily}
-          onChange={(e) => restyle({ fontFamily: e.target.value as FontFamily }, "Police")}
+          onChange={(e) => restyle({ fontFamily: e.target.value as FontFamily }, tr("Police"))}
           className="h-8 max-w-44 rounded-md border border-input bg-background px-1.5 text-xs"
-          aria-label="Police"
+          aria-label={tr("Police")}
           data-testid="prop-font-family"
         >
           {(["sans", "serif", "mono"] as const).map((category) => (
@@ -411,7 +417,7 @@ function TextControls({
                 .map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.label}
-                    {f.note ? ` — ${f.note}` : ""}
+                    {f.note ? ` — ${tr(f.note)}` : ""}
                   </option>
                 ))}
             </optgroup>
@@ -419,7 +425,7 @@ function TextControls({
         </select>
       </label>
       <label className="flex items-center gap-1">
-        <span className="sr-only">Taille</span>
+        <span className="sr-only">{tr("Taille")}</span>
         <input
           type="number"
           min={4}
@@ -430,10 +436,10 @@ function TextControls({
           onChange={(e) => {
             const v = Number(e.target.value);
             if (Number.isFinite(v) && v >= 4 && v <= 200)
-              restyle({ fontSize: v }, "Taille du texte", "size");
+              restyle({ fontSize: v }, tr("Taille du texte"), "size");
           }}
           className="h-8 w-16 rounded-md border border-input bg-background px-1.5 text-xs tabular-nums"
-          aria-label="Taille (pt)"
+          aria-label={tr("Taille (pt)")}
           data-testid="prop-font-size"
         />
         <datalist id="editor-font-sizes">
@@ -444,9 +450,9 @@ function TextControls({
       </label>
       <Toggle
         pressed={a.bold}
-        label="Gras"
+        label={tr("Gras")}
         disabled={!hasStyle(a.fontFamily, { bold: true, italic: a.italic })}
-        onClick={() => restyle({ bold: !a.bold }, "Gras")}
+        onClick={() => restyle({ bold: !a.bold }, tr("Gras"))}
         testId="prop-bold"
       >
         <Bold className="size-3.5" />
@@ -455,63 +461,65 @@ function TextControls({
         pressed={a.italic}
         label={
           hasStyle(a.fontFamily, { bold: a.bold, italic: true })
-            ? "Italique"
-            : `Italique : non disponible pour ${family?.label ?? "cette police"}`
+            ? tr("Italique")
+            : tr("Italique : non disponible pour {font}", {
+                font: family?.label ?? tr("cette police"),
+              })
         }
         disabled={!hasStyle(a.fontFamily, { bold: a.bold, italic: true })}
-        onClick={() => restyle({ italic: !a.italic }, "Italique")}
+        onClick={() => restyle({ italic: !a.italic }, tr("Italique"))}
         testId="prop-italic"
       >
         <Italic className="size-3.5" />
       </Toggle>
       <Toggle
         pressed={!!a.underline}
-        label="Souligné"
-        onClick={() => restyle({ underline: !a.underline }, "Souligné")}
+        label={tr("Souligné")}
+        onClick={() => restyle({ underline: !a.underline }, tr("Souligné"))}
         testId="prop-underline"
       >
         <Underline className="size-3.5" />
       </Toggle>
-      <div className="flex items-center" role="radiogroup" aria-label="Alignement">
+      <div className="flex items-center" role="radiogroup" aria-label={tr("Alignement")}>
         <Toggle
           pressed={a.align === "left"}
-          label="Aligner à gauche"
-          onClick={() => restyle({ align: "left" }, "Alignement")}
+          label={tr("Aligner à gauche")}
+          onClick={() => restyle({ align: "left" }, tr("Alignement"))}
         >
           <AlignLeft className="size-3.5" />
         </Toggle>
         <Toggle
           pressed={a.align === "center"}
-          label="Centrer"
-          onClick={() => restyle({ align: "center" }, "Alignement")}
+          label={tr("Centrer")}
+          onClick={() => restyle({ align: "center" }, tr("Alignement"))}
         >
           <AlignCenter className="size-3.5" />
         </Toggle>
         <Toggle
           pressed={a.align === "right"}
-          label="Aligner à droite"
-          onClick={() => restyle({ align: "right" }, "Alignement")}
+          label={tr("Aligner à droite")}
+          onClick={() => restyle({ align: "right" }, tr("Alignement"))}
         >
           <AlignRight className="size-3.5" />
         </Toggle>
       </div>
       <ColorField
-        label="Texte"
+        label={tr("Texte")}
         value={a.color}
-        onChange={(c) => update({ ...a, color: c }, "Couleur du texte", "color")}
+        onChange={(c) => update({ ...a, color: c }, tr("Couleur du texte"), "color")}
         testId="prop-text-color"
       />
       <FillField
-        label="Fond"
+        label={tr("Fond")}
         fill={a.background ?? null}
         defaultColor={{ r: 1, g: 0.97, b: 0.75 }}
         onChange={(c) =>
-          restyle({ background: c ?? undefined }, c ? "Fond du texte" : "Fond retiré", "bg")
+          restyle({ background: c ?? undefined }, c ? tr("Fond du texte") : tr("Fond retiré"), "bg")
         }
       />
       <Divider />
       <IconButton
-        label="Modifier le texte (double-clic)"
+        label={tr("Modifier le texte (double-clic)")}
         onClick={onEditText}
         testId="edit-annotation-text"
       >
@@ -596,25 +604,25 @@ function NumberField({
 
 function DashField({ value, onChange }: { value: DashStyle; onChange: (d: DashStyle) => void }) {
   return (
-    <label className="flex items-center gap-1" title="Style du trait">
-      <span className="sr-only">Style du trait</span>
+    <label className="flex items-center gap-1" title={tr("Style du trait")}>
+      <span className="sr-only">{tr("Style du trait")}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as DashStyle)}
         className="h-8 rounded-md border border-input bg-background px-1.5 text-xs"
-        aria-label="Style du trait"
+        aria-label={tr("Style du trait")}
         data-testid="prop-dash"
       >
-        <option value="solid">Continu</option>
-        <option value="dashed">Tireté</option>
-        <option value="dotted">Pointillé</option>
+        <option value="solid">{tr("Continu")}</option>
+        <option value="dashed">{tr("Tireté")}</option>
+        <option value="dotted">{tr("Pointillé")}</option>
       </select>
     </label>
   );
 }
 
 function FillField({
-  label = "Remplissage",
+  label = tr("Remplissage"),
   fill,
   defaultColor = { r: 0.93, g: 0.94, b: 1 },
   onChange,
@@ -630,8 +638,8 @@ function FillField({
         pressed={!!fill}
         label={
           fill
-            ? `${label} : opaque (cliquer pour transparent)`
-            : `${label} : transparent (cliquer pour remplir)`
+            ? tr("{label} : opaque (cliquer pour transparent)", { label })
+            : tr("{label} : transparent (cliquer pour remplir)", { label })
         }
         onClick={() => onChange(fill ? null : defaultColor)}
         testId="prop-fill-toggle"
@@ -640,7 +648,7 @@ function FillField({
       </Toggle>
       {fill ? (
         <ColorField
-          label={`Couleur de ${label.toLowerCase()}`}
+          label={tr("Couleur de {label}", { label: label.toLowerCase() })}
           value={fill}
           onChange={onChange}
           testId="prop-fill-color"
@@ -660,8 +668,8 @@ function OpacityField({
   onChange: (v: number) => void;
 }) {
   return (
-    <label className="flex items-center gap-1" title="Opacité">
-      <span className="text-[11px] text-muted-foreground">Opacité</span>
+    <label className="flex items-center gap-1" title={tr("Opacité")}>
+      <span className="text-[11px] text-muted-foreground">{tr("Opacité")}</span>
       <input
         type="range"
         min={10}
@@ -670,7 +678,7 @@ function OpacityField({
         value={Math.round(value * 100)}
         onChange={(e) => onChange(Number(e.target.value) / 100)}
         className="w-16 accent-primary"
-        aria-label="Opacité"
+        aria-label={tr("Opacité")}
         data-testid="prop-opacity"
       />
       <span className="w-8 tabular-nums text-muted-foreground">{Math.round(value * 100)}%</span>

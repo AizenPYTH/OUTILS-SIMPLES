@@ -34,6 +34,7 @@ import type { PageInfo } from "@/lib/pdf/browser/pdfjs";
 import { formatBytes } from "@/lib/files/format";
 import { normalizeRotation, organizePages, type PageArrangement } from "@/lib/pdf/operations/pages";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-organize";
 
@@ -124,8 +125,10 @@ function OrganizeWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          Faites glisser les vignettes pour les réordonner. {items.length} page(s) dans le document
-          final.
+          {tr(
+            "Faites glisser les vignettes pour les réordonner. {n} page(s) dans le document final.",
+            { n: items.length },
+          )}
         </p>
         <div className="flex gap-2">
           <Button
@@ -152,7 +155,7 @@ function OrganizeWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }
         <SortableContext items={items.map((i) => i.id)} strategy={rectSortingStrategy}>
           <ul
             className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(120px,1fr))]"
-            aria-label="Ordre des pages"
+            aria-label={tr("Ordre des pages")}
             data-testid="organize-grid"
           >
             {items.map((item, position) => (
@@ -228,7 +231,7 @@ function SortablePage({
               variant="ghost"
               size="icon-sm"
               onClick={onRotate}
-              aria-label={`Pivoter la page ${item.sourceIndex + 1}`}
+              aria-label={tr("Pivoter la page {n}", { n: item.sourceIndex + 1 })}
             >
               <RotateCw aria-hidden="true" />
             </Button>
@@ -238,7 +241,7 @@ function SortablePage({
               size="icon-sm"
               onClick={onDelete}
               disabled={!canDelete}
-              aria-label={`Supprimer la page ${item.sourceIndex + 1}`}
+              aria-label={tr("Supprimer la page {n}", { n: item.sourceIndex + 1 })}
               className="text-destructive hover:text-destructive"
             >
               <Trash2 aria-hidden="true" />
@@ -248,7 +251,10 @@ function SortablePage({
       >
         <div
           className="cursor-grab touch-none active:cursor-grabbing"
-          aria-label={`Position ${position + 1} : page d'origine ${item.sourceIndex + 1}. Déplacer avec les flèches.`}
+          aria-label={tr("Position {position} : page d'origine {n}. Déplacer avec les flèches.", {
+            position: position + 1,
+            n: item.sourceIndex + 1,
+          })}
           {...attributes}
           {...listeners}
         >

@@ -17,7 +17,11 @@ interface OgInput {
   /** Small label above the title (family or section). */
   kicker?: string;
   accent?: string;
+  /** Footer line (defaults to the French promise). */
+  footer?: string;
 }
+
+export const OG_FOOTER_EN = "Processed in your browser · nothing is sent to a server · free";
 
 async function fonts() {
   const dir = path.join(process.cwd(), "public", "fonts");
@@ -31,7 +35,7 @@ async function fonts() {
   ];
 }
 
-export async function ogImage({ title, subtitle, kicker, accent = "#5146e5" }: OgInput) {
+export async function ogImage({ title, subtitle, kicker, accent = "#5146e5", footer }: OgInput) {
   const size = title.length > 48 ? 54 : title.length > 32 ? 64 : 76;
   return new ImageResponse(
     <div
@@ -85,7 +89,7 @@ export async function ogImage({ title, subtitle, kicker, accent = "#5146e5" }: O
         style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 24, color: "#1d7a4f" }}
       >
         <div style={{ width: 16, height: 16, borderRadius: 8, background: "#1d7a4f" }} />
-        Traitement dans votre navigateur · rien n&apos;est envoyé sur un serveur · gratuit
+        {footer ?? "Traitement dans votre navigateur · rien n'est envoyé sur un serveur · gratuit"}
       </div>
     </div>,
     { ...OG_SIZE, fonts: await fonts() },

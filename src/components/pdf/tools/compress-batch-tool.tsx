@@ -24,6 +24,7 @@ import {
   type CompressionLevel,
 } from "@/lib/pdf/operations/compress";
 import { compressionLevelOptions } from "./compress-levels";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-compress";
 const MAX_FILES = pdfLimits.maxFileCount;
@@ -66,7 +67,11 @@ export function CompressBatchTool() {
         report({
           current: i,
           total: files.length,
-          label: `Fichier ${i + 1} sur ${files.length} : ${file.name}`,
+          label: tr("Fichier {n} sur {total} : {name}", {
+            n: i + 1,
+            total: files.length,
+            name: file.name,
+          }),
         });
         try {
           const bytes = await readPdfFile(file, pdfLimits.maxFileSizeBytes);
@@ -122,7 +127,9 @@ export function CompressBatchTool() {
       <div className="space-y-4" data-testid="pdf-batch-done">
         <ToolPanel className="space-y-3">
           <p className="font-semibold">
-            {done.length} fichier{done.length > 1 ? "s" : ""} compressé{done.length > 1 ? "s" : ""}{" "}
+            {tr(done.length > 1 ? "{n} fichiers compressés" : "{n} fichier compressé", {
+              n: done.length,
+            })}{" "}
             · {formatBytes(before)} → {formatBytes(after)}
             {before > 0
               ? ` (${after < before ? "−" : "+"}${formatPercent(Math.abs(after - before) / before)})`
@@ -164,10 +171,10 @@ export function CompressBatchTool() {
               disabled={done.length === 0}
               data-testid="pdf-batch-download-zip"
             >
-              <Download aria-hidden="true" /> Télécharger tout (ZIP)
+              <Download aria-hidden="true" /> {tr("Télécharger tout (ZIP)")}
             </Button>
             <Button type="button" variant="outline" size="lg" onClick={reset}>
-              Autres fichiers
+              {tr("Autres fichiers")}
             </Button>
           </div>
         </ToolPanel>
@@ -184,7 +191,7 @@ export function CompressBatchTool() {
         maxFileSizeBytes={pdfLimits.maxFileSizeBytes}
         maxFileCount={MAX_FILES}
         compact={files.length > 0}
-        title={files.length > 0 ? "Ajouter d'autres PDF" : undefined}
+        title={files.length > 0 ? tr("Ajouter d'autres PDF") : undefined}
       />
       {files.length > 0 ? (
         <ToolPanel className="space-y-4">
@@ -200,7 +207,7 @@ export function CompressBatchTool() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  aria-label={`Retirer ${file.name}`}
+                  aria-label={tr("Retirer {name}", { name: file.name })}
                   onClick={() => setFiles((list) => list.filter((f) => f !== file))}
                 >
                   <Trash2 aria-hidden="true" />
@@ -209,7 +216,7 @@ export function CompressBatchTool() {
             ))}
           </ul>
           <Segmented
-            label="Niveau de compression"
+            label={tr("Niveau de compression")}
             value={level}
             onChange={setLevel}
             options={compressionLevelOptions}
@@ -222,7 +229,9 @@ export function CompressBatchTool() {
             data-testid="pdf-batch-run"
           >
             <Minimize2 aria-hidden="true" />
-            Compresser {files.length} fichier{files.length > 1 ? "s" : ""}
+            {tr(files.length > 1 ? "Compresser {n} fichiers" : "Compresser {n} fichier", {
+              n: files.length,
+            })}
           </Button>
         </ToolPanel>
       ) : null}

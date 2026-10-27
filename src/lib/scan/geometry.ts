@@ -2,6 +2,8 @@
  * Perspective geometry for the document scanner: 4-point homography and
  * quadrilateral helpers. Pure math (no DOM), unit-tested.
  */
+import { tr } from "@/lib/i18n/messages";
+
 export interface Point {
   x: number;
   y: number;
@@ -39,7 +41,7 @@ function solveLinear(A: number[][], b: number[]): number[] {
     for (let r = col + 1; r < n; r += 1)
       if (Math.abs(M[r]![col]!) > Math.abs(M[pivot]![col]!)) pivot = r;
     if (Math.abs(M[pivot]![col]!) < 1e-12)
-      throw new Error("Quadrilatère dégénéré : les coins doivent former une surface.");
+      throw new Error(tr("Quadrilatère dégénéré : les coins doivent former une surface."));
     [M[col], M[pivot]] = [M[pivot]!, M[col]!];
     for (let r = 0; r < n; r += 1) {
       if (r === col) continue;
@@ -68,14 +70,14 @@ export function quadOutputSize(quad: Quad, maxDimension = 4000): { width: number
 
 /** Orders arbitrary 4 points as TL, TR, BR, BL. */
 export function orderQuad(points: Point[]): Quad {
-  if (points.length !== 4) throw new Error("Quatre points attendus.");
+  if (points.length !== 4) throw new Error(tr("Quatre points attendus."));
   const sum = points.map((p) => p.x + p.y);
   const diff = points.map((p) => p.x - p.y);
   const tl = points[sum.indexOf(Math.min(...sum))]!;
   const br = points[sum.indexOf(Math.max(...sum))]!;
-  const tr = points[diff.indexOf(Math.max(...diff))]!;
+  const topRight = points[diff.indexOf(Math.max(...diff))]!;
   const bl = points[diff.indexOf(Math.min(...diff))]!;
-  return [tl, tr, br, bl];
+  return [tl, topRight, br, bl];
 }
 
 /**

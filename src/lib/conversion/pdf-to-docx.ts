@@ -1,6 +1,7 @@
 import { PdfError, toPdfError } from "@/lib/pdf/errors";
 import { openPdf } from "@/lib/pdf/browser/pdfjs";
 import { extractImages, type ExtractedImage } from "@/lib/pdf/operations/extract-images";
+import { tr } from "@/lib/i18n/messages";
 
 export interface PdfToDocxOptions {
   /** Keep one Word page per PDF page (page break after each page). */
@@ -228,9 +229,9 @@ export async function pdfToDocx(
           imagesByPage.set(image.pageIndex, list);
         }
         if (extracted.skipped.length > 0)
-          warnings.push("Certaines images (CCITT, JBIG2) n'ont pas pu être extraites.");
+          warnings.push(tr("Certaines images (CCITT, JBIG2) n'ont pas pu être extraites."));
       } catch {
-        warnings.push("Les images n'ont pas pu être extraites ; seul le texte a été converti.");
+        warnings.push(tr("Les images n'ont pas pu être extraites ; seul le texte a été converti."));
       }
     }
     const children: InstanceType<typeof docx.Paragraph>[] = [];
@@ -276,7 +277,9 @@ export async function pdfToDocx(
       }
       for (const image of imagesByPage.get(i) ?? []) {
         if (image.mimeType === "image/jp2") {
-          warnings.push("Une image JPEG 2000 n'est pas prise en charge par Word et a été ignorée.");
+          warnings.push(
+            tr("Une image JPEG 2000 n'est pas prise en charge par Word et a été ignorée."),
+          );
           continue;
         }
         const maxWidth = 600;
@@ -306,13 +309,23 @@ export async function pdfToDocx(
     if (paragraphCount === 0 && imageCount === 0)
       throw new PdfError(
         "EMPTY",
-        "Aucun texte ni image exploitable dans ce PDF. S'il s'agit d'un scan, passez d'abord par la reconnaissance de texte (OCR).",
+        tr(
+          "Aucun texte ni image exploitable dans ce PDF. S'il s'agit d'un scan, passez d'abord par la reconnaissance de texte (OCR).",
+        ),
       );
     if (emptyPages.length > 0)
       warnings.push(
         emptyPages.length === opened.pageCount
-          ? "Ce PDF ne contient pas de couche texte (scan) : seules les images ont été reprises. Utilisez l'OCR pour obtenir un texte modifiable."
-          : `${emptyPages.length} page${emptyPages.length > 1 ? "s" : ""} sans texte (scan) : image reprise, texte absent.`,
+          ? tr(
+              "Ce PDF ne contient pas de couche texte (scan) : seules les images ont été reprises. Utilisez l'OCR pour obtenir un texte modifiable.",
+            )
+          : emptyPages.length > 1
+            ? tr("{n} pages sans texte (scan) : image reprise, texte absent.", {
+                n: emptyPages.length,
+              })
+            : tr("{n} page sans texte (scan) : image reprise, texte absent.", {
+                n: emptyPages.length,
+              }),
       );
     const document = new docx.Document({
       creator: "OUTILIA",

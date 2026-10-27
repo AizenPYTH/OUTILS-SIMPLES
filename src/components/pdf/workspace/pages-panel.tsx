@@ -41,6 +41,7 @@ import {
 } from "@/lib/pdf/operations/page-plan";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 interface PagesPanelProps {
   doc: PDFDocumentProxy;
@@ -100,7 +101,10 @@ export function PagesPanel({
     const from = ids.indexOf(String(active.id));
     const to = ids.indexOf(String(over.id));
     if (from < 0 || to < 0) return;
-    onPlanChange(movePlanned(plan, from, to), `Page ${from + 1} déplacée en ${to + 1}`);
+    onPlanChange(
+      movePlanned(plan, from, to),
+      tr("Page {from} déplacée en {to}", { from: from + 1, to: to + 1 }),
+    );
     onSelect(to);
   };
 
@@ -110,25 +114,40 @@ export function PagesPanel({
   ) => {
     switch (action) {
       case "rotate-left":
-        onPlanChange(rotatePlanned(plan, position, -90), `Page ${position + 1} pivotée`);
+        onPlanChange(
+          rotatePlanned(plan, position, -90),
+          tr("Page {n} pivotée", { n: position + 1 }),
+        );
         break;
       case "rotate-right":
-        onPlanChange(rotatePlanned(plan, position, 90), `Page ${position + 1} pivotée`);
+        onPlanChange(
+          rotatePlanned(plan, position, 90),
+          tr("Page {n} pivotée", { n: position + 1 }),
+        );
         break;
       case "duplicate":
-        onPlanChange(duplicatePlanned(plan, position), `Page ${position + 1} dupliquée`);
+        onPlanChange(
+          duplicatePlanned(plan, position),
+          tr("Page {n} dupliquée", { n: position + 1 }),
+        );
         break;
       case "delete":
         if (plan.length <= 1) return;
-        onPlanChange(removePlanned(plan, position), `Page ${position + 1} supprimée`);
+        onPlanChange(removePlanned(plan, position), tr("Page {n} supprimée", { n: position + 1 }));
         onSelect(Math.min(position, plan.length - 2));
         break;
       case "up":
-        onPlanChange(movePlanned(plan, position, position - 1), `Page ${position + 1} déplacée`);
+        onPlanChange(
+          movePlanned(plan, position, position - 1),
+          tr("Page {n} déplacée", { n: position + 1 }),
+        );
         onSelect(position - 1);
         break;
       case "down":
-        onPlanChange(movePlanned(plan, position, position + 1), `Page ${position + 1} déplacée`);
+        onPlanChange(
+          movePlanned(plan, position, position + 1),
+          tr("Page {n} déplacée", { n: position + 1 }),
+        );
         onSelect(position + 1);
         break;
     }
@@ -136,13 +155,13 @@ export function PagesPanel({
 
   return (
     <nav
-      aria-label="Pages"
+      aria-label={tr("Pages")}
       className="flex h-full w-full flex-col border-r border-border bg-muted/40"
       data-testid="pages-panel"
     >
       <div className="flex h-10 shrink-0 items-center justify-between border-b border-border px-3">
         <p className="text-xs font-semibold">
-          {plan.length} {plan.length > 1 ? t.common.pages : "page"}
+          {plan.length} {plan.length > 1 ? t.common.pages : tr("page")}
         </p>
         {onInsertDocument ? (
           <>
@@ -152,7 +171,7 @@ export function PagesPanel({
               accept="application/pdf,.pdf"
               className="sr-only"
               tabIndex={-1}
-              aria-label="Fichier PDF dont les pages seront insérées"
+              aria-label={tr("Fichier PDF dont les pages seront insérées")}
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) onInsertDocument(file, current);
@@ -164,18 +183,18 @@ export function PagesPanel({
               type="button"
               onClick={() => insertInputRef.current?.click()}
               className="ml-auto mr-1 inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium text-link hover:bg-muted"
-              title={`Insérer les pages d'un autre PDF après la page ${current + 1}`}
+              title={tr("Insérer les pages d'un autre PDF après la page {n}", { n: current + 1 })}
               data-testid="pages-insert"
             >
               <FilePlus className="size-3.5" aria-hidden="true" />
-              Insérer un PDF
+              {tr("Insérer un PDF")}
             </button>
           </>
         ) : null}
         <button
           type="button"
           onClick={onClose}
-          aria-label="Masquer le panneau des pages"
+          aria-label={tr("Masquer le panneau des pages")}
           className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
           data-testid="pages-panel-close"
         >
@@ -257,7 +276,7 @@ const PageItem = React.forwardRef<
         <button
           type="button"
           className="flex touch-none items-center self-stretch rounded px-0.5 text-muted-foreground hover:bg-muted"
-          aria-label={`Déplacer la page ${position + 1}`}
+          aria-label={tr("Déplacer la page {n}", { n: position + 1 })}
           {...attributes}
           {...listeners}
         >
@@ -267,7 +286,7 @@ const PageItem = React.forwardRef<
           type="button"
           onClick={onSelect}
           aria-current={current ? "page" : undefined}
-          aria-label={`${t.common.page} ${position + 1}${rotation ? ` (pivotée de ${rotation}°)` : ""}${modified ? " (modifiée)" : ""}`}
+          aria-label={`${t.common.page} ${position + 1}${rotation ? ` ${tr("(pivotée de {deg}°)", { deg: rotation })}` : ""}${modified ? ` ${tr("(modifiée)")}` : ""}`}
           className="relative flex-1 overflow-hidden rounded-[4px]"
           data-testid={`thumb-${position}`}
         >
@@ -291,31 +310,31 @@ const PageItem = React.forwardRef<
           !current && "opacity-0 focus-within:opacity-100 group-hover:opacity-100",
         )}
         role="group"
-        aria-label={`Actions de la page ${position + 1}`}
+        aria-label={tr("Actions de la page {n}", { n: position + 1 })}
       >
         <PageActionButton
-          label="Pivoter vers la gauche"
+          label={tr("Pivoter vers la gauche")}
           onClick={() => onAction("rotate-left")}
           testId={`page-rotate-left-${position}`}
         >
           <RotateCcw className="size-3.5" />
         </PageActionButton>
         <PageActionButton
-          label="Pivoter vers la droite"
+          label={tr("Pivoter vers la droite")}
           onClick={() => onAction("rotate-right")}
           testId={`page-rotate-right-${position}`}
         >
           <RotateCw className="size-3.5" />
         </PageActionButton>
         <PageActionButton
-          label="Dupliquer la page"
+          label={tr("Dupliquer la page")}
           onClick={() => onAction("duplicate")}
           testId={`page-duplicate-${position}`}
         >
           <Copy className="size-3.5" />
         </PageActionButton>
         <PageActionButton
-          label="Monter la page"
+          label={tr("Monter la page")}
           onClick={() => onAction("up")}
           disabled={position === 0}
           testId={`page-up-${position}`}
@@ -323,7 +342,7 @@ const PageItem = React.forwardRef<
           <ChevronUp className="size-3.5" />
         </PageActionButton>
         <PageActionButton
-          label="Descendre la page"
+          label={tr("Descendre la page")}
           onClick={() => onAction("down")}
           disabled={position >= total - 1}
           testId={`page-down-${position}`}
@@ -331,7 +350,7 @@ const PageItem = React.forwardRef<
           <ChevronDown className="size-3.5" />
         </PageActionButton>
         <PageActionButton
-          label="Supprimer la page"
+          label={tr("Supprimer la page")}
           onClick={() => onAction("delete")}
           disabled={total <= 1}
           destructive

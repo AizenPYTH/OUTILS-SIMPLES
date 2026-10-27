@@ -14,6 +14,7 @@ import type { OperationState } from "@/components/pdf/hooks/use-operation";
 import type { DrawReport } from "@/lib/pdf/annotations/draw";
 import { formatBytes } from "@/lib/files/format";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 export interface ExportResult {
   bytes: Uint8Array;
@@ -49,14 +50,18 @@ export function ExportDialog({
   const parts: string[] = [];
   if (summary.textEdits)
     parts.push(
-      `${summary.textEdits} texte${summary.textEdits > 1 ? "s" : ""} modifié${summary.textEdits > 1 ? "s" : ""}`,
+      summary.textEdits > 1
+        ? tr("{n} textes modifiés", { n: summary.textEdits })
+        : tr("{n} texte modifié", { n: summary.textEdits }),
     );
   if (summary.annotations)
     parts.push(
-      `${summary.annotations} élément${summary.annotations > 1 ? "s" : ""} ajouté${summary.annotations > 1 ? "s" : ""}`,
+      summary.annotations > 1
+        ? tr("{n} éléments ajoutés", { n: summary.annotations })
+        : tr("{n} élément ajouté", { n: summary.annotations }),
     );
-  if (summary.ocr) parts.push("couche de texte OCR");
-  if (summary.pagesChanged) parts.push("pages réorganisées");
+  if (summary.ocr) parts.push(tr("couche de texte OCR"));
+  if (summary.pagesChanged) parts.push(tr("pages réorganisées"));
   const done = state.status === "done";
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,15 +69,15 @@ export function ExportDialog({
         <DialogHeader>
           <DialogTitle>
             {done
-              ? "PDF modifié prêt"
+              ? tr("PDF modifié prêt")
               : state.status === "error"
-                ? "Export impossible"
-                : "Préparation du PDF modifié…"}
+                ? tr("Export impossible")
+                : tr("Préparation du PDF modifié…")}
           </DialogTitle>
           <DialogDescription>
             {parts.length
               ? parts.join(" · ")
-              : "Aucune modification : le document sera réenregistré tel quel."}
+              : tr("Aucune modification : le document sera réenregistré tel quel.")}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center gap-2 py-3 text-center text-sm">
@@ -88,14 +93,22 @@ export function ExportDialog({
             <>
               <CheckCircle2 className="size-10 text-success" aria-hidden="true" />
               <p data-testid="export-verified">
-                Fichier vérifié : {state.result.verified.pageCount} page
-                {state.result.verified.pageCount > 1 ? "s" : ""},{" "}
-                {formatBytes(state.result.bytes.byteLength)}, réouvert sans erreur.
+                {state.result.verified.pageCount > 1
+                  ? tr("Fichier vérifié : {n} pages, {size}, réouvert sans erreur.", {
+                      n: state.result.verified.pageCount,
+                      size: formatBytes(state.result.bytes.byteLength),
+                    })
+                  : tr("Fichier vérifié : {n} page, {size}, réouvert sans erreur.", {
+                      n: state.result.verified.pageCount,
+                      size: formatBytes(state.result.bytes.byteLength),
+                    })}
               </p>
               {state.result.verified.pageCount !== summary.expectedPages ? (
                 <p role="alert" className="text-destructive">
-                  Le fichier produit compte {state.result.verified.pageCount} pages au lieu de{" "}
-                  {summary.expectedPages}.
+                  {tr("Le fichier produit compte {n} pages au lieu de {expected}.", {
+                    n: state.result.verified.pageCount,
+                    expected: summary.expectedPages,
+                  })}
                 </p>
               ) : null}
             </>
@@ -109,14 +122,16 @@ export function ExportDialog({
         {summary.annotations > 0 ? (
           <p className="flex items-start gap-2 text-xs text-muted-foreground">
             <AlertTriangle className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
-            Les éléments ajoutés (texte, dessins, images, signature) sont dessinés dans les pages :
-            ils ne seront plus déplaçables dans un autre lecteur.
+            {tr(
+              "Les éléments ajoutés (texte, dessins, images, signature) sont dessinés dans les pages : ils ne seront plus déplaçables dans un autre lecteur.",
+            )}
           </p>
         ) : null}
         {done && state.result.report.replacedCharacters > 0 ? (
           <p className="text-xs text-warning-foreground">
-            Certains caractères non pris en charge par les polices standard ont été remplacés par «
-            ? ».
+            {tr(
+              "Certains caractères non pris en charge par les polices standard ont été remplacés par « ? ».",
+            )}
           </p>
         ) : null}
         <DialogFooter>
@@ -125,7 +140,7 @@ export function ExportDialog({
           </Button>
           {done ? (
             <Button type="button" onClick={onDownload} data-testid="export-download">
-              <Download aria-hidden="true" /> Télécharger le PDF modifié
+              <Download aria-hidden="true" /> {tr("Télécharger le PDF modifié")}
             </Button>
           ) : null}
         </DialogFooter>

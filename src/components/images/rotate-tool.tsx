@@ -7,6 +7,7 @@ import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { encodeCanvas, releaseCanvas, rotateFlipCanvas } from "@/lib/images/canvas";
 import { outputExtensions } from "@/lib/images/types";
 import { deriveOutputName } from "@/lib/files/filename";
+import { tr } from "@/lib/i18n/messages";
 import { ImageBatchTool } from "./image-batch-tool";
 import {
   FormatOptions,
@@ -60,25 +61,25 @@ export function RotateImageTool() {
   return (
     <ImageBatchTool
       toolId={TOOL_ID}
-      actionLabel="Appliquer"
+      actionLabel={tr("Appliquer")}
       zipName="images-pivotees"
       processor={processor}
       options={
         <ToolPanel className="space-y-4">
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Rotation">
-            {rotateBtn(0, "Aucune rotation")}
-            {rotateBtn(90, "90° à droite", RotateCw)}
+          <div className="flex flex-wrap gap-2" role="group" aria-label={tr("Rotation")}>
+            {rotateBtn(0, tr("Aucune rotation"))}
+            {rotateBtn(90, tr("90° à droite"), RotateCw)}
             {rotateBtn(180, "180°")}
-            {rotateBtn(270, "90° à gauche", RotateCcw)}
+            {rotateBtn(270, tr("90° à gauche"), RotateCcw)}
           </div>
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Retournement">
+          <div className="flex flex-wrap gap-2" role="group" aria-label={tr("Retournement")}>
             <Button
               type="button"
               variant={flipH ? "default" : "outline"}
               onClick={() => setFlipH((v) => !v)}
               aria-pressed={flipH}
             >
-              <FlipHorizontal aria-hidden="true" /> Miroir horizontal
+              <FlipHorizontal aria-hidden="true" /> {tr("Miroir horizontal")}
             </Button>
             <Button
               type="button"
@@ -86,7 +87,7 @@ export function RotateImageTool() {
               onClick={() => setFlipV((v) => !v)}
               aria-pressed={flipV}
             >
-              <FlipVertical aria-hidden="true" /> Miroir vertical
+              <FlipVertical aria-hidden="true" /> {tr("Miroir vertical")}
             </Button>
           </div>
           <FormatOptions value={format} onChange={setFormat} idPrefix="rotate" />

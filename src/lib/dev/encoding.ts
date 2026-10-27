@@ -1,4 +1,5 @@
 /** Encoding helpers (not encryption): Base64, URL, HTML entities, hex. */
+import { tr } from "@/lib/i18n/messages";
 
 export function encodeBase64(text: string, urlSafe = false): string {
   const bytes = new TextEncoder().encode(text);
@@ -11,7 +12,7 @@ export function encodeBase64(text: string, urlSafe = false): string {
 export function decodeBase64(input: string): string {
   let normalized = input.trim().replace(/-/g, "+").replace(/_/g, "/").replace(/\s+/g, "");
   if (!/^[A-Za-z0-9+/]*={0,2}$/.test(normalized))
-    throw new Error("Ce texte n'est pas du Base64 valide.");
+    throw new Error(tr("Ce texte n'est pas du Base64 valide."));
   while (normalized.length % 4 !== 0) normalized += "=";
   const binary = atob(normalized);
   const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
@@ -35,7 +36,7 @@ export function decodeUrl(text: string): string {
     return decodeURIComponent(text.replace(/\+/g, " "));
   } catch {
     throw new Error(
-      "Séquence pour-cent invalide : ce texte n'est pas une URL encodée correctement.",
+      tr("Séquence pour-cent invalide : ce texte n'est pas une URL encodée correctement."),
     );
   }
 }

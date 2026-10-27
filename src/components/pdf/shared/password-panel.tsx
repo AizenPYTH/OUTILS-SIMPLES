@@ -5,6 +5,7 @@ import { Loader2, LockKeyhole } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { tr } from "@/lib/i18n/messages";
 
 interface PasswordPanelProps {
   fileName: string;
@@ -43,15 +44,18 @@ export function PasswordPanel({
         <span className="flex size-12 items-center justify-center rounded-full bg-primary-soft text-link">
           <LockKeyhole className="size-6" aria-hidden="true" />
         </span>
-        <h2 className="font-heading text-xl font-bold">Ce PDF est protégé par un mot de passe</h2>
+        <h2 className="font-heading text-xl font-bold">
+          {tr("Ce PDF est protégé par un mot de passe")}
+        </h2>
         <p className="max-w-md text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">{fileName}</span> demande un mot de passe
-          d&apos;ouverture. Saisissez-le pour l&apos;ouvrir ici : il reste dans votre navigateur, le
-          document est déverrouillé localement.
+          {tr(
+            "« {name} » demande un mot de passe d'ouverture. Saisissez-le pour l'ouvrir ici : il reste dans votre navigateur, le document est déverrouillé localement.",
+            { name: fileName },
+          )}
         </p>
       </div>
       <div className="mx-auto mt-6 max-w-sm space-y-2">
-        <Label htmlFor="pdf-password">Mot de passe</Label>
+        <Label htmlFor="pdf-password">{tr("Mot de passe")}</Label>
         <Input
           ref={inputRef}
           id="pdf-password"
@@ -72,17 +76,17 @@ export function PasswordPanel({
             className="text-sm text-destructive"
             data-testid="password-error"
           >
-            Mot de passe incorrect. Vérifiez la casse et réessayez.
+            {tr("Mot de passe incorrect. Vérifiez la casse et réessayez.")}
           </p>
         ) : null}
       </div>
       <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
         <Button type="submit" disabled={value.length === 0 || busy} data-testid="password-submit">
           {busy ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
-          Ouvrir le document
+          {tr("Ouvrir le document")}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>
-          Choisir un autre fichier
+          {tr("Choisir un autre fichier")}
         </Button>
       </div>
     </form>

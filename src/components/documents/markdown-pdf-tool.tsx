@@ -32,8 +32,9 @@ import {
 import { standardFontFamilies as fontFamilies, type FontFamily } from "@/lib/pdf/fonts";
 import { formatBytes } from "@/lib/files/format";
 import { sanitizeFilename } from "@/lib/files/filename";
+import { tr } from "@/lib/i18n/messages";
 
-const SAMPLE_MD = `# Compte rendu de réunion
+const SAMPLE_MD = tr(`# Compte rendu de réunion
 
 **Date :** 12 mars 2026 · **Participants :** équipe produit
 
@@ -55,7 +56,7 @@ const SAMPLE_MD = `# Compte rendu de réunion
 | Design | Karim | 8 avril |
 
 Plus d'informations : [outilia.fr](https://outilia.fr/)
-`;
+`);
 
 export function TextPdfTool() {
   return <MarkdownPdfTool mode="text" />;
@@ -92,22 +93,29 @@ export function MarkdownPdfTool({ mode = "markdown" }: { mode?: "markdown" | "te
     const name = `${sanitizeFilename(filename || options.title || "document")}.pdf`;
     return (
       <DonePanel
-        title="Votre PDF est prêt"
-        summary={`${result.pageCount} page${result.pageCount > 1 ? "s" : ""} · ${formatBytes(result.bytes.byteLength)}`}
+        title={tr("Votre PDF est prêt")}
+        summary={`${tr(result.pageCount > 1 ? "{n} pages" : "{n} page", { n: result.pageCount })} · ${formatBytes(result.bytes.byteLength)}`}
         onDownload={() => downloadPdf(result.bytes, name, "", toolId)}
         onStartOver={op.reset}
       >
         {result.replacedCharacters || result.skipped.length ? (
-          <Alert variant="warning" title="À vérifier">
+          <Alert variant="warning" title={tr("À vérifier")}>
             {result.replacedCharacters
-              ? "Certains caractères (emoji, alphabets non latins, symboles) ne sont pas disponibles dans les polices PDF standard et ont été remplacés par « ? ». "
+              ? tr(
+                  "Certains caractères (emoji, alphabets non latins, symboles) ne sont pas disponibles dans les polices PDF standard et ont été remplacés par « ? ».",
+                ) + " "
               : ""}
-            {result.skipped.length ? result.skipped.slice(0, 5).join(" · ") : ""}
+            {result.skipped.length
+              ? result.skipped
+                  .slice(0, 5)
+                  .map((s) => tr(s))
+                  .join(" · ")
+              : ""}
           </Alert>
         ) : null}
         <div className="mt-3 text-center">
           <Button type="button" variant="ghost" size="sm" onClick={op.reset}>
-            Modifier le texte
+            {tr("Modifier le texte")}
           </Button>
         </div>
       </DonePanel>
@@ -121,18 +129,22 @@ export function MarkdownPdfTool({ mode = "markdown" }: { mode?: "markdown" | "te
           <TabsList>
             <TabsTrigger value="edit">Markdown</TabsTrigger>
             <TabsTrigger value="preview" disabled={!preview}>
-              Aperçu
+              {tr("Aperçu")}
             </TabsTrigger>
           </TabsList>
           <TabsContent value="edit" className="space-y-2">
             <TextInputPanel
               id="md-input"
-              label="Texte Markdown"
+              label={tr("Texte Markdown")}
               value={source}
               onChange={setSource}
               rows={14}
               acceptFile=".md,.markdown,.txt,text/markdown,text/plain"
-              placeholder={"# Titre\n\nVotre texte avec **gras**, listes, tableaux…"}
+              placeholder={[
+                tr("# Titre"),
+                "",
+                tr("Votre texte avec **gras**, listes, tableaux…"),
+              ].join("\n")}
             />
             {!source ? (
               <Button
@@ -143,7 +155,7 @@ export function MarkdownPdfTool({ mode = "markdown" }: { mode?: "markdown" | "te
                 onClick={() => setSource(SAMPLE_MD)}
                 data-testid="md-sample"
               >
-                Insérer un exemple
+                {tr("Insérer un exemple")}
               </Button>
             ) : null}
           </TabsContent>
@@ -158,28 +170,30 @@ export function MarkdownPdfTool({ mode = "markdown" }: { mode?: "markdown" | "te
       ) : (
         <TextInputPanel
           id="txt-input"
-          label="Texte"
+          label={tr("Texte")}
           value={source}
           onChange={setSource}
           rows={14}
           acceptFile=".txt,.log,.csv,text/plain"
-          placeholder="Collez votre texte : les sauts de ligne sont conservés, les lignes vides séparent les paragraphes."
+          placeholder={tr(
+            "Collez votre texte : les sauts de ligne sont conservés, les lignes vides séparent les paragraphes.",
+          )}
         />
       )}
       <ToolPanel className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1 sm:col-span-2">
-            <Label htmlFor="doc-title">Titre (facultatif, en tête du document)</Label>
+            <Label htmlFor="doc-title">{tr("Titre (facultatif, en tête du document)")}</Label>
             <Input
               id="doc-title"
               value={options.title ?? ""}
               onChange={(e) => patch({ title: e.target.value })}
-              placeholder="Compte rendu"
+              placeholder={tr("Compte rendu")}
               maxLength={200}
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="doc-filename">Nom du fichier</Label>
+            <Label htmlFor="doc-filename">{tr("Nom du fichier")}</Label>
             <Input
               id="doc-filename"
               value={filename}
@@ -189,7 +203,7 @@ export function MarkdownPdfTool({ mode = "markdown" }: { mode?: "markdown" | "te
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="doc-font">Police</Label>
+            <Label htmlFor="doc-font">{tr("Police")}</Label>
             <Select
               value={options.fontFamily}
               onValueChange={(v) => patch({ fontFamily: v as FontFamily })}
@@ -207,7 +221,7 @@ export function MarkdownPdfTool({ mode = "markdown" }: { mode?: "markdown" | "te
             </Select>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="doc-size">Taille du texte</Label>
+            <Label htmlFor="doc-size">{tr("Taille du texte")}</Label>
             <Select
               value={String(options.fontSize)}
               onValueChange={(v) => patch({ fontSize: Number(v) })}
@@ -225,7 +239,7 @@ export function MarkdownPdfTool({ mode = "markdown" }: { mode?: "markdown" | "te
             </Select>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="doc-margin">Marges</Label>
+            <Label htmlFor="doc-margin">{tr("Marges")}</Label>
             <Select
               value={String(options.margin)}
               onValueChange={(v) => patch({ margin: Number(v) })}
@@ -234,15 +248,15 @@ export function MarkdownPdfTool({ mode = "markdown" }: { mode?: "markdown" | "te
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="36">Étroites (1,3 cm)</SelectItem>
-                <SelectItem value="56">Normales (2 cm)</SelectItem>
-                <SelectItem value="72">Larges (2,5 cm)</SelectItem>
+                <SelectItem value="36">{tr("Étroites (1,3 cm)")}</SelectItem>
+                <SelectItem value="56">{tr("Normales (2 cm)")}</SelectItem>
+                <SelectItem value="72">{tr("Larges (2,5 cm)")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
             <Segmented
-              label="Format de page"
+              label={tr("Format de page")}
               value={options.pageSize}
               onChange={(v) => patch({ pageSize: v })}
               className="sm:grid-cols-2"
@@ -257,7 +271,7 @@ export function MarkdownPdfTool({ mode = "markdown" }: { mode?: "markdown" | "te
               checked={options.pageNumbers}
               onCheckedChange={(v) => patch({ pageNumbers: v === true })}
             />{" "}
-            Numéroter les pages
+            {tr("Numéroter les pages")}
           </label>
         </div>
         <Button
@@ -268,7 +282,7 @@ export function MarkdownPdfTool({ mode = "markdown" }: { mode?: "markdown" | "te
           disabled={!source.trim() && !options.title?.trim()}
           data-testid="doc-run"
         >
-          <FileText aria-hidden="true" /> Créer le PDF
+          <FileText aria-hidden="true" /> {tr("Créer le PDF")}
         </Button>
       </ToolPanel>
     </div>

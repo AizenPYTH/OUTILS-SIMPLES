@@ -1,3 +1,4 @@
+import { tr } from "@/lib/i18n/messages";
 import type { OcrPageResult } from "./types";
 
 export function ocrPagesToText(
@@ -18,7 +19,7 @@ export function ocrPagesToMarkdown(
   const out: string[] = [];
   if (title) out.push(`# ${title}`, "");
   for (const p of pages)
-    out.push(`## Page ${p.pageIndex + 1}`, "", p.text.trim() || "_(aucun texte reconnu)_", "");
+    out.push(`## Page ${p.pageIndex + 1}`, "", p.text.trim() || tr("_(aucun texte reconnu)_"), "");
   return out.join("\n").trim() + "\n";
 }
 

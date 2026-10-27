@@ -1,4 +1,5 @@
 import { zlibSync } from "fflate";
+import { tr } from "@/lib/i18n/messages";
 
 export type PngChannels = 1 | 2 | 3 | 4;
 
@@ -30,9 +31,9 @@ export function encodePng(
   channels: PngChannels,
   samples: Uint8Array,
 ): Uint8Array {
-  if (width <= 0 || height <= 0) throw new Error("Dimensions PNG invalides.");
+  if (width <= 0 || height <= 0) throw new Error(tr("Dimensions PNG invalides."));
   const rowBytes = width * channels;
-  if (samples.length < rowBytes * height) throw new Error("Données d'image incomplètes.");
+  if (samples.length < rowBytes * height) throw new Error(tr("Données d'image incomplètes."));
   const raw = new Uint8Array((rowBytes + 1) * height);
   for (let y = 0; y < height; y += 1) {
     raw[y * (rowBytes + 1)] = 0;

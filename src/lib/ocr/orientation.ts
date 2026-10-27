@@ -4,6 +4,7 @@
  * baseline Tesseract reports, skew estimation, and the merge of several
  * oriented passes. No DOM: unit-tested in Node.
  */
+import { tr } from "@/lib/i18n/messages";
 import type { RgbaImage } from "@/lib/images/pixels";
 import type { OcrAngle, OcrLine, OcrWord } from "./types";
 
@@ -406,9 +407,9 @@ export function charsByAngle(lines: OcrLine[]): Record<OcrAngle, number> {
 
 const ANGLE_HEADING: Record<OcrAngle, string> = {
   0: "",
-  90: "[Texte tourné à 90°, lu de bas en haut]",
-  180: "[Texte à l'envers (180°)]",
-  270: "[Texte tourné à 270°, lu de haut en bas]",
+  90: tr("[Texte tourné à 90°, lu de bas en haut]"),
+  180: tr("[Texte à l'envers (180°)]"),
+  270: tr("[Texte tourné à 270°, lu de haut en bas]"),
 };
 
 /**

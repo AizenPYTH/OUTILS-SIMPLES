@@ -13,6 +13,7 @@ import {
 import { formatChangedRatio } from "@/lib/pdf/operations/visual-diff";
 import type { RasterLike } from "@/lib/pdf/operations/visual-diff";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 
 interface VisualCompareProps {
   bytesA: Uint8Array;
@@ -54,7 +55,7 @@ function Raster({
         />
       ) : (
         <div className="flex aspect-[1/1.4] items-center justify-center rounded-md border border-dashed border-border text-xs text-muted-foreground">
-          Page absente
+          {tr("Page absente")}
         </div>
       )}
     </figure>
@@ -89,7 +90,8 @@ export function VisualCompare({ bytesA, bytesB, pageCount }: VisualCompareProps)
         }
         setDocs(opened);
       } catch {
-        if (!cancelled) setError("Impossible d'ouvrir les documents pour la comparaison visuelle.");
+        if (!cancelled)
+          setError(tr("Impossible d'ouvrir les documents pour la comparaison visuelle."));
       }
     })();
     return () => {
@@ -109,7 +111,7 @@ export function VisualCompare({ bytesA, bytesB, pageCount }: VisualCompareProps)
         if (!controller.signal.aborted) setResult(r);
       })
       .catch(() => {
-        if (!controller.signal.aborted) setError("Le rendu de cette page a échoué.");
+        if (!controller.signal.aborted) setError(tr("Le rendu de cette page a échoué."));
       });
     return () => controller.abort();
   }, [docs, page]);
@@ -134,12 +136,12 @@ export function VisualCompare({ bytesA, bytesB, pageCount }: VisualCompareProps)
     <div className="space-y-4" data-testid="visual-compare">
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm">
-          Page
+          {tr("Page")}
           <select
             value={page}
             onChange={(e) => setPage(Number(e.target.value))}
             className="h-9 rounded-md border border-input bg-surface px-2 text-sm"
-            aria-label="Page comparée"
+            aria-label={tr("Page comparée")}
             data-testid="visual-page"
           >
             {Array.from({ length: pageCount }, (_, i) => (
@@ -160,16 +162,16 @@ export function VisualCompare({ bytesA, bytesB, pageCount }: VisualCompareProps)
             data-testid="visual-ratio"
           >
             {result.status === "compared"
-              ? `Pixels différents : ${formatChangedRatio(result.changedRatio)}${result.sizeDiffers ? " · formats de page différents" : ""}`
+              ? `${tr("Pixels différents : {ratio}", { ratio: formatChangedRatio(result.changedRatio) })}${result.sizeDiffers ? ` · ${tr("formats de page différents")}` : ""}`
               : result.status === "added"
-                ? "Page ajoutée dans le document modifié"
-                : "Page absente du document modifié"}
+                ? tr("Page ajoutée dans le document modifié")
+                : tr("Page absente du document modifié")}
           </span>
         ) : null}
         {busy ? (
           <Loader2
             className="size-4 animate-spin text-muted-foreground"
-            aria-label="Rendu en cours"
+            aria-label={tr("Rendu en cours")}
           />
         ) : null}
         <Button
@@ -180,7 +182,9 @@ export function VisualCompare({ bytesA, bytesB, pageCount }: VisualCompareProps)
           disabled={!docs || progress !== null}
           data-testid="visual-summary-run"
         >
-          {progress ? `Analyse ${progress.done}/${progress.total}…` : "Analyser toutes les pages"}
+          {progress
+            ? tr("Analyse {done}/{total}…", { done: progress.done, total: progress.total })
+            : tr("Analyser toutes les pages")}
         </Button>
       </div>
       {summary ? (
@@ -198,12 +202,12 @@ export function VisualCompare({ bytesA, bytesB, pageCount }: VisualCompareProps)
                   entry.pageIndex === page && "ring-2 ring-ring",
                 )}
               >
-                p. {entry.pageIndex + 1} ·{" "}
+                {tr("p. {n}", { n: entry.pageIndex + 1 })} ·{" "}
                 {entry.status === "compared"
                   ? formatChangedRatio(entry.changedRatio)
                   : entry.status === "added"
-                    ? "ajoutée"
-                    : "absente"}
+                    ? tr("ajoutée")
+                    : tr("absente")}
               </button>
             </li>
           ))}
@@ -211,22 +215,22 @@ export function VisualCompare({ bytesA, bytesB, pageCount }: VisualCompareProps)
       ) : null}
       {result ? (
         <div className="grid gap-3 md:grid-cols-3">
-          <Raster raster={result.a} label="Original" />
-          <Raster raster={result.b} label="Modifié" />
+          <Raster raster={result.a} label={tr("Original")} />
+          <Raster raster={result.b} label={tr("Modifié")} />
           <Raster
             raster={
               result.status === "compared"
                 ? { width: result.width, height: result.height, data: result.overlay }
                 : null
             }
-            label="Différences (en rouge)"
+            label={tr("Différences (en rouge)")}
           />
         </div>
       ) : null}
       <p className="text-xs text-muted-foreground">
-        Rendu des deux pages à la même taille (~1 100 px) et comparaison pixel par pixel avec une
-        tolérance de couleur : un décalage d&apos;un pixel ou un anticrénelage différent apparaît
-        comme une différence. Les pages sont comparées par numéro.
+        {tr(
+          "Rendu des deux pages à la même taille (~1 100 px) et comparaison pixel par pixel avec une tolérance de couleur : un décalage d'un pixel ou un anticrénelage différent apparaît comme une différence. Les pages sont comparées par numéro.",
+        )}
       </p>
     </div>
   );

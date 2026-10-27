@@ -3,6 +3,7 @@
 import { FileText, ImageIcon, ScanText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { DocumentDiagnosis } from "@/lib/pdf/browser/diagnose";
+import { tr } from "@/lib/i18n/messages";
 
 interface ImportDiagnosisProps {
   diagnosis: DocumentDiagnosis;
@@ -24,14 +25,25 @@ export function ImportDiagnosis({
   const scanned = diagnosis.scannedPages;
   const title =
     diagnosis.kind === "scanned"
-      ? `Document scanné — ${pageCount} page${pageCount > 1 ? "s" : ""} sans texte sélectionnable`
+      ? pageCount > 1
+        ? tr("Document scanné — {n} pages sans texte sélectionnable", { n: pageCount })
+        : tr("Document scanné — {n} page sans texte sélectionnable", { n: pageCount })
       : diagnosis.kind === "mixed"
-        ? `PDF ouvert — ${pageCount} pages, dont ${scanned} sans texte sélectionnable`
-        : `PDF ouvert — ${pageCount} page${pageCount > 1 ? "s" : ""} sans texte ni image`;
+        ? tr("PDF ouvert — {n} pages, dont {scanned} sans texte sélectionnable", {
+            n: pageCount,
+            scanned,
+          })
+        : pageCount > 1
+          ? tr("PDF ouvert — {n} pages sans texte ni image", { n: pageCount })
+          : tr("PDF ouvert — {n} page sans texte ni image", { n: pageCount });
   const body =
     diagnosis.kind === "empty"
-      ? "Les pages analysées ne contiennent ni texte ni image. Vous pouvez ajouter du texte, des formes, des images ou une signature."
-      : "Ces pages sont des images : leur texte ne peut pas être modifié directement. Lancez l'OCR pour reconnaître le texte (recherche, copie, correction), ou continuez pour annoter, ajouter du texte par-dessus, insérer une signature ou réorganiser les pages.";
+      ? tr(
+          "Les pages analysées ne contiennent ni texte ni image. Vous pouvez ajouter du texte, des formes, des images ou une signature.",
+        )
+      : tr(
+          "Ces pages sont des images : leur texte ne peut pas être modifié directement. Lancez l'OCR pour reconnaître le texte (recherche, copie, correction), ou continuez pour annoter, ajouter du texte par-dessus, insérer une signature ou réorganiser les pages.",
+        );
   return (
     <div
       role="dialog"
@@ -56,7 +68,7 @@ export function ImportDiagnosis({
           <p className="mt-1 text-sm text-muted-foreground">{body}</p>
           {diagnosis.sampled ? (
             <p className="mt-1 text-xs text-muted-foreground">
-              Document long : un échantillon de pages a été analysé.
+              {tr("Document long : un échantillon de pages a été analysé.")}
             </p>
           ) : null}
         </div>
@@ -68,11 +80,11 @@ export function ImportDiagnosis({
           onClick={onContinue}
           data-testid="diagnosis-continue"
         >
-          Continuer sans OCR
+          {tr("Continuer sans OCR")}
         </Button>
         {diagnosis.kind !== "empty" ? (
           <Button type="button" onClick={onRunOcr} data-testid="diagnosis-run-ocr">
-            <ScanText aria-hidden="true" /> Lancer l&apos;OCR
+            <ScanText aria-hidden="true" /> {tr("Lancer l'OCR")}
           </Button>
         ) : null}
       </div>

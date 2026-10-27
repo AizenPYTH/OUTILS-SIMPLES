@@ -17,6 +17,7 @@ import {
   Underline,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 import { TOOL_GROUPS, toolLabels, toolShortcuts, type WorkspaceTool } from "./types";
 
 const icons: Record<WorkspaceTool, React.ComponentType<{ className?: string }>> = {
@@ -70,7 +71,7 @@ export function Toolbar({ tools, active, onChange, orientation, extras = [] }: T
     return (
       <div
         role="toolbar"
-        aria-label="Outils d'édition"
+        aria-label={tr("Outils d'édition")}
         aria-orientation="vertical"
         className="flex h-full flex-col gap-2"
       >
@@ -92,7 +93,7 @@ export function Toolbar({ tools, active, onChange, orientation, extras = [] }: T
         {extras.length ? (
           <div className="mt-auto flex flex-col gap-0.5 border-t border-border pt-2">
             <p className="px-1 pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Document
+              {tr("Document")}
             </p>
             <div className="grid grid-cols-2 gap-0.5">
               {extras.map((extra) => (
@@ -107,7 +108,7 @@ export function Toolbar({ tools, active, onChange, orientation, extras = [] }: T
   return (
     <div
       role="toolbar"
-      aria-label="Outils d'édition"
+      aria-label={tr("Outils d'édition")}
       aria-orientation={orientation}
       className="flex flex-row gap-1 overflow-x-auto px-2"
     >

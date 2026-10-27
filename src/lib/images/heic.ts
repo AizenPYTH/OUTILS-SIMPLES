@@ -4,6 +4,8 @@
  * Chrome, Firefox and Edge cannot decode HEIC natively; Safari can but goes
  * through the same path for consistency of the EXIF orientation handling.
  */
+import { tr } from "@/lib/i18n/messages";
+
 export const HEIF_ASSET_BASE = "/heif/";
 
 const HEIF_BRANDS = /^(heic|heix|hevc|hevx|heim|heis|mif1|msf1)$/;
@@ -59,7 +61,10 @@ export function loadHeif(wasmBinary?: Uint8Array): Promise<HeifModule> {
       let binary = wasmBinary;
       if (!binary) {
         const response = await fetch(`${HEIF_ASSET_BASE}libheif.wasm`);
-        if (!response.ok) throw new Error(`Décodeur HEIC indisponible (${response.status}).`);
+        if (!response.ok)
+          throw new Error(
+            tr("Décodeur HEIC indisponible ({status}).", { status: response.status }),
+          );
         binary = new Uint8Array(await response.arrayBuffer());
       }
       const mod = factory({ wasmBinary: binary });
@@ -82,7 +87,7 @@ export async function decodeHeic(
   const decoder = new mod.HeifDecoder();
   const images = decoder.decode(bytes);
   const image = images[0];
-  if (!image) throw new Error("Aucune image lisible dans ce fichier HEIC.");
+  if (!image) throw new Error(tr("Aucune image lisible dans ce fichier HEIC."));
   try {
     const width = image.get_width();
     const height = image.get_height();
@@ -91,7 +96,7 @@ export async function decodeHeic(
       try {
         image.display({ data, width, height }, (result) => {
           if (result === null || result === undefined)
-            reject(new Error("Décodage HEIC impossible."));
+            reject(new Error(tr("Décodage HEIC impossible.")));
           else resolve();
         });
       } catch (error) {

@@ -26,6 +26,7 @@ import { bytesToBlob, triggerDownload } from "@/lib/files/download";
 import { deriveOutputName } from "@/lib/files/filename";
 import { formatBytes } from "@/lib/files/format";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 import { QuadEditor } from "./quad-editor";
 
 const TOOL_ID = "scan-perspective";
@@ -93,9 +94,9 @@ export function PerspectiveTool() {
       setQuad(detection?.quad ?? defaultQuad(decoded.width, decoded.height));
       setResult(null);
       track("tool_start", { tool: TOOL_ID });
-      if (!detection) toast.info("Coins non détectés automatiquement : placez-les à la main.");
+      if (!detection) toast.info(tr("Coins non détectés automatiquement : placez-les à la main."));
     } catch {
-      toast.error("Image illisible par ce navigateur.");
+      toast.error(tr("Image illisible par ce navigateur."));
     }
   };
 
@@ -111,14 +112,14 @@ export function PerspectiveTool() {
     const detection = detectQuadFromBitmap(loaded.decoded.bitmap);
     if (detection) {
       setQuad(detection.quad);
-      toast.success("Coins détectés.");
-    } else toast.info("Aucune feuille détectée : le contraste avec le fond est insuffisant.");
+      toast.success(tr("Coins détectés."));
+    } else toast.info(tr("Aucune feuille détectée : le contraste avec le fond est insuffisant."));
   };
 
   const run = async () => {
     if (!loaded || !quad) return;
     if (polygonArea(quad) < 400) {
-      toast.error("La zone sélectionnée est trop petite.");
+      toast.error(tr("La zone sélectionnée est trop petite."));
       return;
     }
     setBusy(true);
@@ -153,7 +154,7 @@ export function PerspectiveTool() {
       });
       track("tool_success", { tool: TOOL_ID });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Correction impossible.");
+      toast.error(error instanceof Error ? tr(error.message) : tr("Correction impossible."));
     } finally {
       setBusy(false);
     }
@@ -166,15 +167,18 @@ export function PerspectiveTool() {
           onFiles={(f) => f[0] && void load(f[0])}
           accept="image/*"
           validate={validateImageFile}
-          title="Déposez la photo du document"
-          hint={`JPG, PNG, WebP · ${formatBytes(IMAGE_MAX_SIZE)} max · la feuille doit être plus claire que le fond`}
-          buttonLabel="Choisir ou photographier"
+          title={tr("Déposez la photo du document")}
+          hint={tr("JPG, PNG, WebP · {max} max · la feuille doit être plus claire que le fond", {
+            max: formatBytes(IMAGE_MAX_SIZE),
+          })}
+          buttonLabel={tr("Choisir ou photographier")}
           capture="environment"
           testId="perspective-dropzone"
         />
         <Alert variant="info">
-          Pour plusieurs pages à la suite, utilisez plutôt « Scanner un document » ; cet outil se
-          concentre sur une page avec un redressement précis.
+          {tr(
+            "Pour plusieurs pages à la suite, utilisez plutôt « Scanner un document » ; cet outil se concentre sur une page avec un redressement précis.",
+          )}
         </Alert>
       </div>
     );
@@ -183,9 +187,9 @@ export function PerspectiveTool() {
   if (result) {
     return (
       <DonePanel
-        title="Document redressé"
+        title={tr("Document redressé")}
         summary={`${result.width}×${result.height} px · ${formatBytes(result.blob.size)} · ${format.toUpperCase()}`}
-        downloadLabel={format === "pdf" ? "Télécharger le PDF" : "Télécharger l'image"}
+        downloadLabel={format === "pdf" ? tr("Télécharger le PDF") : tr("Télécharger l'image")}
         onDownload={() => {
           triggerDownload(result.blob, result.name);
           track("tool_download", { tool: TOOL_ID });
@@ -196,14 +200,14 @@ export function PerspectiveTool() {
           {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
           <img
             src={result.url}
-            alt="Aperçu du document redressé"
+            alt={tr("Aperçu du document redressé")}
             className="max-h-96 max-w-full rounded-md border border-border shadow-sm"
             data-testid="perspective-result"
           />
         </div>
         <div className="mt-4 text-center">
           <Button type="button" variant="ghost" size="sm" onClick={() => setResult(null)}>
-            Ajuster les coins
+            {tr("Ajuster les coins")}
           </Button>
         </div>
       </DonePanel>
@@ -216,16 +220,19 @@ export function PerspectiveTool() {
         <p className="text-sm text-muted-foreground">
           {loaded.file.name} · {loaded.decoded.width}×{loaded.decoded.height} px
           {loaded.detected !== null
-            ? ` · coins détectés (confiance ${Math.round(loaded.detected * 100)} %)`
-            : " · coins à placer manuellement"}
+            ? " · " +
+              tr("coins détectés (confiance {confidence} %)", {
+                confidence: Math.round(loaded.detected * 100),
+              })
+            : " · " + tr("coins à placer manuellement")}
         </p>
         <Button type="button" variant="outline" size="sm" onClick={reset}>
-          <RefreshCw aria-hidden="true" /> Autre photo
+          <RefreshCw aria-hidden="true" /> {tr("Autre photo")}
         </Button>
       </div>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="space-y-2">
-          <p className="text-sm font-medium">1. Placez les quatre coins de la feuille</p>
+          <p className="text-sm font-medium">{tr("1. Placez les quatre coins de la feuille")}</p>
           <QuadEditor
             imageUrl={loaded.url}
             imageWidth={loaded.decoded.width}
@@ -241,7 +248,7 @@ export function PerspectiveTool() {
               onClick={redetect}
               data-testid="perspective-detect"
             >
-              <Wand2 aria-hidden="true" /> Détecter les coins
+              <Wand2 aria-hidden="true" /> {tr("Détecter les coins")}
             </Button>
             <Button
               type="button"
@@ -256,12 +263,12 @@ export function PerspectiveTool() {
                 ])
               }
             >
-              <Maximize2 aria-hidden="true" /> Toute l&apos;image
+              <Maximize2 aria-hidden="true" /> {tr("Toute l'image")}
             </Button>
           </div>
         </div>
         <div className="space-y-2">
-          <p className="text-sm font-medium">2. Aperçu du résultat</p>
+          <p className="text-sm font-medium">{tr("2. Aperçu du résultat")}</p>
           <WarpPreview
             bitmap={loaded.decoded.bitmap}
             settings={{ ...settings, quad, crop: null }}
@@ -282,24 +289,30 @@ export function PerspectiveTool() {
             }
             data-testid="perspective-rotate"
           >
-            <RotateCw aria-hidden="true" /> Pivoter le résultat
+            <RotateCw aria-hidden="true" /> {tr("Pivoter le résultat")}
           </Button>
         </div>
         <Segmented
-          label="Filtre"
+          label={tr("Filtre")}
           value={settings.filter}
           onChange={(filter: ScanFilter) => setSettings((s) => ({ ...s, filter }))}
           className="sm:grid-cols-4"
           options={[
-            { value: "document", label: "Document", description: "Fond blanchi, texte net" },
-            { value: "color", label: "Couleur", description: "Photo d'origine" },
-            { value: "gray", label: "Niveaux de gris", description: "" },
-            { value: "bw", label: "Noir et blanc", description: "Texte seul" },
+            {
+              value: "document",
+              label: tr("Document"),
+              description: tr("Fond blanchi, texte net"),
+            },
+            { value: "color", label: tr("Couleur"), description: tr("Photo d'origine") },
+            { value: "gray", label: tr("Niveaux de gris"), description: "" },
+            { value: "bw", label: tr("Noir et blanc"), description: tr("Texte seul") },
           ]}
         />
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
-            <Label htmlFor="persp-brightness">Luminosité ({settings.brightness})</Label>
+            <Label htmlFor="persp-brightness">
+              {tr("Luminosité ({value})", { value: settings.brightness })}
+            </Label>
             <input
               id="persp-brightness"
               type="range"
@@ -311,7 +324,9 @@ export function PerspectiveTool() {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="persp-contrast">Contraste ({settings.contrast})</Label>
+            <Label htmlFor="persp-contrast">
+              {tr("Contraste ({value})", { value: settings.contrast })}
+            </Label>
             <input
               id="persp-contrast"
               type="range"
@@ -324,13 +339,13 @@ export function PerspectiveTool() {
           </div>
         </div>
         <Segmented
-          label="Format d'export"
+          label={tr("Format d'export")}
           value={format}
           onChange={setFormat}
           options={[
-            { value: "jpg", label: "JPG", description: "Léger, pour partager" },
-            { value: "png", label: "PNG", description: "Sans perte" },
-            { value: "pdf", label: "PDF", description: "Une page à la taille de l'image" },
+            { value: "jpg", label: "JPG", description: tr("Léger, pour partager") },
+            { value: "png", label: "PNG", description: tr("Sans perte") },
+            { value: "pdf", label: "PDF", description: tr("Une page à la taille de l'image") },
           ]}
         />
         <Button
@@ -341,7 +356,7 @@ export function PerspectiveTool() {
           loading={busy}
           data-testid="perspective-run"
         >
-          <ScanLine aria-hidden="true" /> Redresser et exporter
+          <ScanLine aria-hidden="true" /> {tr("Redresser et exporter")}
         </Button>
       </ToolPanel>
     </div>
@@ -380,7 +395,7 @@ function WarpPreview({ bitmap, settings }: { bitmap: ImageBitmap; settings: Scan
       <canvas
         ref={canvasRef}
         className="max-h-[60vh] max-w-full rounded-[4px] shadow-md"
-        aria-label="Aperçu du document redressé"
+        aria-label={tr("Aperçu du document redressé")}
       />
     </div>
   );

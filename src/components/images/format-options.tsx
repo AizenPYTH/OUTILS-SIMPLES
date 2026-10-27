@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Segmented } from "@/components/pdf/shared/segmented";
 import * as React from "react";
 import { supportsWebpEncoding } from "@/lib/images/canvas";
+import { tr } from "@/lib/i18n/messages";
 import {
   outputFormatLabels,
   supportsTransparency,
@@ -39,9 +40,9 @@ export function FormatOptions({ value, onChange, allowSame = true, idPrefix }: F
   return (
     <div className="space-y-4">
       <div className="space-y-1.5">
-        <Label>Format de sortie</Label>
+        <Label>{tr("Format de sortie")}</Label>
         <Segmented
-          label="Format de sortie"
+          label={tr("Format de sortie")}
           value={value.format}
           onChange={(format) => onChange({ ...value, format })}
           className="sm:grid-cols-4"
@@ -50,25 +51,27 @@ export function FormatOptions({ value, onChange, allowSame = true, idPrefix }: F
               ? [
                   {
                     value: "same" as const,
-                    label: "Identique",
-                    description: "Conserve le format d'origine",
+                    label: tr("Identique"),
+                    description: tr("Conserve le format d'origine"),
                   },
                 ]
               : []),
             {
               value: "image/jpeg" as const,
               label: outputFormatLabels["image/jpeg"],
-              description: "Photos, sans transparence",
+              description: tr("Photos, sans transparence"),
             },
             {
               value: "image/png" as const,
               label: outputFormatLabels["image/png"],
-              description: "Sans perte, transparence",
+              description: tr("Sans perte, transparence"),
             },
             {
               value: "image/webp" as const,
               label: outputFormatLabels["image/webp"],
-              description: webp ? "Léger, transparence" : "Non pris en charge par ce navigateur",
+              description: webp
+                ? tr("Léger, transparence")
+                : tr("Non pris en charge par ce navigateur"),
               disabled: !webp,
             },
           ]}
@@ -77,7 +80,7 @@ export function FormatOptions({ value, onChange, allowSame = true, idPrefix }: F
       {lossy ? (
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-quality`}>
-            Qualité ({Math.round(value.quality * 100)} %)
+            {tr("Qualité ({value} %)", { value: Math.round(value.quality * 100) })}
           </Label>
           <Slider
             id={`${idPrefix}-quality`}
@@ -86,17 +89,18 @@ export function FormatOptions({ value, onChange, allowSame = true, idPrefix }: F
             step={1}
             value={[Math.round(value.quality * 100)]}
             onValueChange={([q]) => q !== undefined && onChange({ ...value, quality: q / 100 })}
-            aria-label="Qualité"
+            aria-label={tr("Qualité")}
           />
           <p className="text-xs text-muted-foreground">
-            S&apos;applique aux formats JPG et WebP (compression avec perte). Le PNG reste sans
-            perte.
+            {tr(
+              "S'applique aux formats JPG et WebP (compression avec perte). Le PNG reste sans perte.",
+            )}
           </p>
         </div>
       ) : null}
       {value.format !== "same" && !supportsTransparency(value.format) ? (
         <div className="flex items-center gap-3">
-          <Label htmlFor={`${idPrefix}-bg`}>Fond pour les zones transparentes</Label>
+          <Label htmlFor={`${idPrefix}-bg`}>{tr("Fond pour les zones transparentes")}</Label>
           <input
             id={`${idPrefix}-bg`}
             type="color"
@@ -105,7 +109,7 @@ export function FormatOptions({ value, onChange, allowSame = true, idPrefix }: F
             className="size-9 cursor-pointer rounded-md border border-input bg-background p-0.5"
           />
           <span className="text-xs text-muted-foreground">
-            Le JPG ne gère pas la transparence : elle est aplatie sur cette couleur.
+            {tr("Le JPG ne gère pas la transparence : elle est aplatie sur cette couleur.")}
           </span>
         </div>
       ) : null}

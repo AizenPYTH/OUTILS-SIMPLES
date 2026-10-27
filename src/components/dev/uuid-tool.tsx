@@ -15,6 +15,7 @@ import {
 import { TextOutputPanel } from "@/components/tools/shared/text-io";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { generateUuid } from "@/lib/dev/random";
+import { tr } from "@/lib/i18n/messages";
 import { track } from "@/lib/analytics/events";
 
 const TOOL_ID = "dev-uuid";
@@ -58,7 +59,7 @@ export function UuidTool() {
     <div className="space-y-4">
       <ToolPanel className="flex flex-wrap items-end gap-4">
         <div className="space-y-1">
-          <Label htmlFor="uuid-count">Nombre</Label>
+          <Label htmlFor="uuid-count">{tr("Nombre")}</Label>
           <Select
             value={String(options.count)}
             onValueChange={(v) => {
@@ -84,24 +85,24 @@ export function UuidTool() {
             checked={options.uppercase}
             onCheckedChange={(v) => patch({ uppercase: v === true })}
           />{" "}
-          MAJUSCULES
+          {tr("MAJUSCULES")}
         </label>
         <label className="flex items-center gap-2 pb-2 text-sm">
           <Checkbox
             checked={options.braces}
             onCheckedChange={(v) => patch({ braces: v === true })}
           />{" "}
-          Accolades {"{ }"}
+          {tr("Accolades")} {"{ }"}
         </label>
         <label className="flex items-center gap-2 pb-2 text-sm">
           <Checkbox
             checked={options.noHyphens}
             onCheckedChange={(v) => patch({ noHyphens: v === true })}
           />{" "}
-          Sans tirets
+          {tr("Sans tirets")}
         </label>
         <Button type="button" onClick={() => regenerate()} data-testid="uuid-regenerate">
-          <RefreshCw aria-hidden="true" /> Régénérer
+          <RefreshCw aria-hidden="true" /> {tr("Régénérer")}
         </Button>
       </ToolPanel>
       <TextOutputPanel
@@ -113,8 +114,9 @@ export function UuidTool() {
         toolId={TOOL_ID}
       />
       <p className="text-xs text-muted-foreground">
-        Générés avec l&apos;API Web Crypto de votre navigateur (aléatoire cryptographique), version
-        4, variante RFC 4122. Rien n&apos;est conservé.
+        {tr(
+          "Générés avec l'API Web Crypto de votre navigateur (aléatoire cryptographique), version 4, variante RFC 4122. Rien n'est conservé.",
+        )}
       </p>
     </div>
   );

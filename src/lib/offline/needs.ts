@@ -1,4 +1,5 @@
 import type { ToolCategoryId } from "@/lib/tools/types";
+import { getLocale } from "@/lib/i18n/locale";
 
 /** Groups of heavy runtime files listed in public/offline-manifest.json (built by scripts/build-sw.mjs). */
 export type OfflineGroup = "pdf" | "ocr" | "fonts";
@@ -32,5 +33,8 @@ export function offlineGroupsFor(tool: { id: string; category: ToolCategoryId })
 
 export function formatMegabytes(bytes: number): string {
   const mb = bytes / 1024 / 1024;
-  return mb >= 10 ? `${Math.round(mb)} Mo` : `${mb.toFixed(1).replace(".", ",")} Mo`;
+  const en = getLocale() === "en";
+  const value =
+    mb >= 10 ? String(Math.round(mb)) : en ? mb.toFixed(1) : mb.toFixed(1).replace(".", ",");
+  return `${value} ${en ? "MB" : "Mo"}`;
 }

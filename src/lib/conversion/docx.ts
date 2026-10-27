@@ -6,6 +6,7 @@ import {
   type TextToPdfResult,
 } from "@/lib/pdf/operations/text-to-pdf";
 import { htmlToMarkdown } from "./html-to-markdown";
+import { tr } from "@/lib/i18n/messages";
 
 export interface OfficeToPdfResult extends TextToPdfResult {
   /** Honest list of what was simplified or dropped during the conversion. */
@@ -35,7 +36,9 @@ function assertDocx(bytes: Uint8Array): void {
   if (!looksLikeZip(bytes))
     throw new PdfError(
       "UNSUPPORTED",
-      "Ce fichier n'est pas un document Word (.docx). Les anciens .doc ne sont pas pris en charge : enregistrez-le au format .docx depuis Word ou LibreOffice.",
+      tr(
+        "Ce fichier n'est pas un document Word (.docx). Les anciens .doc ne sont pas pris en charge : enregistrez-le au format .docx depuis Word ou LibreOffice.",
+      ),
     );
 }
 
@@ -70,13 +73,15 @@ export async function docxToMarkdown(
   } catch (error) {
     throw new PdfError(
       "CORRUPTED",
-      "Impossible de lire ce document Word : le fichier est peut-être endommagé ou protégé par un mot de passe.",
+      tr(
+        "Impossible de lire ce document Word : le fichier est peut-être endommagé ou protégé par un mot de passe.",
+      ),
       { cause: error },
     );
   }
   const converted = htmlToMarkdown(html);
   if (/<w:hdr|<w:ftr/.test(html))
-    warnings.push("Les en-têtes et pieds de page ne sont pas convertis.");
+    warnings.push(tr("Les en-têtes et pieds de page ne sont pas convertis."));
   return {
     markdown: converted.markdown,
     warnings: Array.from(new Set([...warnings, ...converted.warnings])),
@@ -85,12 +90,12 @@ export async function docxToMarkdown(
 
 function humanize(message: string): string {
   if (/unrecognised paragraph style/i.test(message))
-    return "Certains styles de paragraphe inconnus ont été rendus comme du texte normal.";
+    return tr("Certains styles de paragraphe inconnus ont été rendus comme du texte normal.");
   if (/unrecognised run style/i.test(message))
-    return "Certains styles de caractère inconnus ont été ignorés.";
-  if (/image/i.test(message)) return "Une image n'a pas pu être lue et a été ignorée.";
-  if (/footnote|endnote/i.test(message)) return "Les notes de bas de page ont été simplifiées.";
-  return "Un élément non pris en charge a été ignoré.";
+    return tr("Certains styles de caractère inconnus ont été ignorés.");
+  if (/image/i.test(message)) return tr("Une image n'a pas pu être lue et a été ignorée.");
+  if (/footnote|endnote/i.test(message)) return tr("Les notes de bas de page ont été simplifiées.");
+  return tr("Un élément non pris en charge a été ignoré.");
 }
 
 export async function docxToPdf(
@@ -101,14 +106,18 @@ export async function docxToPdf(
   if (!markdown.trim() && !options.title?.trim())
     throw new PdfError(
       "EMPTY",
-      "Ce document Word ne contient aucun texte convertible (document vide ou composé uniquement d'images non prises en charge).",
+      tr(
+        "Ce document Word ne contient aucun texte convertible (document vide ou composé uniquement d'images non prises en charge).",
+      ),
     );
   try {
     const result = await textToPdf(markdown, { ...options, markdown: true });
     const notes = [...warnings, ...result.skipped];
     if (result.replacedCharacters)
       notes.push(
-        "Certains caractères (emoji, alphabets non latins, symboles) ont été remplacés par « ? ».",
+        tr(
+          "Certains caractères (emoji, alphabets non latins, symboles) ont été remplacés par « ? ».",
+        ),
       );
     return { ...result, warnings: Array.from(new Set(notes)) };
   } catch (error) {

@@ -8,6 +8,7 @@ import { ToolIcon } from "@/components/tools/tool-icon";
 import { searchSlim, type SlimTool } from "@/lib/tools/search-index";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { localizedPath } from "@/lib/i18n/routes";
 
 interface SearchPanelProps {
   open: boolean;
@@ -49,7 +50,7 @@ export function SearchPanel({ open, onOpenChange, index }: SearchPanelProps) {
         go(tool);
       } else if (query.trim()) {
         setOpen(false);
-        router.push(`/outils/?q=${encodeURIComponent(query.trim())}`);
+        router.push(`${localizedPath("/outils/")}?q=${encodeURIComponent(query.trim())}`);
       }
     }
   };

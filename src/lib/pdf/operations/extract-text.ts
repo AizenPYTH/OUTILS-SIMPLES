@@ -1,4 +1,5 @@
 import type { PDFDocumentProxy } from "pdfjs-dist";
+import { tr } from "@/lib/i18n/messages";
 
 export interface PageText {
   pageIndex: number;
@@ -107,7 +108,7 @@ export function pagesToMarkdown(pages: PageText[], title?: string): string {
     out.push(
       `## Page ${p.pageIndex + 1}`,
       "",
-      p.text.length ? p.text : "_(aucun texte détecté sur cette page)_",
+      p.text.length ? p.text : tr("_(aucun texte détecté sur cette page)_"),
       "",
     );
   }

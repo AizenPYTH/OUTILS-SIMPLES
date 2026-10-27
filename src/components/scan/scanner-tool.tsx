@@ -62,6 +62,7 @@ import {
   type ScanPageSettings,
 } from "@/lib/scan/page-pipeline";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 import { uid } from "@/lib/utils";
 import { defaultQuad, detectQuadFromBitmap } from "@/lib/scan/detect-browser";
 import { polygonArea } from "@/lib/scan/detect";
@@ -119,7 +120,8 @@ export function ScannerTool() {
   const addFiles = async (files: (File | Blob)[]) => {
     const room = MAX_PAGES - pages.length;
     const list = files.slice(0, room);
-    if (files.length > room) toast.info(`${MAX_PAGES} pages maximum par document.`);
+    if (files.length > room)
+      toast.info(tr("{max} pages maximum par document.", { max: MAX_PAGES }));
     const created: ScanPage[] = [];
     for (const file of list) {
       try {
@@ -134,7 +136,9 @@ export function ScannerTool() {
           settings: { ...defaultScanSettings },
         });
       } catch {
-        toast.error(`${file instanceof File ? file.name : "Photo"} : image illisible.`);
+        toast.error(
+          tr("{name} : image illisible.", { name: file instanceof File ? file.name : "Photo" }),
+        );
       }
     }
     if (created.length) {
@@ -173,7 +177,7 @@ export function ScannerTool() {
       (blob) => {
         releaseCanvas(canvas);
         if (!blob) {
-          toast.error("Aperçu impossible pour cette page.");
+          toast.error(tr("Aperçu impossible pour cette page."));
           return;
         }
         cb(URL.createObjectURL(blob));
@@ -218,7 +222,7 @@ export function ScannerTool() {
         report({
           current: i + 1,
           total: pages.length,
-          label: `Traitement de la page ${i + 1} sur ${pages.length}…`,
+          label: tr("Traitement de la page {n} sur {total}…", { n: i + 1, total: pages.length }),
         });
         await new Promise((r) => setTimeout(r, 0));
         const canvas = renderScanPage(page.bitmap, page.settings);
@@ -232,7 +236,7 @@ export function ScannerTool() {
         });
       }
       if (exportFormat === "pdf") {
-        report({ current: pages.length, total: pages.length, label: "Assemblage du PDF…" });
+        report({ current: pages.length, total: pages.length, label: tr("Assemblage du PDF…") });
         const bytes = await imagesToPdf(images, { pageSize: "a4-portrait", margin: 0, dpi: 150 });
         return { kind: "pdf", bytes, name: "document-scanne.pdf" };
       }
@@ -248,14 +252,16 @@ export function ScannerTool() {
     const result = op.state.result;
     return (
       <DonePanel
-        title={result.kind === "pdf" ? "Votre PDF scanné est prêt" : "Vos images sont prêtes"}
-        summary={`${pages.length} page(s)`}
+        title={
+          result.kind === "pdf" ? tr("Votre PDF scanné est prêt") : tr("Vos images sont prêtes")
+        }
+        summary={tr("{n} page(s)", { n: pages.length })}
         downloadLabel={
           result.kind === "pdf"
-            ? "Télécharger le PDF"
+            ? tr("Télécharger le PDF")
             : result.kind === "zip"
-              ? "Tout télécharger (ZIP)"
-              : "Télécharger l'image"
+              ? tr("Tout télécharger (ZIP)")
+              : tr("Télécharger l'image")
         }
         onDownload={() => {
           if (result.kind === "pdf") downloadPdf(result.bytes, result.name, "", TOOL_ID);
@@ -276,7 +282,7 @@ export function ScannerTool() {
       >
         <div className="text-center">
           <Button type="button" variant="ghost" size="sm" onClick={op.reset}>
-            Revenir aux pages
+            {tr("Revenir aux pages")}
           </Button>
         </div>
       </DonePanel>
@@ -292,12 +298,12 @@ export function ScannerTool() {
           onClick={() => setCameraOpen(true)}
           data-testid="scan-camera"
         >
-          <Camera aria-hidden="true" /> Prendre une photo
+          <Camera aria-hidden="true" /> {tr("Prendre une photo")}
         </Button>
       ) : null}
       <label className="inline-flex h-[52px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-surface px-6 text-base font-medium shadow-sm hover:bg-muted">
         <ImagePlus className="size-4" aria-hidden="true" />{" "}
-        {hasCamera ? "Importer des photos" : "Photographier ou importer"}
+        {hasCamera ? tr("Importer des photos") : tr("Photographier ou importer")}
         <input
           type="file"
           accept="image/*"
@@ -323,9 +329,12 @@ export function ScannerTool() {
             accept="image/*"
             validate={validateImageFile}
             multiple
-            title="Photographiez ou déposez vos pages"
-            hint={`JPG, PNG, WebP · ${Math.round(IMAGE_MAX_SIZE / 1024 / 1024)} Mo max par photo · ${MAX_PAGES} pages max`}
-            buttonLabel="Importer des photos"
+            title={tr("Photographiez ou déposez vos pages")}
+            hint={tr("JPG, PNG, WebP · {max} Mo max par photo · {pages} pages max", {
+              max: Math.round(IMAGE_MAX_SIZE / 1024 / 1024),
+              pages: MAX_PAGES,
+            })}
+            buttonLabel={tr("Importer des photos")}
             capture={hasCamera ? undefined : "environment"}
             testId="scan-dropzone"
           />
@@ -337,13 +346,14 @@ export function ScannerTool() {
                 onClick={() => setCameraOpen(true)}
                 data-testid="scan-camera"
               >
-                <Camera aria-hidden="true" /> Prendre une photo avec la caméra
+                <Camera aria-hidden="true" /> {tr("Prendre une photo avec la caméra")}
               </Button>
             </div>
           ) : (
             <Alert variant="info">
-              La capture directe nécessite un navigateur récent en HTTPS. Sur mobile, le bouton «
-              Importer » ouvre l&apos;appareil photo.
+              {tr(
+                "La capture directe nécessite un navigateur récent en HTTPS. Sur mobile, le bouton « Importer » ouvre l'appareil photo.",
+              )}
             </Alert>
           )}
         </div>
@@ -362,7 +372,7 @@ export function ScannerTool() {
                       onClick={openCrop}
                       data-testid="scan-crop"
                     >
-                      <Crop aria-hidden="true" /> Recadrer
+                      <Crop aria-hidden="true" /> {tr("Recadrer")}
                     </Button>
                     <Button
                       type="button"
@@ -371,7 +381,7 @@ export function ScannerTool() {
                       onClick={openQuad}
                       data-testid="scan-straighten"
                     >
-                      <Scan aria-hidden="true" /> Redresser
+                      <Scan aria-hidden="true" /> {tr("Redresser")}
                     </Button>
                     <Button
                       type="button"
@@ -384,7 +394,7 @@ export function ScannerTool() {
                       }
                       data-testid="scan-rotate"
                     >
-                      <RotateCw aria-hidden="true" /> Pivoter
+                      <RotateCw aria-hidden="true" /> {tr("Pivoter")}
                     </Button>
                     <Button
                       type="button"
@@ -392,7 +402,7 @@ export function ScannerTool() {
                       size="sm"
                       onClick={() => updateSettings(selected.id, { ...defaultScanSettings })}
                     >
-                      <Wand2 aria-hidden="true" /> Réinitialiser
+                      <Wand2 aria-hidden="true" /> {tr("Réinitialiser")}
                     </Button>
                     <Button
                       type="button"
@@ -401,33 +411,42 @@ export function ScannerTool() {
                       className="ml-auto text-destructive hover:text-destructive"
                       onClick={() => removePage(selected.id)}
                     >
-                      <Trash2 aria-hidden="true" /> Supprimer la page
+                      <Trash2 aria-hidden="true" /> {tr("Supprimer la page")}
                     </Button>
                   </div>
                   <Segmented
-                    label="Filtre"
+                    label={tr("Filtre")}
                     value={selected.settings.filter}
                     onChange={(filter: ScanFilter) => updateSettings(selected.id, { filter })}
                     className="sm:grid-cols-4"
                     options={[
-                      { value: "color", label: "Couleur", description: "Photo d'origine" },
-                      { value: "gray", label: "Niveaux de gris", description: "Sans couleur" },
+                      { value: "color", label: tr("Couleur"), description: tr("Photo d'origine") },
+                      {
+                        value: "gray",
+                        label: tr("Niveaux de gris"),
+                        description: tr("Sans couleur"),
+                      },
                       {
                         value: "bw",
-                        label: "Noir et blanc",
-                        description: "Texte seul, seuil auto",
+                        label: tr("Noir et blanc"),
+                        description: tr("Texte seul, seuil auto"),
                       },
-                      { value: "document", label: "Document", description: "Fond blanchi (gris)" },
+                      {
+                        value: "document",
+                        label: tr("Document"),
+                        description: tr("Fond blanchi (gris)"),
+                      },
                     ]}
                   />
                   <p className="text-xs text-muted-foreground">
-                    La photo d&apos;origine est conservée : chaque filtre se calcule à partir
-                    d&apos;elle et peut être changé à tout moment.
+                    {tr(
+                      "La photo d'origine est conservée : chaque filtre se calcule à partir d'elle et peut être changé à tout moment.",
+                    )}
                   </p>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1">
                       <Label htmlFor="scan-brightness">
-                        Luminosité ({selected.settings.brightness})
+                        {tr("Luminosité ({value})", { value: selected.settings.brightness })}
                       </Label>
                       <input
                         id="scan-brightness"
@@ -443,7 +462,7 @@ export function ScannerTool() {
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor="scan-contrast">
-                        Contraste ({selected.settings.contrast})
+                        {tr("Contraste ({value})", { value: selected.settings.contrast })}
                       </Label>
                       <input
                         id="scan-contrast"
@@ -463,7 +482,9 @@ export function ScannerTool() {
             </div>
             <aside className="space-y-3">
               <p className="text-sm font-medium">
-                {pages.length} page{pages.length > 1 ? "s" : ""} · glissez pour réordonner
+                {pages.length > 1
+                  ? tr("{n} pages · glissez pour réordonner", { n: pages.length })
+                  : tr("{n} page · glissez pour réordonner", { n: pages.length })}
               </p>
               <DndContext
                 sensors={sensors}
@@ -483,7 +504,7 @@ export function ScannerTool() {
                 <SortableContext items={pages.map((p) => p.id)} strategy={rectSortingStrategy}>
                   <ol
                     className="grid grid-cols-3 gap-2 lg:grid-cols-2"
-                    aria-label="Pages scannées"
+                    aria-label={tr("Pages scannées")}
                     data-testid="scan-pages"
                   >
                     {pages.map((page, index) => (
@@ -503,22 +524,30 @@ export function ScannerTool() {
           </div>
           <ToolPanel className="space-y-3">
             <Segmented
-              label="Format d'export"
+              label={tr("Format d'export")}
               value={exportFormat}
               onChange={setExportFormat}
               options={[
-                { value: "pdf", label: "PDF multipage", description: "Une page A4 par photo" },
+                {
+                  value: "pdf",
+                  label: tr("PDF multipage"),
+                  description: tr("Une page A4 par photo"),
+                },
                 {
                   value: "jpg",
-                  label: "Images JPG",
-                  description: pages.length > 1 ? "Archive ZIP" : "Une image",
+                  label: tr("Images JPG"),
+                  description: pages.length > 1 ? tr("Archive ZIP") : tr("Une image"),
                 },
-                { value: "png", label: "Images PNG", description: "Sans perte, plus lourd" },
+                {
+                  value: "png",
+                  label: tr("Images PNG"),
+                  description: tr("Sans perte, plus lourd"),
+                },
               ]}
             />
             <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
               <Button type="button" variant="outline" onClick={clearAll}>
-                Tout supprimer
+                {tr("Tout supprimer")}
               </Button>
               <Button type="button" size="lg" onClick={exportAll} data-testid="scan-export">
                 {exportFormat === "pdf" ? (
@@ -527,8 +556,10 @@ export function ScannerTool() {
                   <Download aria-hidden="true" />
                 )}{" "}
                 {exportFormat === "pdf"
-                  ? `Créer le PDF (${pages.length} page${pages.length > 1 ? "s" : ""})`
-                  : "Télécharger les images"}
+                  ? pages.length > 1
+                    ? tr("Créer le PDF ({n} pages)", { n: pages.length })
+                    : tr("Créer le PDF ({n} page)", { n: pages.length })
+                  : tr("Télécharger les images")}
               </Button>
             </div>
           </ToolPanel>
@@ -553,10 +584,11 @@ export function ScannerTool() {
       >
         <DialogContent size="xl" className="rounded-[20px]">
           <DialogHeader>
-            <DialogTitle>Recadrer la page</DialogTitle>
+            <DialogTitle>{tr("Recadrer la page")}</DialogTitle>
             <DialogDescription>
-              Ajustez le cadre autour de la feuille. Pour une photo prise de biais, utilisez plutôt
-              « Redresser » (quatre coins).
+              {tr(
+                "Ajustez le cadre autour de la feuille. Pour une photo prise de biais, utilisez plutôt « Redresser » (quatre coins).",
+              )}
             </DialogDescription>
           </DialogHeader>
           {selected && cropUrl && cropDraft ? (
@@ -577,7 +609,7 @@ export function ScannerTool() {
                 selected && (updateSettings(selected.id, { crop: null }), setCropOpen(false))
               }
             >
-              Sans recadrage
+              {tr("Sans recadrage")}
             </Button>
             <Button
               type="button"
@@ -588,7 +620,7 @@ export function ScannerTool() {
               }
               data-testid="scan-crop-apply"
             >
-              Appliquer
+              {tr("Appliquer")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -605,11 +637,11 @@ export function ScannerTool() {
       >
         <DialogContent size="xl" className="max-h-[92vh] overflow-y-auto rounded-[20px]">
           <DialogHeader>
-            <DialogTitle>Redresser la page</DialogTitle>
+            <DialogTitle>{tr("Redresser la page")}</DialogTitle>
             <DialogDescription>
-              Placez les quatre coins sur les angles de la feuille : la perspective est corrigée et
-              la page devient rectangulaire. Les coins proposés viennent d&apos;une détection
-              automatique, à ajuster si besoin.
+              {tr(
+                "Placez les quatre coins sur les angles de la feuille : la perspective est corrigée et la page devient rectangulaire. Les coins proposés viennent d'une détection automatique, à ajuster si besoin.",
+              )}
             </DialogDescription>
           </DialogHeader>
           {selected && quadUrl && quadDraft ? (
@@ -635,14 +667,14 @@ export function ScannerTool() {
                 selected && (updateSettings(selected.id, { quad: null }), setQuadOpen(false))
               }
             >
-              Sans redressement
+              {tr("Sans redressement")}
             </Button>
             <Button
               type="button"
               onClick={() => {
                 if (!selected || !quadDraft) return;
                 if (polygonArea(quadDraft) < 400) {
-                  toast.error("Les coins sont trop rapprochés : agrandissez la zone.");
+                  toast.error(tr("Les coins sont trop rapprochés : agrandissez la zone."));
                   return;
                 }
                 updateSettings(selected.id, { quad: quadDraft, crop: null });
@@ -650,7 +682,7 @@ export function ScannerTool() {
               }}
               data-testid="scan-straighten-apply"
             >
-              Appliquer
+              {tr("Appliquer")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -683,7 +715,11 @@ function SortableThumb({
         type="button"
         onClick={onSelect}
         aria-current={active ? "true" : undefined}
-        aria-label={`Page ${index + 1}${active ? " (sélectionnée)" : ""}`}
+        aria-label={
+          active
+            ? tr("Page {n} (sélectionnée)", { n: index + 1 })
+            : tr("Page {n}", { n: index + 1 })
+        }
         className={`relative block w-full overflow-hidden rounded-[6px] border-2 bg-muted ${active ? "border-primary" : "border-border"}`}
         {...attributes}
         {...listeners}

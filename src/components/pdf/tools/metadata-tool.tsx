@@ -20,6 +20,7 @@ import {
   type PdfMetadata,
 } from "@/lib/pdf/operations/metadata";
 import { formatBytes } from "@/lib/files/format";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-metadata";
 
@@ -63,19 +64,19 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
     );
   }
   if (!meta)
-    return <BusyPanel progress={{ current: 0, total: 0, label: "Lecture des métadonnées…" }} />;
+    return <BusyPanel progress={{ current: 0, total: 0, label: tr("Lecture des métadonnées…") }} />;
 
   const rows: [string, string][] = [
-    ["Titre", meta.title],
-    ["Auteur", meta.author],
-    ["Sujet", meta.subject],
-    ["Mots-clés", meta.keywords],
-    ["Créé avec", meta.creator],
-    ["Producteur", meta.producer],
-    ["Date de création", meta.creationDate],
-    ["Date de modification", meta.modificationDate],
-    ["Version PDF", meta.pdfVersion],
-    ["Métadonnées XMP", meta.hasXmp ? "présentes" : "absentes"],
+    [tr("Titre"), meta.title],
+    [tr("Auteur"), meta.author],
+    [tr("Sujet"), meta.subject],
+    [tr("Mots-clés"), meta.keywords],
+    [tr("Créé avec"), meta.creator],
+    [tr("Producteur"), meta.producer],
+    [tr("Date de création"), meta.creationDate],
+    [tr("Date de modification"), meta.modificationDate],
+    [tr("Version PDF"), meta.pdfVersion],
+    [tr("Métadonnées XMP"), meta.hasXmp ? tr("présentes") : tr("absentes")],
     ...Object.entries(meta.custom),
   ];
 
@@ -88,7 +89,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         onReset={reset}
       />
       <ToolPanel>
-        <h3 className="text-base font-semibold">Métadonnées actuelles</h3>
+        <h3 className="text-base font-semibold">{tr("Métadonnées actuelles")}</h3>
         <dl
           className="mt-3 grid gap-x-6 gap-y-1.5 text-sm sm:grid-cols-[auto_1fr]"
           data-testid="metadata-list"
@@ -104,17 +105,17 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         </dl>
       </ToolPanel>
       <ToolPanel className="space-y-3">
-        <h3 className="text-base font-semibold">Modifier</h3>
+        <h3 className="text-base font-semibold">{tr("Modifier")}</h3>
         <div className="grid gap-3 sm:grid-cols-2">
           {(["title", "author", "subject", "keywords"] as const).map((key) => (
             <div key={key} className="space-y-1">
               <Label htmlFor={`meta-${key}`}>
                 {
                   {
-                    title: "Titre",
-                    author: "Auteur",
-                    subject: "Sujet",
-                    keywords: "Mots-clés (séparés par des virgules)",
+                    title: tr("Titre"),
+                    author: tr("Auteur"),
+                    subject: tr("Sujet"),
+                    keywords: tr("Mots-clés (séparés par des virgules)"),
                   }[key]
                 }
               </Label>
@@ -136,7 +137,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
             )}
             data-testid="meta-save"
           >
-            <Save aria-hidden="true" /> Enregistrer les champs
+            <Save aria-hidden="true" /> {tr("Enregistrer les champs")}
           </Button>
           <Button
             type="button"
@@ -147,13 +148,13 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
             )}
             data-testid="meta-strip"
           >
-            <Eraser aria-hidden="true" /> Supprimer toutes les métadonnées
+            <Eraser aria-hidden="true" /> {tr("Supprimer toutes les métadonnées")}
           </Button>
         </div>
         <Alert variant="info">
-          La suppression efface le dictionnaire d&apos;informations (titre, auteur, logiciel,
-          dates…) et les métadonnées XMP. Elle ne modifie pas le contenu des pages, ni les
-          métadonnées éventuellement incrustées dans les images (EXIF) ou le texte lui-même.
+          {tr(
+            "La suppression efface le dictionnaire d'informations (titre, auteur, logiciel, dates…) et les métadonnées XMP. Elle ne modifie pas le contenu des pages, ni les métadonnées éventuellement incrustées dans les images (EXIF) ou le texte lui-même.",
+          )}
         </Alert>
       </ToolPanel>
     </div>

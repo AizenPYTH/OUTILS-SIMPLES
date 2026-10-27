@@ -1,5 +1,6 @@
 import type { Change } from "diff";
 import { computeDiff, type DiffMode } from "@/lib/text/diff";
+import { tr } from "@/lib/i18n/messages";
 
 export type PageStatus = "identical" | "changed" | "added" | "removed";
 
@@ -91,15 +92,29 @@ export function comparePageTexts(
 /** Human-readable report (for download). */
 export function compareReport(result: CompareResult, nameA: string, nameB: string): string {
   const out = [
-    `Comparaison : ${nameA} → ${nameB}`,
-    `Pages modifiées : ${result.changedPages} / ${result.pages.length}`,
-    `Ajouts : ${result.totalAdded} · Suppressions : ${result.totalRemoved}`,
+    tr("Comparaison : {a} → {b}", { a: nameA, b: nameB }),
+    tr("Pages modifiées : {changed} / {total}", {
+      changed: result.changedPages,
+      total: result.pages.length,
+    }),
+    tr("Ajouts : {added} · Suppressions : {removed}", {
+      added: result.totalAdded,
+      removed: result.totalRemoved,
+    }),
     "",
   ];
   for (const page of result.pages) {
     if (page.status === "identical") continue;
     out.push(
-      `--- Page ${page.pageIndex + 1} (${page.status === "changed" ? "modifiée" : page.status === "added" ? "ajoutée" : "supprimée"}) ---`,
+      tr("--- Page {n} ({status}) ---", {
+        n: page.pageIndex + 1,
+        status:
+          page.status === "changed"
+            ? tr("modifiée")
+            : page.status === "added"
+              ? tr("ajoutée")
+              : tr("supprimée"),
+      }),
     );
     for (const change of page.changes) {
       if (!change.added && !change.removed) continue;

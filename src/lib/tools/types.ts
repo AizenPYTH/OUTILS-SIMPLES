@@ -144,6 +144,32 @@ export interface ToolDefinition {
   premium: boolean;
   featured?: boolean;
   content: ToolContent;
+  /** False when the tool is served in a locale that has no translation yet (French text shown). */
+  translated?: boolean;
+}
+
+/** English (or another locale's) text of a tool, merged over the French definition. */
+export interface ToolLocalization {
+  slug: string;
+  name: string;
+  shortDescription: string;
+  description: string;
+  keywords: string[];
+  seo: { title: string; description: string };
+  content: {
+    steps: string[];
+    limitations: string[];
+    faq: ToolFaqEntry[];
+    privacyNote?: string;
+  };
+}
+
+export interface CategoryLocalization {
+  slug: string;
+  name: string;
+  shortName: string;
+  description: string;
+  seo: { title: string; description: string };
 }
 
 export interface ToolCategory {

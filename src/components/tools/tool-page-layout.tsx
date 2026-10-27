@@ -10,9 +10,17 @@ import { Badge } from "@/components/ui/badge";
 import { formatBytes } from "@/lib/files/format";
 import { getGuidesForTool } from "@/lib/content/guides";
 import { buildFaqJsonLd, buildToolJsonLd } from "@/lib/seo";
-import { getRelatedTools, getToolPath, type ToolCategory, type ToolDefinition } from "@/lib/tools";
+import {
+  getCategoryPath,
+  getRelatedTools,
+  getToolPath,
+  type ToolCategory,
+  type ToolDefinition,
+} from "@/lib/tools";
 import { t } from "@/lib/i18n";
 import { ToolFaq } from "./tool-faq";
+import { localizedPath } from "@/lib/i18n/routes";
+import { tr } from "@/lib/i18n/messages";
 
 interface ToolPageLayoutProps {
   tool: ToolDefinition;
@@ -37,8 +45,8 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
       {faqJsonLd ? <JsonLd data={faqJsonLd} /> : null}
       <Breadcrumbs
         items={[
-          { name: t.nav.home, path: "/" },
-          { name: category.name, path: `/${category.slug}/` },
+          { name: t.nav.home, path: localizedPath("/") },
+          { name: category.name, path: getCategoryPath(category) },
           { name: tool.name, path: getToolPath(tool) },
         ]}
       />
@@ -127,10 +135,12 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
             </h2>
             <p className="mt-3 text-[15px] leading-relaxed">
               {tool.content.privacyNote ??
-                "Votre fichier est traité directement dans votre navigateur et n'est jamais envoyé sur nos serveurs."}
+                tr(
+                  "Votre fichier est traité directement dans votre navigateur et n'est jamais envoyé sur nos serveurs.",
+                )}
             </p>
             <Link
-              href="/confidentialite/"
+              href={localizedPath("/confidentialite/")}
               className="mt-3 inline-block text-sm font-medium text-link underline-offset-4 hover:underline"
             >
               {t.home.privacyLink}
@@ -148,7 +158,7 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
                 {guides.map((guide) => (
                   <li key={guide.slug}>
                     <Link
-                      href={`/guides/${guide.slug}/`}
+                      href={`${localizedPath("/guides/")}${guide.slug}/`}
                       className="inline-flex items-center gap-2 text-[15px] font-medium text-link hover:underline"
                     >
                       <BookOpen className="size-4" aria-hidden="true" />

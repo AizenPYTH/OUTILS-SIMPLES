@@ -31,6 +31,7 @@ import {
   type Operand,
 } from "../content/tokenizer";
 import type { FallbackFontHint, OriginalEncoding, TextEdit, TextEditReport } from "./types";
+import { tr } from "@/lib/i18n/messages";
 
 export const TEXT_SHOW_OPS = new Set(["Tj", "TJ", "'", '"']);
 
@@ -333,7 +334,11 @@ export async function applyTextEdits(
         replacements.push({ start: raw.op.start, end: raw.op.end, bytes: new Uint8Array() });
       }
       if (seen.has(edit.opIndex)) {
-        report.skipped.push({ pageIndex, opIndex: edit.opIndex, reason: "modification en double" });
+        report.skipped.push({
+          pageIndex,
+          opIndex: edit.opIndex,
+          reason: tr("modification en double"),
+        });
         continue;
       }
       const raw = textOps[edit.opIndex];
@@ -341,7 +346,7 @@ export async function applyTextEdits(
         report.skipped.push({
           pageIndex,
           opIndex: edit.opIndex,
-          reason: "opérateur de texte introuvable",
+          reason: tr("opérateur de texte introuvable"),
         });
         continue;
       }
@@ -357,7 +362,7 @@ export async function applyTextEdits(
           report.skipped.push({
             pageIndex,
             opIndex: edit.opIndex,
-            reason: "police d'origine inconnue, remplacement impossible",
+            reason: tr("police d'origine inconnue, remplacement impossible"),
           });
           continue;
         }

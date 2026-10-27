@@ -17,6 +17,8 @@ import {
   parseDay,
   toIsoDay,
 } from "@/lib/calc/dates";
+import { tr } from "@/lib/i18n/messages";
+import { currentLanguageTag } from "@/lib/i18n";
 
 function todayIso(): string {
   const d = new Date();
@@ -80,12 +82,12 @@ export function DatesTool() {
   const options = (
     <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
       <label className="flex items-center gap-2">
-        <Checkbox checked={holidays} onCheckedChange={(v) => setHolidays(v === true)} /> Exclure les
-        jours fériés français
+        <Checkbox checked={holidays} onCheckedChange={(v) => setHolidays(v === true)} />{" "}
+        {tr("Exclure les jours fériés français")}
       </label>
       <label className="flex items-center gap-2">
-        <Checkbox checked={alsace} onCheckedChange={(v) => setAlsace(v === true)} /> Alsace-Moselle
-        (Vendredi saint, Saint-Étienne)
+        <Checkbox checked={alsace} onCheckedChange={(v) => setAlsace(v === true)} />{" "}
+        {tr("Alsace-Moselle (Vendredi saint, Saint-Étienne)")}
       </label>
     </div>
   );
@@ -93,17 +95,22 @@ export function DatesTool() {
   return (
     <Tabs defaultValue="between" className="space-y-4">
       <TabsList>
-        <TabsTrigger value="between">Durée entre deux dates</TabsTrigger>
-        <TabsTrigger value="add">Ajouter des jours</TabsTrigger>
-        <TabsTrigger value="holidays">Jours fériés</TabsTrigger>
+        <TabsTrigger value="between">{tr("Durée entre deux dates")}</TabsTrigger>
+        <TabsTrigger value="add">{tr("Ajouter des jours")}</TabsTrigger>
+        <TabsTrigger value="holidays">{tr("Jours fériés")}</TabsTrigger>
       </TabsList>
       <TabsContent value="between" className="space-y-4">
         <ToolPanel className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <DateField id="dates-from" label="Date de début" value={from} onChange={setFrom} />
+            <DateField
+              id="dates-from"
+              label={tr("Date de début")}
+              value={from}
+              onChange={setFrom}
+            />
             <DateField
               id="dates-to"
-              label="Date de fin (incluse dans les jours ouvrés)"
+              label={tr("Date de fin (incluse dans les jours ouvrés)")}
               value={to}
               onChange={setTo}
             />
@@ -115,31 +122,51 @@ export function DatesTool() {
             <StatGrid
               items={[
                 {
-                  label: "Durée",
-                  value: `${duration.years} an${duration.years > 1 ? "s" : ""} ${duration.months} mois ${duration.days} j`,
-                  hint: duration.negative ? "La date de fin précède le début" : undefined,
+                  label: tr("Durée"),
+                  value: [
+                    duration.years > 1
+                      ? tr("{n} ans", { n: duration.years })
+                      : tr("{n} an", { n: duration.years }),
+                    tr("{n} mois", { n: duration.months }),
+                    tr("{n} j", { n: duration.days }),
+                  ].join(" "),
+                  hint: duration.negative ? tr("La date de fin précède le début") : undefined,
                 },
-                { label: "Jours calendaires", value: duration.totalDays.toLocaleString("fr-FR") },
                 {
-                  label: "Semaines",
-                  value: `${duration.totalWeeks} sem. ${duration.remainingDaysAfterWeeks} j`,
+                  label: tr("Jours calendaires"),
+                  value: duration.totalDays.toLocaleString(currentLanguageTag()),
                 },
-                { label: "Jours ouvrés", value: business.businessDays.toLocaleString("fr-FR") },
+                {
+                  label: tr("Semaines"),
+                  value: tr("{w} sem. {d} j", {
+                    w: duration.totalWeeks,
+                    d: duration.remainingDaysAfterWeeks,
+                  }),
+                },
+                {
+                  label: tr("Jours ouvrés"),
+                  value: business.businessDays.toLocaleString(currentLanguageTag()),
+                },
               ]}
             />
             <ToolPanel className="space-y-2 text-sm" data-testid="dates-detail">
               <p>
-                Du <strong>{formatDayFr(a!)}</strong> au <strong>{formatDayFr(b!)}</strong>
-                {duration.negative ? " (ordre inversé)" : ""} : {business.weekendDays} jour
-                {business.weekendDays > 1 ? "s" : ""} de week-end
-                {holidays
-                  ? ` et ${business.holidays.length} jour${business.holidays.length > 1 ? "s" : ""} férié${business.holidays.length > 1 ? "s" : ""} en semaine`
-                  : ""}
+                {tr("Du")} <strong>{formatDayFr(a!)}</strong> {tr("au")}{" "}
+                <strong>{formatDayFr(b!)}</strong>
+                {duration.negative ? " " + tr("(ordre inversé)") : ""}
+                {business.weekendDays > 1
+                  ? tr(" : {n} jours de week-end", { n: business.weekendDays })
+                  : tr(" : {n} jour de week-end", { n: business.weekendDays })}
+                {!holidays
+                  ? ""
+                  : business.holidays.length > 1
+                    ? tr(" et {n} jours fériés en semaine", { n: business.holidays.length })
+                    : tr(" et {n} jour férié en semaine", { n: business.holidays.length })}
                 .
               </p>
               {business.holidays.length ? (
                 <p className="text-muted-foreground">
-                  Fériés comptés :{" "}
+                  {tr("Fériés comptés :")}{" "}
                   {business.holidays
                     .map(
                       (h) =>
@@ -152,15 +179,20 @@ export function DatesTool() {
             </ToolPanel>
           </>
         ) : (
-          <p className="text-sm text-destructive">Saisissez deux dates valides.</p>
+          <p className="text-sm text-destructive">{tr("Saisissez deux dates valides.")}</p>
         )}
       </TabsContent>
       <TabsContent value="add" className="space-y-4">
         <ToolPanel className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
-            <DateField id="dates-start" label="À partir du" value={start} onChange={setStart} />
+            <DateField
+              id="dates-start"
+              label={tr("À partir du")}
+              value={start}
+              onChange={setStart}
+            />
             <div className="space-y-1">
-              <Label htmlFor="dates-count">Nombre de jours (négatif pour reculer)</Label>
+              <Label htmlFor="dates-count">{tr("Nombre de jours (négatif pour reculer)")}</Label>
               <Input
                 id="dates-count"
                 inputMode="numeric"
@@ -171,38 +203,44 @@ export function DatesTool() {
             </div>
           </div>
           <Segmented
-            label="Type de jours"
+            label={tr("Type de jours")}
             value={kind}
             onChange={setKind}
             className="sm:grid-cols-2"
             options={[
               {
                 value: "business",
-                label: "Jours ouvrés",
-                description: "Lundi à vendredi, fériés exclus",
+                label: tr("Jours ouvrés"),
+                description: tr("Lundi à vendredi, fériés exclus"),
               },
-              { value: "calendar", label: "Jours calendaires", description: "Tous les jours" },
+              {
+                value: "calendar",
+                label: tr("Jours calendaires"),
+                description: tr("Tous les jours"),
+              },
             ]}
           />
           {kind === "business" ? options : null}
         </ToolPanel>
         {target ? (
           <ToolPanel>
-            <p className="text-xs text-muted-foreground">Date obtenue</p>
+            <p className="text-xs text-muted-foreground">{tr("Date obtenue")}</p>
             <p className="font-heading text-xl font-bold" data-testid="dates-target">
               {formatDayFr(target)}
             </p>
             <p className="mt-1 font-mono text-sm text-muted-foreground">{toIsoDay(target)}</p>
           </ToolPanel>
         ) : (
-          <p className="text-sm text-destructive">Saisissez une date et un nombre valides.</p>
+          <p className="text-sm text-destructive">
+            {tr("Saisissez une date et un nombre valides.")}
+          </p>
         )}
       </TabsContent>
       <TabsContent value="holidays" className="space-y-4">
         <ToolPanel className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-[12rem_1fr] sm:items-end">
             <div className="space-y-1">
-              <Label htmlFor="dates-year">Année</Label>
+              <Label htmlFor="dates-year">{tr("Année")}</Label>
               <Input
                 id="dates-year"
                 inputMode="numeric"
@@ -229,12 +267,12 @@ export function DatesTool() {
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-destructive">Année invalide.</p>
+            <p className="text-sm text-destructive">{tr("Année invalide.")}</p>
           )}
           <p className="text-xs text-muted-foreground">
-            Jours fériés légaux en France métropolitaine (Pâques calculée par l&apos;algorithme de
-            Meeus). Les ponts et jours spécifiques à une convention collective ne sont pas pris en
-            compte.
+            {tr(
+              "Jours fériés légaux en France métropolitaine (Pâques calculée par l'algorithme de Meeus). Les ponts et jours spécifiques à une convention collective ne sont pas pris en compte.",
+            )}
           </p>
         </ToolPanel>
       </TabsContent>

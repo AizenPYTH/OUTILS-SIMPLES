@@ -15,6 +15,7 @@ import {
   type FontFamily,
   type FontStyle,
 } from "./fonts";
+import { tr } from "@/lib/i18n/messages";
 
 export const FONT_ASSET_BASE = "/fonts/";
 
@@ -22,7 +23,10 @@ type FontLoader = (file: string) => Promise<Uint8Array>;
 
 let loader: FontLoader = async (file) => {
   const response = await fetch(`${FONT_ASSET_BASE}${file}`);
-  if (!response.ok) throw new Error(`Police introuvable : ${file} (${response.status})`);
+  if (!response.ok)
+    throw new Error(
+      tr("Police introuvable : {file} ({status})", { file, status: response.status }),
+    );
   return new Uint8Array(await response.arrayBuffer());
 };
 const bytesCache = new Map<string, Promise<Uint8Array>>();

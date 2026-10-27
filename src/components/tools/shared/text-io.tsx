@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { CopyButton } from "./copy-button";
 import { DownloadTextButton } from "./download-text-button";
+import { tr } from "@/lib/i18n/messages";
 
 interface TextInputPanelProps {
   id: string;
@@ -42,7 +43,11 @@ export function TextInputPanel({
   const onFile = async (file: File | undefined) => {
     if (!file) return;
     if (file.size > maxLength) {
-      setFileError(`Fichier trop volumineux (maximum ${Math.round(maxLength / 1_000_000)} Mo).`);
+      setFileError(
+        tr("Fichier trop volumineux (maximum {max} Mo).", {
+          max: Math.round(maxLength / 1_000_000),
+        }),
+      );
       return;
     }
     setFileError(null);
@@ -56,7 +61,7 @@ export function TextInputPanel({
         <Label htmlFor={id}>{label}</Label>
         <div className="flex items-center gap-1">
           <Button type="button" variant="ghost" size="sm" onClick={() => inputRef.current?.click()}>
-            <Upload aria-hidden="true" /> Importer un fichier
+            <Upload aria-hidden="true" /> {tr("Importer un fichier")}
           </Button>
           <input
             ref={inputRef}
@@ -64,7 +69,7 @@ export function TextInputPanel({
             accept={acceptFile}
             className="sr-only"
             tabIndex={-1}
-            aria-label="Importer un fichier texte"
+            aria-label={tr("Importer un fichier texte")}
             onChange={(e) => void onFile(e.target.files?.[0])}
           />
           <Button
@@ -127,7 +132,7 @@ export function TextOutputPanel({
   editable = false,
   onChange,
   children,
-  emptyHint = "Le résultat apparaîtra ici.",
+  emptyHint,
 }: TextOutputPanelProps) {
   return (
     <div className={cn("space-y-1.5", className)}>
@@ -151,7 +156,7 @@ export function TextOutputPanel({
         onChange={editable && onChange ? (e) => onChange(e.target.value) : undefined}
         rows={rows}
         spellCheck={false}
-        placeholder={emptyHint}
+        placeholder={emptyHint ?? tr("Le résultat apparaîtra ici.")}
         className={cn("font-mono text-[13px] leading-relaxed", !editable && "bg-muted/40")}
         data-testid={`${id}-output`}
         aria-live="polite"

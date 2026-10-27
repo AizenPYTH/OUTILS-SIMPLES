@@ -21,6 +21,7 @@ import { bytesToBlob, triggerDownload } from "@/lib/files/download";
 import { stripExtension } from "@/lib/files/filename";
 import { formatBytes } from "@/lib/files/format";
 import { getToolById, getToolPath } from "@/lib/tools";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-extract-images";
 
@@ -53,7 +54,11 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       const result = await extractImages(pdf.bytes, {
         minDimension: Number(minDimension),
         onProgress: (current, total) =>
-          report({ current, total, label: `Analyse de la page ${current} sur ${total}…` }),
+          report({
+            current,
+            total,
+            label: tr("Analyse de la page {current} sur {total}…", { current, total }),
+          }),
       });
       const previews: Preview[] = result.images.map((img) => ({
         ...img,
@@ -77,13 +82,17 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       <DonePanel
         title={
           previews.length === 0
-            ? "Aucune image intégrée trouvée"
-            : `${previews.length} image${previews.length > 1 ? "s" : ""} extraite${previews.length > 1 ? "s" : ""}`
+            ? tr("Aucune image intégrée trouvée")
+            : tr(previews.length > 1 ? "{n} images extraites" : "{n} image extraite", {
+                n: previews.length,
+              })
         }
         summary={
           previews.length
-            ? `${formatBytes(total)} au total · formats d'origine conservés`
-            : "Le document ne contient pas d'images matricielles (ou seulement des dessins vectoriels)."
+            ? tr("{size} au total · formats d'origine conservés", { size: formatBytes(total) })
+            : tr(
+                "Le document ne contient pas d'images matricielles (ou seulement des dessins vectoriels).",
+              )
         }
         onDownload={
           previews.length
@@ -96,21 +105,21 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
                 )
             : undefined
         }
-        downloadLabel="Tout télécharger (ZIP)"
+        downloadLabel={tr("Tout télécharger (ZIP)")}
         onStartOver={() => (op.reset(), reset())}
       >
         {result.skipped.length ? (
           <Alert
             variant="warning"
-            title={`${result.skipped.length} image(s) non extraite(s)`}
+            title={tr("{n} image(s) non extraite(s)", { n: result.skipped.length })}
             className="mb-4"
           >
-            {Array.from(new Set(result.skipped.map((s) => s.reason))).join(" · ")}
+            {Array.from(new Set(result.skipped.map((s) => tr(s.reason)))).join(" · ")}
             {toImages ? (
               <>
                 {" "}
                 <a href={getToolPath(toImages)} className="font-medium underline">
-                  Convertissez plutôt les pages en images.
+                  {tr("Convertissez plutôt les pages en images.")}
                 </a>
               </>
             ) : null}
@@ -131,7 +140,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
                     // eslint-disable-next-line @next/next/no-img-element -- object URL preview
                     <img
                       src={p.url}
-                      alt={`Image page ${p.pageIndex + 1}`}
+                      alt={tr("Image page {n}", { n: p.pageIndex + 1 })}
                       className="max-h-full max-w-full object-contain"
                     />
                   ) : (
@@ -139,17 +148,18 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
                   )}
                 </span>
                 <span className="truncate text-xs" title={p.name}>
-                  p. {p.pageIndex + 1} · {p.width}×{p.height} · {formatBytes(p.bytes.length)}
+                  {tr("p. {n}", { n: p.pageIndex + 1 })} · {p.width}×{p.height} ·{" "}
+                  {formatBytes(p.bytes.length)}
                 </span>
                 {p.note ? (
-                  <span className="text-[11px] text-muted-foreground">{p.note}</span>
+                  <span className="text-[11px] text-muted-foreground">{tr(p.note)}</span>
                 ) : null}
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => triggerDownload(bytesToBlob(p.bytes, p.mimeType), p.name)}
-                  aria-label={`Télécharger ${p.name}`}
+                  aria-label={tr("Télécharger {name}", { name: p.name })}
                 >
                   <Download aria-hidden="true" />{" "}
                   {p.mimeType === "image/jpeg" ? "JPG" : p.mimeType === "image/png" ? "PNG" : "JP2"}
@@ -171,22 +181,22 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         onReset={reset}
       />
       <div className="max-w-sm space-y-1">
-        <Label htmlFor="extract-min">Ignorer les images plus petites que</Label>
+        <Label htmlFor="extract-min">{tr("Ignorer les images plus petites que")}</Label>
         <select
           id="extract-min"
           value={minDimension}
           onChange={(e) => setMinDimension(e.target.value as typeof minDimension)}
           className="h-10 w-full rounded-md border border-input bg-surface px-3 text-sm"
         >
-          <option value="8">8 px (tout extraire)</option>
-          <option value="64">64 px (ignorer puces et séparateurs)</option>
-          <option value="200">200 px (photos et illustrations seulement)</option>
+          <option value="8">{tr("8 px (tout extraire)")}</option>
+          <option value="64">{tr("64 px (ignorer puces et séparateurs)")}</option>
+          <option value="200">{tr("200 px (photos et illustrations seulement)")}</option>
         </select>
       </div>
       <Alert variant="info">
-        Les images sont récupérées telles qu&apos;elles sont stockées dans le PDF : les JPEG ne sont
-        pas recompressés, les autres formats sont convertis en PNG sans perte. Les dessins
-        vectoriels et le texte ne sont pas des images.
+        {tr(
+          "Les images sont récupérées telles qu'elles sont stockées dans le PDF : les JPEG ne sont pas recompressés, les autres formats sont convertis en PNG sans perte. Les dessins vectoriels et le texte ne sont pas des images.",
+        )}
       </Alert>
       <Button
         type="button"
@@ -195,7 +205,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         onClick={run}
         data-testid="extract-images-run"
       >
-        <Images aria-hidden="true" /> Extraire les images
+        <Images aria-hidden="true" /> {tr("Extraire les images")}
       </Button>
     </div>
   );

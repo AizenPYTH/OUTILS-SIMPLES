@@ -31,6 +31,11 @@ jobs:
       - run: pnpm build
         env:
           NEXT_PUBLIC_SITE_URL: https://example.invalid
+      # Launch readiness report (legal identity, site URL): informative on branches,
+      # blocking only when run against the production environment (see docs/MISE_EN_LIGNE.md).
+      - run: node scripts/check-launch-env.mjs --warn
+        env:
+          NEXT_PUBLIC_SITE_URL: https://example.invalid
       - uses: actions/upload-artifact@v4
         with:
           name: next-build

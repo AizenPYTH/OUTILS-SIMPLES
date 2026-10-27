@@ -5,6 +5,7 @@
  */
 import { PdfError } from "./errors";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 interface QpdfModule {
   FS: {
@@ -117,7 +118,7 @@ export async function protectPdf(
   options: ProtectOptions,
 ): Promise<Uint8Array> {
   if (!options.userPassword && !options.ownerPassword) {
-    throw new PdfError("NO_SELECTION", "Saisissez au moins un mot de passe.", {
+    throw new PdfError("NO_SELECTION", tr("Saisissez au moins un mot de passe."), {
       recoverable: true,
     });
   }
@@ -139,7 +140,7 @@ export async function unlockPdf(
     if (/invalid password/i.test(run.stderr) || isEncryptedPdf(bytes)) {
       throw new PdfError(
         "ENCRYPTED",
-        "Mot de passe incorrect : le document n'a pas pu être déverrouillé.",
+        tr("Mot de passe incorrect : le document n'a pas pu être déverrouillé."),
         { recoverable: true },
       );
     }
@@ -195,8 +196,8 @@ export async function checkPdf(runner: QpdfRunner, bytes: Uint8Array): Promise<P
   if (run.code !== 0 && errors.length === 0 && warnings.length === 0) {
     errors.push(
       encrypted
-        ? "Le document est chiffré : déverrouillez-le pour une analyse complète."
-        : "qpdf n'a pas pu lire ce fichier (structure endommagée ou fichier incomplet).",
+        ? tr("Le document est chiffré : déverrouillez-le pour une analyse complète.")
+        : tr("qpdf n'a pas pu lire ce fichier (structure endommagée ou fichier incomplet)."),
     );
   }
   let repaired: Uint8Array | null = null;

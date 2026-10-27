@@ -20,6 +20,7 @@ import {
   type CompressionLevel,
 } from "@/lib/pdf/operations/compress";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompressBatchTool } from "./compress-batch-tool";
 import { compressionLevelOptions } from "./compress-levels";
@@ -30,9 +31,9 @@ export function CompressTool() {
   return (
     <Tabs defaultValue="single">
       <TabsList className="mb-3">
-        <TabsTrigger value="single">Un fichier</TabsTrigger>
+        <TabsTrigger value="single">{tr("Un fichier")}</TabsTrigger>
         <TabsTrigger value="batch" data-testid="compress-tab-batch">
-          Plusieurs fichiers (ZIP)
+          {tr("Plusieurs fichiers (ZIP)")}
         </TabsTrigger>
       </TabsList>
       <TabsContent value="single">
@@ -72,7 +73,7 @@ function CompressWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }
           : t.result.unchanged;
     return (
       <DonePanel
-        title={delta < 0 ? t.result.title : "Compression terminée, sans gain notable"}
+        title={delta < 0 ? t.result.title : tr("Compression terminée, sans gain notable")}
         onDownload={() => downloadPdf(bytes, pdf.file.name, "compresse", TOOL_ID)}
         onStartOver={() => {
           op.reset();
@@ -99,7 +100,7 @@ function CompressWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }
             <div
               className={`rounded-md p-3 ${delta < 0 ? "bg-success-soft text-success-foreground" : "bg-warning-soft text-warning-foreground"}`}
             >
-              <dt className="text-xs opacity-80">Bilan</dt>
+              <dt className="text-xs opacity-80">{tr("Bilan")}</dt>
               <dd
                 className="font-heading text-lg font-bold tabular-nums"
                 data-testid="compress-verdict"
@@ -110,19 +111,26 @@ function CompressWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }
           </dl>
           {profile.recompressImages ? (
             <p className="text-center text-sm text-muted-foreground">
-              {stats.imagesFound} image(s) analysée(s) · {stats.imagesRecompressed} recompressée(s)
-              · {stats.imagesKeptOriginal} conservée(s) (recompression inutile) ·{" "}
-              {stats.imagesSkipped} ignorée(s) (transparence, masque ou format spécial)
+              {tr(
+                "{found} image(s) analysée(s) · {recompressed} recompressée(s) · {kept} conservée(s) (recompression inutile) · {skipped} ignorée(s) (transparence, masque ou format spécial)",
+                {
+                  found: stats.imagesFound,
+                  recompressed: stats.imagesRecompressed,
+                  kept: stats.imagesKeptOriginal,
+                  skipped: stats.imagesSkipped,
+                },
+              )}
             </p>
           ) : null}
           {delta >= 0 ? (
             <Alert variant="warning">
-              Ce document était déjà compact. Essayez un niveau plus fort s&apos;il contient des
-              images, ou conservez l&apos;original : aucune transformation n&apos;est imposée.
+              {tr(
+                "Ce document était déjà compact. Essayez un niveau plus fort s'il contient des images, ou conservez l'original : aucune transformation n'est imposée.",
+              )}
             </Alert>
           ) : null}
           <Button type="button" variant="ghost" size="sm" className="w-full" onClick={op.reset}>
-            Essayer un autre niveau
+            {tr("Essayer un autre niveau")}
           </Button>
         </div>
       </DonePanel>
@@ -138,21 +146,22 @@ function CompressWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }
         onReset={reset}
       />
       <Segmented
-        label="Niveau de compression"
+        label={tr("Niveau de compression")}
         value={level}
         onChange={setLevel}
         options={compressionLevelOptions}
       />
       {profile.lossy ? (
-        <Alert variant="warning" title="Ce niveau réduit la qualité des images">
-          Les images JPEG et non compressées sont réencodées avec perte. Le texte et les dessins
-          vectoriels ne sont jamais modifiés, et toute image dont la recompression serait
-          contre-productive est conservée telle quelle.
+        <Alert variant="warning" title={tr("Ce niveau réduit la qualité des images")}>
+          {tr(
+            "Les images JPEG et non compressées sont réencodées avec perte. Le texte et les dessins vectoriels ne sont jamais modifiés, et toute image dont la recompression serait contre-productive est conservée telle quelle.",
+          )}
         </Alert>
       ) : (
         <Alert variant="info">
-          Aucune image n&apos;est modifiée : seuls les objets inutilisés sont supprimés et la
-          structure réécrite. Le gain dépend du fichier et peut être nul.
+          {tr(
+            "Aucune image n'est modifiée : seuls les objets inutilisés sont supprimés et la structure réécrite. Le gain dépend du fichier et peut être nul.",
+          )}
         </Alert>
       )}
       <Button
@@ -163,7 +172,7 @@ function CompressWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }
         data-testid="compress-button"
       >
         <Minimize2 aria-hidden="true" />
-        Compresser le PDF
+        {tr("Compresser le PDF")}
       </Button>
     </div>
   );

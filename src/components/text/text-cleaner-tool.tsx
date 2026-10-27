@@ -13,29 +13,30 @@ import {
 import { TextInputPanel, TextOutputPanel } from "@/components/tools/shared/text-io";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { cleanText, defaultCleanOptions, type CleanOptions } from "@/lib/text/transform";
+import { tr } from "@/lib/i18n/messages";
 
 const toggles: { key: keyof Omit<CleanOptions, "sortLines">; label: string; hint: string }[] = [
-  { key: "trimLines", label: "Supprimer les espaces en début et fin de ligne", hint: "" },
-  { key: "collapseSpaces", label: "Réduire les espaces multiples à un seul", hint: "" },
+  { key: "trimLines", label: tr("Supprimer les espaces en début et fin de ligne"), hint: "" },
+  { key: "collapseSpaces", label: tr("Réduire les espaces multiples à un seul"), hint: "" },
   {
     key: "removeEmptyLines",
-    label: "Supprimer les lignes vides",
-    hint: "Sinon, les blocs de lignes vides sont réduits à une seule.",
+    label: tr("Supprimer les lignes vides"),
+    hint: tr("Sinon, les blocs de lignes vides sont réduits à une seule."),
   },
   {
     key: "joinWrappedLines",
-    label: "Recoller les lignes coupées (texte copié d'un PDF)",
-    hint: "Les sauts de ligne simples deviennent des espaces, les paragraphes sont conservés.",
+    label: tr("Recoller les lignes coupées (texte copié d'un PDF)"),
+    hint: tr("Les sauts de ligne simples deviennent des espaces, les paragraphes sont conservés."),
   },
   {
     key: "fixPdfHyphenation",
-    label: "Réparer les mots coupés par un tiret en fin de ligne",
-    hint: "« docu-\\nment » devient « document ».",
+    label: tr("Réparer les mots coupés par un tiret en fin de ligne"),
+    hint: tr("« docu-\\nment » devient « document »."),
   },
-  { key: "removeDuplicateLines", label: "Supprimer les lignes en double", hint: "" },
+  { key: "removeDuplicateLines", label: tr("Supprimer les lignes en double"), hint: "" },
   {
     key: "normalizeQuotes",
-    label: "Remplacer les guillemets typographiques par des guillemets droits",
+    label: tr("Remplacer les guillemets typographiques par des guillemets droits"),
     hint: "",
   },
 ];
@@ -49,7 +50,7 @@ export function TextCleanerTool({ preset }: { preset?: Partial<CleanOptions> }) 
     <div className="space-y-4">
       <TextInputPanel
         id="clean-input"
-        label="Texte à nettoyer"
+        label={tr("Texte à nettoyer")}
         value={text}
         onChange={setText}
         rows={10}
@@ -77,7 +78,7 @@ export function TextCleanerTool({ preset }: { preset?: Partial<CleanOptions> }) 
         </ul>
         <div className="flex items-center gap-2">
           <Label htmlFor="clean-sort" className="text-sm">
-            Trier les lignes
+            {tr("Trier les lignes")}
           </Label>
           <Select
             value={options.sortLines}
@@ -89,8 +90,8 @@ export function TextCleanerTool({ preset }: { preset?: Partial<CleanOptions> }) 
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">Ne pas trier</SelectItem>
-              <SelectItem value="asc">A → Z (ordre naturel)</SelectItem>
+              <SelectItem value="none">{tr("Ne pas trier")}</SelectItem>
+              <SelectItem value="asc">{tr("A → Z (ordre naturel)")}</SelectItem>
               <SelectItem value="desc">Z → A</SelectItem>
             </SelectContent>
           </Select>
@@ -98,7 +99,13 @@ export function TextCleanerTool({ preset }: { preset?: Partial<CleanOptions> }) 
       </ToolPanel>
       <TextOutputPanel
         id="clean-output"
-        label={`Résultat${text ? ` · ${removedChars >= 0 ? `${removedChars} caractère(s) retiré(s)` : `${-removedChars} caractère(s) ajouté(s)`}` : ""}`}
+        label={
+          text
+            ? removedChars >= 0
+              ? tr("Résultat · {n} caractère(s) retiré(s)", { n: removedChars })
+              : tr("Résultat · {n} caractère(s) ajouté(s)", { n: -removedChars })
+            : tr("Résultat")
+        }
         value={output}
         filename="texte-nettoye.txt"
         rows={10}

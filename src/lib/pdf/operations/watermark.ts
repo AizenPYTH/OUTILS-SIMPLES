@@ -22,6 +22,7 @@ import { PdfError, toPdfError } from "../errors";
 import { loadPdfDocument, savePdfDocument } from "../load";
 import type { RgbColor } from "../annotations/types";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 /** Marked-content tag wrapping every watermark drawn by this platform. */
 export const WATERMARK_TAG = "OutiliaWatermark";
@@ -146,7 +147,9 @@ export async function addWatermark(
       });
   }
   if (options.kind === "text" && options.text.trim().length === 0) {
-    throw new PdfError("NO_SELECTION", "Saisissez le texte du filigrane.", { recoverable: true });
+    throw new PdfError("NO_SELECTION", tr("Saisissez le texte du filigrane."), {
+      recoverable: true,
+    });
   }
 
   let font: PDFFont | null = null;
@@ -490,7 +493,7 @@ export async function removeWatermarks(
   if (removedBlocks === 0 && removedAnnotations === 0) {
     throw new PdfError(
       "UNSUPPORTED",
-      "Aucun filigrane retirable n'a été trouvé dans ce document.",
+      tr("Aucun filigrane retirable n'a été trouvé dans ce document."),
       { recoverable: true },
     );
   }

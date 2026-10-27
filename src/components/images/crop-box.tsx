@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { CropRect } from "@/lib/images/types";
+import { tr } from "@/lib/i18n/messages";
 
 interface CropBoxProps {
   imageUrl: string;
@@ -144,7 +145,7 @@ export function CropBox({
       {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
       <img
         src={imageUrl}
-        alt="Image à recadrer"
+        alt={tr("Image à recadrer")}
         className="block h-full w-full"
         draggable={false}
       />
@@ -156,7 +157,10 @@ export function CropBox({
       />
       <div
         role="application"
-        aria-label={`Zone de recadrage : ${Math.round(crop.width)} × ${Math.round(crop.height)} pixels. Utilisez les flèches pour déplacer.`}
+        aria-label={tr(
+          "Zone de recadrage : {width} × {height} pixels. Utilisez les flèches pour déplacer.",
+          { width: Math.round(crop.width), height: Math.round(crop.height) },
+        )}
         tabIndex={0}
         onKeyDown={onKey}
         onPointerDown={(e) => startDrag("move", e)}
@@ -172,7 +176,7 @@ export function CropBox({
           <button
             key={h}
             type="button"
-            aria-label={`Redimensionner (${h})`}
+            aria-label={tr("Redimensionner ({handle})", { handle: h })}
             onPointerDown={(e) => startDrag(h, e)}
             className="absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary bg-white shadow-sm sm:size-4"
             style={{ ...handlePos[h], touchAction: "none" }}

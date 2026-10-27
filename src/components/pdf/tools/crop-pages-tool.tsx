@@ -19,6 +19,7 @@ import { cropPages, uncropPages, type CropMargins } from "@/lib/pdf/operations/c
 import type { ParsedRanges } from "@/lib/pdf/page-ranges";
 import { formatBytes } from "@/lib/files/format";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-crop";
 const MM = 72 / 25.4;
@@ -88,19 +89,23 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-5">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {field("top", "Haut")}
-            {field("bottom", "Bas")}
-            {field("left", "Gauche")}
-            {field("right", "Droite")}
+            {field("top", tr("Haut"))}
+            {field("bottom", tr("Bas"))}
+            {field("left", tr("Gauche"))}
+            {field("right", tr("Droite"))}
           </div>
           <Segmented
-            label="Pages"
+            label={tr("Pages")}
             value={pageMode}
             onChange={setPageMode}
             className="sm:grid-cols-2"
             options={[
-              { value: "all", label: "Toutes les pages", description: `${pdf.pageCount} pages` },
-              { value: "range", label: "Pages choisies", description: "ex. 1-3, 5" },
+              {
+                value: "all",
+                label: tr("Toutes les pages"),
+                description: tr("{n} pages", { n: pdf.pageCount }),
+              },
+              { value: "range", label: tr("Pages choisies"), description: tr("ex. 1-3, 5") },
             ]}
           />
           {pageMode === "range" ? (
@@ -115,9 +120,9 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
             />
           ) : null}
           <Alert variant="info">
-            Le recadrage définit la zone visible et imprimée (CropBox) sans supprimer le contenu
-            masqué : il reste présent dans le fichier et peut être rétabli. Pour supprimer
-            réellement une zone, utilisez le caviardage.
+            {tr(
+              "Le recadrage définit la zone visible et imprimée (CropBox) sans supprimer le contenu masqué : il reste présent dans le fichier et peut être rétabli. Pour supprimer réellement une zone, utilisez le caviardage.",
+            )}
           </Alert>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button
@@ -128,7 +133,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
               disabled={pageMode === "range" && indices.length === 0}
               data-testid="crop-run"
             >
-              <Crop aria-hidden="true" /> Recadrer
+              <Crop aria-hidden="true" /> {tr("Recadrer")}
             </Button>
             <Button
               type="button"
@@ -136,14 +141,14 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
               size="lg"
               onClick={() => void op.run(() => uncropPages(pdf.bytes))}
             >
-              Rétablir la page entière
+              {tr("Rétablir la page entière")}
             </Button>
           </div>
         </div>
         <aside className="space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">
-              Aperçu · {t.common.pageOf(previewPage + 1, pdf.pageCount)}
+              {tr("Aperçu")} · {t.common.pageOf(previewPage + 1, pdf.pageCount)}
             </p>
             <div className="flex gap-1">
               <Button
@@ -210,7 +215,7 @@ function CropPreview({
       className="relative inline-block overflow-hidden rounded-[6px] border border-border bg-muted"
       data-testid="crop-preview"
     >
-      <canvas ref={canvasRef} aria-label="Aperçu de la page recadrée" />
+      <canvas ref={canvasRef} aria-label={tr("Aperçu de la page recadrée")} />
       {applies ? (
         <div className="pointer-events-none absolute inset-0" aria-hidden="true">
           <div

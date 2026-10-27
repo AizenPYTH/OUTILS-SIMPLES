@@ -1,5 +1,6 @@
 import type { FontFamily } from "@/lib/pdf/fonts";
 import type { DashStyle, RgbColor } from "@/lib/pdf/annotations/types";
+import { tr } from "@/lib/i18n/messages";
 
 export type WorkspaceMode = "editor" | "annotate" | "text" | "sign";
 
@@ -122,39 +123,45 @@ export const toolDefaults: Partial<Record<WorkspaceTool, Partial<ToolSettings>>>
 };
 
 export const toolLabels: Record<WorkspaceTool, string> = {
-  select: "Sélection",
-  editText: "Modifier le texte",
-  text: "Ajouter du texte",
-  comment: "Commentaire",
-  pen: "Dessin",
-  highlight: "Surligner",
-  underline: "Souligner",
-  rect: "Rectangle",
-  ellipse: "Ellipse",
-  line: "Ligne",
-  arrow: "Flèche",
-  mask: "Masque",
-  image: "Image",
-  signature: "Signature",
+  select: tr("Sélection"),
+  editText: tr("Modifier le texte"),
+  text: tr("Ajouter du texte"),
+  comment: tr("Commentaire"),
+  pen: tr("Dessin"),
+  highlight: tr("Surligner"),
+  underline: tr("Souligner"),
+  rect: tr("Rectangle"),
+  ellipse: tr("Ellipse"),
+  line: tr("Ligne"),
+  arrow: tr("Flèche"),
+  mask: tr("Masque"),
+  image: tr("Image"),
+  signature: tr("Signature"),
 };
 
 export const toolHints: Record<WorkspaceTool, string> = {
-  select:
+  select: tr(
     "Cliquez sur un élément pour le sélectionner ; glissez pour le déplacer ; double-cliquez sur un texte pour le modifier.",
-  editText:
+  ),
+  editText: tr(
     "Cliquez sur un passage du document pour remplacer son texte (même police quand c'est possible).",
-  text: "Cliquez sur la page pour placer un texte ; cliquez sur un texte ajouté pour le modifier.",
-  comment: "Cliquez sur la page pour ajouter une note sur fond jaune.",
-  pen: "Dessinez à main levée sur la page.",
-  highlight: "Tracez un rectangle sur la zone à surligner.",
-  underline: "Tracez un trait sous le passage à souligner.",
-  rect: "Tracez un rectangle, puis réglez contour, remplissage et trait sur l'objet.",
-  ellipse: "Tracez une ellipse, puis réglez contour, remplissage et trait sur l'objet.",
-  line: "Tracez une ligne ; ses extrémités restent réglables.",
-  arrow: "Tracez une flèche du point de départ vers la cible.",
-  mask: "Tracez une zone opaque pour masquer visuellement un contenu (les données restent dans le fichier : pour les supprimer, utilisez l'outil Caviarder).",
-  image: "Choisissez une image PNG ou JPEG : elle sera placée au centre de la page.",
-  signature: "Dessinez, tapez ou importez votre signature, puis placez-la sur la page.",
+  ),
+  text: tr(
+    "Cliquez sur la page pour placer un texte ; cliquez sur un texte ajouté pour le modifier.",
+  ),
+  comment: tr("Cliquez sur la page pour ajouter une note sur fond jaune."),
+  pen: tr("Dessinez à main levée sur la page."),
+  highlight: tr("Tracez un rectangle sur la zone à surligner."),
+  underline: tr("Tracez un trait sous le passage à souligner."),
+  rect: tr("Tracez un rectangle, puis réglez contour, remplissage et trait sur l'objet."),
+  ellipse: tr("Tracez une ellipse, puis réglez contour, remplissage et trait sur l'objet."),
+  line: tr("Tracez une ligne ; ses extrémités restent réglables."),
+  arrow: tr("Tracez une flèche du point de départ vers la cible."),
+  mask: tr(
+    "Tracez une zone opaque pour masquer visuellement un contenu (les données restent dans le fichier : pour les supprimer, utilisez l'outil Caviarder).",
+  ),
+  image: tr("Choisissez une image PNG ou JPEG : elle sera placée au centre de la page."),
+  signature: tr("Dessinez, tapez ou importez votre signature, puis placez-la sur la page."),
 };
 
 /** Panels of the editor: at most one open at a time (besides the pages panel). */
@@ -162,12 +169,12 @@ export type EditorPanel = "ocr" | "document" | "history" | "shortcuts" | "search
 
 /** Tool groups by intent (docs/DESIGN_PRINCIPES.md § C). */
 export const TOOL_GROUPS: { id: string; label: string; tools: WorkspaceTool[] }[] = [
-  { id: "select", label: "Sélection", tools: ["select"] },
-  { id: "text", label: "Texte", tools: ["editText", "text"] },
-  { id: "shapes", label: "Formes", tools: ["rect", "ellipse", "line", "arrow"] },
-  { id: "annotate", label: "Annoter", tools: ["pen", "highlight", "underline", "comment"] },
-  { id: "insert", label: "Insérer", tools: ["image", "signature"] },
-  { id: "mask", label: "Masquer", tools: ["mask"] },
+  { id: "select", label: tr("Sélection"), tools: ["select"] },
+  { id: "text", label: tr("Texte"), tools: ["editText", "text"] },
+  { id: "shapes", label: tr("Formes"), tools: ["rect", "ellipse", "line", "arrow"] },
+  { id: "annotate", label: tr("Annoter"), tools: ["pen", "highlight", "underline", "comment"] },
+  { id: "insert", label: tr("Insérer"), tools: ["image", "signature"] },
+  { id: "mask", label: tr("Masquer"), tools: ["mask"] },
 ];
 
 /** Single-key shortcuts of the tools (outside text fields). */
@@ -190,31 +197,31 @@ export const toolShortcuts: Partial<Record<WorkspaceTool, string>> = {
 
 export const SHORTCUTS: { keys: string; action: string }[] = [
   {
-    keys: "Ctrl + Z / Ctrl + Maj + Z",
-    action: "Annuler / rétablir (ajouts, textes modifiés, pages)",
+    keys: tr("Ctrl + Z / Ctrl + Maj + Z"),
+    action: tr("Annuler / rétablir (ajouts, textes modifiés, pages)"),
   },
-  { keys: "Ctrl + D", action: "Dupliquer l'élément sélectionné" },
-  { keys: "Ctrl + S", action: "Télécharger le PDF modifié" },
-  { keys: "Ctrl + F", action: "Rechercher dans le document" },
-  { keys: "Suppr", action: "Supprimer l'élément sélectionné" },
-  { keys: "Flèches (+ Maj)", action: "Déplacer l'élément sélectionné de 1 pt (10 pt)" },
+  { keys: "Ctrl + D", action: tr("Dupliquer l'élément sélectionné") },
+  { keys: "Ctrl + S", action: tr("Télécharger le PDF modifié") },
+  { keys: "Ctrl + F", action: tr("Rechercher dans le document") },
+  { keys: tr("Suppr"), action: tr("Supprimer l'élément sélectionné") },
+  { keys: tr("Flèches (+ Maj)"), action: tr("Déplacer l'élément sélectionné de 1 pt (10 pt)") },
   {
-    keys: "Entrée / double-clic",
-    action: "Modifier le texte sélectionné (sélection d'un mot au double-clic dans le champ)",
+    keys: tr("Entrée / double-clic"),
+    action: tr("Modifier le texte sélectionné (sélection d'un mot au double-clic dans le champ)"),
   },
   {
-    keys: "Échap",
-    action: "Terminer la saisie, désélectionner, revenir à Sélection, fermer un panneau",
+    keys: tr("Échap"),
+    action: tr("Terminer la saisie, désélectionner, revenir à Sélection, fermer un panneau"),
   },
-  { keys: "Page suiv. / Page préc.", action: "Page suivante / précédente" },
-  { keys: "Ctrl + molette", action: "Zoom progressif autour du curseur" },
+  { keys: tr("Page suiv. / Page préc."), action: tr("Page suivante / précédente") },
+  { keys: tr("Ctrl + molette"), action: tr("Zoom progressif autour du curseur") },
   {
     keys: "Ctrl + / Ctrl − / Ctrl 0",
-    action: "Zoom avant / arrière / ajuster à la largeur (aussi sans Ctrl hors d'un champ)",
+    action: tr("Zoom avant / arrière / ajuster à la largeur (aussi sans Ctrl hors d'un champ)"),
   },
   {
     keys: "V, E, T, R, O, L, A, P, H, U, N, I, S, M",
-    action: "Choisir un outil (voir l'info-bulle de chaque outil)",
+    action: tr("Choisir un outil (voir l'info-bulle de chaque outil)"),
   },
-  { keys: "?", action: "Afficher cette aide" },
+  { keys: "?", action: tr("Afficher cette aide") },
 ];

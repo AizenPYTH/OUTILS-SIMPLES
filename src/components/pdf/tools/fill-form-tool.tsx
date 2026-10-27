@@ -38,6 +38,7 @@ import {
 } from "@/lib/pdf/operations/forms";
 import { getToolById, getToolPath } from "@/lib/tools";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-fill-form";
 
@@ -100,7 +101,7 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
     const bytes = op.state.result;
     return (
       <DonePanel
-        summary={`${flatten ? "Formulaire aplati" : "Champs modifiables conservés"} · ${formatBytes(bytes.byteLength)}`}
+        summary={`${flatten ? tr("Formulaire aplati") : tr("Champs modifiables conservés")} · ${formatBytes(bytes.byteLength)}`}
         onDownload={() => downloadPdf(bytes, pdf.file.name, "rempli", TOOL_ID)}
         onStartOver={() => {
           op.reset();
@@ -111,7 +112,7 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
   }
 
   if (fields === null)
-    return <BusyPanel progress={{ current: 0, total: 0, label: "Analyse des champs…" }} />;
+    return <BusyPanel progress={{ current: 0, total: 0, label: tr("Analyse des champs…") }} />;
 
   const editable = fields.filter(
     (f) => f.kind !== "button" && f.kind !== "signature" && f.kind !== "unknown",
@@ -133,18 +134,20 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         onReset={reset}
       />
       {hasXfa ? (
-        <Alert variant="warning" title="Formulaire XFA détecté">
-          Les formulaires XFA (technologie Adobe) ne sont pas pris en charge ; seuls les champs
-          AcroForm éventuels sont listés.
+        <Alert variant="warning" title={tr("Formulaire XFA détecté")}>
+          {tr(
+            "Les formulaires XFA (technologie Adobe) ne sont pas pris en charge ; seuls les champs AcroForm éventuels sont listés.",
+          )}
         </Alert>
       ) : null}
       {editable.length === 0 ? (
-        <Alert variant="warning" title="Aucun champ interactif détecté">
-          Ce PDF ne contient pas de champs de formulaire remplissables : il s&apos;agit probablement
-          d&apos;un formulaire scanné ou aplati.{" "}
+        <Alert variant="warning" title={tr("Aucun champ interactif détecté")}>
+          {tr(
+            "Ce PDF ne contient pas de champs de formulaire remplissables : il s'agit probablement d'un formulaire scanné ou aplati.",
+          )}{" "}
           {addText ? (
             <a href={getToolPath(addText)} className="font-medium underline">
-              Utilisez « Ajouter du texte » pour le compléter.
+              {tr("Utilisez « Ajouter du texte » pour le compléter.")}
             </a>
           ) : null}
         </Alert>
@@ -163,7 +166,7 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
                 className="space-y-4 rounded-[14px] border border-border bg-surface p-4"
               >
                 <legend className="px-1 text-sm font-semibold">
-                  {key === null ? "Champs sans page identifiée" : `${t.common.page} ${key + 1}`}
+                  {key === null ? tr("Champs sans page identifiée") : `${t.common.page} ${key + 1}`}
                 </legend>
                 {byPage.get(key)!.map((field) => (
                   <FormFieldControl
@@ -179,22 +182,22 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
             <div className="flex items-center justify-between gap-3 rounded-[14px] border border-border bg-surface p-4">
               <div>
                 <Label htmlFor="flatten" className="text-sm font-medium">
-                  Aplatir le formulaire
+                  {tr("Aplatir le formulaire")}
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Les valeurs deviennent fixes et ne sont plus modifiables.
+                  {tr("Les valeurs deviennent fixes et ne sont plus modifiables.")}
                 </p>
               </div>
               <Switch id="flatten" checked={flatten} onCheckedChange={setFlatten} />
             </div>
             <Button type="submit" size="lg" className="w-full" data-testid="fill-form-export">
-              <ClipboardList aria-hidden="true" /> Exporter le formulaire rempli
+              <ClipboardList aria-hidden="true" /> {tr("Exporter le formulaire rempli")}
             </Button>
           </form>
           <aside className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm font-medium">
-                Aperçu · {t.common.pageOf(activePage + 1, pdf.pageCount)}
+                {tr("Aperçu")} · {t.common.pageOf(activePage + 1, pdf.pageCount)}
               </p>
               <Button
                 type="button"
@@ -203,7 +206,7 @@ function FormWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
                 onClick={() => void refreshPreview()}
                 loading={previewBusy}
               >
-                <RefreshCw aria-hidden="true" /> Mettre à jour l&apos;aperçu
+                <RefreshCw aria-hidden="true" /> {tr("Mettre à jour l'aperçu")}
               </Button>
             </div>
             <FormPreview bytes={previewBytes} fallback={pdf.opened} pageIndex={activePage} />
@@ -251,7 +254,7 @@ function FormFieldControl({
       {field.name}
       {field.required ? <span className="text-destructive"> *</span> : null}
       {field.readOnly ? (
-        <span className="text-xs font-normal text-muted-foreground"> (lecture seule)</span>
+        <span className="text-xs font-normal text-muted-foreground"> {tr("(lecture seule)")}</span>
       ) : null}
     </Label>
   );
@@ -305,7 +308,7 @@ function FormFieldControl({
             disabled={field.readOnly}
           >
             <SelectTrigger id={id} onFocus={onFocus}>
-              <SelectValue placeholder="Choisir…" />
+              <SelectValue placeholder={tr("Choisir…")} />
             </SelectTrigger>
             <SelectContent>
               {field.options.map((o) => (
@@ -391,7 +394,11 @@ function FormPreview({
       {error ? (
         <p className="text-sm text-muted-foreground">{t.errors.renderFailed}</p>
       ) : (
-        <canvas ref={canvasRef} className="max-w-full shadow-sm" aria-label="Aperçu de la page" />
+        <canvas
+          ref={canvasRef}
+          className="max-w-full shadow-sm"
+          aria-label={tr("Aperçu de la page")}
+        />
       )}
     </div>
   );

@@ -31,6 +31,7 @@ import { standardFontFamilies as fontFamilies, type FontFamily } from "@/lib/pdf
 import { getToolById } from "@/lib/tools";
 import { formatBytes } from "@/lib/files/format";
 import { stripExtension } from "@/lib/files/filename";
+import { tr } from "@/lib/i18n/messages";
 
 type Mode = "docx" | "sheet";
 
@@ -79,20 +80,22 @@ export function OfficeToPdfTool({ mode }: { mode: Mode }) {
     const kind = kindOf(candidate);
     if (!kind || (mode === "docx" && kind !== "docx") || (mode === "sheet" && kind === "docx")) {
       return mode === "docx"
-        ? "Seuls les fichiers Word .docx sont acceptés (enregistrez les .doc au format .docx)."
-        : "Seuls les classeurs .xlsx et les fichiers .csv sont acceptés (enregistrez les .xls au format .xlsx).";
+        ? tr("Seuls les fichiers Word .docx sont acceptés (enregistrez les .doc au format .docx).")
+        : tr(
+            "Seuls les classeurs .xlsx et les fichiers .csv sont acceptés (enregistrez les .xls au format .xlsx).",
+          );
     }
     if (candidate.size > maxSize)
-      return `Fichier trop volumineux (maximum ${formatBytes(maxSize)}).`;
+      return tr("Fichier trop volumineux (maximum {max}).", { max: formatBytes(maxSize) });
     return null;
   };
 
   const run = () => {
     if (!file) return;
     void op.run(async (report) => {
-      report({ current: 0, total: 1, label: "Lecture du fichier…" });
+      report({ current: 0, total: 1, label: tr("Lecture du fichier…") });
       const bytes = new Uint8Array(await file.arrayBuffer());
-      report({ current: 0, total: 1, label: "Mise en page du PDF…" });
+      report({ current: 0, total: 1, label: tr("Mise en page du PDF…") });
       const kind = kindOf(file);
       if (kind === "docx") return docxToPdf(bytes, options);
       if (kind === "xlsx") return sheetToPdf({ kind: "xlsx", bytes }, options, { headerRow });
@@ -116,23 +119,23 @@ export function OfficeToPdfTool({ mode }: { mode: Mode }) {
     const result = op.state.result;
     return (
       <DonePanel
-        title="Votre PDF est prêt"
-        summary={`${result.pageCount} page${result.pageCount > 1 ? "s" : ""} · ${formatBytes(result.bytes.byteLength)}${result.imageCount ? ` · ${result.imageCount} image${result.imageCount > 1 ? "s" : ""}` : ""}`}
+        title={tr("Votre PDF est prêt")}
+        summary={`${tr(result.pageCount > 1 ? "{n} pages" : "{n} page", { n: result.pageCount })} · ${formatBytes(result.bytes.byteLength)}${result.imageCount ? ` · ${tr(result.imageCount > 1 ? "{n} images" : "{n} image", { n: result.imageCount })}` : ""}`}
         onDownload={() => downloadPdf(result.bytes, file.name, "", toolId)}
         onStartOver={reset}
       >
         {result.warnings.length > 0 ? (
-          <Alert variant="warning" title="Conversion simplifiée : à vérifier">
+          <Alert variant="warning" title={tr("Conversion simplifiée : à vérifier")}>
             <ul className="list-disc space-y-1 pl-4 text-left" data-testid="conversion-warnings">
               {result.warnings.slice(0, 6).map((w) => (
-                <li key={w}>{w}</li>
+                <li key={w}>{tr(w)}</li>
               ))}
             </ul>
           </Alert>
         ) : null}
         <div className="mt-3 text-center">
           <Button type="button" variant="ghost" size="sm" onClick={op.reset}>
-            Changer les options
+            {tr("Changer les options")}
           </Button>
         </div>
       </DonePanel>
@@ -150,11 +153,14 @@ export function OfficeToPdfTool({ mode }: { mode: Mode }) {
           validate={validate}
           title={
             mode === "docx"
-              ? "Déposez votre document Word (.docx)"
-              : "Déposez un classeur Excel (.xlsx) ou un fichier CSV"
+              ? tr("Déposez votre document Word (.docx)")
+              : tr("Déposez un classeur Excel (.xlsx) ou un fichier CSV")
           }
-          hint={`${mode === "docx" ? "Format .docx" : "Formats .xlsx et .csv"} · ${formatBytes(maxSize)} max`}
-          buttonLabel="Choisir un fichier"
+          hint={tr("{format} · {size} max", {
+            format: mode === "docx" ? tr("Format .docx") : tr("Formats .xlsx et .csv"),
+            size: formatBytes(maxSize),
+          })}
+          buttonLabel={tr("Choisir un fichier")}
           testId="office-dropzone"
         />
       ) : (
@@ -167,28 +173,28 @@ export function OfficeToPdfTool({ mode }: { mode: Mode }) {
             <p className="text-sm text-muted-foreground">{formatBytes(file.size)}</p>
           </div>
           <Button type="button" variant="outline" size="sm" onClick={() => setFile(null)}>
-            Changer de fichier
+            {tr("Changer de fichier")}
           </Button>
         </ToolPanel>
       )}
       <ToolPanel className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1 sm:col-span-2">
-            <Label htmlFor="office-title">Titre (facultatif, en tête du PDF)</Label>
+            <Label htmlFor="office-title">{tr("Titre (facultatif, en tête du PDF)")}</Label>
             <Input
               id="office-title"
               value={options.title ?? ""}
               onChange={(e) => patch({ title: e.target.value })}
               placeholder={
                 mode === "docx"
-                  ? "Laisser vide pour garder le titre du document"
-                  : "Nom du relevé, du rapport…"
+                  ? tr("Laisser vide pour garder le titre du document")
+                  : tr("Nom du relevé, du rapport…")
               }
               maxLength={200}
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="office-font">Police</Label>
+            <Label htmlFor="office-font">{tr("Police")}</Label>
             <Select
               value={options.fontFamily}
               onValueChange={(v) => patch({ fontFamily: v as FontFamily })}
@@ -206,7 +212,7 @@ export function OfficeToPdfTool({ mode }: { mode: Mode }) {
             </Select>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="office-size">Taille du texte (pt)</Label>
+            <Label htmlFor="office-size">{tr("Taille du texte (pt)")}</Label>
             <Input
               id="office-size"
               type="number"
@@ -219,7 +225,7 @@ export function OfficeToPdfTool({ mode }: { mode: Mode }) {
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <Segmented
-            label="Format de page"
+            label={tr("Format de page")}
             value={options.pageSize}
             onChange={(v) => patch({ pageSize: v })}
             options={[
@@ -234,7 +240,7 @@ export function OfficeToPdfTool({ mode }: { mode: Mode }) {
             onChange={(v) => patch({ orientation: v })}
             options={[
               { value: "portrait", label: "Portrait" },
-              { value: "landscape", label: "Paysage" },
+              { value: "landscape", label: tr("Paysage") },
             ]}
             className="sm:grid-cols-2"
           />
@@ -245,17 +251,17 @@ export function OfficeToPdfTool({ mode }: { mode: Mode }) {
               checked={options.pageNumbers}
               onCheckedChange={(v) => patch({ pageNumbers: v === true })}
             />
-            Numéroter les pages
+            {tr("Numéroter les pages")}
           </label>
           {mode === "sheet" ? (
             <label className="flex items-center gap-2 text-sm">
               <Checkbox checked={headerRow} onCheckedChange={(v) => setHeaderRow(v === true)} />
-              La première ligne est un en-tête
+              {tr("La première ligne est un en-tête")}
             </label>
           ) : null}
         </div>
         <Button type="button" size="lg" onClick={run} disabled={!file} data-testid="office-run">
-          Créer le PDF
+          {tr("Créer le PDF")}
         </Button>
       </ToolPanel>
     </div>

@@ -3,6 +3,8 @@
  * JPEG and PNG files (the pixel data is copied untouched) and a readable
  * summary of the tags parsed by exifr. Pure byte operations, testable in Node.
  */
+import { tr } from "@/lib/i18n/messages";
+import { currentLanguageTag } from "@/lib/i18n";
 
 export interface StripResult {
   bytes: Uint8Array;
@@ -23,12 +25,12 @@ const JPEG_COM = 0xfe;
  */
 export function stripJpegMetadata(input: Uint8Array): StripResult {
   if (input.length < 4 || input[0] !== 0xff || input[1] !== JPEG_SOI)
-    throw new Error("Ce fichier n'est pas un JPEG valide.");
+    throw new Error(tr("Ce fichier n'est pas un JPEG valide."));
   const parts: Uint8Array[] = [input.subarray(0, 2)];
   let removed = 0;
   let pos = 2;
   while (pos + 4 <= input.length) {
-    if (input[pos] !== 0xff) throw new Error("Structure JPEG inattendue.");
+    if (input[pos] !== 0xff) throw new Error(tr("Structure JPEG inattendue."));
     const marker = input[pos + 1]!;
     if (marker === 0xff) {
       pos += 1; // padding byte
@@ -40,7 +42,7 @@ export function stripJpegMetadata(input: Uint8Array): StripResult {
     }
     const length = (input[pos + 2]! << 8) | input[pos + 3]!;
     const end = pos + 2 + length;
-    if (length < 2 || end > input.length) throw new Error("Segment JPEG tronqué.");
+    if (length < 2 || end > input.length) throw new Error(tr("Segment JPEG tronqué."));
     const isMetadata =
       (marker > JPEG_APP0 && marker <= 0xef && marker !== JPEG_APP14_ADOBE) || marker === JPEG_COM;
     if (isMetadata) removed += 1;
@@ -55,8 +57,9 @@ const PNG_METADATA_CHUNKS = new Set(["tEXt", "zTXt", "iTXt", "eXIf", "tIME"]);
 
 /** Removes textual, EXIF and timestamp chunks from a PNG; colour chunks stay. */
 export function stripPngMetadata(input: Uint8Array): StripResult {
-  if (input.length < 8 || PNG_SIGNATURE.some((b, i) => input[i] !== b))
-    throw new Error("Ce fichier n'est pas un PNG valide.");
+  if (input.length < 8 || PNG_SIGNATURE.some((b, i) => input[i] !== b)) {
+    throw new Error(tr("Ce fichier n'est pas un PNG valide."));
+  }
   const parts: Uint8Array[] = [input.subarray(0, 8)];
   let removed = 0;
   let pos = 8;
@@ -69,7 +72,7 @@ export function stripPngMetadata(input: Uint8Array): StripResult {
       input[pos + 7]!,
     );
     const end = pos + 12 + length;
-    if (end > input.length) throw new Error("Chunk PNG tronqué.");
+    if (end > input.length) throw new Error(tr("Chunk PNG tronqué."));
     if (PNG_METADATA_CHUNKS.has(type)) removed += 1;
     else parts.push(input.subarray(pos, end));
     pos = end;
@@ -113,53 +116,58 @@ const KNOWN: {
   sensitive?: boolean;
   format?: (v: unknown) => string;
 }[] = [
-  { key: "Make", label: "Marque de l'appareil", sensitive: true },
-  { key: "Model", label: "Modèle de l'appareil", sensitive: true },
-  { key: "LensModel", label: "Objectif" },
-  { key: "Software", label: "Logiciel", sensitive: true },
-  { key: "DateTimeOriginal", label: "Date de prise de vue", sensitive: true, format: formatDate },
-  { key: "CreateDate", label: "Date de création", sensitive: true, format: formatDate },
-  { key: "ModifyDate", label: "Date de modification", sensitive: true, format: formatDate },
+  { key: "Make", label: tr("Marque de l'appareil"), sensitive: true },
+  { key: "Model", label: tr("Modèle de l'appareil"), sensitive: true },
+  { key: "LensModel", label: tr("Objectif") },
+  { key: "Software", label: tr("Logiciel"), sensitive: true },
+  {
+    key: "DateTimeOriginal",
+    label: tr("Date de prise de vue"),
+    sensitive: true,
+    format: formatDate,
+  },
+  { key: "CreateDate", label: tr("Date de création"), sensitive: true, format: formatDate },
+  { key: "ModifyDate", label: tr("Date de modification"), sensitive: true, format: formatDate },
   {
     key: "ExposureTime",
-    label: "Temps d'exposition",
+    label: tr("Temps d'exposition"),
     format: (v) =>
       typeof v === "number" ? (v >= 1 ? `${v} s` : `1/${Math.round(1 / v)} s`) : String(v),
   },
-  { key: "FNumber", label: "Ouverture", format: (v) => `f/${String(v)}` },
-  { key: "ISO", label: "Sensibilité ISO" },
-  { key: "FocalLength", label: "Focale", format: (v) => `${String(v)} mm` },
+  { key: "FNumber", label: tr("Ouverture"), format: (v) => `f/${String(v)}` },
+  { key: "ISO", label: tr("Sensibilité ISO") },
+  { key: "FocalLength", label: tr("Focale"), format: (v) => `${String(v)} mm` },
   {
     key: "FocalLengthIn35mmFormat",
-    label: "Focale équivalente 35 mm",
+    label: tr("Focale équivalente 35 mm"),
     format: (v) => `${String(v)} mm`,
   },
   { key: "Flash", label: "Flash" },
-  { key: "WhiteBalance", label: "Balance des blancs" },
+  { key: "WhiteBalance", label: tr("Balance des blancs") },
   { key: "Orientation", label: "Orientation" },
-  { key: "ExifImageWidth", label: "Largeur (EXIF)", format: (v) => `${String(v)} px` },
-  { key: "ExifImageHeight", label: "Hauteur (EXIF)", format: (v) => `${String(v)} px` },
-  { key: "XResolution", label: "Résolution horizontale", format: (v) => `${String(v)} dpi` },
-  { key: "ColorSpace", label: "Espace colorimétrique" },
-  { key: "Artist", label: "Auteur", sensitive: true },
-  { key: "Copyright", label: "Droits d'auteur", sensitive: true },
+  { key: "ExifImageWidth", label: tr("Largeur (EXIF)"), format: (v) => `${String(v)} px` },
+  { key: "ExifImageHeight", label: tr("Hauteur (EXIF)"), format: (v) => `${String(v)} px` },
+  { key: "XResolution", label: tr("Résolution horizontale"), format: (v) => `${String(v)} dpi` },
+  { key: "ColorSpace", label: tr("Espace colorimétrique") },
+  { key: "Artist", label: tr("Auteur"), sensitive: true },
+  { key: "Copyright", label: tr("Droits d'auteur"), sensitive: true },
   { key: "ImageDescription", label: "Description", sensitive: true },
-  { key: "UserComment", label: "Commentaire", sensitive: true },
-  { key: "OwnerName", label: "Propriétaire", sensitive: true },
-  { key: "SerialNumber", label: "Numéro de série", sensitive: true },
-  { key: "BodySerialNumber", label: "Numéro de série du boîtier", sensitive: true },
+  { key: "UserComment", label: tr("Commentaire"), sensitive: true },
+  { key: "OwnerName", label: tr("Propriétaire"), sensitive: true },
+  { key: "SerialNumber", label: tr("Numéro de série"), sensitive: true },
+  { key: "BodySerialNumber", label: tr("Numéro de série du boîtier"), sensitive: true },
   {
     key: "GPSAltitude",
-    label: "Altitude GPS",
+    label: tr("Altitude GPS"),
     sensitive: true,
     format: (v) => `${Math.round(Number(v))} m`,
   },
-  { key: "GPSDateStamp", label: "Date GPS", sensitive: true },
+  { key: "GPSDateStamp", label: tr("Date GPS"), sensitive: true },
 ];
 
 function formatDate(v: unknown): string {
   if (v instanceof Date && !Number.isNaN(v.getTime()))
-    return v.toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" });
+    return v.toLocaleString(currentLanguageTag(), { dateStyle: "long", timeStyle: "short" });
   return String(v);
 }
 
@@ -186,7 +194,7 @@ export function describeExif(tags: Record<string, unknown> | null | undefined): 
   if (gps)
     rows.unshift({
       key: "GPS",
-      label: "Position GPS",
+      label: tr("Position GPS"),
       value: `${gps.latitude.toFixed(5)}, ${gps.longitude.toFixed(5)}`,
       sensitive: true,
     });
@@ -197,7 +205,7 @@ export function describeExif(tags: Record<string, unknown> | null | undefined): 
 function stringify(value: unknown): string {
   if (value instanceof Date) return formatDate(value);
   if (Array.isArray(value)) return value.map(stringify).join(", ");
-  if (value instanceof Uint8Array) return `${value.length} octets`;
+  if (value instanceof Uint8Array) return tr("{n} octets", { n: value.length });
   if (typeof value === "object" && value !== null) return "";
   return String(value);
 }

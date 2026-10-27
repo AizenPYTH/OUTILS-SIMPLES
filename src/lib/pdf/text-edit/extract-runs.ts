@@ -18,6 +18,7 @@ import type { FontFamily } from "../fonts";
 import { collectTextOps, expandLigatures } from "./apply";
 import { glyphNameToUnicode } from "./glyph-names";
 import type { FallbackFontHint, OriginalEncoding, PageTextStatus, TextRun } from "./types";
+import { tr } from "@/lib/i18n/messages";
 
 type Matrix = [number, number, number, number, number, number];
 const IDENTITY: Matrix = [1, 0, 0, 1, 0, 0];
@@ -281,11 +282,12 @@ export async function extractTextRuns(
         const fontSize = Math.abs(size) * scale;
         const invisible = text.renderMode === 3 || text.renderMode === 7;
         let reason: string | undefined;
-        if (!raw) reason = "désynchronisation avec le flux de contenu";
-        else if (invisible && font?.isType3Font) reason = "Police Type 3 : non modifiable.";
-        else if (font?.isType3Font) reason = "Police Type 3 (glyphes dessinés) : non modifiable.";
-        else if (font?.vertical) reason = "Écriture verticale : non prise en charge.";
-        else if (fontSize < 0.5 || str.trim().length === 0) reason = "Passage vide.";
+        if (!raw) reason = tr("désynchronisation avec le flux de contenu");
+        else if (invisible && font?.isType3Font) reason = tr("Police Type 3 : non modifiable.");
+        else if (font?.isType3Font)
+          reason = tr("Police Type 3 (glyphes dessinés) : non modifiable.");
+        else if (font?.vertical) reason = tr("Écriture verticale : non prise en charge.");
+        else if (fontSize < 0.5 || str.trim().length === 0) reason = tr("Passage vide.");
         runs.push({
           id: `run-${pageIndex}-${opIndex}`,
           pageIndex,
@@ -322,7 +324,10 @@ export async function extractTextRuns(
     return {
       kind: "mismatch",
       runs: [],
-      detail: `${shown} passages rendus pour ${rawOps.length} opérateurs de texte`,
+      detail: tr("{shown} passages rendus pour {total} opérateurs de texte", {
+        shown,
+        total: rawOps.length,
+      }),
     };
   }
   if (runs.length === 0)

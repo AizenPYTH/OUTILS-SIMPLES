@@ -3,6 +3,8 @@
  * name as a fallback. Used by the home page drop zone to suggest tools.
  * Deliberately tiny: no library, no full read.
  */
+import { tr } from "@/lib/i18n/messages";
+
 export type FileKind =
   | "pdf"
   | "image"
@@ -121,17 +123,17 @@ export function detectFileKind(name: string, head: Uint8Array): FileKind {
 }
 
 export const KIND_LABELS: Record<FileKind, string> = {
-  pdf: "Document PDF",
-  image: "Image",
-  heic: "Photo HEIC / HEIF",
-  docx: "Document Word (.docx)",
-  xlsx: "Classeur Excel (.xlsx)",
-  pptx: "Présentation PowerPoint (.pptx)",
-  csv: "Fichier CSV",
-  markdown: "Texte Markdown",
-  text: "Fichier texte",
-  zip: "Archive ZIP",
-  unknown: "Type non reconnu",
+  pdf: tr("Document PDF"),
+  image: tr("Image"),
+  heic: tr("Photo HEIC / HEIF"),
+  docx: tr("Document Word (.docx)"),
+  xlsx: tr("Classeur Excel (.xlsx)"),
+  pptx: tr("Présentation PowerPoint (.pptx)"),
+  csv: tr("Fichier CSV"),
+  markdown: tr("Texte Markdown"),
+  text: tr("Fichier texte"),
+  zip: tr("Archive ZIP"),
+  unknown: tr("Type non reconnu"),
 };
 
 /** Tool ids suggested for a kind, best first. The editor comes first for PDFs on purpose. */
@@ -176,9 +178,14 @@ export const KIND_TOOLS: Record<FileKind, string[]> = {
 
 /** What to say when nothing applies: honest, with the nearest alternative. */
 export const KIND_NOTES: Partial<Record<FileKind, string>> = {
-  pptx: "Les présentations PowerPoint ne sont pas prises en charge : exportez-la en PDF depuis PowerPoint ou LibreOffice, puis utilisez les outils PDF.",
-  zip: "Les archives ne sont pas traitées : extrayez les fichiers puis déposez-les un par un.",
-  unknown:
+  pptx: tr(
+    "Les présentations PowerPoint ne sont pas prises en charge : exportez-la en PDF depuis PowerPoint ou LibreOffice, puis utilisez les outils PDF.",
+  ),
+  zip: tr("Les archives ne sont pas traitées : extrayez les fichiers puis déposez-les un par un."),
+  unknown: tr(
     "Ce type de fichier n'est pas reconnu. Les outils acceptent les PDF, les images (PNG, JPEG, WebP, HEIC), les documents Word, Excel, CSV, Markdown et texte.",
-  heic: "Les photos HEIC sont converties en JPEG ou PNG par l'outil « Convertir une image » (navigateurs récents ; décodeur libheif chargé à la demande).",
+  ),
+  heic: tr(
+    "Les photos HEIC sont converties en JPEG ou PNG par l'outil « Convertir une image » (navigateurs récents ; décodeur libheif chargé à la demande).",
+  ),
 };

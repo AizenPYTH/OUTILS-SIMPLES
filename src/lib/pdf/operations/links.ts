@@ -1,5 +1,6 @@
 import { PDFArray, PDFDict, PDFHexString, PDFName, PDFString } from "pdf-lib";
 import { loadPdfDocument } from "../load";
+import { tr } from "@/lib/i18n/messages";
 
 export type LinkKind = "lien" | "texte" | "e-mail";
 
@@ -97,8 +98,8 @@ export function mergeLinks(...lists: PdfLink[][]): PdfLink[] {
 export function linksToCsv(links: PdfLink[]): string {
   const escape = (s: string) => `"${s.replace(/"/g, '""')}"`;
   return [
-    "page;type;adresse",
-    ...links.map((l) => `${l.pageIndex + 1};${l.kind};${escape(l.url)}`),
+    tr("page;type;adresse"),
+    ...links.map((l) => `${l.pageIndex + 1};${tr(l.kind)};${escape(l.url)}`),
   ].join("\n");
 }
 

@@ -1,4 +1,5 @@
 /** Percentage and VAT calculators (pure, French rounding helpers). */
+import { tr } from "@/lib/i18n/messages";
 
 export function round(value: number, decimals = 2): number {
   const factor = 10 ** decimals;
@@ -60,11 +61,11 @@ export interface VatBreakdown {
 }
 
 export const FRENCH_VAT_RATES: { rate: number; label: string }[] = [
-  { rate: 20, label: "20 % — taux normal" },
-  { rate: 10, label: "10 % — restauration, travaux, transports" },
-  { rate: 5.5, label: "5,5 % — alimentaire, livres, énergie" },
-  { rate: 2.1, label: "2,1 % — presse, médicaments remboursables" },
-  { rate: 8.5, label: "8,5 % — taux normal DOM" },
+  { rate: 20, label: tr("20 % — taux normal") },
+  { rate: 10, label: tr("10 % — restauration, travaux, transports") },
+  { rate: 5.5, label: tr("5,5 % — alimentaire, livres, énergie") },
+  { rate: 2.1, label: tr("2,1 % — presse, médicaments remboursables") },
+  { rate: 8.5, label: tr("8,5 % — taux normal DOM") },
 ];
 
 export function vatFromHt(ht: number, rate: number): VatBreakdown {

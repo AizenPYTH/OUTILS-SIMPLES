@@ -29,6 +29,7 @@ import {
 import { formatBytes } from "@/lib/files/format";
 import { track } from "@/lib/analytics/events";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 /** Loads raw bytes without pdf-lib (encrypted files cannot be parsed by it). */
 function useRawPdf(toolId: string) {
@@ -79,7 +80,10 @@ export function ProtectTool() {
     const bytes = op.state.result;
     return (
       <DonePanel
-        summary={`Chiffré ${level === "aes-256" ? "AES-256" : "AES-128"} · ${formatBytes(bytes.byteLength)}`}
+        summary={tr("Chiffré {algo} · {size}", {
+          algo: level === "aes-256" ? "AES-256" : "AES-128",
+          size: formatBytes(bytes.byteLength),
+        })}
         onDownload={() => downloadPdf(bytes, raw.file!.file.name, "protege", "pdf-protect")}
         onStartOver={() => (op.reset(), raw.reset())}
       />
@@ -93,14 +97,15 @@ export function ProtectTool() {
       <FileSummary name={raw.file.file.name} size={raw.file.file.size} onReset={raw.reset} />
       {alreadyEncrypted ? (
         <Alert variant="warning">
-          Ce PDF est déjà chiffré. Déverrouillez-le d&apos;abord avec l&apos;outil « Déverrouiller
-          un PDF » si vous souhaitez changer son mot de passe.
+          {tr(
+            "Ce PDF est déjà chiffré. Déverrouillez-le d'abord avec l'outil « Déverrouiller un PDF » si vous souhaitez changer son mot de passe.",
+          )}
         </Alert>
       ) : null}
       <ToolPanel className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1">
-            <Label htmlFor="pw-user">Mot de passe d&apos;ouverture</Label>
+            <Label htmlFor="pw-user">{tr("Mot de passe d'ouverture")}</Label>
             <Input
               id="pw-user"
               type="password"
@@ -110,12 +115,16 @@ export function ProtectTool() {
               data-testid="pw-user"
             />
             <p className="text-xs text-muted-foreground">
-              Demandé pour ouvrir le document.{" "}
-              {tooShort ? <span className="text-destructive">4 caractères minimum.</span> : null}
+              {tr("Demandé pour ouvrir le document.")}{" "}
+              {tooShort ? (
+                <span className="text-destructive">{tr("4 caractères minimum.")}</span>
+              ) : null}
             </p>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="pw-owner">Mot de passe propriétaire ({t.common.optional})</Label>
+            <Label htmlFor="pw-owner">
+              {tr("Mot de passe propriétaire")} ({t.common.optional})
+            </Label>
             <Input
               id="pw-owner"
               type="password"
@@ -124,31 +133,39 @@ export function ProtectTool() {
               autoComplete="new-password"
             />
             <p className="text-xs text-muted-foreground">
-              Permet de lever les restrictions ci-dessous. Identique au mot de passe
-              d&apos;ouverture si vide.
+              {tr(
+                "Permet de lever les restrictions ci-dessous. Identique au mot de passe d'ouverture si vide.",
+              )}
             </p>
           </div>
         </div>
         <Segmented
-          label="Chiffrement"
+          label={tr("Chiffrement")}
           value={level}
           onChange={setLevel}
           className="sm:grid-cols-2"
           options={[
-            { value: "aes-256", label: "AES-256", description: "Recommandé (PDF 1.7+)" },
-            { value: "aes-128", label: "AES-128", description: "Compatibilité anciens lecteurs" },
+            { value: "aes-256", label: "AES-256", description: tr("Recommandé (PDF 1.7+)") },
+            {
+              value: "aes-128",
+              label: "AES-128",
+              description: tr("Compatibilité anciens lecteurs"),
+            },
           ]}
         />
         <fieldset className="space-y-2">
           <legend className="text-sm font-medium">
-            Autorisations (sans le mot de passe propriétaire)
+            {tr("Autorisations (sans le mot de passe propriétaire)")}
           </legend>
           {(
             [
-              ["allowPrinting", "Autoriser l'impression"],
-              ["allowCopy", "Autoriser la copie du texte et des images"],
-              ["allowModification", "Autoriser la modification"],
-              ["allowAnnotations", "Autoriser les annotations et le remplissage de formulaires"],
+              ["allowPrinting", tr("Autoriser l'impression")],
+              ["allowCopy", tr("Autoriser la copie du texte et des images")],
+              ["allowModification", tr("Autoriser la modification")],
+              [
+                "allowAnnotations",
+                tr("Autoriser les annotations et le remplissage de formulaires"),
+              ],
             ] as const
           ).map(([key, label]) => (
             <div key={key} className="flex items-center gap-2">
@@ -164,9 +181,9 @@ export function ProtectTool() {
           ))}
         </fieldset>
         <Alert variant="info">
-          Les restrictions (impression, copie…) sont respectées par les lecteurs PDF mais ne sont
-          pas une protection absolue : seul le mot de passe d&apos;ouverture empêche réellement la
-          lecture. Conservez-le précieusement, il n&apos;est pas récupérable.
+          {tr(
+            "Les restrictions (impression, copie…) sont respectées par les lecteurs PDF mais ne sont pas une protection absolue : seul le mot de passe d'ouverture empêche réellement la lecture. Conservez-le précieusement, il n'est pas récupérable.",
+          )}
         </Alert>
       </ToolPanel>
       <Button
@@ -186,7 +203,7 @@ export function ProtectTool() {
         }
         data-testid="protect-run"
       >
-        <Lock aria-hidden="true" /> Protéger le PDF
+        <Lock aria-hidden="true" /> {tr("Protéger le PDF")}
       </Button>
     </div>
   );
@@ -213,7 +230,7 @@ export function UnlockTool() {
     const bytes = op.state.result;
     return (
       <DonePanel
-        summary={`Protection retirée · ${formatBytes(bytes.byteLength)}`}
+        summary={tr("Protection retirée · {size}", { size: formatBytes(bytes.byteLength) })}
         onDownload={() => downloadPdf(bytes, raw.file!.file.name, "deverrouille", "pdf-unlock")}
         onStartOver={() => (op.reset(), raw.reset())}
       />
@@ -226,14 +243,14 @@ export function UnlockTool() {
       <FileSummary name={raw.file.file.name} size={raw.file.file.size} onReset={raw.reset} />
       {!encrypted ? (
         <Alert variant="info">
-          Ce PDF ne semble pas chiffré : il s&apos;ouvre sans mot de passe. L&apos;outil peut tout
-          de même retirer d&apos;éventuelles restrictions si vous disposez du mot de passe
-          propriétaire.
+          {tr(
+            "Ce PDF ne semble pas chiffré : il s'ouvre sans mot de passe. L'outil peut tout de même retirer d'éventuelles restrictions si vous disposez du mot de passe propriétaire.",
+          )}
         </Alert>
       ) : null}
       <ToolPanel className="space-y-4">
         <div className="space-y-1 sm:max-w-sm">
-          <Label htmlFor="unlock-pw">Mot de passe du document</Label>
+          <Label htmlFor="unlock-pw">{tr("Mot de passe du document")}</Label>
           <Input
             id="unlock-pw"
             type="password"
@@ -243,8 +260,9 @@ export function UnlockTool() {
             data-testid="unlock-pw"
           />
           <p className="text-xs text-muted-foreground">
-            Mot de passe d&apos;ouverture ou propriétaire. Il n&apos;est utilisé que dans votre
-            navigateur et n&apos;est jamais transmis.
+            {tr(
+              "Mot de passe d'ouverture ou propriétaire. Il n'est utilisé que dans votre navigateur et n'est jamais transmis.",
+            )}
           </p>
         </div>
         <div className="flex items-start gap-2">
@@ -256,9 +274,9 @@ export function UnlockTool() {
             data-testid="unlock-auth"
           />
           <Label htmlFor="unlock-auth" className="font-normal leading-relaxed">
-            Je suis l&apos;auteur de ce document ou autorisé à en retirer la protection. Cet outil
-            ne permet pas de retrouver un mot de passe oublié ni de contourner une protection sans y
-            être autorisé.
+            {tr(
+              "Je suis l'auteur de ce document ou autorisé à en retirer la protection. Cet outil ne permet pas de retrouver un mot de passe oublié ni de contourner une protection sans y être autorisé.",
+            )}
           </Label>
         </div>
       </ToolPanel>
@@ -272,7 +290,7 @@ export function UnlockTool() {
         }
         data-testid="unlock-run"
       >
-        <LockOpen aria-hidden="true" /> Déverrouiller
+        <LockOpen aria-hidden="true" /> {tr("Déverrouiller")}
       </Button>
     </div>
   );
@@ -295,7 +313,7 @@ export function CheckPdfTool() {
       />
     );
   if (op.state.status === "busy" || op.state.status === "idle")
-    return <BusyPanel progress={{ current: 0, total: 0, label: "Analyse de la structure…" }} />;
+    return <BusyPanel progress={{ current: 0, total: 0, label: tr("Analyse de la structure…") }} />;
   if (op.state.status === "error")
     return <ErrorPanel error={op.state.error} onRetry={op.reset} onReset={raw.reset} />;
   const report = op.state.result;
@@ -314,41 +332,41 @@ export function CheckPdfTool() {
           />
           <h3 className="text-base font-semibold">
             {report.ok
-              ? "Aucune erreur de structure détectée"
+              ? tr("Aucune erreur de structure détectée")
               : report.encrypted
-                ? "Document chiffré"
-                : "Problèmes détectés"}
+                ? tr("Document chiffré")
+                : tr("Problèmes détectés")}
           </h3>
         </div>
         <dl className="grid gap-2 text-sm sm:grid-cols-3">
           <div className="rounded-md bg-muted px-3 py-2">
-            <dt className="text-xs text-muted-foreground">Version PDF</dt>
+            <dt className="text-xs text-muted-foreground">{tr("Version PDF")}</dt>
             <dd className="font-medium">{report.version}</dd>
           </div>
           <div className="rounded-md bg-muted px-3 py-2">
-            <dt className="text-xs text-muted-foreground">Chiffrement</dt>
-            <dd className="font-medium">{report.encrypted ? "Oui" : "Non"}</dd>
+            <dt className="text-xs text-muted-foreground">{tr("Chiffrement")}</dt>
+            <dd className="font-medium">{report.encrypted ? tr("Oui") : tr("Non")}</dd>
           </div>
           <div className="rounded-md bg-muted px-3 py-2">
-            <dt className="text-xs text-muted-foreground">Linéarisé (web)</dt>
-            <dd className="font-medium">{report.linearized ? "Oui" : "Non"}</dd>
+            <dt className="text-xs text-muted-foreground">{tr("Linéarisé (web)")}</dt>
+            <dd className="font-medium">{report.linearized ? tr("Oui") : tr("Non")}</dd>
           </div>
         </dl>
         {report.warnings.length || report.errors.length ? (
           <ul className="max-h-60 space-y-1 overflow-auto font-mono text-xs">
             {[...report.errors, ...report.warnings].map((line, i) => (
               <li key={i} className="rounded bg-warning-soft px-2 py-1 text-warning-foreground">
-                {line}
+                {tr(line)}
               </li>
             ))}
           </ul>
         ) : null}
         {report.repaired ? (
           <div className="space-y-2">
-            <Alert variant="success" title="Une copie réécrite est disponible">
-              qpdf a pu relire le document et en réécrire une version propre. Vérifiez-la : la
-              réparation corrige les tables de références et les objets mal formés, pas un contenu
-              manquant.
+            <Alert variant="success" title={tr("Une copie réécrite est disponible")}>
+              {tr(
+                "qpdf a pu relire le document et en réécrire une version propre. Vérifiez-la : la réparation corrige les tables de références et les objets mal formés, pas un contenu manquant.",
+              )}
             </Alert>
             <Button
               type="button"
@@ -356,20 +374,20 @@ export function CheckPdfTool() {
                 downloadPdf(report.repaired!, raw.file!.file.name, "repare", "pdf-check")
               }
             >
-              Télécharger la copie réparée
+              {tr("Télécharger la copie réparée")}
             </Button>
           </div>
         ) : !report.ok && !report.encrypted ? (
           <Alert variant="warning">
-            Le fichier n&apos;a pas pu être réécrit : la structure est trop endommagée pour une
-            réparation automatique. Essayez de récupérer l&apos;original auprès de
-            l&apos;expéditeur.
+            {tr(
+              "Le fichier n'a pas pu être réécrit : la structure est trop endommagée pour une réparation automatique. Essayez de récupérer l'original auprès de l'expéditeur.",
+            )}
           </Alert>
         ) : null}
         <p className="text-xs text-muted-foreground">
-          Vérification réalisée par qpdf (WebAssembly) dans votre navigateur. Elle détecte les
-          erreurs de syntaxe et d&apos;encodage des flux ; elle ne garantit pas l&apos;absence
-          d&apos;autres défauts.
+          {tr(
+            "Vérification réalisée par qpdf (WebAssembly) dans votre navigateur. Elle détecte les erreurs de syntaxe et d'encodage des flux ; elle ne garantit pas l'absence d'autres défauts.",
+          )}
         </p>
       </ToolPanel>
     </div>

@@ -1,4 +1,5 @@
 /** Regular-expression tester helpers (pure). */
+import { tr } from "@/lib/i18n/messages";
 
 export interface RegexMatch {
   index: number;
@@ -13,10 +14,10 @@ export type RegexResult =
   | { ok: false; error: string };
 
 export const REGEX_FLAGS: { flag: string; label: string }[] = [
-  { flag: "g", label: "g — toutes les occurrences" },
-  { flag: "i", label: "i — ignorer la casse" },
-  { flag: "m", label: "m — ^ et $ par ligne" },
-  { flag: "s", label: "s — le point inclut les sauts de ligne" },
+  { flag: "g", label: tr("g — toutes les occurrences") },
+  { flag: "i", label: tr("i — ignorer la casse") },
+  { flag: "m", label: tr("m — ^ et $ par ligne") },
+  { flag: "s", label: tr("s — le point inclut les sauts de ligne") },
   { flag: "u", label: "u — Unicode" },
 ];
 
@@ -31,8 +32,8 @@ export function compileRegex(
       ok: false,
       error:
         e instanceof Error
-          ? e.message.replace(/^Invalid regular expression: /, "Expression invalide : ")
-          : "Expression invalide.",
+          ? e.message.replace(/^Invalid regular expression: /, tr("Expression invalide : "))
+          : tr("Expression invalide."),
     };
   }
 }
@@ -82,7 +83,7 @@ export function replaceWithRegex(
   try {
     return { ok: true, result: text.replace(compiled.regex, replacement) };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Remplacement impossible." };
+    return { ok: false, error: e instanceof Error ? e.message : tr("Remplacement impossible.") };
   }
 }
 
@@ -103,16 +104,20 @@ export function segmentMatches(
 }
 
 export const REGEX_PRESETS: { label: string; pattern: string; flags: string }[] = [
-  { label: "Adresse e-mail", pattern: "[\\w.+-]+@[\\w-]+\\.[\\w.-]+", flags: "gi" },
+  { label: tr("Adresse e-mail"), pattern: "[\\w.+-]+@[\\w-]+\\.[\\w.-]+", flags: "gi" },
   { label: "URL", pattern: "https?://[^\\s<>\"']+", flags: "gi" },
-  { label: "Téléphone français", pattern: "(?:\\+33\\s?|0)[1-9](?:[\\s.-]?\\d{2}){4}", flags: "g" },
-  { label: "Code postal français", pattern: "\\b\\d{5}\\b", flags: "g" },
   {
-    label: "Date JJ/MM/AAAA",
+    label: tr("Téléphone français"),
+    pattern: "(?:\\+33\\s?|0)[1-9](?:[\\s.-]?\\d{2}){4}",
+    flags: "g",
+  },
+  { label: tr("Code postal français"), pattern: "\\b\\d{5}\\b", flags: "g" },
+  {
+    label: tr("Date JJ/MM/AAAA"),
     pattern: "\\b(0[1-9]|[12]\\d|3[01])/(0[1-9]|1[0-2])/(\\d{4})\\b",
     flags: "g",
   },
-  { label: "Nombre décimal", pattern: "-?\\d+(?:[.,]\\d+)?", flags: "g" },
+  { label: tr("Nombre décimal"), pattern: "-?\\d+(?:[.,]\\d+)?", flags: "g" },
   {
     label: "IBAN",
     pattern: "\\b[A-Z]{2}\\d{2}(?:\\s?[A-Z0-9]{4}){2,7}\\s?[A-Z0-9]{1,4}\\b",

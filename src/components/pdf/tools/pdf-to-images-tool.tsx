@@ -21,6 +21,7 @@ import { triggerDownload } from "@/lib/files/download";
 import { formatBytes } from "@/lib/files/format";
 import type { ParsedRanges } from "@/lib/pdf/page-ranges";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-to-images";
 type Dpi = "72" | "150" | "300";
@@ -110,7 +111,11 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
     const total = results.reduce((s, r) => s + r.blob.size, 0);
     return (
       <DonePanel
-        title={results.length === 1 ? "Votre image est prête" : `${results.length} images prêtes`}
+        title={
+          results.length === 1
+            ? tr("Votre image est prête")
+            : tr("{n} images prêtes", { n: results.length })
+        }
         summary={`${outputExtensions[format].toUpperCase()} · ${dpi} dpi · ${formatBytes(total)}`}
         onDownload={
           results.length === 1
@@ -123,7 +128,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
                   })),
                 ).then((entries) => downloadZip(buildZip(entries), base, "images", TOOL_ID))
         }
-        downloadLabel={results.length === 1 ? "Télécharger l'image" : t.common.downloadAllZip}
+        downloadLabel={results.length === 1 ? tr("Télécharger l'image") : t.common.downloadAllZip}
         onStartOver={() => {
           op.reset();
           reset();
@@ -138,7 +143,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
               {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
               <img
                 src={r.url}
-                alt={`Page ${r.pageIndex + 1}`}
+                alt={tr("Page {n}", { n: r.pageIndex + 1 })}
                 className="max-h-40 rounded-[6px] border border-border"
               />
               <Button
@@ -147,7 +152,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
                 size="sm"
                 onClick={() => triggerDownload(r.blob, r.name)}
               >
-                <Download aria-hidden="true" /> p. {r.pageIndex + 1}
+                <Download aria-hidden="true" /> {tr("p. {n}", { n: r.pageIndex + 1 })}
               </Button>
             </li>
           ))}
@@ -165,28 +170,30 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         onReset={reset}
       />
       <Segmented
-        label="Format"
+        label={tr("Format")}
         value={format}
         onChange={setFormat}
         options={[
-          { value: "image/jpeg", label: "JPG", description: "Photos, léger" },
-          { value: "image/png", label: "PNG", description: "Sans perte, texte net" },
-          { value: "image/webp", label: "WebP", description: "Léger, moderne" },
+          { value: "image/jpeg", label: "JPG", description: tr("Photos, léger") },
+          { value: "image/png", label: "PNG", description: tr("Sans perte, texte net") },
+          { value: "image/webp", label: "WebP", description: tr("Léger, moderne") },
         ]}
       />
       <Segmented
-        label="Résolution"
+        label={tr("Résolution")}
         value={dpi}
         onChange={setDpi}
         options={[
-          { value: "72", label: "72 dpi", description: "Aperçu web" },
-          { value: "150", label: "150 dpi", description: "Lecture confortable" },
-          { value: "300", label: "300 dpi", description: "Impression" },
+          { value: "72", label: "72 dpi", description: tr("Aperçu web") },
+          { value: "150", label: "150 dpi", description: tr("Lecture confortable") },
+          { value: "300", label: "300 dpi", description: tr("Impression") },
         ]}
       />
       {format !== "image/png" ? (
         <div className="max-w-sm space-y-1">
-          <Label htmlFor="p2i-quality">Qualité ({Math.round(quality * 100)} %)</Label>
+          <Label htmlFor="p2i-quality">
+            {tr("Qualité ({q} %)", { q: Math.round(quality * 100) })}
+          </Label>
           <input
             id="p2i-quality"
             type="range"
@@ -199,13 +206,17 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         </div>
       ) : null}
       <Segmented
-        label="Pages"
+        label={tr("Pages")}
         value={pageMode}
         onChange={setPageMode}
         className="sm:grid-cols-2"
         options={[
-          { value: "all", label: "Toutes les pages", description: `${pdf.pageCount} image(s)` },
-          { value: "range", label: "Pages choisies", description: "ex. 1-3, 5" },
+          {
+            value: "all",
+            label: tr("Toutes les pages"),
+            description: tr("{n} image(s)", { n: pdf.pageCount }),
+          },
+          { value: "range", label: tr("Pages choisies"), description: tr("ex. 1-3, 5") },
         ]}
       />
       {pageMode === "range" ? (
@@ -223,7 +234,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         disabled={indices.length === 0}
         data-testid="pdf-to-images-run"
       >
-        <Images aria-hidden="true" /> Convertir {indices.length} page(s) en images
+        <Images aria-hidden="true" /> {tr("Convertir {n} page(s) en images", { n: indices.length })}
       </Button>
     </div>
   );

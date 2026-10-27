@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import type { Point, Quad } from "@/lib/scan/geometry";
+import { tr } from "@/lib/i18n/messages";
 
 interface QuadEditorProps {
   imageUrl: string;
@@ -11,7 +12,7 @@ interface QuadEditorProps {
   onChange: (quad: Quad) => void;
 }
 
-const LABELS = ["haut gauche", "haut droit", "bas droit", "bas gauche"];
+const LABELS = [tr("haut gauche"), tr("haut droit"), tr("bas droit"), tr("bas gauche")];
 
 /**
  * Four draggable corners over an image (pointer + keyboard), in image pixel
@@ -103,7 +104,7 @@ export function QuadEditor({ imageUrl, imageWidth, imageHeight, quad, onChange }
       {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
       <img
         src={imageUrl}
-        alt="Document à redresser"
+        alt={tr("Document à redresser")}
         className="block h-full w-full"
         draggable={false}
       />
@@ -144,7 +145,11 @@ export function QuadEditor({ imageUrl, imageWidth, imageHeight, quad, onChange }
         <button
           key={i}
           type="button"
-          aria-label={`Coin ${LABELS[i]} : ${Math.round(p.x)}, ${Math.round(p.y)}. Flèches pour déplacer.`}
+          aria-label={tr("Coin {corner} : {x}, {y}. Flèches pour déplacer.", {
+            corner: LABELS[i] ?? "",
+            x: Math.round(p.x),
+            y: Math.round(p.y),
+          })}
           onPointerDown={(e) => startDrag(i, e)}
           onKeyDown={(e) => onKey(i, e)}
           className="absolute size-9 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-primary bg-white/90 shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:size-7"

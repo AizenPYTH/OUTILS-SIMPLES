@@ -42,19 +42,20 @@ import {
 } from "@/lib/pdf/operations/watermark";
 import { getToolById, getToolPath } from "@/lib/tools";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-watermark";
 
 const positions: { value: WatermarkPosition; label: string }[] = [
-  { value: "top-left", label: "Haut gauche" },
-  { value: "top-center", label: "Haut centre" },
-  { value: "top-right", label: "Haut droite" },
-  { value: "middle-left", label: "Milieu gauche" },
-  { value: "center", label: "Centre" },
-  { value: "middle-right", label: "Milieu droite" },
-  { value: "bottom-left", label: "Bas gauche" },
-  { value: "bottom-center", label: "Bas centre" },
-  { value: "bottom-right", label: "Bas droite" },
+  { value: "top-left", label: tr("Haut gauche") },
+  { value: "top-center", label: tr("Haut centre") },
+  { value: "top-right", label: tr("Haut droite") },
+  { value: "middle-left", label: tr("Milieu gauche") },
+  { value: "center", label: tr("Centre") },
+  { value: "middle-right", label: tr("Milieu droite") },
+  { value: "bottom-left", label: tr("Bas gauche") },
+  { value: "bottom-center", label: tr("Bas centre") },
+  { value: "bottom-right", label: tr("Bas droite") },
 ];
 
 export function WatermarkTool() {
@@ -74,7 +75,7 @@ interface ImageAsset {
 
 function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
   const [kind, setKind] = React.useState<"text" | "image">("text");
-  const [text, setText] = React.useState("CONFIDENTIEL");
+  const [text, setText] = React.useState(tr("CONFIDENTIEL"));
   const [fontSize, setFontSize] = React.useState(48);
   const [fontFamily, setFontFamily] = React.useState<FontFamily>("helvetica");
   const [color, setColor] = React.useState("#c0392b");
@@ -151,7 +152,10 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
     const result = op.state.result;
     return (
       <DonePanel
-        summary={`Filigrane appliqué sur ${result.pagesMarked.length} page(s) · ${formatBytes(result.bytes.byteLength)}`}
+        summary={tr("Filigrane appliqué sur {n} page(s) · {size}", {
+          n: result.pagesMarked.length,
+          size: formatBytes(result.bytes.byteLength),
+        })}
         onDownload={() => downloadPdf(result.bytes, pdf.file.name, "filigrane", TOOL_ID)}
         onStartOver={() => {
           op.reset();
@@ -160,13 +164,14 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
       >
         {result.replacedCharacters ? (
           <Alert variant="warning">
-            Certains caractères non pris en charge par les polices standard ont été remplacés par «
-            ? ».
+            {tr(
+              "Certains caractères non pris en charge par les polices standard ont été remplacés par « ? ».",
+            )}
           </Alert>
         ) : null}
         {manageTool ? (
           <p className="text-center text-sm text-muted-foreground">
-            Ce filigrane porte un marqueur OUTILIA : vous pourrez le retirer plus tard avec{" "}
+            {tr("Ce filigrane porte un marqueur OUTILIA : vous pourrez le retirer plus tard avec")}{" "}
             <a href={getToolPath(manageTool)} className="font-medium text-link underline">
               {manageTool.name}
             </a>
@@ -190,15 +195,15 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
           <Tabs value={kind} onValueChange={(v) => setKind(v as "text" | "image")}>
             <TabsList className="w-full sm:w-auto">
               <TabsTrigger value="text" data-testid="wm-tab-text">
-                <Type aria-hidden="true" /> Texte
+                <Type aria-hidden="true" /> {tr("Texte")}
               </TabsTrigger>
               <TabsTrigger value="image" data-testid="wm-tab-image">
-                <ImageIcon aria-hidden="true" /> Image
+                <ImageIcon aria-hidden="true" /> {tr("Image")}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="text" className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="wm-text">Texte du filigrane</Label>
+                <Label htmlFor="wm-text">{tr("Texte du filigrane")}</Label>
                 <Input
                   id="wm-text"
                   value={text}
@@ -209,7 +214,7 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="wm-font">Police</Label>
+                  <Label htmlFor="wm-font">{tr("Police")}</Label>
                   <Select value={fontFamily} onValueChange={(v) => setFontFamily(v as FontFamily)}>
                     <SelectTrigger id="wm-font">
                       <SelectValue />
@@ -224,7 +229,7 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="wm-size">Taille ({fontSize} pt)</Label>
+                  <Label htmlFor="wm-size">{tr("Taille ({size} pt)", { size: fontSize })}</Label>
                   <Slider
                     id="wm-size"
                     min={8}
@@ -232,11 +237,11 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                     step={1}
                     value={[fontSize]}
                     onValueChange={([v]) => v !== undefined && setFontSize(v)}
-                    aria-label="Taille du texte"
+                    aria-label={tr("Taille du texte")}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="wm-color">Couleur</Label>
+                  <Label htmlFor="wm-color">{tr("Couleur")}</Label>
                   <input
                     id="wm-color"
                     type="color"
@@ -251,7 +256,7 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
               <div className="flex flex-wrap items-center gap-4">
                 <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-surface px-4 text-sm font-medium shadow-sm hover:bg-muted">
                   <ImageIcon className="size-4" aria-hidden="true" />
-                  {image ? "Changer l'image" : t.upload.imageBrowse}
+                  {image ? tr("Changer l'image") : t.upload.imageBrowse}
                   <input
                     type="file"
                     accept="image/png,image/jpeg"
@@ -264,18 +269,18 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                   // eslint-disable-next-line @next/next/no-img-element -- object URL preview
                   <img
                     src={image.url}
-                    alt="Aperçu de l'image du filigrane"
+                    alt={tr("Aperçu de l'image du filigrane")}
                     className="h-12 max-w-32 rounded border border-border object-contain checkerboard"
                   />
                 ) : (
                   <span className="text-sm text-muted-foreground">
-                    PNG ou JPEG, transparence conservée
+                    {tr("PNG ou JPEG, transparence conservée")}
                   </span>
                 )}
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="wm-width">
-                  Largeur ({Math.round(widthRatio * 100)} % de la page)
+                  {tr("Largeur ({w} % de la page)", { w: Math.round(widthRatio * 100) })}
                 </Label>
                 <Slider
                   id="wm-width"
@@ -284,7 +289,7 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                   step={1}
                   value={[Math.round(widthRatio * 100)]}
                   onValueChange={([v]) => v !== undefined && setWidthRatio(v / 100)}
-                  aria-label="Largeur de l'image"
+                  aria-label={tr("Largeur de l'image")}
                 />
               </div>
             </TabsContent>
@@ -292,7 +297,9 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="wm-opacity">Opacité ({Math.round(opacity * 100)} %)</Label>
+              <Label htmlFor="wm-opacity">
+                {tr("Opacité ({o} %)", { o: Math.round(opacity * 100) })}
+              </Label>
               <Slider
                 id="wm-opacity"
                 min={5}
@@ -300,11 +307,11 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                 step={1}
                 value={[Math.round(opacity * 100)]}
                 onValueChange={([v]) => v !== undefined && setOpacity(v / 100)}
-                aria-label="Opacité"
+                aria-label={tr("Opacité")}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="wm-rotation">Rotation ({rotation}°)</Label>
+              <Label htmlFor="wm-rotation">{tr("Rotation ({r}°)", { r: rotation })}</Label>
               <Slider
                 id="wm-rotation"
                 min={-90}
@@ -312,18 +319,18 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                 step={5}
                 value={[rotation]}
                 onValueChange={([v]) => v !== undefined && setRotation(v)}
-                aria-label="Rotation"
+                aria-label={tr("Rotation")}
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label>Position</Label>
+            <Label>{tr("Position")}</Label>
             <div className="flex flex-wrap items-center gap-3">
               <div
                 className="grid grid-cols-3 gap-1 rounded-md border border-border bg-surface p-1"
                 role="radiogroup"
-                aria-label="Position du filigrane"
+                aria-label={tr("Position du filigrane")}
               >
                 {positions.map((p) => (
                   <button
@@ -343,20 +350,24 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
                 onClick={() => setPosition("tiled")}
                 aria-pressed={position === "tiled"}
               >
-                Mosaïque (toute la page)
+                {tr("Mosaïque (toute la page)")}
               </Button>
             </div>
           </div>
 
           <div className="space-y-3">
             <Segmented
-              label="Pages concernées"
+              label={tr("Pages concernées")}
               value={pageMode}
               onChange={setPageMode}
               className="sm:grid-cols-2"
               options={[
-                { value: "all", label: "Toutes les pages", description: `${pdf.pageCount} pages` },
-                { value: "range", label: "Pages choisies", description: "ex. 1, 3-5" },
+                {
+                  value: "all",
+                  label: tr("Toutes les pages"),
+                  description: tr("{n} pages", { n: pdf.pageCount }),
+                },
+                { value: "range", label: tr("Pages choisies"), description: tr("ex. 1, 3-5") },
               ]}
             />
             {pageMode === "range" ? (
@@ -381,14 +392,14 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
             onClick={() => options && void op.run(() => addWatermark(pdf.bytes, options))}
             data-testid="watermark-button"
           >
-            <Droplets aria-hidden="true" /> Appliquer le filigrane
+            <Droplets aria-hidden="true" /> {tr("Appliquer le filigrane")}
           </Button>
         </div>
 
         <aside className="space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">
-              Aperçu · {t.common.pageOf(previewPage + 1, pdf.pageCount)}
+              {tr("Aperçu")} · {t.common.pageOf(previewPage + 1, pdf.pageCount)}
             </p>
             <div className="flex gap-1">
               <Button
@@ -495,7 +506,7 @@ function WatermarkPreview({
       className="relative mx-auto inline-block overflow-hidden rounded-[6px] border border-border bg-muted"
       data-testid="watermark-preview"
     >
-      <canvas ref={canvasRef} aria-label="Aperçu de la page avec filigrane" />
+      <canvas ref={canvasRef} aria-label={tr("Aperçu de la page avec filigrane")} />
       {viewport && options ? (
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
           {boxes.map((b, i) => (
@@ -532,7 +543,7 @@ function WatermarkPreview({
       ) : null}
       {!applies ? (
         <p className="absolute inset-x-0 bottom-0 bg-background/80 p-1 text-center text-xs text-muted-foreground">
-          Page non concernée par la sélection
+          {tr("Page non concernée par la sélection")}
         </p>
       ) : null}
       <span className="sr-only">{rgbToHex(hexToRgb("#000"))}</span>

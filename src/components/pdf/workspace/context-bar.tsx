@@ -5,6 +5,7 @@ import { fontFamilies, hasStyle, type FontFamily } from "@/lib/pdf/fonts";
 import { ensureFontFace } from "@/lib/pdf/fonts-embed";
 import { hexToRgb, rgbToHex, type DashStyle } from "@/lib/pdf/annotations/types";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/i18n/messages";
 import { toolHints, type ToolSettings, type WorkspaceTool } from "./types";
 
 interface ContextBarProps {
@@ -64,9 +65,9 @@ export function ContextBar({
           <Toggle
             pressed={showRuns}
             onClick={() => onToggleRuns?.()}
-            label="Afficher toutes les zones de texte modifiables"
+            label={tr("Afficher toutes les zones de texte modifiables")}
           >
-            <span className="px-1 text-xs">Zones de texte</span>
+            <span className="px-1 text-xs">{tr("Zones de texte")}</span>
           </Toggle>
           {textInfo ? (
             <span className="shrink-0 text-xs text-muted-foreground" data-testid="text-info">
@@ -77,20 +78,20 @@ export function ContextBar({
       ) : null}
       {showDefaults && !hasSelection ? (
         <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-          Style par défaut
+          {tr("Style par défaut")}
         </span>
       ) : null}
       {showColor && !hasSelection ? (
         <label className="flex shrink-0 items-center gap-1.5">
           <span className="text-xs text-muted-foreground">
-            {tool === "mask" ? "Masque" : showText ? "Texte" : "Couleur"}
+            {tool === "mask" ? tr("Masque") : showText ? tr("Texte") : tr("Couleur")}
           </span>
           <input
             type="color"
             value={rgbToHex(settings.color)}
             onChange={(e) => onChange({ color: hexToRgb(e.target.value) })}
             className="size-8 cursor-pointer rounded-md border border-input bg-background p-0.5"
-            aria-label="Couleur"
+            aria-label={tr("Couleur")}
             data-testid="color-input"
           />
         </label>
@@ -98,7 +99,7 @@ export function ContextBar({
       {showText && !hasSelection ? (
         <>
           <label className="flex shrink-0 items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">Police</span>
+            <span className="text-xs text-muted-foreground">{tr("Police")}</span>
             <select
               value={settings.fontFamily}
               onChange={(e) => {
@@ -107,7 +108,7 @@ export function ContextBar({
                 onChange({ fontFamily: family });
               }}
               className="h-8 max-w-48 rounded-md border border-input bg-background px-1.5 text-xs"
-              aria-label="Police"
+              aria-label={tr("Police")}
               data-testid="font-family-select"
             >
               {(["sans", "serif", "mono"] as const).map((category) => (
@@ -126,7 +127,7 @@ export function ContextBar({
                     .map((f) => (
                       <option key={f.id} value={f.id}>
                         {f.label}
-                        {f.note ? ` — ${f.note}` : ""}
+                        {f.note ? ` — ${tr(f.note)}` : ""}
                       </option>
                     ))}
                 </optgroup>
@@ -134,12 +135,12 @@ export function ContextBar({
             </select>
           </label>
           <label className="flex shrink-0 items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">Taille</span>
+            <span className="text-xs text-muted-foreground">{tr("Taille")}</span>
             <select
               value={String(settings.fontSize)}
               onChange={(e) => onChange({ fontSize: Number(e.target.value) })}
               className="h-8 w-20 rounded-md border border-input bg-background px-1.5 text-xs"
-              aria-label="Taille"
+              aria-label={tr("Taille")}
               data-testid="font-size-select"
             >
               {sizes.map((s) => (
@@ -154,7 +155,7 @@ export function ContextBar({
               pressed={settings.bold}
               disabled={!hasStyle(settings.fontFamily, { bold: true, italic: settings.italic })}
               onClick={() => onChange({ bold: !settings.bold })}
-              label="Gras"
+              label={tr("Gras")}
             >
               <Bold className="size-4" />
             </Toggle>
@@ -162,14 +163,14 @@ export function ContextBar({
               pressed={settings.italic}
               disabled={!hasStyle(settings.fontFamily, { bold: settings.bold, italic: true })}
               onClick={() => onChange({ italic: !settings.italic })}
-              label="Italique"
+              label={tr("Italique")}
             >
               <Italic className="size-4" />
             </Toggle>
             <Toggle
               pressed={settings.underline}
               onClick={() => onChange({ underline: !settings.underline })}
-              label="Souligné"
+              label={tr("Souligné")}
             >
               <Underline className="size-4" />
             </Toggle>
@@ -177,26 +178,26 @@ export function ContextBar({
           <div
             className="flex shrink-0 items-center gap-0.5"
             role="radiogroup"
-            aria-label="Alignement"
+            aria-label={tr("Alignement")}
           >
             <Toggle
               pressed={settings.align === "left"}
               onClick={() => onChange({ align: "left" })}
-              label="Aligner à gauche"
+              label={tr("Aligner à gauche")}
             >
               <AlignLeft className="size-4" />
             </Toggle>
             <Toggle
               pressed={settings.align === "center"}
               onClick={() => onChange({ align: "center" })}
-              label="Centrer"
+              label={tr("Centrer")}
             >
               <AlignCenter className="size-4" />
             </Toggle>
             <Toggle
               pressed={settings.align === "right"}
               onClick={() => onChange({ align: "right" })}
-              label="Aligner à droite"
+              label={tr("Aligner à droite")}
             >
               <AlignRight className="size-4" />
             </Toggle>
@@ -207,9 +208,9 @@ export function ContextBar({
               onClick={() =>
                 onChange({ background: settings.background ? null : { r: 1, g: 0.97, b: 0.75 } })
               }
-              label="Fond du texte"
+              label={tr("Fond du texte")}
             >
-              <span className="px-1 text-xs">Fond</span>
+              <span className="px-1 text-xs">{tr("Fond")}</span>
             </Toggle>
             {settings.background ? (
               <input
@@ -217,7 +218,7 @@ export function ContextBar({
                 value={rgbToHex(settings.background)}
                 onChange={(e) => onChange({ background: hexToRgb(e.target.value) })}
                 className="size-8 cursor-pointer rounded-md border border-input bg-background p-0.5"
-                aria-label="Couleur de fond"
+                aria-label={tr("Couleur de fond")}
               />
             ) : null}
           </label>
@@ -226,7 +227,7 @@ export function ContextBar({
       {showStroke && !hasSelection ? (
         <>
           <label className="flex shrink-0 items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">Épaisseur</span>
+            <span className="text-xs text-muted-foreground">{tr("Épaisseur")}</span>
             <input
               type="range"
               min={0.5}
@@ -235,23 +236,23 @@ export function ContextBar({
               value={settings.strokeWidth}
               onChange={(e) => onChange({ strokeWidth: Number(e.target.value) })}
               className="w-24 accent-primary"
-              aria-label="Épaisseur du trait"
+              aria-label={tr("Épaisseur du trait")}
             />
             <span className="w-7 text-xs tabular-nums text-muted-foreground">
               {settings.strokeWidth}
             </span>
           </label>
           <label className="flex shrink-0 items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">Trait</span>
+            <span className="text-xs text-muted-foreground">{tr("Trait")}</span>
             <select
               value={settings.dash}
               onChange={(e) => onChange({ dash: e.target.value as DashStyle })}
               className="h-8 rounded-md border border-input bg-background px-1.5 text-xs"
-              aria-label="Style du trait"
+              aria-label={tr("Style du trait")}
             >
-              <option value="solid">Continu</option>
-              <option value="dashed">Tireté</option>
-              <option value="dotted">Pointillé</option>
+              <option value="solid">{tr("Continu")}</option>
+              <option value="dashed">{tr("Tireté")}</option>
+              <option value="dotted">{tr("Pointillé")}</option>
             </select>
           </label>
         </>
@@ -261,9 +262,9 @@ export function ContextBar({
           <Toggle
             pressed={settings.fill}
             onClick={() => onChange({ fill: !settings.fill })}
-            label="Remplir la forme"
+            label={tr("Remplir la forme")}
           >
-            <span className="px-1 text-xs">Remplissage</span>
+            <span className="px-1 text-xs">{tr("Remplissage")}</span>
           </Toggle>
           {settings.fill ? (
             <input
@@ -271,14 +272,14 @@ export function ContextBar({
               value={rgbToHex(settings.fillColor)}
               onChange={(e) => onChange({ fillColor: hexToRgb(e.target.value) })}
               className="size-8 cursor-pointer rounded-md border border-input bg-background p-0.5"
-              aria-label="Couleur de remplissage"
+              aria-label={tr("Couleur de remplissage")}
             />
           ) : null}
         </div>
       ) : null}
       {showOpacity && !hasSelection ? (
         <label className="flex shrink-0 items-center gap-1.5">
-          <span className="text-xs text-muted-foreground">Opacité</span>
+          <span className="text-xs text-muted-foreground">{tr("Opacité")}</span>
           <input
             type="range"
             min={10}
@@ -287,7 +288,7 @@ export function ContextBar({
             value={Math.round(settings.opacity * 100)}
             onChange={(e) => onChange({ opacity: Number(e.target.value) / 100 })}
             className="w-20 accent-primary"
-            aria-label="Opacité"
+            aria-label={tr("Opacité")}
           />
           <span className="w-8 text-xs tabular-nums text-muted-foreground">
             {Math.round(settings.opacity * 100)}%
@@ -299,7 +300,9 @@ export function ContextBar({
         data-testid="tool-hint"
       >
         {hasSelection
-          ? "Élément sélectionné : propriétés dans la barre flottante · glisser pour déplacer · Suppr pour supprimer · Ctrl + D pour dupliquer."
+          ? tr(
+              "Élément sélectionné : propriétés dans la barre flottante · glisser pour déplacer · Suppr pour supprimer · Ctrl + D pour dupliquer.",
+            )
           : toolHints[tool]}
       </p>
     </div>

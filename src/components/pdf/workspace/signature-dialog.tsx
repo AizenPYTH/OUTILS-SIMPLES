@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { measureImage, readImageFile } from "@/lib/pdf/browser/read-file";
 import { isPdfError } from "@/lib/pdf/errors";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 export interface SignatureAsset {
   bytes: Uint8Array;
@@ -48,7 +49,9 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
       else if (tab === "type") asset = await renderTypedSignature(typed.trim(), color);
       if (!asset) {
         toast.error(
-          tab === "draw" ? "Tracez votre signature avant de valider." : "Saisissez votre nom.",
+          tab === "draw"
+            ? tr("Tracez votre signature avant de valider.")
+            : tr("Saisissez votre nom."),
         );
         return;
       }
@@ -75,35 +78,36 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="md" className="rounded-[20px]">
         <DialogHeader>
-          <DialogTitle>Ajouter une signature</DialogTitle>
+          <DialogTitle>{tr("Ajouter une signature")}</DialogTitle>
           <DialogDescription>
-            Signature visuelle : elle est dessinée sur la page et n&apos;a pas la valeur d&apos;une
-            signature électronique qualifiée.
+            {tr(
+              "Signature visuelle : elle est dessinée sur la page et n'a pas la valeur d'une signature électronique qualifiée.",
+            )}
           </DialogDescription>
         </DialogHeader>
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="w-full">
             <TabsTrigger value="draw">
-              <PenLine aria-hidden="true" /> Dessiner
+              <PenLine aria-hidden="true" /> {tr("Dessiner")}
             </TabsTrigger>
             <TabsTrigger value="type">
-              <Type aria-hidden="true" /> Taper
+              <Type aria-hidden="true" /> {tr("Taper")}
             </TabsTrigger>
             <TabsTrigger value="import">
-              <ImageIcon aria-hidden="true" /> Importer
+              <ImageIcon aria-hidden="true" /> {tr("Importer")}
             </TabsTrigger>
           </TabsList>
           <TabsContent value="draw" className="space-y-3">
             <SignaturePad ref={padRef} color={color} />
             <div className="flex items-center justify-between gap-3">
               <label className="flex items-center gap-2 text-sm">
-                Couleur
+                {tr("Couleur")}
                 <input
                   type="color"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
                   className="size-9 cursor-pointer rounded-md border border-input bg-background p-0.5"
-                  aria-label="Couleur du trait"
+                  aria-label={tr("Couleur du trait")}
                 />
               </label>
               <Button
@@ -112,13 +116,13 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
                 size="sm"
                 onClick={() => padRef.current?.clear()}
               >
-                <Eraser aria-hidden="true" /> Effacer
+                <Eraser aria-hidden="true" /> {tr("Effacer")}
               </Button>
             </div>
           </TabsContent>
           <TabsContent value="type" className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="typed-signature">Votre nom</Label>
+              <Label htmlFor="typed-signature">{tr("Votre nom")}</Label>
               <Input
                 id="typed-signature"
                 value={typed}
@@ -133,7 +137,7 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
                 style={{ color }}
                 aria-live="polite"
               >
-                {typed || "Aperçu"}
+                {typed || tr("Aperçu")}
               </span>
             </div>
           </TabsContent>
@@ -150,7 +154,7 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
               />
             </label>
             <p className="text-xs text-muted-foreground">
-              Un PNG à fond transparent donne le meilleur résultat.
+              {tr("Un PNG à fond transparent donne le meilleur résultat.")}
             </p>
           </TabsContent>
         </Tabs>
@@ -165,7 +169,7 @@ export function SignatureDialog({ open, onOpenChange, onConfirm }: SignatureDial
               loading={busy}
               data-testid="signature-confirm"
             >
-              Utiliser cette signature
+              {tr("Utiliser cette signature")}
             </Button>
           </DialogFooter>
         ) : null}
@@ -254,7 +258,7 @@ const SignaturePad = React.forwardRef<SignaturePadHandle, { color: string }>(fun
       onPointerUp={onUp}
       onPointerCancel={onUp}
       onPointerLeave={onUp}
-      aria-label="Zone de signature : dessinez avec la souris ou le doigt"
+      aria-label={tr("Zone de signature : dessinez avec la souris ou le doigt")}
       role="img"
       data-testid="signature-pad"
     />

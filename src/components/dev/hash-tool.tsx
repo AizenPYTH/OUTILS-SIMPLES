@@ -12,6 +12,7 @@ import { TextInputPanel } from "@/components/tools/shared/text-io";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { hashHex } from "@/lib/dev/random";
 import { formatBytes } from "@/lib/files/format";
+import { tr } from "@/lib/i18n/messages";
 import { track } from "@/lib/analytics/events";
 
 const TOOL_ID = "dev-hash";
@@ -60,7 +61,7 @@ export function HashTool() {
   const render = (hashes: Hashes, idPrefix: string) => (
     <ToolPanel className="space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-medium">Empreintes</p>
+        <p className="text-sm font-medium">{tr("Empreintes")}</p>
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -68,7 +69,7 @@ export function HashTool() {
             onChange={(e) => setUppercase(e.target.checked)}
             className="accent-primary"
           />{" "}
-          majuscules
+          {tr("majuscules")}
         </label>
       </div>
       <dl className="space-y-2">
@@ -82,12 +83,12 @@ export function HashTool() {
                 {algorithm}
                 {match === true ? (
                   <span className="inline-flex items-center gap-1 text-success-foreground">
-                    <CheckCircle2 className="size-3.5" aria-hidden="true" /> correspond
+                    <CheckCircle2 className="size-3.5" aria-hidden="true" /> {tr("correspond")}
                   </span>
                 ) : null}
                 {match === false && normalizedExpected.length === value.length ? (
                   <span className="inline-flex items-center gap-1 text-destructive">
-                    <XCircle className="size-3.5" aria-hidden="true" /> différent
+                    <XCircle className="size-3.5" aria-hidden="true" /> {tr("différent")}
                   </span>
                 ) : null}
               </dt>
@@ -98,7 +99,7 @@ export function HashTool() {
                 >
                   {shown}
                 </code>
-                <CopyButton text={shown} label="Copier" />
+                <CopyButton text={shown} label={tr("Copier")} />
               </dd>
             </div>
           );
@@ -111,17 +112,17 @@ export function HashTool() {
     <div className="space-y-4">
       <Tabs defaultValue="text">
         <TabsList>
-          <TabsTrigger value="text">Texte</TabsTrigger>
-          <TabsTrigger value="file">Fichier</TabsTrigger>
+          <TabsTrigger value="text">{tr("Texte")}</TabsTrigger>
+          <TabsTrigger value="file">{tr("Fichier")}</TabsTrigger>
         </TabsList>
         <TabsContent value="text" className="space-y-4">
           <TextInputPanel
             id="hash-input"
-            label="Texte (UTF-8)"
+            label={tr("Texte (UTF-8)")}
             value={text}
             onChange={setText}
             rows={5}
-            placeholder="Le texte dont vous voulez l'empreinte"
+            placeholder={tr("Le texte dont vous voulez l'empreinte")}
           />
           {render(textHashes, "hash-text")}
         </TabsContent>
@@ -130,16 +131,20 @@ export function HashTool() {
             onFiles={(f) => f[0] && void onFile(f[0])}
             accept="*/*"
             validate={(f) =>
-              f.size > FILE_MAX ? `fichier trop volumineux (max ${formatBytes(FILE_MAX)})` : null
+              f.size > FILE_MAX
+                ? tr("fichier trop volumineux (max {max})", { max: formatBytes(FILE_MAX) })
+                : null
             }
-            title="Déposez un fichier pour calculer son empreinte"
-            hint={`Tout type de fichier · ${formatBytes(FILE_MAX)} max · lu localement`}
-            buttonLabel="Choisir un fichier"
+            title={tr("Déposez un fichier pour calculer son empreinte")}
+            hint={tr("Tout type de fichier · {max} max · lu localement", {
+              max: formatBytes(FILE_MAX),
+            })}
+            buttonLabel={tr("Choisir un fichier")}
             compact={!!file}
             disabled={busy}
             testId="hash-file"
           />
-          {busy ? <p className="text-sm text-muted-foreground">Calcul en cours…</p> : null}
+          {busy ? <p className="text-sm text-muted-foreground">{tr("Calcul en cours…")}</p> : null}
           {file ? (
             <>
               <p className="text-sm">
@@ -151,19 +156,21 @@ export function HashTool() {
         </TabsContent>
       </Tabs>
       <ToolPanel className="space-y-2">
-        <Label htmlFor="hash-expected">Comparer avec une empreinte attendue (facultatif)</Label>
+        <Label htmlFor="hash-expected">
+          {tr("Comparer avec une empreinte attendue (facultatif)")}
+        </Label>
         <Input
           id="hash-expected"
           value={expected}
           onChange={(e) => setExpected(e.target.value)}
-          placeholder="Collez le SHA-256 fourni par l'éditeur du fichier"
+          placeholder={tr("Collez le SHA-256 fourni par l'éditeur du fichier")}
           className="font-mono text-xs"
           data-testid="hash-expected"
         />
         <Alert variant="info">
-          MD5 n&apos;est pas proposé : il n&apos;est plus considéré comme sûr et n&apos;est pas
-          disponible dans l&apos;API Web Crypto des navigateurs. SHA-1 est fourni pour vérifier
-          d&apos;anciennes sommes de contrôle uniquement.
+          {tr(
+            "MD5 n'est pas proposé : il n'est plus considéré comme sûr et n'est pas disponible dans l'API Web Crypto des navigateurs. SHA-1 est fourni pour vérifier d'anciennes sommes de contrôle uniquement.",
+          )}
         </Alert>
       </ToolPanel>
     </div>

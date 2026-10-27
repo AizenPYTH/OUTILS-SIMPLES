@@ -1,3 +1,5 @@
+import { getLocale, type Locale } from "@/lib/i18n/locale";
+import { categoriesEn } from "./categories-en";
 import type { ToolCategory } from "./types";
 
 export const toolCategories: readonly ToolCategory[] = [
@@ -129,10 +131,28 @@ export const toolCategories: readonly ToolCategory[] = [
   },
 ];
 
-export function getCategoryById(id: string): ToolCategory | undefined {
-  return toolCategories.find((c) => c.id === id);
+/** Category text in a locale (French definitions are the source; English overrides are merged). */
+export function localizeCategory(category: ToolCategory, locale: Locale): ToolCategory {
+  if (locale === "fr") return category;
+  const en = categoriesEn[category.id];
+  return en ? { ...category, ...en } : category;
 }
 
-export function getCategoryBySlug(slug: string): ToolCategory | undefined {
-  return toolCategories.find((c) => c.slug === slug);
+export function getCategories(locale: Locale = getLocale()): ToolCategory[] {
+  return toolCategories.map((c) => localizeCategory(c, locale));
+}
+
+export function getCategoryById(
+  id: string,
+  locale: Locale = getLocale(),
+): ToolCategory | undefined {
+  const category = toolCategories.find((c) => c.id === id);
+  return category ? localizeCategory(category, locale) : undefined;
+}
+
+export function getCategoryBySlug(
+  slug: string,
+  locale: Locale = getLocale(),
+): ToolCategory | undefined {
+  return getCategories(locale).find((c) => c.slug === slug);
 }

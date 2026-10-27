@@ -23,6 +23,7 @@ import {
 } from "@/lib/pdf/operations/links";
 import { stripExtension } from "@/lib/files/filename";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-links";
 
@@ -63,7 +64,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       track("tool_success", { tool: TOOL_ID, resultCount: annots.links.length + found.length });
     })().catch(
       (e: unknown) =>
-        !cancelled && setError(e instanceof Error ? e.message : "Analyse impossible."),
+        !cancelled && setError(e instanceof Error ? e.message : tr("Analyse impossible.")),
     );
     return () => {
       cancelled = true;
@@ -72,12 +73,12 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
 
   if (error)
     return (
-      <Alert variant="destructive" title="Analyse impossible">
-        {error}
+      <Alert variant="destructive" title={tr("Analyse impossible")}>
+        {tr(error)}
       </Alert>
     );
   if (!analysis)
-    return <BusyPanel progress={{ current: 0, total: 0, label: "Recherche des liens…" }} />;
+    return <BusyPanel progress={{ current: 0, total: 0, label: tr("Recherche des liens…") }} />;
 
   let links = includeText ? analysis.links : analysis.links.filter((l) => l.kind === "lien");
   if (uniqueOnly) {
@@ -97,13 +98,13 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       />
       <StatGrid
         items={[
-          { label: "Liens cliquables", value: analysis.annotationCount },
+          { label: tr("Liens cliquables"), value: analysis.annotationCount },
           {
-            label: "Adresses dans le texte",
+            label: tr("Adresses dans le texte"),
             value: analysis.links.length - analysis.annotationCount,
           },
-          { label: "E-mails", value: emails },
-          { label: "Liens internes (pages)", value: analysis.internalLinks },
+          { label: tr("E-mails"), value: emails },
+          { label: tr("Liens internes (pages)"), value: analysis.internalLinks },
         ]}
       />
       <ToolPanel className="space-y-4" data-testid="pdf-links">
@@ -114,7 +115,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
               onCheckedChange={(v) => setIncludeText(v === true)}
               id="links-text"
             />
-            <span>Inclure les adresses écrites dans le texte (non cliquables)</span>
+            <span>{tr("Inclure les adresses écrites dans le texte (non cliquables)")}</span>
           </label>
           <label className="flex items-center gap-2 text-sm">
             <Checkbox
@@ -122,23 +123,24 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
               onCheckedChange={(v) => setUniqueOnly(v === true)}
               id="links-unique"
             />
-            <span>Une seule fois par adresse</span>
+            <span>{tr("Une seule fois par adresse")}</span>
           </label>
         </div>
         {links.length === 0 ? (
           <Alert variant="info">
-            Aucun lien trouvé. Les liens d&apos;un document scanné ne sont pas détectables sans OCR
-            ; les liens internes (vers d&apos;autres pages) sont comptés mais pas listés.
+            {tr(
+              "Aucun lien trouvé. Les liens d'un document scanné ne sont pas détectables sans OCR ; les liens internes (vers d'autres pages) sont comptés mais pas listés.",
+            )}
           </Alert>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <caption className="sr-only">Liens trouvés dans le document</caption>
+              <caption className="sr-only">{tr("Liens trouvés dans le document")}</caption>
               <thead>
                 <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="py-2 pr-3 font-semibold">Page</th>
-                  <th className="py-2 pr-3 font-semibold">Type</th>
-                  <th className="py-2 font-semibold">Adresse</th>
+                  <th className="py-2 pr-3 font-semibold">{tr("Page")}</th>
+                  <th className="py-2 pr-3 font-semibold">{tr("Type")}</th>
+                  <th className="py-2 font-semibold">{tr("Adresse")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -150,7 +152,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
                   >
                     <td className="py-2 pr-3 tabular-nums">{link.pageIndex + 1}</td>
                     <td className="py-2 pr-3 text-muted-foreground">
-                      {link.kind === "lien" ? "cliquable" : link.kind}
+                      {link.kind === "lien" ? tr("cliquable") : tr(link.kind)}
                     </td>
                     <td className="py-2 break-all">
                       <a
@@ -170,24 +172,24 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           </div>
         )}
         <div className="flex flex-wrap items-center gap-2">
-          <Label className="sr-only">Exporter</Label>
-          <CopyButton text={linksToText(links)} label="Copier les adresses" />
+          <Label className="sr-only">{tr("Exporter")}</Label>
+          <CopyButton text={linksToText(links)} label={tr("Copier les adresses")} />
           <DownloadTextButton
             text={linksToText(links)}
             filename={`${base}-liens.txt`}
-            label="Télécharger (TXT)"
+            label={tr("Télécharger (TXT)")}
             toolId={TOOL_ID}
           />
           <DownloadTextButton
             text={linksToCsv(links)}
             filename={`${base}-liens.csv`}
             mimeType="text/csv;charset=utf-8"
-            label="Télécharger (CSV)"
+            label={tr("Télécharger (CSV)")}
             toolId={TOOL_ID}
           />
           <span className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <Link2 className="size-3.5" aria-hidden="true" /> Les liens s&apos;ouvrent dans un
-            nouvel onglet ; vérifiez-les avant de cliquer.
+            <Link2 className="size-3.5" aria-hidden="true" />{" "}
+            {tr("Les liens s'ouvrent dans un nouvel onglet ; vérifiez-les avant de cliquer.")}
           </span>
         </div>
       </ToolPanel>

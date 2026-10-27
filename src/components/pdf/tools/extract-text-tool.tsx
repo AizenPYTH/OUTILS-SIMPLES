@@ -23,6 +23,8 @@ import {
 import { deriveOutputName, stripExtension } from "@/lib/files/filename";
 import { getToolById, getToolPath } from "@/lib/tools";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
+import { currentLanguageTag } from "@/lib/i18n";
 
 const TOOL_ID = "pdf-extract-text";
 
@@ -61,7 +63,7 @@ function ExtractWorkspace({
       })
       .catch(
         (e: unknown) =>
-          !cancelled && setError(e instanceof Error ? e.message : "Extraction impossible."),
+          !cancelled && setError(e instanceof Error ? e.message : tr("Extraction impossible.")),
       );
     return () => {
       cancelled = true;
@@ -70,8 +72,8 @@ function ExtractWorkspace({
 
   if (error)
     return (
-      <Alert variant="destructive" title="Extraction impossible">
-        {error}
+      <Alert variant="destructive" title={tr("Extraction impossible")}>
+        {tr(error)}
       </Alert>
     );
   if (!result)
@@ -80,7 +82,10 @@ function ExtractWorkspace({
         progress={{
           current: progress.current,
           total: progress.total,
-          label: `Lecture de la page ${progress.current} sur ${progress.total}…`,
+          label: tr("Lecture de la page {current} sur {total}…", {
+            current: progress.current,
+            total: progress.total,
+          }),
         }}
       />
     );
@@ -103,14 +108,14 @@ function ExtractWorkspace({
           variant="warning"
           title={
             result.emptyPages.length === pdf.pageCount
-              ? "Aucun texte trouvé dans ce PDF"
-              : `${result.emptyPages.length} page(s) sans texte`
+              ? tr("Aucun texte trouvé dans ce PDF")
+              : tr("{n} page(s) sans texte", { n: result.emptyPages.length })
           }
         >
-          Ces pages ne contiennent pas de texte sélectionnable (document scanné ou image).{" "}
+          {tr("Ces pages ne contiennent pas de texte sélectionnable (document scanné ou image).")}{" "}
           {ocr ? (
             <a href={getToolPath(ocr)} className="font-medium underline">
-              Utilisez l&apos;outil OCR pour reconnaître le texte des images.
+              {tr("Utilisez l'outil OCR pour reconnaître le texte des images.")}
             </a>
           ) : null}
         </Alert>
@@ -118,19 +123,23 @@ function ExtractWorkspace({
       {mode === "search" || result.totalCharacters > 0 ? (
         <ToolPanel className="space-y-3" data-testid="pdf-search">
           <Label htmlFor="pdf-search-input" className="flex items-center gap-2">
-            <Search className="size-4" aria-hidden="true" /> Rechercher un mot ou une expression
+            <Search className="size-4" aria-hidden="true" />{" "}
+            {tr("Rechercher un mot ou une expression")}
           </Label>
           <Input
             id="pdf-search-input"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="ex. facture, article 3, montant"
+            placeholder={tr("ex. facture, article 3, montant")}
           />
           {query.trim() ? (
             <p className="text-sm" aria-live="polite">
               {hits.length === 0
-                ? "Aucune occurrence."
-                : `${hits.length} occurrence(s) sur ${new Set(hits.map((h) => h.pageIndex)).size} page(s)`}
+                ? tr("Aucune occurrence.")
+                : tr("{hits} occurrence(s) sur {pages} page(s)", {
+                    hits: hits.length,
+                    pages: new Set(hits.map((h) => h.pageIndex)).size,
+                  })}
             </p>
           ) : null}
           {hits.length ? (
@@ -138,7 +147,7 @@ function ExtractWorkspace({
               {hits.slice(0, 200).map((h, i) => (
                 <li key={i} className="rounded-md bg-muted px-3 py-1.5">
                   <span className="mr-2 rounded-full bg-primary-soft px-1.5 text-xs font-medium text-link">
-                    p. {h.pageIndex + 1}
+                    {tr("p. {n}", { n: h.pageIndex + 1 })}
                   </span>
                   {h.snippet}
                 </li>
@@ -149,7 +158,7 @@ function ExtractWorkspace({
       ) : null}
       <Tabs defaultValue="txt">
         <TabsList>
-          <TabsTrigger value="txt">Texte brut</TabsTrigger>
+          <TabsTrigger value="txt">{tr("Texte brut")}</TabsTrigger>
           <TabsTrigger value="md">Markdown</TabsTrigger>
         </TabsList>
         <TabsContent value="txt" className="space-y-2">
@@ -160,11 +169,13 @@ function ExtractWorkspace({
               onChange={(e) => setSeparators(e.target.checked)}
               className="accent-primary"
             />{" "}
-            Séparer les pages
+            {tr("Séparer les pages")}
           </label>
           <TextOutputPanel
             id="pdf-text"
-            label={`${result.totalCharacters.toLocaleString("fr-FR")} caractères extraits`}
+            label={tr("{n} caractères extraits", {
+              n: result.totalCharacters.toLocaleString(currentLanguageTag()),
+            })}
             value={plain}
             filename={deriveOutputName(base, "texte", "txt")}
             toolId={toolId}
@@ -174,7 +185,7 @@ function ExtractWorkspace({
         <TabsContent value="md">
           <TextOutputPanel
             id="pdf-markdown"
-            label="Markdown (un titre par page)"
+            label={tr("Markdown (un titre par page)")}
             value={markdown}
             filename={deriveOutputName(base, "texte", "md")}
             mimeType="text/markdown;charset=utf-8"
@@ -184,11 +195,13 @@ function ExtractWorkspace({
         </TabsContent>
       </Tabs>
       <p className="flex items-center gap-2 text-xs text-muted-foreground">
-        <FileSearch className="size-3.5" aria-hidden="true" /> L&apos;ordre des mots suit la
-        position sur la page : les colonnes ou tableaux complexes peuvent être mélangés.
+        <FileSearch className="size-3.5" aria-hidden="true" />{" "}
+        {tr(
+          "L'ordre des mots suit la position sur la page : les colonnes ou tableaux complexes peuvent être mélangés.",
+        )}
       </p>
       <Button type="button" variant="ghost" size="sm" onClick={reset}>
-        Analyser un autre PDF
+        {tr("Analyser un autre PDF")}
       </Button>
     </div>
   );

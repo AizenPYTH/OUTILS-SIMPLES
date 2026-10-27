@@ -1,10 +1,12 @@
 /** OCR result model shared by the engine wrapper, the UI and the searchable-PDF builder. */
+import { tr } from "@/lib/i18n/messages";
+
 export type OcrLanguage = "fra" | "eng" | "fra+eng";
 
 export const ocrLanguages: { id: OcrLanguage; label: string }[] = [
-  { id: "fra", label: "Français" },
-  { id: "eng", label: "Anglais" },
-  { id: "fra+eng", label: "Français + anglais" },
+  { id: "fra", label: tr("Français") },
+  { id: "eng", label: tr("Anglais") },
+  { id: "fra+eng", label: tr("Français + anglais") },
 ];
 
 /**
@@ -28,38 +30,44 @@ export const ocrOrientationModes: { id: OcrOrientationMode; label: string; descr
   [
     {
       id: "auto",
-      label: "Automatique",
-      description: "Passe à l'endroit, puis les autres orientations si une partie reste illisible",
+      label: tr("Automatique"),
+      description: tr(
+        "Passe à l'endroit, puis les autres orientations si une partie reste illisible",
+      ),
     },
     {
       id: "mixed",
-      label: "Mixte (0° et 180°)",
-      description: "Pour une page avec des zones à l'envers",
+      label: tr("Mixte (0° et 180°)"),
+      description: tr("Pour une page avec des zones à l'envers"),
     },
     {
       id: "mixed-all",
-      label: "Toutes les orientations",
-      description: "Quatre passes : plus lent, pour les étiquettes et formulaires",
+      label: tr("Toutes les orientations"),
+      description: tr("Quatre passes : plus lent, pour les étiquettes et formulaires"),
     },
-    { id: "0", label: "À l'endroit (0°)", description: "Une seule passe" },
-    { id: "90", label: "Tourné à 90°", description: "Texte qui se lit de bas en haut" },
-    { id: "180", label: "À l'envers (180°)", description: "" },
-    { id: "270", label: "Tourné à 270°", description: "Texte qui se lit de haut en bas" },
+    { id: "0", label: tr("À l'endroit (0°)"), description: tr("Une seule passe") },
+    { id: "90", label: tr("Tourné à 90°"), description: tr("Texte qui se lit de bas en haut") },
+    { id: "180", label: tr("À l'envers (180°)"), description: "" },
+    { id: "270", label: tr("Tourné à 270°"), description: tr("Texte qui se lit de haut en bas") },
   ];
 
 export const ocrPreprocessModes: { id: OcrPreprocessMode; label: string; description: string }[] = [
   {
     id: "auto",
-    label: "Automatique",
-    description: "Niveaux de gris, contraste étiré, redressement des lignes",
+    label: tr("Automatique"),
+    description: tr("Niveaux de gris, contraste étiré, redressement des lignes"),
   },
-  { id: "none", label: "Aucun", description: "Image telle quelle" },
+  { id: "none", label: tr("Aucun"), description: tr("Image telle quelle") },
   {
     id: "contrast",
-    label: "Contraste",
-    description: "Fond blanchi, texte renforcé (photos, ombres)",
+    label: tr("Contraste"),
+    description: tr("Fond blanchi, texte renforcé (photos, ombres)"),
   },
-  { id: "bw", label: "Noir et blanc", description: "Seuil automatique (texte imprimé net)" },
+  {
+    id: "bw",
+    label: tr("Noir et blanc"),
+    description: tr("Seuil automatique (texte imprimé net)"),
+  },
 ];
 
 export interface OcrWord {

@@ -19,6 +19,7 @@ import { track } from "@/lib/analytics/events";
 import { bytesToBlob, triggerDownload } from "@/lib/files/download";
 import { deriveOutputName } from "@/lib/files/filename";
 import { formatBytes } from "@/lib/files/format";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "conv-pdf-docx";
 
@@ -56,7 +57,7 @@ function PdfToDocxInner({
       pdfToDocx(bytes, {
         ...options,
         onProgress: (current, total) =>
-          report({ current, total, label: `Page ${current} sur ${total}` }),
+          report({ current, total, label: tr("Page {n} sur {total}", { n: current, total }) }),
       }),
     );
 
@@ -68,9 +69,9 @@ function PdfToDocxInner({
     const name = deriveOutputName(fileName, "", "docx");
     return (
       <DonePanel
-        title="Votre document Word est prêt"
-        summary={`${result.paragraphCount} paragraphe${result.paragraphCount > 1 ? "s" : ""}${result.imageCount ? ` · ${result.imageCount} image${result.imageCount > 1 ? "s" : ""}` : ""} · ${formatBytes(result.bytes.byteLength)}`}
-        downloadLabel="Télécharger le .docx"
+        title={tr("Votre document Word est prêt")}
+        summary={`${tr(result.paragraphCount > 1 ? "{n} paragraphes" : "{n} paragraphe", { n: result.paragraphCount })}${result.imageCount ? ` · ${tr(result.imageCount > 1 ? "{n} images" : "{n} image", { n: result.imageCount })}` : ""} · ${formatBytes(result.bytes.byteLength)}`}
+        downloadLabel={tr("Télécharger le .docx")}
         onDownload={() => {
           triggerDownload(bytesToBlob(result.bytes, DOCX_MIME), name);
           track("tool_download", { tool: TOOL_ID });
@@ -78,17 +79,17 @@ function PdfToDocxInner({
         onStartOver={onReset}
       >
         {result.warnings.length > 0 ? (
-          <Alert variant="warning" title="Conversion simplifiée : à vérifier">
+          <Alert variant="warning" title={tr("Conversion simplifiée : à vérifier")}>
             <ul className="list-disc space-y-1 pl-4 text-left" data-testid="conversion-warnings">
               {result.warnings.slice(0, 6).map((w) => (
-                <li key={w}>{w}</li>
+                <li key={w}>{tr(w)}</li>
               ))}
             </ul>
           </Alert>
         ) : null}
         <div className="mt-3 text-center">
           <Button type="button" variant="ghost" size="sm" onClick={op.reset}>
-            Changer les options
+            {tr("Changer les options")}
           </Button>
         </div>
       </DonePanel>
@@ -98,8 +99,10 @@ function PdfToDocxInner({
   return (
     <ToolPanel className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        {pageCount} page{pageCount > 1 ? "s" : ""} · le texte devient des paragraphes modifiables ;
-        la mise en page exacte n&apos;est pas reproduite.
+        {tr(pageCount > 1 ? "{n} pages" : "{n} page", { n: pageCount })} ·{" "}
+        {tr(
+          "le texte devient des paragraphes modifiables ; la mise en page exacte n'est pas reproduite.",
+        )}
       </p>
       <div className="flex flex-wrap gap-5">
         <label className="flex items-center gap-2 text-sm">
@@ -107,18 +110,18 @@ function PdfToDocxInner({
             checked={options.pageBreaks}
             onCheckedChange={(v) => setOptions((o) => ({ ...o, pageBreaks: v === true }))}
           />
-          Une page Word par page du PDF
+          {tr("Une page Word par page du PDF")}
         </label>
         <label className="flex items-center gap-2 text-sm">
           <Checkbox
             checked={options.images}
             onCheckedChange={(v) => setOptions((o) => ({ ...o, images: v === true }))}
           />
-          Reprendre les images
+          {tr("Reprendre les images")}
         </label>
       </div>
       <Button type="button" size="lg" onClick={run} data-testid="docx-run">
-        Créer le document Word
+        {tr("Créer le document Word")}
       </Button>
     </ToolPanel>
   );

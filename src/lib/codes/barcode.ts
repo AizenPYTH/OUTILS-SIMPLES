@@ -4,6 +4,8 @@
  * UPC-A, Code 128 (subsets B/C), Code 39.
  */
 
+import { tr } from "@/lib/i18n/messages";
+
 export type BarcodeType = "ean13" | "ean8" | "upca" | "code128" | "code39";
 
 export interface Barcode {
@@ -18,11 +20,11 @@ export interface Barcode {
 export type BarcodeResult = { ok: true; barcode: Barcode } | { ok: false; error: string };
 
 export const BARCODE_TYPES: { id: BarcodeType; label: string; hint: string }[] = [
-  { id: "ean13", label: "EAN-13", hint: "12 ou 13 chiffres (produits en Europe)" },
-  { id: "ean8", label: "EAN-8", hint: "7 ou 8 chiffres (petits emballages)" },
-  { id: "upca", label: "UPC-A", hint: "11 ou 12 chiffres (Amérique du Nord)" },
-  { id: "code128", label: "Code 128", hint: "Texte ASCII, logistique, étiquettes" },
-  { id: "code39", label: "Code 39", hint: "Majuscules, chiffres, - . $ / + % espace" },
+  { id: "ean13", label: "EAN-13", hint: tr("12 ou 13 chiffres (produits en Europe)") },
+  { id: "ean8", label: "EAN-8", hint: tr("7 ou 8 chiffres (petits emballages)") },
+  { id: "upca", label: "UPC-A", hint: tr("11 ou 12 chiffres (Amérique du Nord)") },
+  { id: "code128", label: "Code 128", hint: tr("Texte ASCII, logistique, étiquettes") },
+  { id: "code39", label: "Code 39", hint: tr("Majuscules, chiffres, - . $ / + % espace") },
 ];
 
 // ------------------------------------------------------------------ EAN / UPC
@@ -80,11 +82,11 @@ function bits(pattern: string): boolean[] {
 function encodeEan13(input: string): BarcodeResult {
   const digits = input.replace(/\s/g, "");
   if (!/^\d{12,13}$/.test(digits))
-    return { ok: false, error: "EAN-13 : saisissez 12 chiffres (ou 13 avec la clé)." };
+    return { ok: false, error: tr("EAN-13 : saisissez 12 chiffres (ou 13 avec la clé).") };
   const body = digits.slice(0, 12);
   const check = eanCheckDigit(body);
   if (digits.length === 13 && Number(digits[12]) !== check)
-    return { ok: false, error: `Clé de contrôle incorrecte : attendue ${check}.` };
+    return { ok: false, error: tr("Clé de contrôle incorrecte : attendue {check}.", { check }) };
   const full = body + check;
   const parity = EAN13_PARITY[Number(full[0])]!;
   const modules: boolean[] = [...bits("101")];
@@ -99,11 +101,11 @@ function encodeEan13(input: string): BarcodeResult {
 function encodeEan8(input: string): BarcodeResult {
   const digits = input.replace(/\s/g, "");
   if (!/^\d{7,8}$/.test(digits))
-    return { ok: false, error: "EAN-8 : saisissez 7 chiffres (ou 8 avec la clé)." };
+    return { ok: false, error: tr("EAN-8 : saisissez 7 chiffres (ou 8 avec la clé).") };
   const body = digits.slice(0, 7);
   const check = eanCheckDigit(body);
   if (digits.length === 8 && Number(digits[7]) !== check)
-    return { ok: false, error: `Clé de contrôle incorrecte : attendue ${check}.` };
+    return { ok: false, error: tr("Clé de contrôle incorrecte : attendue {check}.", { check }) };
   const full = body + check;
   const modules: boolean[] = [...bits("101")];
   for (let i = 0; i < 4; i += 1) modules.push(...bits(EAN_L[Number(full[i])]!));
@@ -116,7 +118,7 @@ function encodeEan8(input: string): BarcodeResult {
 function encodeUpcA(input: string): BarcodeResult {
   const digits = input.replace(/\s/g, "");
   if (!/^\d{11,12}$/.test(digits))
-    return { ok: false, error: "UPC-A : saisissez 11 chiffres (ou 12 avec la clé)." };
+    return { ok: false, error: tr("UPC-A : saisissez 11 chiffres (ou 12 avec la clé).") };
   const asEan = encodeEan13(`0${digits}`);
   if (!asEan.ok) return asEan;
   return {
@@ -256,15 +258,17 @@ function widthsToModules(widths: string, startWithBar = true): boolean[] {
 
 /** Code 128 with automatic subset selection: runs of 4+ digit pairs use subset C. */
 function encodeCode128(input: string): BarcodeResult {
-  if (!input.length) return { ok: false, error: "Saisissez le texte à encoder." };
+  if (!input.length) return { ok: false, error: tr("Saisissez le texte à encoder.") };
   if (input.length > 80)
-    return { ok: false, error: "Code 128 : 80 caractères maximum pour rester lisible." };
+    return { ok: false, error: tr("Code 128 : 80 caractères maximum pour rester lisible.") };
   for (const ch of input) {
     const code = ch.charCodeAt(0);
     if (code < 32 || code > 126)
       return {
         ok: false,
-        error: `Caractère non pris en charge par le Code 128 (sous-ensemble B) : « ${ch} ».`,
+        error: tr("Caractère non pris en charge par le Code 128 (sous-ensemble B) : « {ch} ».", {
+          ch,
+        }),
       };
   }
   const values: number[] = [];
@@ -353,14 +357,17 @@ export { CODE39 };
 
 function encodeCode39(input: string): BarcodeResult {
   const text = input.toUpperCase();
-  if (!text.length) return { ok: false, error: "Saisissez le texte à encoder." };
+  if (!text.length) return { ok: false, error: tr("Saisissez le texte à encoder.") };
   if (text.length > 40)
-    return { ok: false, error: "Code 39 : 40 caractères maximum pour rester lisible." };
+    return { ok: false, error: tr("Code 39 : 40 caractères maximum pour rester lisible.") };
   for (const ch of text)
     if (!CODE39[ch] || ch === "*")
       return {
         ok: false,
-        error: `Caractère non pris en charge par le Code 39 : « ${ch} ». Autorisés : A-Z, 0-9, espace, - . $ / + %`,
+        error: tr(
+          "Caractère non pris en charge par le Code 39 : « {ch} ». Autorisés : A-Z, 0-9, espace, - . $ / + %",
+          { ch },
+        ),
       };
   const modules: boolean[] = [];
   const wide = 3;

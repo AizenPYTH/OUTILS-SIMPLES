@@ -6,7 +6,8 @@
  * Strategy (all same-origin, GET only):
  *  - /_next/static/**            cache-first, permanent (file names carry a content hash)
  *  - /pdfjs, /ocr, /qpdf, /fonts cache-first in a cache keyed by the engines' versions
- *  - page navigations            network-first, cached copy when offline, else /hors-ligne/
+ *  - page navigations            network-first, cached copy when offline, else the offline page of the
+ *                                 URL's language (/hors-ligne/ or /en/offline/)
  *  - manifest, icons             stale-while-revalidate
  * Everything else (RSC payloads, cross-origin) goes straight to the network.
  *
@@ -18,8 +19,13 @@ const SHELL = `outilia-shell-${VERSION}`;
 const STATIC = "outilia-static-v1";
 const ASSETS = `outilia-assets-${ASSET_KEY}`;
 const KEEP = new Set([SHELL, STATIC, ASSETS]);
-const OFFLINE_URL = "/hors-ligne/";
-const PRECACHE = [OFFLINE_URL, "/offline-manifest.json"];
+const OFFLINE_URLS = { fr: "/hors-ligne/", en: "/en/offline/" };
+const OFFLINE_SET = new Set(Object.values(OFFLINE_URLS));
+const PRECACHE = [...OFFLINE_SET, "/offline-manifest.json"];
+
+function offlineUrlFor(pathname) {
+  return pathname === "/en" || pathname.startsWith("/en/") ? OFFLINE_URLS.en : OFFLINE_URLS.fr;
+}
 const ENGINE_PREFIXES = ["/pdfjs/", "/ocr/", "/qpdf/", "/fonts/", "/heif/"];
 const SHELL_FILES = new Set([
   "/manifest.webmanifest",
@@ -92,11 +98,12 @@ async function networkFirstPage(request) {
     if (cached) return cached;
     // Redirect rather than serving the offline page under a foreign URL: Next would hydrate
     // the wrong route and try to fetch it. The redirected request is served from the cache.
-    if (url.pathname !== OFFLINE_URL) return Response.redirect(OFFLINE_URL, 302);
-    const offline = await caches.match(OFFLINE_URL, { ignoreVary: true });
+    const offlineUrl = offlineUrlFor(url.pathname);
+    if (url.pathname !== offlineUrl) return Response.redirect(offlineUrl, 302);
+    const offline = await caches.match(offlineUrl, { ignoreVary: true });
     return (
       offline ||
-      new Response("Hors connexion", {
+      new Response(offlineUrl === OFFLINE_URLS.en ? "Offline" : "Hors connexion", {
         status: 503,
         headers: { "Content-Type": "text/plain; charset=utf-8" },
       })
@@ -132,7 +139,7 @@ self.addEventListener("install", (event) => {
             if (!response.ok) return;
             await cache.put(path, response.clone());
             // The offline page must hydrate without network: store the scripts and styles it references.
-            if (path === OFFLINE_URL) await precacheReferencedStatic(await response.text());
+            if (OFFLINE_SET.has(path)) await precacheReferencedStatic(await response.text());
           } catch {
             /* offline during install: the next install retries */
           }
@@ -231,7 +238,7 @@ self.addEventListener("message", (event) => {
         const keys = await cache.keys();
         const pages = keys
           .map((r) => new URL(r.url).pathname)
-          .filter((p) => !SHELL_FILES.has(p) && p !== OFFLINE_URL && !p.startsWith("/_next/"));
+          .filter((p) => !SHELL_FILES.has(p) && !OFFLINE_SET.has(p) && !p.startsWith("/_next/"));
         reply({ type: "pages", pages: Array.from(new Set(pages)).sort() });
       })(),
     );

@@ -20,6 +20,7 @@ import { bytesToBlob, triggerDownload } from "@/lib/files/download";
 import { deriveOutputName } from "@/lib/files/filename";
 import { formatBytes } from "@/lib/files/format";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 import { IMAGE_MAX_SIZE, validateImageFile } from "./image-batch-tool";
 
 const TOOL_ID = "image-exif";
@@ -73,7 +74,7 @@ export function ExifTool() {
       setCleaned(null);
       track("tool_start", { tool: TOOL_ID });
     } catch {
-      toast.error("Lecture impossible.");
+      toast.error(tr("Lecture impossible."));
     } finally {
       setBusy(false);
     }
@@ -109,7 +110,7 @@ export function ExifTool() {
       });
       track("tool_success", { tool: TOOL_ID });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Suppression impossible.");
+      toast.error(error instanceof Error ? tr(error.message) : tr("Suppression impossible."));
     } finally {
       setBusy(false);
     }
@@ -128,9 +129,11 @@ export function ExifTool() {
         onFiles={(f) => f[0] && void load(f[0])}
         accept="image/*"
         validate={validateImageFile}
-        title="Déposez une photo pour lire ses métadonnées"
-        hint={`JPG, PNG, WebP, HEIC non pris en charge · ${formatBytes(IMAGE_MAX_SIZE)} max`}
-        buttonLabel="Choisir une photo"
+        title={tr("Déposez une photo pour lire ses métadonnées")}
+        hint={tr("JPG, PNG, WebP, HEIC non pris en charge · {max} max", {
+          max: formatBytes(IMAGE_MAX_SIZE),
+        })}
+        buttonLabel={tr("Choisir une photo")}
         testId="exif-dropzone"
       />
     );
@@ -157,31 +160,31 @@ export function ExifTool() {
                 ? "JPEG"
                 : analysis.format === "png"
                   ? "PNG"
-                  : analysis.file.type || "format inconnu"}
+                  : analysis.file.type || tr("format inconnu")}
             </p>
           </div>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={reset}>
-          <RefreshCw aria-hidden="true" /> Autre photo
+          <RefreshCw aria-hidden="true" /> {tr("Autre photo")}
         </Button>
       </div>
       <StatGrid
         items={[
-          { label: "Métadonnées trouvées", value: summary.total },
-          { label: "Données sensibles", value: sensitive },
-          { label: "Position GPS", value: summary.gps ? "oui" : "non" },
+          { label: tr("Métadonnées trouvées"), value: summary.total },
+          { label: tr("Données sensibles"), value: sensitive },
+          { label: tr("Position GPS"), value: summary.gps ? tr("oui") : tr("non") },
         ]}
         className="sm:grid-cols-3 lg:grid-cols-3"
       />
       <ToolPanel className="space-y-3" data-testid="exif-table">
         {summary.total === 0 ? (
           <Alert variant="success">
-            Cette image ne contient aucune métadonnée EXIF, XMP ou IPTC lisible.
+            {tr("Cette image ne contient aucune métadonnée EXIF, XMP ou IPTC lisible.")}
           </Alert>
         ) : (
           <>
             {summary.gps ? (
-              <Alert variant="warning" title="Cette photo contient sa position GPS">
+              <Alert variant="warning" title={tr("Cette photo contient sa position GPS")}>
                 <span className="tabular-nums">
                   {summary.gps.latitude.toFixed(5)}, {summary.gps.longitude.toFixed(5)}
                 </span>{" "}
@@ -191,13 +194,13 @@ export function ExifTool() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 font-medium underline"
                 >
-                  <MapPin className="size-3.5" aria-hidden="true" /> Voir sur une carte (site
-                  externe)
+                  <MapPin className="size-3.5" aria-hidden="true" />{" "}
+                  {tr("Voir sur une carte (site externe)")}
                 </a>
               </Alert>
             ) : null}
             <table className="w-full text-sm">
-              <caption className="sr-only">Métadonnées de l&apos;image</caption>
+              <caption className="sr-only">{tr("Métadonnées de l'image")}</caption>
               <tbody>
                 {summary.rows.map((row) => (
                   <tr key={row.key} className="border-b border-border/60">
@@ -205,13 +208,13 @@ export function ExifTool() {
                       scope="row"
                       className="py-1.5 pr-3 text-left font-medium text-muted-foreground"
                     >
-                      {row.label}
+                      {tr(row.label)}
                     </th>
                     <td className="py-1.5 break-words">
                       {row.value}{" "}
                       {row.sensitive ? (
                         <Badge variant="outline" className="ml-1 text-[10px]">
-                          sensible
+                          {tr("sensible")}
                         </Badge>
                       ) : null}
                     </td>
@@ -221,8 +224,10 @@ export function ExifTool() {
             </table>
             {summary.total > summary.rows.length ? (
               <p className="text-xs text-muted-foreground">
-                {summary.total - summary.rows.length} autre(s) champ(s) technique(s) non affiché(s)
-                (réglages de l&apos;appareil, miniature, XMP).
+                {tr(
+                  "{n} autre(s) champ(s) technique(s) non affiché(s) (réglages de l'appareil, miniature, XMP).",
+                  { n: summary.total - summary.rows.length },
+                )}
               </p>
             ) : null}
           </>
@@ -230,20 +235,25 @@ export function ExifTool() {
       </ToolPanel>
       <ToolPanel className="space-y-3">
         {cleaned ? (
-          <Alert variant="success" title="Image nettoyée" data-testid="exif-cleaned">
+          <Alert variant="success" title={tr("Image nettoyée")} data-testid="exif-cleaned">
             {cleaned.remaining === 0
-              ? "Plus aucune métadonnée détectée."
-              : `${cleaned.remaining} champ(s) technique(s) subsistent (profil colorimétrique ou commentaires non standard).`}{" "}
+              ? tr("Plus aucune métadonnée détectée.")
+              : tr(
+                  "{n} champ(s) technique(s) subsistent (profil colorimétrique ou commentaires non standard).",
+                  { n: cleaned.remaining },
+                )}{" "}
             {cleaned.lossless
-              ? "Les pixels n'ont pas été recompressés."
-              : "L'image a été réencodée en PNG (format d'origine sans suppression directe possible)."}{" "}
+              ? tr("Les pixels n'ont pas été recompressés.")
+              : tr(
+                  "L'image a été réencodée en PNG (format d'origine sans suppression directe possible).",
+                )}{" "}
             · {formatBytes(cleaned.blob.size)}
           </Alert>
         ) : (
           <p className="text-sm text-muted-foreground">
-            La suppression retire EXIF, XMP, IPTC, commentaires et date : l&apos;orientation EXIF
-            n&apos;étant plus présente, vérifiez que l&apos;image est bien droite (les JPEG de
-            téléphone s&apos;appuient parfois dessus).
+            {tr(
+              "La suppression retire EXIF, XMP, IPTC, commentaires et date : l'orientation EXIF n'étant plus présente, vérifiez que l'image est bien droite (les JPEG de téléphone s'appuient parfois dessus).",
+            )}
           </p>
         )}
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -257,7 +267,7 @@ export function ExifTool() {
               }}
               data-testid="exif-download"
             >
-              <Download aria-hidden="true" /> Télécharger l&apos;image nettoyée
+              <Download aria-hidden="true" /> {tr("Télécharger l'image nettoyée")}
             </Button>
           ) : (
             <Button
@@ -267,7 +277,7 @@ export function ExifTool() {
               loading={busy}
               data-testid="exif-strip"
             >
-              <ShieldCheck aria-hidden="true" /> Supprimer les métadonnées
+              <ShieldCheck aria-hidden="true" /> {tr("Supprimer les métadonnées")}
             </Button>
           )}
         </div>

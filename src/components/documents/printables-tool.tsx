@@ -35,27 +35,33 @@ import {
 } from "@/lib/pdf/operations/printables";
 import { FRENCH_MONTHS } from "@/lib/calc/dates";
 import { formatBytes } from "@/lib/files/format";
+import { tr } from "@/lib/i18n/messages";
 
 const PAGE_FORMATS: { value: PageFormat; label: string }[] = [
   { value: "a4", label: "A4 portrait" },
-  { value: "a4-landscape", label: "A4 paysage" },
+  { value: "a4-landscape", label: tr("A4 paysage") },
   { value: "a5", label: "A5" },
   { value: "letter", label: "Letter (US)" },
 ];
 
 const PAPER_KINDS: { value: PaperKind; label: string; description: string; spacing: boolean }[] = [
-  { value: "grid", label: "Quadrillé", description: "Petits carreaux", spacing: true },
-  { value: "lines", label: "Ligné", description: "Lignes horizontales", spacing: true },
+  { value: "grid", label: tr("Quadrillé"), description: tr("Petits carreaux"), spacing: true },
+  { value: "lines", label: tr("Ligné"), description: tr("Lignes horizontales"), spacing: true },
   {
     value: "dots",
-    label: "Pointillé",
-    description: "Grille de points (bullet journal)",
+    label: tr("Pointillé"),
+    description: tr("Grille de points (bullet journal)"),
     spacing: true,
   },
-  { value: "seyes", label: "Seyès", description: "Grands carreaux français", spacing: false },
-  { value: "millimeter", label: "Millimétré", description: "1 / 5 / 10 mm", spacing: false },
-  { value: "isometric", label: "Isométrique", description: "Triangles 60°", spacing: true },
-  { value: "music", label: "Musique", description: "Portées", spacing: false },
+  {
+    value: "seyes",
+    label: tr("Seyès"),
+    description: tr("Grands carreaux français"),
+    spacing: false,
+  },
+  { value: "millimeter", label: tr("Millimétré"), description: "1 / 5 / 10 mm", spacing: false },
+  { value: "isometric", label: tr("Isométrique"), description: "Triangles 60°", spacing: true },
+  { value: "music", label: tr("Musique"), description: tr("Portées"), spacing: false },
 ];
 
 function PageFormatField({
@@ -101,7 +107,7 @@ function Done({
 }) {
   return (
     <DonePanel
-      title="Votre PDF est prêt"
+      title={tr("Votre PDF est prêt")}
       summary={formatBytes(bytes.byteLength)}
       onDownload={() => downloadPdf(bytes, name, "", toolId)}
       onStartOver={onBack}
@@ -133,7 +139,7 @@ export function PaperTool() {
   return (
     <div className="space-y-4">
       <Segmented
-        label="Type de feuille"
+        label={tr("Type de feuille")}
         value={options.kind}
         onChange={(kind) => patch({ kind })}
         className="sm:grid-cols-4"
@@ -152,7 +158,9 @@ export function PaperTool() {
           />
           {kind.spacing ? (
             <div className="space-y-1">
-              <Label htmlFor="paper-spacing">Espacement : {options.spacingMm} mm</Label>
+              <Label htmlFor="paper-spacing">
+                {tr("Espacement : {n} mm", { n: options.spacingMm })}
+              </Label>
               <input
                 id="paper-spacing"
                 type="range"
@@ -166,7 +174,7 @@ export function PaperTool() {
             </div>
           ) : null}
           <div className="space-y-1">
-            <Label htmlFor="paper-margin">Marge : {options.marginMm} mm</Label>
+            <Label htmlFor="paper-margin">{tr("Marge : {n} mm", { n: options.marginMm })}</Label>
             <input
               id="paper-margin"
               type="range"
@@ -178,7 +186,7 @@ export function PaperTool() {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="paper-pages">Nombre de pages</Label>
+            <Label htmlFor="paper-pages">{tr("Nombre de pages")}</Label>
             <Input
               id="paper-pages"
               type="number"
@@ -189,7 +197,7 @@ export function PaperTool() {
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="paper-color">Couleur des traits</Label>
+            <Label htmlFor="paper-color">{tr("Couleur des traits")}</Label>
             <div className="flex items-center gap-2">
               <input
                 id="paper-color"
@@ -204,17 +212,17 @@ export function PaperTool() {
                 size="sm"
                 onClick={() => patch({ color: "#9aa3b2" })}
               >
-                Gris clair
+                {tr("Gris clair")}
               </Button>
             </div>
           </div>
           <div className="space-y-1 sm:col-span-2 lg:col-span-3">
-            <Label htmlFor="paper-title">Titre en haut de page (facultatif)</Label>
+            <Label htmlFor="paper-title">{tr("Titre en haut de page (facultatif)")}</Label>
             <Input
               id="paper-title"
               value={options.title ?? ""}
               onChange={(e) => patch({ title: e.target.value })}
-              placeholder="Nom, matière, date…"
+              placeholder={tr("Nom, matière, date…")}
               maxLength={120}
             />
           </div>
@@ -226,12 +234,13 @@ export function PaperTool() {
           onClick={() => void op.run(async () => paperPdf(options))}
           data-testid="paper-run"
         >
-          <Printer aria-hidden="true" /> Créer le PDF
+          <Printer aria-hidden="true" /> {tr("Créer le PDF")}
         </Button>
       </ToolPanel>
       <p className="text-xs text-muted-foreground">
-        Imprimez à l&apos;échelle 100 % (sans « ajuster à la page ») pour conserver les dimensions
-        exactes des carreaux.
+        {tr(
+          "Imprimez à l'échelle 100 % (sans « ajuster à la page ») pour conserver les dimensions exactes des carreaux.",
+        )}
       </p>
     </div>
   );
@@ -263,7 +272,7 @@ export function CalendarTool() {
   return (
     <div className="space-y-4">
       <Segmented
-        label="Vue"
+        label={tr("Vue")}
         value={view}
         onChange={(v) => {
           setView(v);
@@ -274,14 +283,18 @@ export function CalendarTool() {
         }}
         className="sm:grid-cols-2"
         options={[
-          { value: "month", label: "Un mois par page", description: "Cases larges, zone de notes" },
-          { value: "year", label: "Année complète", description: "12 mois sur une page" },
+          {
+            value: "month",
+            label: tr("Un mois par page"),
+            description: tr("Cases larges, zone de notes"),
+          },
+          { value: "year", label: tr("Année complète"), description: tr("12 mois sur une page") },
         ]}
       />
       <ToolPanel className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-1">
-            <Label htmlFor="cal-year">Année</Label>
+            <Label htmlFor="cal-year">{tr("Année")}</Label>
             <Input
               id="cal-year"
               type="number"
@@ -294,7 +307,7 @@ export function CalendarTool() {
           </div>
           {view === "month" ? (
             <div className="space-y-1">
-              <Label htmlFor="cal-month">Mois</Label>
+              <Label htmlFor="cal-month">{tr("Mois")}</Label>
               <Select
                 value={String(options.month ?? 1)}
                 onValueChange={(v) => patch({ month: Number(v) })}
@@ -324,7 +337,7 @@ export function CalendarTool() {
               checked={options.holidays}
               onCheckedChange={(v) => patch({ holidays: v === true })}
             />{" "}
-            Marquer les jours fériés français
+            {tr("Marquer les jours fériés français")}
           </label>
           <label className="flex items-center gap-2">
             <Checkbox
@@ -339,7 +352,7 @@ export function CalendarTool() {
                 checked={options.notes}
                 onCheckedChange={(v) => patch({ notes: v === true })}
               />{" "}
-              Colonne de notes
+              {tr("Colonne de notes")}
             </label>
           ) : null}
         </div>
@@ -354,7 +367,7 @@ export function CalendarTool() {
           }
           data-testid="cal-run"
         >
-          <Printer aria-hidden="true" /> Créer le calendrier
+          <Printer aria-hidden="true" /> {tr("Créer le calendrier")}
         </Button>
       </ToolPanel>
     </div>
@@ -378,7 +391,7 @@ export function CoverPageTool() {
         onBack={op.reset}
         note={
           op.state.result.replaced
-            ? "Certains caractères (emoji, alphabets non latins) ont été remplacés par « ? »."
+            ? tr("Certains caractères (emoji, alphabets non latins) ont été remplacés par « ? ».")
             : undefined
         }
       />
@@ -389,45 +402,45 @@ export function CoverPageTool() {
       <ToolPanel className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1 sm:col-span-2">
-            <Label htmlFor="cover-title">Titre</Label>
+            <Label htmlFor="cover-title">{tr("Titre")}</Label>
             <Textarea
               id="cover-title"
               value={options.title}
               onChange={(e) => patch({ title: e.target.value })}
               rows={2}
               maxLength={200}
-              placeholder="Rapport de stage"
+              placeholder={tr("Rapport de stage")}
               data-testid="cover-title"
             />
           </div>
           <div className="space-y-1 sm:col-span-2">
-            <Label htmlFor="cover-subtitle">Sous-titre</Label>
+            <Label htmlFor="cover-subtitle">{tr("Sous-titre")}</Label>
             <Input
               id="cover-subtitle"
               value={options.subtitle ?? ""}
               onChange={(e) => patch({ subtitle: e.target.value })}
               maxLength={200}
-              placeholder="Développement d'une plateforme d'outils en ligne"
+              placeholder={tr("Développement d'une plateforme d'outils en ligne")}
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="cover-author">Auteur</Label>
+            <Label htmlFor="cover-author">{tr("Auteur")}</Label>
             <Input
               id="cover-author"
               value={options.author ?? ""}
               onChange={(e) => patch({ author: e.target.value })}
               maxLength={120}
-              placeholder="Prénom Nom"
+              placeholder={tr("Prénom Nom")}
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="cover-institution">Organisation / établissement</Label>
+            <Label htmlFor="cover-institution">{tr("Organisation / établissement")}</Label>
             <Input
               id="cover-institution"
               value={options.institution ?? ""}
               onChange={(e) => patch({ institution: e.target.value })}
               maxLength={120}
-              placeholder="Université, entreprise, classe…"
+              placeholder={tr("Université, entreprise, classe…")}
             />
           </div>
           <div className="space-y-1">
@@ -437,17 +450,17 @@ export function CoverPageTool() {
               value={options.date ?? ""}
               onChange={(e) => patch({ date: e.target.value })}
               maxLength={60}
-              placeholder="Juin 2026"
+              placeholder={tr("Juin 2026")}
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="cover-footer">Pied de page</Label>
+            <Label htmlFor="cover-footer">{tr("Pied de page")}</Label>
             <Input
               id="cover-footer"
               value={options.footer ?? ""}
               onChange={(e) => patch({ footer: e.target.value })}
               maxLength={160}
-              placeholder="Confidentiel · Version 1.0"
+              placeholder={tr("Confidentiel · Version 1.0")}
             />
           </div>
           <PageFormatField
@@ -456,7 +469,7 @@ export function CoverPageTool() {
             onChange={(page) => patch({ page })}
           />
           <div className="space-y-1">
-            <Label htmlFor="cover-accent">Couleur d&apos;accent</Label>
+            <Label htmlFor="cover-accent">{tr("Couleur d'accent")}</Label>
             <input
               id="cover-accent"
               type="color"
@@ -474,12 +487,13 @@ export function CoverPageTool() {
           disabled={!options.title.trim()}
           data-testid="cover-run"
         >
-          <Printer aria-hidden="true" /> Créer la page de garde
+          <Printer aria-hidden="true" /> {tr("Créer la page de garde")}
         </Button>
       </ToolPanel>
       <p className="text-xs text-muted-foreground">
-        Fusionnez ensuite la page de garde avec votre document grâce à l&apos;outil « Fusionner des
-        PDF ».
+        {tr(
+          "Fusionnez ensuite la page de garde avec votre document grâce à l'outil « Fusionner des PDF ».",
+        )}
       </p>
     </div>
   );

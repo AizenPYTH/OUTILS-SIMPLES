@@ -1,4 +1,5 @@
 import { unescapeHtml } from "@/lib/dev/encoding";
+import { tr } from "@/lib/i18n/messages";
 
 /**
  * Converts the simple, well-formed HTML produced by mammoth (Word → HTML) into
@@ -280,8 +281,10 @@ class Writer {
         if (/^data:image\/(png|jpe?g);base64,/i.test(src)) return `\n\n![${alt}](${src})\n\n`;
         this.warnings.push(
           /^data:/i.test(src)
-            ? "Une image dans un format non pris en charge (EMF, WMF, GIF, TIFF…) a été ignorée."
-            : "Une image liée (non incorporée) a été ignorée.",
+            ? tr(
+                "Une image dans un format non pris en charge (EMF, WMF, GIF, TIFF…) a été ignorée.",
+              )
+            : tr("Une image liée (non incorporée) a été ignorée."),
         );
         return alt ? `*[${alt}]*` : "";
       }

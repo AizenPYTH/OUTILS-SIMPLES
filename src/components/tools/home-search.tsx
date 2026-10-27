@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
+import { localizedPath } from "@/lib/i18n/routes";
 
 /** The single, large search field of the home page: submits to the catalogue. */
 export function HomeSearch({ toolCount }: { toolCount: number }) {
@@ -14,7 +15,8 @@ export function HomeSearch({ toolCount }: { toolCount: number }) {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = query.trim();
-    router.push(trimmed ? `/outils/?q=${encodeURIComponent(trimmed)}` : "/outils/");
+    const catalog = localizedPath("/outils/");
+    router.push(trimmed ? `${catalog}?q=${encodeURIComponent(trimmed)}` : catalog);
   };
 
   return (

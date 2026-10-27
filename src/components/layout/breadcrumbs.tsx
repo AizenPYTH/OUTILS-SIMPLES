@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { buildBreadcrumbJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/json-ld";
+import { t } from "@/lib/i18n";
 
 export interface BreadcrumbItem {
   name: string;
@@ -10,7 +11,7 @@ export interface BreadcrumbItem {
 
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav aria-label="Fil d'Ariane" className="text-sm text-muted-foreground">
+    <nav aria-label={t.common.breadcrumb} className="text-sm text-muted-foreground">
       <JsonLd data={buildBreadcrumbJsonLd(items)} />
       <ol className="flex flex-wrap items-center gap-1">
         {items.map((item, index) => {

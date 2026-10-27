@@ -14,17 +14,18 @@ import { decodeQrFromRgba, parseWifiPayload, type QrDecoded } from "@/lib/codes/
 import { decodeImage, getRgba, releaseCanvas, resizeCanvas } from "@/lib/images/canvas";
 import { formatBytes } from "@/lib/files/format";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "qr-read";
 const KIND_LABEL: Record<QrDecoded["kind"], string> = {
-  url: "Lien web",
-  wifi: "Réseau Wi-Fi",
-  vcard: "Carte de visite (vCard)",
-  email: "Adresse e-mail",
-  phone: "Numéro de téléphone",
+  url: tr("Lien web"),
+  wifi: tr("Réseau Wi-Fi"),
+  vcard: tr("Carte de visite (vCard)"),
+  email: tr("Adresse e-mail"),
+  phone: tr("Numéro de téléphone"),
   sms: "SMS",
-  geo: "Position géographique",
-  text: "Texte",
+  geo: tr("Position géographique"),
+  text: tr("Texte"),
 };
 
 /** Tries several sizes: jsQR works best around 300–1200 px. */
@@ -79,7 +80,7 @@ export function QrReaderTool() {
       setResult(decoded ?? "none");
       track(decoded ? "tool_success" : "tool_error", { tool: TOOL_ID });
     } catch {
-      toast.error("Image illisible.");
+      toast.error(tr("Image illisible."));
     } finally {
       setBusy(false);
     }
@@ -95,9 +96,11 @@ export function QrReaderTool() {
         accept="image/*"
         validate={validateImageFile}
         compact={!!preview}
-        title="Déposez une image contenant un QR code"
-        hint={`Photo ou capture d'écran · JPG, PNG, WebP · ${formatBytes(IMAGE_MAX_SIZE)} max`}
-        buttonLabel="Choisir une image"
+        title={tr("Déposez une image contenant un QR code")}
+        hint={tr("Photo ou capture d'écran · JPG, PNG, WebP · {size} max", {
+          size: formatBytes(IMAGE_MAX_SIZE),
+        })}
+        buttonLabel={tr("Choisir une image")}
         capture={hasCamera ? undefined : "environment"}
         disabled={busy}
         testId="qr-dropzone"
@@ -105,7 +108,7 @@ export function QrReaderTool() {
       {hasCamera ? (
         <div className="text-center">
           <Button type="button" variant="outline" onClick={() => setCameraOpen(true)}>
-            <Camera aria-hidden="true" /> Photographier un QR code
+            <Camera aria-hidden="true" /> {tr("Photographier un QR code")}
           </Button>
         </div>
       ) : null}
@@ -114,16 +117,18 @@ export function QrReaderTool() {
           {/* eslint-disable-next-line @next/next/no-img-element -- object URL preview */}
           <img
             src={preview}
-            alt="Image analysée"
+            alt={tr("Image analysée")}
             className="max-h-52 w-full rounded-[12px] border border-border object-contain checkerboard"
           />
           <ToolPanel className="space-y-3" data-testid="qr-result">
-            {busy ? <p className="text-sm text-muted-foreground">Lecture en cours…</p> : null}
+            {busy ? (
+              <p className="text-sm text-muted-foreground">{tr("Lecture en cours…")}</p>
+            ) : null}
             {result === "none" ? (
-              <Alert variant="warning" title="Aucun QR code lisible">
-                Essayez une photo plus nette, mieux éclairée et cadrée sur le code (le QR code doit
-                occuper au moins un quart de l&apos;image). Les codes-barres linéaires ne sont pas
-                pris en charge.
+              <Alert variant="warning" title={tr("Aucun QR code lisible")}>
+                {tr(
+                  "Essayez une photo plus nette, mieux éclairée et cadrée sur le code (le QR code doit occuper au moins un quart de l'image). Les codes-barres linéaires ne sont pas pris en charge.",
+                )}
               </Alert>
             ) : null}
             {result && result !== "none" ? (
@@ -139,16 +144,16 @@ export function QrReaderTool() {
                 </pre>
                 {wifi ? (
                   <dl className="grid gap-1 text-sm sm:grid-cols-[8rem_1fr]">
-                    <dt className="text-muted-foreground">Réseau</dt>
+                    <dt className="text-muted-foreground">{tr("Réseau")}</dt>
                     <dd className="font-mono">{wifi.ssid}</dd>
-                    <dt className="text-muted-foreground">Mot de passe</dt>
-                    <dd className="font-mono">{wifi.password || "(aucun)"}</dd>
-                    <dt className="text-muted-foreground">Sécurité</dt>
+                    <dt className="text-muted-foreground">{tr("Mot de passe")}</dt>
+                    <dd className="font-mono">{wifi.password || tr("(aucun)")}</dd>
+                    <dt className="text-muted-foreground">{tr("Sécurité")}</dt>
                     <dd>{wifi.security}</dd>
                   </dl>
                 ) : null}
                 <div className="flex flex-wrap gap-2">
-                  <CopyButton text={result.text} label="Copier le contenu" />
+                  <CopyButton text={result.text} label={tr("Copier le contenu")} />
                   {result.kind === "url" ? (
                     <Button asChild variant="outline" size="sm">
                       <a
@@ -158,15 +163,16 @@ export function QrReaderTool() {
                         target="_blank"
                         rel="noopener noreferrer nofollow"
                       >
-                        <ExternalLink aria-hidden="true" /> Ouvrir le lien (nouvel onglet)
+                        <ExternalLink aria-hidden="true" /> {tr("Ouvrir le lien (nouvel onglet)")}
                       </a>
                     </Button>
                   ) : null}
                 </div>
                 {result.kind === "url" ? (
                   <p className="text-xs text-muted-foreground">
-                    Vérifiez l&apos;adresse avant d&apos;ouvrir : un QR code peut mener vers un site
-                    frauduleux.
+                    {tr(
+                      "Vérifiez l'adresse avant d'ouvrir : un QR code peut mener vers un site frauduleux.",
+                    )}
                   </p>
                 ) : null}
               </>

@@ -1,4 +1,6 @@
 /** RFC 4180-style CSV parsing/serialisation with delimiter detection. */
+import { tr } from "@/lib/i18n/messages";
+
 export type Delimiter = "," | ";" | "\t" | "|";
 
 export function detectDelimiter(text: string): Delimiter {
@@ -96,7 +98,7 @@ export function escapeCsvField(value: unknown, delimiter: Delimiter): string {
 /** Converts an array of objects (or arrays) into CSV. Nested objects are JSON-encoded. */
 export function jsonToCsv(value: unknown, delimiter: Delimiter = ";"): string {
   const list = Array.isArray(value) ? value : value && typeof value === "object" ? [value] : null;
-  if (!list) throw new Error("Le JSON doit être un tableau d'objets (ou un objet).");
+  if (!list) throw new Error(tr("Le JSON doit être un tableau d'objets (ou un objet)."));
   if (list.length === 0) return "";
   if (list.every((item) => Array.isArray(item))) {
     return (list as unknown[][])
@@ -106,7 +108,7 @@ export function jsonToCsv(value: unknown, delimiter: Delimiter = ";"): string {
   const headers: string[] = [];
   for (const item of list) {
     if (!item || typeof item !== "object" || Array.isArray(item))
-      throw new Error("Chaque élément du tableau doit être un objet.");
+      throw new Error(tr("Chaque élément du tableau doit être un objet."));
     for (const key of Object.keys(item as object)) if (!headers.includes(key)) headers.push(key);
   }
   const lines = [headers.map((h) => escapeCsvField(h, delimiter)).join(delimiter)];

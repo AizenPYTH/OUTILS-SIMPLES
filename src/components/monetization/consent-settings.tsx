@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import { useConsent } from "@/lib/consent/use-consent";
 import { ConsentPreferencesDialog } from "./consent-preferences";
+import { tr } from "@/lib/i18n/messages";
 
 /** Used on /gestion-cookies/ so visitors can review and change their choices at any time. */
 export function ConsentSettings() {
@@ -29,7 +30,7 @@ export function ConsentSettings() {
       </dl>
       {hydrated && !decided ? (
         <p className="mt-3 text-xs text-muted-foreground">
-          Aucun choix enregistré : aucun service tiers n&apos;est chargé.
+          {tr("Aucun choix enregistré : aucun service tiers n'est chargé.")}
         </p>
       ) : null}
       <Button className="mt-4" onClick={() => setOpen(true)}>

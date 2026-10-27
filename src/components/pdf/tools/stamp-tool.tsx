@@ -31,17 +31,19 @@ import {
 import { standardFontFamilies as fontFamilies, type FontFamily } from "@/lib/pdf/fonts";
 import { hexToRgb, rgbToHex } from "@/lib/pdf/annotations/types";
 import { formatBytes } from "@/lib/files/format";
+import { tr } from "@/lib/i18n/messages";
+import { currentLanguageTag } from "@/lib/i18n";
 
 const TOOL_ID = "pdf-stamp";
 
 const templates = [
   { label: "1 / 3", value: "{page} / {total}" },
-  { label: "Page 1 sur 3", value: "Page {page} sur {total}" },
+  { label: tr("Page 1 sur 3"), value: tr("Page {page} sur {total}") },
   { label: "1", value: "{page}" },
   { label: "- 1 -", value: "- {page} -" },
   { label: "Date", value: "{date}" },
-  { label: "Nom du fichier", value: "{file}" },
-  { label: "Personnalisé", value: "" },
+  { label: tr("Nom du fichier"), value: "{file}" },
+  { label: tr("Personnalisé"), value: "" },
 ];
 
 export function StampTool() {
@@ -53,7 +55,7 @@ export function StampTool() {
 }
 
 function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
-  const today = new Intl.DateTimeFormat("fr-FR").format(new Date());
+  const today = new Intl.DateTimeFormat(currentLanguageTag()).format(new Date());
   const [footerOn, setFooterOn] = React.useState(true);
   const [footer, setFooter] = React.useState("{page} / {total}");
   const [footerPos, setFooterPos] = React.useState<StampPosition>("center");
@@ -103,8 +105,9 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       >
         {replaced ? (
           <Alert variant="warning">
-            Certains caractères non pris en charge par les polices standard ont été remplacés par «
-            ? ».
+            {tr(
+              "Certains caractères non pris en charge par les polices standard ont été remplacés par « ? ».",
+            )}
           </Alert>
         ) : null}
       </DonePanel>
@@ -131,13 +134,13 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       {on ? (
         <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
           <div className="space-y-1">
-            <Label htmlFor={`${id}-model`}>Modèle</Label>
+            <Label htmlFor={`${id}-model`}>{tr("Modèle")}</Label>
             <Select
               value={templates.some((t) => t.value === value) ? value : ""}
               onValueChange={(v) => v && setValue(v)}
             >
               <SelectTrigger id={`${id}-model`}>
-                <SelectValue placeholder="Personnalisé" />
+                <SelectValue placeholder={tr("Personnalisé")} />
               </SelectTrigger>
               <SelectContent>
                 {templates
@@ -151,25 +154,27 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
             </Select>
           </div>
           <div className="space-y-1">
-            <Label htmlFor={`${id}-text`}>Texte</Label>
+            <Label htmlFor={`${id}-text`}>{tr("Texte")}</Label>
             <Input
               id={`${id}-text`}
               value={value}
               onChange={(e) => setValue(e.target.value)}
               data-testid={`${id}-text`}
             />
-            <p className="text-xs text-muted-foreground">Aperçu : {preview(value) || "—"}</p>
+            <p className="text-xs text-muted-foreground">
+              {tr("Aperçu")} : {preview(value) || "—"}
+            </p>
           </div>
           <div className="space-y-1">
-            <Label htmlFor={`${id}-pos`}>Position</Label>
+            <Label htmlFor={`${id}-pos`}>{tr("Position")}</Label>
             <Select value={pos} onValueChange={(v) => setPos(v as StampPosition)}>
               <SelectTrigger id={`${id}-pos`} className="w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="left">Gauche</SelectItem>
-                <SelectItem value="center">Centre</SelectItem>
-                <SelectItem value="right">Droite</SelectItem>
+                <SelectItem value="left">{tr("Gauche")}</SelectItem>
+                <SelectItem value="center">{tr("Centre")}</SelectItem>
+                <SelectItem value="right">{tr("Droite")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -187,12 +192,13 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         onReset={reset}
       />
       <p className="text-sm text-muted-foreground">
-        Variables disponibles : <code>{"{page}"}</code> numéro, <code>{"{total}"}</code> nombre de
-        pages, <code>{"{date}"}</code>, <code>{"{file}"}</code> nom du fichier.
+        {tr("Variables disponibles :")} <code>{"{page}"}</code> {tr("numéro,")}{" "}
+        <code>{"{total}"}</code> {tr("nombre de pages,")} <code>{"{date}"}</code>,{" "}
+        <code>{"{file}"}</code> {tr("nom du fichier.")}
       </p>
       {stampEditor(
         "footer",
-        "Pied de page",
+        tr("Pied de page"),
         footerOn,
         setFooterOn,
         footer,
@@ -202,7 +208,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       )}
       {stampEditor(
         "header",
-        "En-tête",
+        tr("En-tête"),
         headerOn,
         setHeaderOn,
         header,
@@ -212,7 +218,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
       )}
       <ToolPanel className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <div className="space-y-1">
-          <Label htmlFor="stamp-font">Police</Label>
+          <Label htmlFor="stamp-font">{tr("Police")}</Label>
           <Select value={fontFamily} onValueChange={(v) => setFontFamily(v as FontFamily)}>
             <SelectTrigger id="stamp-font">
               <SelectValue />
@@ -227,7 +233,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           </Select>
         </div>
         <div className="space-y-1">
-          <Label htmlFor="stamp-size">Taille (pt)</Label>
+          <Label htmlFor="stamp-size">{tr("Taille (pt)")}</Label>
           <Input
             id="stamp-size"
             type="number"
@@ -238,7 +244,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="stamp-color">Couleur</Label>
+          <Label htmlFor="stamp-color">{tr("Couleur")}</Label>
           <input
             id="stamp-color"
             type="color"
@@ -248,7 +254,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="stamp-margin">Marge (mm)</Label>
+          <Label htmlFor="stamp-margin">{tr("Marge (mm)")}</Label>
           <Input
             id="stamp-margin"
             type="number"
@@ -259,7 +265,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="stamp-start">Premier numéro</Label>
+          <Label htmlFor="stamp-start">{tr("Premier numéro")}</Label>
           <Input
             id="stamp-start"
             type="number"
@@ -269,7 +275,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="stamp-from">À partir de la page</Label>
+          <Label htmlFor="stamp-from">{tr("À partir de la page")}</Label>
           <Input
             id="stamp-from"
             type="number"
@@ -280,7 +286,9 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
           />
         </div>
         <div className="space-y-1 sm:col-span-3">
-          <Label htmlFor="stamp-date">Valeur de {"{date}"}</Label>
+          <Label htmlFor="stamp-date">
+            {tr("Valeur de")} {"{date}"}
+          </Label>
           <Input id="stamp-date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
       </ToolPanel>
@@ -292,7 +300,7 @@ function Workspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
         disabled={!footerOn && !headerOn}
         data-testid="stamp-run"
       >
-        <ListOrdered aria-hidden="true" /> Appliquer
+        <ListOrdered aria-hidden="true" /> {tr("Appliquer")}
       </Button>
       <span className="sr-only">{rgbToHex(hexToRgb(color))}</span>
     </div>

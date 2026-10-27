@@ -257,6 +257,10 @@ navigateur seul. Les outils liraient leurs limites via `getLimits(entitlements)`
 
 ## Internationalisation
 
-Les chaînes d'interface sont centralisées dans `src/lib/i18n/fr.ts` (typé `Dictionary`), le contenu outil
-dans le registre. Ajouter l'anglais = un dictionnaire `en.ts` de même forme, un registre de contenu
-traduit, un préfixe de route `/en/` et les balises `hreflang` dans `buildPageMetadata`.
+Deux langues : le français à la racine (langue source) et l'anglais sous `/en/` (racine App Router
+`src/app/en/`, slugs anglais). Le dictionnaire `src/lib/i18n/fr.ts` (typé `Dictionary`) a son équivalent
+`en.ts` de même forme ; `t` est résolu à l'accès selon la locale ambiante (`getLocale()` : mémo par requête
+côté serveur, `LocaleProvider` côté client). Les interfaces d'outils utilisent `tr("texte français")` avec
+une carte français → anglais par domaine (`src/lib/i18n/messages/en/`). Le contenu des outils est traduit par
+surcharges d'identifiant (`src/lib/tools/registry/en/`), les familles dans `categories-en.ts`, les guides dans
+`guides-en.ts`. Détail, SEO international et procédure d'ajout d'une langue : `docs/INTERNATIONALISATION.md`.

@@ -26,6 +26,8 @@ import {
   vatFromTtc,
   whatPercent,
 } from "@/lib/calc/percent";
+import { tr } from "@/lib/i18n/messages";
+import { currentLanguageTag } from "@/lib/i18n";
 
 function NumberField({
   id,
@@ -89,24 +91,24 @@ export function PercentTool() {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <ToolPanel className="space-y-3">
-        <h2 className="font-heading text-base font-bold">Calculer X % d&apos;un nombre</h2>
+        <h2 className="font-heading text-base font-bold">{tr("Calculer X % d'un nombre")}</h2>
         <div className="grid grid-cols-2 gap-3">
           <NumberField
             id="pct-a-p"
-            label="Pourcentage"
+            label={tr("Pourcentage")}
             value={a.p}
             onChange={(v) => setA({ ...a, p: v })}
             suffix="%"
           />
           <NumberField
             id="pct-a-total"
-            label="de"
+            label={tr("de")}
             value={a.total}
             onChange={(v) => setA({ ...a, total: v })}
           />
         </div>
         <Result
-          label="Résultat"
+          label={tr("Résultat")}
           value={fmt(
             n(a.p) !== null && n(a.total) !== null ? percentOf(n(a.p)!, n(a.total)!) : null,
           )}
@@ -114,23 +116,25 @@ export function PercentTool() {
         />
       </ToolPanel>
       <ToolPanel className="space-y-3">
-        <h2 className="font-heading text-base font-bold">X représente quel pourcentage de Y ?</h2>
+        <h2 className="font-heading text-base font-bold">
+          {tr("X représente quel pourcentage de Y ?")}
+        </h2>
         <div className="grid grid-cols-2 gap-3">
           <NumberField
             id="pct-b-part"
-            label="Valeur"
+            label={tr("Valeur")}
             value={b.part}
             onChange={(v) => setB({ ...b, part: v })}
           />
           <NumberField
             id="pct-b-total"
-            label="sur un total de"
+            label={tr("sur un total de")}
             value={b.total}
             onChange={(v) => setB({ ...b, total: v })}
           />
         </div>
         <Result
-          label="Pourcentage"
+          label={tr("Pourcentage")}
           value={fmt(
             n(b.part) !== null && n(b.total) !== null ? whatPercent(n(b.part)!, n(b.total)!) : null,
             " %",
@@ -139,23 +143,23 @@ export function PercentTool() {
         />
       </ToolPanel>
       <ToolPanel className="space-y-3">
-        <h2 className="font-heading text-base font-bold">Variation entre deux valeurs</h2>
+        <h2 className="font-heading text-base font-bold">{tr("Variation entre deux valeurs")}</h2>
         <div className="grid grid-cols-2 gap-3">
           <NumberField
             id="pct-c-from"
-            label="Valeur de départ"
+            label={tr("Valeur de départ")}
             value={c.from}
             onChange={(v) => setC({ ...c, from: v })}
           />
           <NumberField
             id="pct-c-to"
-            label="Valeur d'arrivée"
+            label={tr("Valeur d'arrivée")}
             value={c.to}
             onChange={(v) => setC({ ...c, to: v })}
           />
         </div>
         <Result
-          label="Évolution"
+          label={tr("Évolution")}
           value={fmt(
             n(c.from) !== null && n(c.to) !== null ? percentChange(n(c.from)!, n(c.to)!) : null,
             " %",
@@ -164,24 +168,26 @@ export function PercentTool() {
         />
       </ToolPanel>
       <ToolPanel className="space-y-3">
-        <h2 className="font-heading text-base font-bold">Appliquer une remise ou une hausse</h2>
+        <h2 className="font-heading text-base font-bold">
+          {tr("Appliquer une remise ou une hausse")}
+        </h2>
         <div className="grid grid-cols-2 gap-3">
           <NumberField
             id="pct-d-value"
-            label="Valeur"
+            label={tr("Valeur")}
             value={d.value}
             onChange={(v) => setD({ ...d, value: v })}
           />
           <NumberField
             id="pct-d-p"
-            label="Variation (− pour une remise)"
+            label={tr("Variation (− pour une remise)")}
             value={d.p}
             onChange={(v) => setD({ ...d, p: v })}
             suffix="%"
           />
         </div>
         <Result
-          label="Nouvelle valeur"
+          label={tr("Nouvelle valeur")}
           value={fmt(
             n(d.value) !== null && n(d.p) !== null ? applyPercent(n(d.value)!, n(d.p)!) : null,
           )}
@@ -190,24 +196,24 @@ export function PercentTool() {
       </ToolPanel>
       <ToolPanel className="space-y-3 md:col-span-2">
         <h2 className="font-heading text-base font-bold">
-          Retrouver la valeur avant une variation
+          {tr("Retrouver la valeur avant une variation")}
         </h2>
         <div className="grid gap-3 sm:grid-cols-3">
           <NumberField
             id="pct-e-value"
-            label="Valeur après variation"
+            label={tr("Valeur après variation")}
             value={e.value}
             onChange={(v) => setE({ ...e, value: v })}
           />
           <NumberField
             id="pct-e-p"
-            label="Variation appliquée"
+            label={tr("Variation appliquée")}
             value={e.p}
             onChange={(v) => setE({ ...e, p: v })}
             suffix="%"
           />
           <Result
-            label="Valeur d'origine"
+            label={tr("Valeur d'origine")}
             value={fmt(
               n(e.value) !== null && n(e.p) !== null ? beforePercent(n(e.value)!, n(e.p)!) : null,
             )}
@@ -215,8 +221,9 @@ export function PercentTool() {
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Exemple : un prix de 120 € après +20 % de TVA correspond à 100 € HT. Les nombres acceptent
-          la virgule ou le point.
+          {tr(
+            "Exemple : un prix de 120 € après +20 % de TVA correspond à 100 € HT. Les nombres acceptent la virgule ou le point.",
+          )}
         </p>
       </ToolPanel>
     </div>
@@ -245,25 +252,31 @@ export function VatTool() {
     <div className="space-y-4">
       <ToolPanel className="space-y-4">
         <Segmented
-          label="Montant connu"
+          label={tr("Montant connu")}
           value={mode}
           onChange={setMode}
           options={[
-            { value: "ht", label: "Hors taxes (HT)", description: "Je connais le HT" },
-            { value: "ttc", label: "Toutes taxes (TTC)", description: "Je connais le TTC" },
-            { value: "tva", label: "Montant de TVA", description: "Je connais la TVA" },
+            { value: "ht", label: tr("Hors taxes (HT)"), description: tr("Je connais le HT") },
+            { value: "ttc", label: tr("Toutes taxes (TTC)"), description: tr("Je connais le TTC") },
+            { value: "tva", label: tr("Montant de TVA"), description: tr("Je connais la TVA") },
           ]}
         />
         <div className="grid gap-3 sm:grid-cols-3">
           <NumberField
             id="vat-amount"
-            label={mode === "ht" ? "Montant HT" : mode === "ttc" ? "Montant TTC" : "Montant de TVA"}
+            label={
+              mode === "ht"
+                ? tr("Montant HT")
+                : mode === "ttc"
+                  ? tr("Montant TTC")
+                  : tr("Montant de TVA")
+            }
             value={amount}
             onChange={setAmount}
             suffix="€"
           />
           <div className="space-y-1">
-            <Label htmlFor="vat-rate">Taux de TVA</Label>
+            <Label htmlFor="vat-rate">{tr("Taux de TVA")}</Label>
             <Select value={rate} onValueChange={setRate}>
               <SelectTrigger id="vat-rate">
                 <SelectValue />
@@ -274,14 +287,14 @@ export function VatTool() {
                     {r.label}
                   </SelectItem>
                 ))}
-                <SelectItem value="custom">Autre taux…</SelectItem>
+                <SelectItem value="custom">{tr("Autre taux…")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {rate === "custom" ? (
             <NumberField
               id="vat-custom"
-              label="Taux personnalisé"
+              label={tr("Taux personnalisé")}
               value={custom}
               onChange={setCustom}
               suffix="%"
@@ -290,27 +303,41 @@ export function VatTool() {
         </div>
       </ToolPanel>
       <div className="grid gap-3 sm:grid-cols-3" data-testid="vat-results">
-        <Result label="Hors taxes (HT)" value={fmt(breakdown?.ht, " €")} testId="vat-ht" />
+        <Result label={tr("Hors taxes (HT)")} value={fmt(breakdown?.ht, " €")} testId="vat-ht" />
         <Result
-          label={`TVA (${rateValue ?? "—"} %)`}
+          label={tr("TVA ({rate} %)", { rate: rateValue ?? "—" })}
           value={fmt(breakdown?.tva, " €")}
           testId="vat-tva"
         />
-        <Result label="Toutes taxes (TTC)" value={fmt(breakdown?.ttc, " €")} testId="vat-ttc" />
+        <Result
+          label={tr("Toutes taxes (TTC)")}
+          value={fmt(breakdown?.ttc, " €")}
+          testId="vat-ttc"
+        />
       </div>
       {value !== null ? (
         <ToolPanel className="space-y-2">
           <p className="flex items-center gap-2 text-sm font-medium">
-            <ArrowLeftRight className="size-4" aria-hidden="true" /> Comparaison des taux français
-            pour {formatAmount(value)} € {mode === "ht" ? "HT" : mode === "ttc" ? "TTC" : "de TVA"}
+            <ArrowLeftRight className="size-4" aria-hidden="true" />{" "}
+            {mode === "ht"
+              ? tr("Comparaison des taux français pour {amount} € HT", {
+                  amount: formatAmount(value),
+                })
+              : mode === "ttc"
+                ? tr("Comparaison des taux français pour {amount} € TTC", {
+                    amount: formatAmount(value),
+                  })
+                : tr("Comparaison des taux français pour {amount} € de TVA", {
+                    amount: formatAmount(value),
+                  })}
           </p>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="py-1 font-semibold">Taux</th>
-                <th className="py-1 text-right font-semibold">HT</th>
-                <th className="py-1 text-right font-semibold">TVA</th>
-                <th className="py-1 text-right font-semibold">TTC</th>
+                <th className="py-1 font-semibold">{tr("Taux")}</th>
+                <th className="py-1 text-right font-semibold">{tr("HT")}</th>
+                <th className="py-1 text-right font-semibold">{tr("TVA")}</th>
+                <th className="py-1 text-right font-semibold">{tr("TTC")}</th>
               </tr>
             </thead>
             <tbody>
@@ -323,7 +350,7 @@ export function VatTool() {
                       : vatFromAmount(value, r.rate);
                 return (
                   <tr key={r.rate} className="border-b border-border/60 tabular-nums">
-                    <td className="py-1">{r.rate.toLocaleString("fr-FR")} %</td>
+                    <td className="py-1">{r.rate.toLocaleString(currentLanguageTag())} %</td>
                     <td className="py-1 text-right">{fmt(row?.ht)}</td>
                     <td className="py-1 text-right">{fmt(row?.tva)}</td>
                     <td className="py-1 text-right">{fmt(row?.ttc)}</td>

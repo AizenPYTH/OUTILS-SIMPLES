@@ -1,4 +1,5 @@
 /** Colour parsing, conversion and WCAG contrast (pure). */
+import { tr } from "@/lib/i18n/messages";
 
 export interface Rgb {
   r: number;
@@ -229,11 +230,11 @@ export function colorVariants(rgb: Rgb): { label: string; rgb: Rgb }[] {
   const hsl = rgbToHsl(rgb);
   const at = (l: number) => hslToRgb({ ...hsl, l: Math.max(0, Math.min(100, l)) });
   return [
-    { label: "Plus clair (+20)", rgb: at(hsl.l + 20) },
-    { label: "Plus clair (+10)", rgb: at(hsl.l + 10) },
-    { label: "Couleur", rgb: { ...rgb, a: 1 } },
-    { label: "Plus foncé (−10)", rgb: at(hsl.l - 10) },
-    { label: "Plus foncé (−20)", rgb: at(hsl.l - 20) },
-    { label: "Complémentaire", rgb: hslToRgb({ ...hsl, h: (hsl.h + 180) % 360 }) },
+    { label: tr("Plus clair (+20)"), rgb: at(hsl.l + 20) },
+    { label: tr("Plus clair (+10)"), rgb: at(hsl.l + 10) },
+    { label: tr("Couleur"), rgb: { ...rgb, a: 1 } },
+    { label: tr("Plus foncé (−10)"), rgb: at(hsl.l - 10) },
+    { label: tr("Plus foncé (−20)"), rgb: at(hsl.l - 20) },
+    { label: tr("Complémentaire"), rgb: hslToRgb({ ...hsl, h: (hsl.h + 180) % 360 }) },
   ];
 }

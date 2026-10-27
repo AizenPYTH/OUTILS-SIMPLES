@@ -1,4 +1,6 @@
 /** Builds the string encoded in a QR code for each supported kind (pure, tested). */
+import { tr } from "@/lib/i18n/messages";
+
 export type QrKind = "url" | "text" | "wifi" | "vcard";
 
 export interface WifiPayload {
@@ -46,7 +48,7 @@ export function buildQrPayload(
         value: input.text,
         error:
           input.text.length > 2000
-            ? "Texte trop long pour un QR code lisible (2 000 caractères max)."
+            ? tr("Texte trop long pour un QR code lisible (2 000 caractères max).")
             : null,
       };
     case "wifi": {
@@ -55,7 +57,7 @@ export function buildQrPayload(
       if (security !== "nopass" && !password)
         return {
           value: "",
-          error: "Indiquez le mot de passe du réseau (ou choisissez « Aucune »).",
+          error: tr("Indiquez le mot de passe du réseau (ou choisissez « Aucune »)."),
         };
       const parts = [
         `WIFI:T:${security};`,

@@ -16,6 +16,7 @@ import { formatBytes } from "@/lib/files/format";
 import type { ParsedRanges } from "@/lib/pdf/page-ranges";
 import { normalizeRotation, rotatePages } from "@/lib/pdf/operations/pages";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 const TOOL_ID = "pdf-rotate";
 
@@ -52,7 +53,10 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
     const bytes = op.state.result;
     return (
       <DonePanel
-        summary={`${changed.length} page(s) pivotée(s) · ${formatBytes(bytes.byteLength)}`}
+        summary={tr("{n} page(s) pivotée(s) · {size}", {
+          n: changed.length,
+          size: formatBytes(bytes.byteLength),
+        })}
         onDownload={() => downloadPdf(bytes, pdf.file.name, "pivote", TOOL_ID)}
         onStartOver={() => {
           op.reset();
@@ -78,10 +82,10 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
             onClick={() => rotate(all, 90)}
             data-testid="rotate-all-cw"
           >
-            <RotateCw aria-hidden="true" /> Tout pivoter à droite
+            <RotateCw aria-hidden="true" /> {tr("Tout pivoter à droite")}
           </Button>
           <Button type="button" variant="outline" onClick={() => rotate(all, -90)}>
-            <RotateCcw aria-hidden="true" /> Tout pivoter à gauche
+            <RotateCcw aria-hidden="true" /> {tr("Tout pivoter à gauche")}
           </Button>
           <Button
             type="button"
@@ -101,7 +105,7 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
                 setRangeText(v);
                 setRangeParsed(parsed);
               }}
-              label="Pivoter une plage de pages"
+              label={tr("Pivoter une plage de pages")}
             />
           </div>
           <div className="flex gap-2">
@@ -110,7 +114,7 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
               variant="secondary"
               disabled={!rangeParsed}
               onClick={() => rangeParsed && rotate(rangeParsed.indices, 90)}
-              aria-label="Pivoter la plage à droite"
+              aria-label={tr("Pivoter la plage à droite")}
             >
               <RotateCw aria-hidden="true" /> 90°
             </Button>
@@ -119,7 +123,7 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
               variant="secondary"
               disabled={!rangeParsed}
               onClick={() => rangeParsed && rotate(rangeParsed.indices, 180)}
-              aria-label="Pivoter la plage de 180 degrés"
+              aria-label={tr("Pivoter la plage de 180 degrés")}
             >
               180°
             </Button>
@@ -128,7 +132,7 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
       </div>
       <ul
         className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(112px,1fr))]"
-        aria-label="Pages du document"
+        aria-label={tr("Pages du document")}
         data-testid="page-grid"
       >
         {pdf.pages.map((page) => {
@@ -145,7 +149,7 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
                       variant="ghost"
                       size="icon-sm"
                       onClick={() => rotate([page.index], -90)}
-                      aria-label={`Pivoter la page ${page.index + 1} à gauche`}
+                      aria-label={tr("Pivoter la page {n} à gauche", { n: page.index + 1 })}
                     >
                       <RotateCcw aria-hidden="true" />
                     </Button>
@@ -157,7 +161,7 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
                       variant="ghost"
                       size="icon-sm"
                       onClick={() => rotate([page.index], 90)}
-                      aria-label={`Pivoter la page ${page.index + 1} à droite`}
+                      aria-label={tr("Pivoter la page {n} à droite", { n: page.index + 1 })}
                       data-testid={`rotate-page-${page.index}`}
                     >
                       <RotateCw aria-hidden="true" />
@@ -185,8 +189,11 @@ function RotateWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
         disabled={changed.length === 0}
         data-testid="rotate-export"
       >
-        {t.common.export} ({changed.length} page{changed.length > 1 ? "s" : ""} modifiée
-        {changed.length > 1 ? "s" : ""})
+        {t.common.export} (
+        {tr(changed.length > 1 ? "{n} pages modifiées" : "{n} page modifiée", {
+          n: changed.length,
+        })}
+        )
       </Button>
     </div>
   );

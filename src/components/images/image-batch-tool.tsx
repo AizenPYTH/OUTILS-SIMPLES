@@ -13,6 +13,7 @@ import { deriveOutputName } from "@/lib/files/filename";
 import { buildZip } from "@/lib/pdf/browser/zip";
 import { acceptedInputMimeTypes } from "@/lib/images/types";
 import { track } from "@/lib/analytics/events";
+import { tr } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 import { useImageBatch, type BatchItem, type BatchProcessor } from "./use-image-batch";
 
@@ -20,12 +21,12 @@ export const IMAGE_MAX_SIZE = 50 * 1024 * 1024;
 export const IMAGE_MAX_FILES = 50;
 
 export function validateImageFile(file: File): string | null {
-  if (file.size === 0) return "fichier vide";
+  if (file.size === 0) return tr("fichier vide");
   if (file.size > IMAGE_MAX_SIZE)
-    return `fichier trop volumineux (max ${formatBytes(IMAGE_MAX_SIZE)})`;
+    return tr("fichier trop volumineux (max {max})", { max: formatBytes(IMAGE_MAX_SIZE) });
   const type = file.type.toLowerCase();
   if (type && !(acceptedInputMimeTypes as readonly string[]).includes(type))
-    return "format non pris en charge (JPG, PNG, WebP, GIF, BMP, AVIF, SVG, HEIC)";
+    return tr("format non pris en charge (JPG, PNG, WebP, GIF, BMP, AVIF, SVG, HEIC)");
   return null;
 }
 
@@ -69,7 +70,12 @@ export function ImageBatchTool({
     if (single) batch.clear();
     const dropped = await batch.add(files);
     if (dropped > 0)
-      toast.info(`${dropped} fichier(s) ignoré(s) : ${IMAGE_MAX_FILES} fichiers maximum.`);
+      toast.info(
+        tr("{n} fichier(s) ignoré(s) : {max} fichiers maximum.", {
+          n: dropped,
+          max: IMAGE_MAX_FILES,
+        }),
+      );
   };
 
   const downloadAll = () => {
@@ -103,16 +109,25 @@ export function ImageBatchTool({
           accept="image/*"
           validate={validateImageFile}
           multiple={!single}
-          title={single ? "Déposez une image ici" : "Déposez vos images ici"}
-          hint={`JPG, PNG, WebP, GIF, BMP, AVIF, SVG · ${formatBytes(IMAGE_MAX_SIZE)} max par fichier${single ? "" : ` · jusqu'à ${IMAGE_MAX_FILES} fichiers`}`}
-          buttonLabel={single ? "Choisir une image" : "Choisir des images"}
+          title={single ? tr("Déposez une image ici") : tr("Déposez vos images ici")}
+          hint={
+            single
+              ? tr("JPG, PNG, WebP, GIF, BMP, AVIF, SVG · {max} max par fichier", {
+                  max: formatBytes(IMAGE_MAX_SIZE),
+                })
+              : tr(
+                  "JPG, PNG, WebP, GIF, BMP, AVIF, SVG · {max} max par fichier · jusqu'à {count} fichiers",
+                  { max: formatBytes(IMAGE_MAX_SIZE), count: IMAGE_MAX_FILES },
+                )
+          }
+          buttonLabel={single ? tr("Choisir une image") : tr("Choisir des images")}
           capture={capture}
           testId="image-dropzone"
         />
       ) : (
         <>
           <div data-testid="batch-options">{options}</div>
-          <ul className="space-y-2" aria-label="Images à traiter" data-testid="batch-list">
+          <ul className="space-y-2" aria-label={tr("Images à traiter")} data-testid="batch-list">
             {items.map((item) => (
               <li
                 key={item.id}
@@ -152,18 +167,21 @@ export function ImageBatchTool({
                   </p>
                   {item.error ? (
                     <p className="text-xs text-destructive" role="alert">
-                      {item.error}
+                      {tr(item.error)}
                     </p>
                   ) : null}
                 </div>
                 {item.status === "processing" ? (
-                  <Loader2 className="size-4 animate-spin text-link" aria-label="Traitement" />
+                  <Loader2
+                    className="size-4 animate-spin text-link"
+                    aria-label={tr("Traitement")}
+                  />
                 ) : null}
                 {item.status === "done" ? (
-                  <CheckCircle2 className="size-4 text-success" aria-label="Terminé" />
+                  <CheckCircle2 className="size-4 text-success" aria-label={tr("Terminé")} />
                 ) : null}
                 {item.status === "error" ? (
-                  <AlertCircle className="size-4 text-destructive" aria-label="Erreur" />
+                  <AlertCircle className="size-4 text-destructive" aria-label={tr("Erreur")} />
                 ) : null}
                 {item.result ? (
                   <Button
@@ -171,7 +189,7 @@ export function ImageBatchTool({
                     variant="outline"
                     size="sm"
                     onClick={() => triggerDownload(item.result!.blob, item.result!.name)}
-                    aria-label={`Télécharger ${item.result.name}`}
+                    aria-label={tr("Télécharger {name}", { name: item.result.name })}
                   >
                     <Download aria-hidden="true" />
                   </Button>
@@ -181,7 +199,7 @@ export function ImageBatchTool({
                   variant="ghost"
                   size="icon-sm"
                   onClick={() => batch.remove(item.id)}
-                  aria-label={`Retirer ${item.file.name}`}
+                  aria-label={tr("Retirer {name}", { name: item.file.name })}
                   disabled={batch.running}
                 >
                   <Trash2 aria-hidden="true" />
@@ -196,9 +214,9 @@ export function ImageBatchTool({
               validate={validateImageFile}
               multiple
               compact
-              title="Ajouter des images"
-              hint="Glissez d'autres fichiers ou cliquez"
-              buttonLabel="Ajouter des images"
+              title={tr("Ajouter des images")}
+              hint={tr("Glissez d'autres fichiers ou cliquez")}
+              buttonLabel={tr("Ajouter des images")}
               disabled={batch.running}
               testId="image-dropzone-more"
             />
@@ -207,10 +225,13 @@ export function ImageBatchTool({
             <ToolPanel className="space-y-2" role="status" aria-live="polite">
               <div className="flex items-center justify-between text-sm">
                 <span>
-                  Traitement {batch.progress.current} / {batch.progress.total}…
+                  {tr("Traitement {current} / {total}…", {
+                    current: batch.progress.current,
+                    total: batch.progress.total,
+                  })}
                 </span>
                 <Button type="button" variant="ghost" size="sm" onClick={batch.cancel}>
-                  <X aria-hidden="true" /> Interrompre
+                  <X aria-hidden="true" /> {tr("Interrompre")}
                 </Button>
               </div>
               <Progress
@@ -219,7 +240,7 @@ export function ImageBatchTool({
                     ? (batch.progress.current / batch.progress.total) * 100
                     : undefined
                 }
-                label="Progression"
+                label={tr("Progression")}
               />
             </ToolPanel>
           ) : null}
@@ -229,13 +250,14 @@ export function ImageBatchTool({
               aria-live="polite"
               data-testid="batch-summary"
             >
-              {items.length} image{items.length > 1 ? "s" : ""} · {formatBytes(totalBefore)}
+              {tr(items.length > 1 ? "{n} images" : "{n} image", { n: items.length })} ·{" "}
+              {formatBytes(totalBefore)}
               {hasResults ? (
                 <>
                   {" → "}
                   {formatBytes(totalAfter)}
                   {totalBefore > 0 && totalAfter < totalBefore
-                    ? ` (${formatPercent((totalBefore - totalAfter) / totalBefore)} de moins)`
+                    ? ` (${tr("{percent} de moins", { percent: formatPercent((totalBefore - totalAfter) / totalBefore) })})`
                     : ""}
                 </>
               ) : null}
@@ -247,7 +269,7 @@ export function ImageBatchTool({
                 onClick={batch.clear}
                 disabled={batch.running}
               >
-                Tout retirer
+                {tr("Tout retirer")}
               </Button>
               {hasResults ? (
                 <Button
@@ -257,7 +279,7 @@ export function ImageBatchTool({
                   data-testid="batch-download-all"
                 >
                   <Download aria-hidden="true" />{" "}
-                  {doneItems.length > 1 ? "Tout télécharger (ZIP)" : "Télécharger"}
+                  {doneItems.length > 1 ? tr("Tout télécharger (ZIP)") : tr("Télécharger")}
                 </Button>
               ) : null}
               <Button

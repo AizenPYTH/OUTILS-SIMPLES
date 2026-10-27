@@ -78,6 +78,7 @@ import {
 import { isPdfError, PdfError, toPdfError } from "@/lib/pdf/errors";
 import type { OcrLanguage } from "@/lib/ocr/types";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 import { clamp, uid } from "@/lib/utils";
 import { AnnotationOverlay, autosizeText } from "./overlay";
 import { FloatingBar } from "./floating-bar";
@@ -275,15 +276,22 @@ export function AnnotationWorkspace({
         });
         if (report.skipped.length)
           toast.error(
-            `${report.skipped.length} modification(s) impossible(s) : ${report.skipped.map((s) => s.reason).join(", ")}.`,
+            tr("{n} modification(s) impossible(s) : {reasons}.", {
+              n: report.skipped.length,
+              reasons: report.skipped.map((s) => tr(s.reason)).join(", "),
+            }),
           );
         if (report.fontReplaced)
           toast.info(
-            "Un caractère est absent de la police d'origine : ce passage utilise une police standard proche.",
+            tr(
+              "Un caractère est absent de la police d'origine : ce passage utilise une police standard proche.",
+            ),
           );
       } catch (error) {
         if (!cancelled)
-          toast.error(isPdfError(error) ? error.message : "La modification du texte a échoué.");
+          toast.error(
+            isPdfError(error) ? tr(error.message) : tr("La modification du texte a échoué."),
+          );
       } finally {
         if (!cancelled && request === previewRequest.current) setPreviewBusy(false);
       }
@@ -314,7 +322,9 @@ export function AnnotationWorkspace({
         };
     history.commit(
       { textEdits: [...textEdits.filter((e) => e !== existing), edit] },
-      `Texte modifié : « ${text.slice(0, 24)}${text.length > 24 ? "…" : ""} »`,
+      tr("Texte modifié : « {text} »", {
+        text: `${text.slice(0, 24)}${text.length > 24 ? "…" : ""}`,
+      }),
     );
   };
 
@@ -325,7 +335,7 @@ export function AnnotationWorkspace({
           (e) => !(e.pageIndex === run.pageIndex && e.opIndex === run.opIndex),
         ),
       },
-      "Texte d'origine rétabli",
+      tr("Texte d'origine rétabli"),
     );
   };
 
@@ -341,7 +351,7 @@ export function AnnotationWorkspace({
       if (!cancelled)
         setPageText({
           key: textKey,
-          status: { kind: "mismatch", runs: [], detail: "analyse impossible" },
+          status: { kind: "mismatch", runs: [], detail: tr("analyse impossible") },
         });
     });
     return () => {
@@ -504,7 +514,7 @@ export function AnnotationWorkspace({
   const duplicateSelected = () => {
     if (!selected) return;
     const copy = duplicateAnnotation(selected, uid(selected.type));
-    commitAnnotations([...annotations, copy], "Élément dupliqué");
+    commitAnnotations([...annotations, copy], tr("Élément dupliqué"));
     setSelectedId(copy.id);
   };
 
@@ -512,7 +522,7 @@ export function AnnotationWorkspace({
     if (!selected) return;
     commitAnnotations(
       annotations.filter((a) => a.id !== selected.id),
-      "Élément supprimé",
+      tr("Élément supprimé"),
     );
     setSelectedId(null);
   };
@@ -565,7 +575,7 @@ export function AnnotationWorkspace({
     };
     commitAnnotations(
       [...annotations, annotation],
-      role === "signature" ? "Signature placée" : "Image insérée",
+      role === "signature" ? tr("Signature placée") : tr("Image insérée"),
     );
     setSelectedId(annotation.id);
     setToolState("select");
@@ -681,8 +691,10 @@ export function AnnotationWorkspace({
         if (!quiet)
           toast.error(
             status.kind === "scanned"
-              ? "Ce passage est une image (page scannée) : lancez l'OCR pour le rendre modifiable."
-              : "Le texte de cette page ne peut pas être modifié en toute sécurité.",
+              ? tr(
+                  "Ce passage est une image (page scannée) : lancez l'OCR pour le rendre modifiable.",
+                )
+              : tr("Le texte de cette page ne peut pas être modifié en toute sécurité."),
           );
         return false;
       }
@@ -696,12 +708,17 @@ export function AnnotationWorkspace({
       if (!run) {
         if (!quiet)
           toast.error(
-            "Passage introuvable dans le flux de la page (texte coupé entre deux fragments).",
+            tr("Passage introuvable dans le flux de la page (texte coupé entre deux fragments)."),
           );
         return false;
       }
       if (!run.editable) {
-        if (!quiet) toast.error(`Passage non modifiable : ${run.reason ?? "police particulière"}.`);
+        if (!quiet)
+          toast.error(
+            tr("Passage non modifiable : {reason}.", {
+              reason: run.reason ? tr(run.reason) : tr("police particulière"),
+            }),
+          );
         return false;
       }
       const normalizedRun = normalizeForSearch(run.text);
@@ -711,7 +728,7 @@ export function AnnotationWorkspace({
       commitTextEdit(run, text);
       return true;
     } catch {
-      if (!quiet) toast.error("Le remplacement a échoué.");
+      if (!quiet) toast.error(tr("Le remplacement a échoué."));
       return false;
     }
   };
@@ -722,10 +739,12 @@ export function AnnotationWorkspace({
     // Work page by page from the last match so earlier edits do not shift later ones on the same run.
     for (let i = total - 1; i >= 0; i -= 1) if (await replaceMatch(i, true)) done += 1;
     if (done === 0)
-      toast.error("Aucun passage remplaçable : pages scannées ou polices non modifiables.");
+      toast.error(tr("Aucun passage remplaçable : pages scannées ou polices non modifiables."));
     else
       toast.success(
-        `${done} passage${done > 1 ? "s" : ""} remplacé${done > 1 ? "s" : ""} sur ${total}.`,
+        done > 1
+          ? tr("{done} passages remplacés sur {total}.", { done, total })
+          : tr("{done} passage remplacé sur {total}.", { done, total }),
       );
   };
 
@@ -752,14 +771,17 @@ export function AnnotationWorkspace({
       });
       // Edits of a previous OCR layer point at operators that no longer exist.
       const kept = textEdits.filter((e) => !pages.includes(e.pageIndex) || !ocrLayerRef.current);
-      if (kept.length !== textEdits.length) history.commit({ textEdits: kept }, "OCR relancé");
+      if (kept.length !== textEdits.length) history.commit({ textEdits: kept }, tr("OCR relancé"));
       toast.success(
-        `OCR terminé : ${info.words} mots reconnus, qualité estimée ${info.confidence} %.`,
+        tr("OCR terminé : {words} mots reconnus, qualité estimée {confidence} %.", {
+          words: info.words,
+          confidence: info.confidence,
+        }),
       );
       if (tool !== "editText") setTool("editText");
     } catch (error) {
       toast.error(
-        isPdfError(error) ? error.message : "Le document reconnu n'a pas pu être rouvert.",
+        isPdfError(error) ? tr(error.message) : tr("Le document reconnu n'a pas pu être rouvert."),
       );
     }
   };
@@ -771,8 +793,9 @@ export function AnnotationWorkspace({
     void layer.opened.destroy();
     ocr.reset();
     const kept = textEdits.filter((e) => !layer.info.pages.includes(e.pageIndex));
-    if (kept.length !== textEdits.length) history.commit({ textEdits: kept }, "Couche OCR retirée");
-    toast.info("Couche OCR retirée : le document est revenu à son état d'origine.");
+    if (kept.length !== textEdits.length)
+      history.commit({ textEdits: kept }, tr("Couche OCR retirée"));
+    toast.info(tr("Couche OCR retirée : le document est revenu à son état d'origine."));
   };
 
   const revertAll = () => {
@@ -780,7 +803,7 @@ export function AnnotationWorkspace({
     history.reset({ annotations: [], textEdits: [], plan: identityPlan(pdf.pageCount) });
     setSelectedId(null);
     setPosition(0);
-    toast.info("Document d'origine rétabli.");
+    toast.info(tr("Document d'origine rétabli."));
   };
 
   // Background colour under a run (viewport px) from the rendered canvas: median of samples
@@ -844,13 +867,25 @@ export function AnnotationWorkspace({
         setOcrLayer(null);
         history.commit(
           { plan: insertPlanned(plan, afterPosition, sources) },
-          `${appended.count} page${appended.count > 1 ? "s" : ""} insérée${appended.count > 1 ? "s" : ""}`,
+          appended.count > 1
+            ? tr("{n} pages insérées", { n: appended.count })
+            : tr("{n} page insérée", { n: appended.count }),
         );
         toast.success(
-          `${appended.count} page${appended.count > 1 ? "s" : ""} de « ${file.name} » insérée${appended.count > 1 ? "s" : ""} après la page ${afterPosition + 1}.`,
+          appended.count > 1
+            ? tr("{n} pages de « {name} » insérées après la page {after}.", {
+                n: appended.count,
+                name: file.name,
+                after: afterPosition + 1,
+              })
+            : tr("{n} page de « {name} » insérée après la page {after}.", {
+                n: appended.count,
+                name: file.name,
+                after: afterPosition + 1,
+              }),
         );
       } catch (error) {
-        toast.error(toPdfError(error, "CORRUPTED").message);
+        toast.error(tr(toPdfError(error, "CORRUPTED").message));
       }
     },
     [baseBytes, history, plan],
@@ -866,24 +901,27 @@ export function AnnotationWorkspace({
     void exportOp.run(async (report) => {
       let bytes = baseBytes;
       if (textEdits.length) {
-        report({ current: 1, total: 4, label: "Application des textes modifiés…" });
+        report({ current: 1, total: 4, label: tr("Application des textes modifiés…") });
         bytes = (await applyTextEdits(bytes, textEdits)).bytes;
       }
-      report({ current: 2, total: 4, label: "Intégration des éléments ajoutés…" });
+      report({ current: 2, total: 4, label: tr("Intégration des éléments ajoutés…") });
       const annotated = await applyAnnotations(bytes, kept);
       bytes = annotated.bytes;
       if (planChanged) {
-        report({ current: 3, total: 4, label: "Réorganisation des pages…" });
+        report({ current: 3, total: 4, label: tr("Réorganisation des pages…") });
         bytes = await applyPagePlan(bytes, plan);
       }
-      report({ current: 4, total: 4, label: "Vérification du fichier produit…" });
+      report({ current: 4, total: 4, label: tr("Vérification du fichier produit…") });
       const check = await openPdf(bytes);
       const pageCount = check.pageCount;
       await check.destroy();
       if (pageCount !== plan.length)
         throw new PdfError(
           "PROCESSING_FAILED",
-          `Le fichier produit compte ${pageCount} pages au lieu de ${plan.length}.`,
+          tr("Le fichier produit compte {n} pages au lieu de {expected}.", {
+            n: pageCount,
+            expected: plan.length,
+          }),
           { recoverable: true },
         );
       return { bytes, report: annotated.report, verified: { pageCount } };
@@ -954,7 +992,7 @@ export function AnnotationWorkspace({
         const dy = e.key === "ArrowUp" ? step : e.key === "ArrowDown" ? -step : 0;
         commitAnnotations(
           annotations.map((a) => (a.id === selected.id ? translateAnnotation(a, dx, dy) : a)),
-          "Élément déplacé",
+          tr("Élément déplacé"),
         );
       } else if (e.key === "PageDown") {
         e.preventDefault();
@@ -995,7 +1033,10 @@ export function AnnotationWorkspace({
 
   // --- Header state.
   const status: DocumentStatus = (() => {
-    const pages = `${pdf.pageCount} page${pdf.pageCount > 1 ? "s" : ""}`;
+    const pages =
+      pdf.pageCount > 1
+        ? tr("{n} pages", { n: pdf.pageCount })
+        : tr("{n} page", { n: pdf.pageCount });
     if (ocrLayer)
       return {
         label: `${pages} · OCR ${ocrLayer.info.confidence} %`,
@@ -1006,27 +1047,41 @@ export function AnnotationWorkspace({
     switch (d.kind) {
       case "native":
         return {
-          label: `${pages} · ${d.ocrLayerPages > 0 ? "texte reconnu (OCR)" : "texte natif"}`,
+          label:
+            pages + " · " + (d.ocrLayerPages > 0 ? tr("texte reconnu (OCR)") : tr("texte natif")),
           tone: "info",
         };
       case "mixed":
         return {
-          label: `${pages} · ${d.scannedPages} scannée${d.scannedPages > 1 ? "s" : ""}`,
+          label:
+            pages +
+            " · " +
+            (d.scannedPages > 1
+              ? tr("{n} scannées", { n: d.scannedPages })
+              : tr("{n} scannée", { n: d.scannedPages })),
           tone: "warning",
         };
       case "scanned":
-        return { label: `${pages} · document scanné`, tone: "warning" };
+        return { label: pages + " · " + tr("document scanné"), tone: "warning" };
       default:
-        return { label: `${pages} · sans texte`, tone: "neutral" };
+        return { label: pages + " · " + tr("sans texte"), tone: "neutral" };
     }
   })();
   const summary = [
-    `${annotations.length} élément${annotations.length > 1 ? "s" : ""}`,
+    annotations.length > 1
+      ? tr("{n} éléments", { n: annotations.length })
+      : tr("{n} élément", { n: annotations.length }),
     textEdits.length
-      ? `${textEdits.length} texte${textEdits.length > 1 ? "s" : ""} modifié${textEdits.length > 1 ? "s" : ""}`
+      ? textEdits.length > 1
+        ? tr("{n} textes modifiés", { n: textEdits.length })
+        : tr("{n} texte modifié", { n: textEdits.length })
       : null,
-    planChanged ? `${plan.length} page${plan.length > 1 ? "s" : ""} (réorganisées)` : null,
-    pdf.unlocked ? "déverrouillé" : null,
+    planChanged
+      ? plan.length > 1
+        ? tr("{n} pages (réorganisées)", { n: plan.length })
+        : tr("{n} page (réorganisées)", { n: plan.length })
+      : null,
+    pdf.unlocked ? tr("déverrouillé") : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -1035,36 +1090,50 @@ export function AnnotationWorkspace({
   const menu: HeaderMenuItem[] = [
     {
       id: "pages",
-      label: pagesOpen ? "Masquer le panneau des pages" : "Afficher le panneau des pages",
+      label: pagesOpen ? tr("Masquer le panneau des pages") : tr("Afficher le panneau des pages"),
       onSelect: () => setPagesOpen((o) => !o),
     },
     ...(isEditor
-      ? [{ id: "ocr", label: "Reconnaissance de texte (OCR)…", onSelect: () => setPanel("ocr") }]
+      ? [
+          {
+            id: "ocr",
+            label: tr("Reconnaissance de texte (OCR)…"),
+            onSelect: () => setPanel("ocr"),
+          },
+        ]
       : []),
-    { id: "search", label: "Rechercher dans le document…", onSelect: () => setPanel("search") },
-    { id: "document", label: "Informations sur le document", onSelect: () => setPanel("document") },
-    { id: "history", label: "Historique des modifications", onSelect: () => setPanel("history") },
-    { id: "shortcuts", label: "Raccourcis clavier", onSelect: () => setPanel("shortcuts") },
+    { id: "search", label: tr("Rechercher dans le document…"), onSelect: () => setPanel("search") },
+    {
+      id: "document",
+      label: tr("Informations sur le document"),
+      onSelect: () => setPanel("document"),
+    },
+    {
+      id: "history",
+      label: tr("Historique des modifications"),
+      onSelect: () => setPanel("history"),
+    },
+    { id: "shortcuts", label: tr("Raccourcis clavier"), onSelect: () => setPanel("shortcuts") },
     {
       id: "fit-page",
-      label: fitMode === "page" ? "Ajuster à la largeur" : "Afficher la page entière",
+      label: fitMode === "page" ? tr("Ajuster à la largeur") : tr("Afficher la page entière"),
       onSelect: () => applyFit(fitMode === "page" ? "width" : "page"),
       separator: true,
     },
     {
       id: "revert",
-      label: "Revenir au document d'origine",
+      label: tr("Revenir au document d'origine"),
       onSelect: revertAll,
       disabled: !dirty,
       destructive: true,
       separator: true,
     },
-    { id: "close", label: "Fermer le document", onSelect: requestClose },
+    { id: "close", label: tr("Fermer le document"), onSelect: requestClose },
   ];
   const extras: ToolbarExtra[] = [
     {
       id: "pages",
-      label: "Pages",
+      label: tr("Pages"),
       icon: LayoutList,
       active: pagesOpen,
       onClick: () => setPagesOpen((o) => !o),
@@ -1083,21 +1152,21 @@ export function AnnotationWorkspace({
       : []),
     {
       id: "search",
-      label: "Rechercher",
+      label: tr("Rechercher"),
       icon: Search,
       active: panel === "search",
       onClick: () => togglePanel("search"),
     },
     {
       id: "document",
-      label: "Infos",
+      label: tr("Infos"),
       icon: BookOpen,
       active: panel === "document",
       onClick: () => togglePanel("document"),
     },
     {
       id: "shortcuts",
-      label: "Aide",
+      label: tr("Aide"),
       icon: Keyboard,
       active: panel === "shortcuts",
       onClick: () => togglePanel("shortcuts"),
@@ -1126,12 +1195,18 @@ export function AnnotationWorkspace({
       : textStatus === null
         ? null
         : textStatus.kind === "ok"
-          ? `${textStatus.runs.filter((r) => r.editable).length} passage${textStatus.runs.filter((r) => r.editable).length > 1 ? "s" : ""} modifiable${textStatus.runs.filter((r) => r.editable).length > 1 ? "s" : ""}`
+          ? textStatus.runs.filter((r) => r.editable).length > 1
+            ? tr("{n} passages modifiables", {
+                n: textStatus.runs.filter((r) => r.editable).length,
+              })
+            : tr("{n} passage modifiable", {
+                n: textStatus.runs.filter((r) => r.editable).length,
+              })
           : textStatus.kind === "scanned"
-            ? "page scannée"
+            ? tr("page scannée")
             : textStatus.kind === "empty"
-              ? "page sans texte"
-              : "structure non prise en charge";
+              ? tr("page sans texte")
+              : tr("structure non prise en charge");
   const showDiagnosis =
     isEditor &&
     !!pdf.diagnosis &&
@@ -1246,7 +1321,9 @@ export function AnnotationWorkspace({
                       onLiveChange={history.replaceLive}
                       onBeginInteraction={() => history.beginLive(annotations)}
                       onEndInteraction={history.endLive}
-                      onCommit={(next, label) => commitAnnotations(next, label ?? "Élément ajouté")}
+                      onCommit={(next, label) =>
+                        commitAnnotations(next, label ?? tr("Élément ajouté"))
+                      }
                       onPlaceAt={onPlaceAt}
                       onToolChange={setToolState}
                     />
@@ -1362,7 +1439,9 @@ export function AnnotationWorkspace({
                 layer={ocrLayer?.info ?? null}
                 planSummary={
                   planChanged
-                    ? `${plan.length} à l'export (ordre, rotation ou suppression modifiés)`
+                    ? tr("{n} à l'export (ordre, rotation ou suppression modifiés)", {
+                        n: plan.length,
+                      })
                     : null
                 }
                 textEdits={textEdits.length}
@@ -1443,7 +1522,15 @@ export function AnnotationWorkspace({
                 <button
                   type="button"
                   className="min-w-14 rounded-md px-1 text-sm tabular-nums hover:bg-muted"
-                  aria-label={`Zoom ${zoomLabel(scale)}${fitMode === "width" ? " (ajusté à la largeur)" : fitMode === "page" ? " (page entière)" : ""} : choisir`}
+                  aria-label={tr("Zoom {level}{fit} : choisir", {
+                    level: zoomLabel(scale),
+                    fit:
+                      fitMode === "width"
+                        ? " " + tr("(ajusté à la largeur)")
+                        : fitMode === "page"
+                          ? " " + tr("(page entière)")
+                          : "",
+                  })}
                   data-testid="zoom-level"
                   data-fit={fitMode ?? "manual"}
                 >
@@ -1452,10 +1539,12 @@ export function AnnotationWorkspace({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onSelect={() => applyFit("width")} data-testid="zoom-fit-width">
-                  {fitMode === "width" ? "✓ " : ""}Ajuster à la largeur
+                  {fitMode === "width" ? "✓ " : ""}
+                  {tr("Ajuster à la largeur")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => applyFit("page")} data-testid="zoom-fit-page">
-                  {fitMode === "page" ? "✓ " : ""}Page entière
+                  {fitMode === "page" ? "✓ " : ""}
+                  {tr("Page entière")}
                 </DropdownMenuItem>
                 {ZOOM_PERCENT_STEPS.map((p) => (
                   <DropdownMenuItem
@@ -1533,15 +1622,16 @@ export function AnnotationWorkspace({
       <Dialog open={closeConfirmOpen} onOpenChange={setCloseConfirmOpen}>
         <DialogContent size="sm" className="rounded-[20px]" data-testid="close-confirm">
           <DialogHeader>
-            <DialogTitle>Fermer sans télécharger ?</DialogTitle>
+            <DialogTitle>{tr("Fermer sans télécharger ?")}</DialogTitle>
             <DialogDescription>
-              Vos modifications ne sont pas enregistrées : le fichier d&apos;origine reste intact
-              sur votre appareil, et ce qui a été fait ici sera perdu.
+              {tr(
+                "Vos modifications ne sont pas enregistrées : le fichier d'origine reste intact sur votre appareil, et ce qui a été fait ici sera perdu.",
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setCloseConfirmOpen(false)}>
-              Continuer l&apos;édition
+              {tr("Continuer l'édition")}
             </Button>
             <Button
               type="button"
@@ -1552,7 +1642,7 @@ export function AnnotationWorkspace({
               }}
               data-testid="close-confirm-discard"
             >
-              Fermer sans enregistrer
+              {tr("Fermer sans enregistrer")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 
 export interface HeaderMenuItem {
   id: string;
@@ -78,7 +79,7 @@ export function EditorHeader({
         variant="ghost"
         size="icon-sm"
         onClick={onClose}
-        aria-label={`${t.common.back} : fermer le document`}
+        aria-label={t.common.back + " : " + tr("fermer le document")}
         data-testid="editor-close"
       >
         <ArrowLeft aria-hidden="true" />
@@ -86,7 +87,7 @@ export function EditorHeader({
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold leading-tight" title={fileName}>
           {fileName}
-          {dirty ? <span className="text-muted-foreground"> · modifié</span> : null}
+          {dirty ? <span className="text-muted-foreground"> · {tr("modifié")}</span> : null}
         </p>
         <p className="truncate text-[11px] leading-tight text-muted-foreground">
           <span className="sr-only">{title} · </span>
@@ -128,7 +129,7 @@ export function EditorHeader({
       <div className="mx-0.5 hidden h-6 w-px bg-border sm:block" />
       <Button type="button" size="sm" onClick={onExport} data-testid="editor-download">
         <Download aria-hidden="true" />
-        <span className="hidden sm:inline">Télécharger le PDF modifié</span>
+        <span className="hidden sm:inline">{tr("Télécharger le PDF modifié")}</span>
         <span className="sm:hidden">{t.common.download}</span>
       </Button>
       <DropdownMenu>
@@ -137,7 +138,7 @@ export function EditorHeader({
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label="Autres actions"
+            aria-label={tr("Autres actions")}
             data-testid="editor-menu"
           >
             <MoreHorizontal aria-hidden="true" />

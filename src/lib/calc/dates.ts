@@ -2,31 +2,40 @@
  * Date calculators on calendar days (UTC midnight to avoid DST surprises):
  * durations, business days and French public holidays.
  */
+import { tr } from "@/lib/i18n/messages";
 
 export const FRENCH_MONTHS = [
-  "janvier",
-  "février",
-  "mars",
-  "avril",
-  "mai",
-  "juin",
-  "juillet",
-  "août",
-  "septembre",
-  "octobre",
-  "novembre",
-  "décembre",
+  tr("janvier"),
+  tr("février"),
+  tr("mars"),
+  tr("avril"),
+  tr("mai"),
+  tr("juin"),
+  tr("juillet"),
+  tr("août"),
+  tr("septembre"),
+  tr("octobre"),
+  tr("novembre"),
+  tr("décembre"),
 ];
 export const FRENCH_WEEKDAYS = [
-  "lundi",
-  "mardi",
-  "mercredi",
-  "jeudi",
-  "vendredi",
-  "samedi",
-  "dimanche",
+  tr("lundi"),
+  tr("mardi"),
+  tr("mercredi"),
+  tr("jeudi"),
+  tr("vendredi"),
+  tr("samedi"),
+  tr("dimanche"),
 ];
-export const FRENCH_WEEKDAYS_SHORT = ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."];
+export const FRENCH_WEEKDAYS_SHORT = [
+  tr("lun."),
+  tr("mar."),
+  tr("mer."),
+  tr("jeu."),
+  tr("ven."),
+  tr("sam."),
+  tr("dim."),
+];
 
 /** Builds a UTC calendar day. Month is 1-based. */
 export function day(year: number, month: number, date: number): Date {
@@ -213,7 +222,7 @@ export function businessDaysBetween(
     }
     const key = toIsoDay(d);
     if (holidays.has(key)) {
-      hit.push({ date: d, name: names.get(key) ?? "Jour férié" });
+      hit.push({ date: d, name: names.get(key) ?? tr("Jour férié") });
       continue;
     }
     businessDays += 1;

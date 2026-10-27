@@ -33,6 +33,7 @@ import { isPdfError, PdfError, toPdfError } from "@/lib/pdf/errors";
 import { mergePdfs, type MergeResult } from "@/lib/pdf/operations/merge";
 import { getToolById, getToolPath } from "@/lib/tools";
 import { t } from "@/lib/i18n";
+import { tr } from "@/lib/i18n/messages";
 import { uid } from "@/lib/utils";
 
 interface QueuedFile {
@@ -179,7 +180,7 @@ export function MergeTool() {
             <SortableContext items={files.map((f) => f.id)} strategy={verticalListSortingStrategy}>
               <ol
                 className="space-y-2"
-                aria-label="Fichiers à fusionner"
+                aria-label={tr("Fichiers à fusionner")}
                 data-testid="merge-file-list"
               >
                 {files.map((item, index) => (
@@ -218,7 +219,7 @@ export function MergeTool() {
               data-testid="merge-button"
             >
               <Merge aria-hidden="true" />
-              Fusionner {files.length > 1 ? `${files.length} fichiers` : ""}
+              {tr("Fusionner")} {files.length > 1 ? tr("{n} fichiers", { n: files.length }) : ""}
             </Button>
           </div>
         </>
@@ -255,7 +256,7 @@ function SortableFileRow({
       <button
         type="button"
         className="flex size-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted active:cursor-grabbing"
-        aria-label={`Déplacer ${item.file.name}`}
+        aria-label={tr("Déplacer {name}", { name: item.file.name })}
         {...attributes}
         {...listeners}
       >
@@ -280,7 +281,7 @@ function SortableFileRow({
         size="icon-sm"
         onClick={onMoveUp}
         disabled={index === 0}
-        aria-label="Monter"
+        aria-label={tr("Monter")}
       >
         <ArrowUp aria-hidden="true" />
       </Button>
@@ -290,7 +291,7 @@ function SortableFileRow({
         size="icon-sm"
         onClick={onMoveDown}
         disabled={index === total - 1}
-        aria-label="Descendre"
+        aria-label={tr("Descendre")}
       >
         <ArrowDown aria-hidden="true" />
       </Button>

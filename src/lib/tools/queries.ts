@@ -1,73 +1,129 @@
-import { getCategoryById, getCategoryBySlug, toolCategories } from "./categories";
+import { getLocale, localePrefix, type Locale } from "@/lib/i18n/locale";
+import { getCategories, getCategoryById } from "./categories";
 import { toolRegistry } from "./registry";
-import type { ToolCategory, ToolCategoryId, ToolDefinition } from "./types";
+import type { ToolCategory, ToolCategoryId, ToolDefinition, ToolLocalization } from "./types";
+
+const localized = new Map<Locale, ToolDefinition[]>();
+const localizations = new Map<Locale, Record<string, ToolLocalization>>();
+
+/**
+ * Registers the translated text of the tools for a locale. The English map lives in
+ * `src/lib/tools/registry/en` and is registered by `src/lib/i18n/register-en.ts`
+ * (imported by the root layouts, the sitemap and the English client bundle) so that
+ * French pages never download it. Tools without a registered text fall back to
+ * French and are marked `translated: false`.
+ */
+export function registerToolLocalizations(
+  locale: Locale,
+  map: Record<string, ToolLocalization>,
+): void {
+  localizations.set(locale, map);
+  localized.delete(locale);
+}
+
+/** The registry in a locale: French is the source, English merges per-tool overrides. */
+export function getRegistry(locale: Locale = getLocale()): readonly ToolDefinition[] {
+  if (locale === "fr") return toolRegistry;
+  let list = localized.get(locale);
+  if (!list) {
+    const map = localizations.get(locale) ?? {};
+    list = toolRegistry.map((tool) => {
+      const en = map[tool.id];
+      if (!en) return { ...tool, translated: false };
+      return {
+        ...tool,
+        ...en,
+        content: {
+          ...tool.content,
+          ...en.content,
+          privacyNote: en.content.privacyNote ?? tool.content.privacyNote,
+        },
+        translated: true,
+      };
+    });
+    localized.set(locale, list);
+  }
+  return list;
+}
 
 /** Tools that are implemented and reachable (published or beta). */
-export function getOperationalTools(): ToolDefinition[] {
-  return toolRegistry.filter((t) => t.status === "published" || t.status === "beta");
+export function getOperationalTools(locale: Locale = getLocale()): ToolDefinition[] {
+  return getRegistry(locale).filter((t) => t.status === "published" || t.status === "beta");
 }
 
 /** Tools shown in navigation, directory and search results. */
-export function getPublishedTools(): ToolDefinition[] {
-  return toolRegistry.filter((t) => t.status === "published");
+export function getPublishedTools(locale: Locale = getLocale()): ToolDefinition[] {
+  return getRegistry(locale).filter((t) => t.status === "published");
 }
 
 /** Tools eligible for the sitemap and `index,follow` robots directives. */
-export function getIndexableTools(): ToolDefinition[] {
-  return toolRegistry.filter((t) => t.status === "published" && t.indexable);
+export function getIndexableTools(locale: Locale = getLocale()): ToolDefinition[] {
+  return getRegistry(locale).filter((t) => isToolIndexable(t));
 }
 
+/** A tool page is indexable when published, flagged indexable and, outside French, really translated. */
 export function isToolIndexable(tool: ToolDefinition): boolean {
-  return tool.status === "published" && tool.indexable;
+  return tool.status === "published" && tool.indexable && tool.translated !== false;
 }
 
-export function getFeaturedTools(): ToolDefinition[] {
-  return getPublishedTools().filter((t) => t.featured);
+export function getFeaturedTools(locale: Locale = getLocale()): ToolDefinition[] {
+  return getPublishedTools(locale).filter((t) => t.featured);
 }
 
-export function getToolById(id: string): ToolDefinition | undefined {
-  return toolRegistry.find((t) => t.id === id);
+export function getToolById(id: string, locale: Locale = getLocale()): ToolDefinition | undefined {
+  return getRegistry(locale).find((t) => t.id === id);
 }
 
-export function getToolByPath(categorySlug: string, toolSlug: string): ToolDefinition | undefined {
-  const category = getCategoryBySlug(categorySlug);
+export function getToolByPath(
+  categorySlug: string,
+  toolSlug: string,
+  locale: Locale = getLocale(),
+): ToolDefinition | undefined {
+  const category = getCategories(locale).find((c) => c.slug === categorySlug);
   if (!category) return undefined;
-  return toolRegistry.find((t) => t.category === category.id && t.slug === toolSlug);
+  return getRegistry(locale).find((t) => t.category === category.id && t.slug === toolSlug);
 }
 
-export function getToolPath(tool: ToolDefinition): string {
-  const category = getCategoryById(tool.category);
+export function getToolPath(tool: ToolDefinition, locale: Locale = getLocale()): string {
+  const category = getCategoryById(tool.category, locale);
   if (!category) throw new Error(`Unknown category "${tool.category}" for tool "${tool.id}"`);
-  return `/${category.slug}/${tool.slug}/`;
+  const localizedTool = getToolById(tool.id, locale) ?? tool;
+  return `${localePrefix(locale)}/${category.slug}/${localizedTool.slug}/`;
 }
 
-export function getCategoryPath(category: ToolCategory): string {
-  return `/${category.slug}/`;
+export function getCategoryPath(category: ToolCategory, locale: Locale = getLocale()): string {
+  const localizedCategory = getCategoryById(category.id, locale) ?? category;
+  return `${localePrefix(locale)}/${localizedCategory.slug}/`;
 }
 
 export function getToolsByCategory(
   categoryId: ToolCategoryId,
   publishedOnly = true,
+  locale: Locale = getLocale(),
 ): ToolDefinition[] {
-  const list = publishedOnly ? getPublishedTools() : [...toolRegistry];
+  const list = publishedOnly ? getPublishedTools(locale) : [...getRegistry(locale)];
   return list.filter((t) => t.category === categoryId);
 }
 
 /** Categories that have at least one published tool (the only ones that get a page). */
-export function getActiveCategories(): ToolCategory[] {
-  return toolCategories.filter((c) => getToolsByCategory(c.id).length > 0);
+export function getActiveCategories(locale: Locale = getLocale()): ToolCategory[] {
+  return getCategories(locale).filter((c) => getToolsByCategory(c.id, true, locale).length > 0);
 }
 
-export function getPlannedCategories(): ToolCategory[] {
-  return toolCategories.filter((c) => getToolsByCategory(c.id).length === 0);
+export function getPlannedCategories(locale: Locale = getLocale()): ToolCategory[] {
+  return getCategories(locale).filter((c) => getToolsByCategory(c.id, true, locale).length === 0);
 }
 
-export function getRelatedTools(tool: ToolDefinition, max = 4): ToolDefinition[] {
+export function getRelatedTools(
+  tool: ToolDefinition,
+  max = 4,
+  locale: Locale = getLocale(),
+): ToolDefinition[] {
   const explicit = tool.related
-    .map((id) => getToolById(id))
+    .map((id) => getToolById(id, locale))
     .filter((t): t is ToolDefinition => !!t && t.status === "published");
   if (explicit.length >= max) return explicit.slice(0, max);
-  const sameCategory = getToolsByCategory(tool.category).filter(
+  const sameCategory = getToolsByCategory(tool.category, true, locale).filter(
     (t) => t.id !== tool.id && !explicit.some((e) => e.id === t.id),
   );
   return [...explicit, ...sameCategory].slice(0, max);

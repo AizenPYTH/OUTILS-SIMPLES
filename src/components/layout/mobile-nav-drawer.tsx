@@ -6,9 +6,10 @@ import { LayoutGrid, SquarePen } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { ToolIcon } from "@/components/tools/tool-icon";
 import { t } from "@/lib/i18n";
-import { LanguageMenu } from "./language-menu";
+import { LanguageSwitcher } from "./language-switcher";
 import { ThemeMenu } from "./theme-menu";
 import type { MobileNavCategory } from "./mobile-nav";
+import { localizedPath } from "@/lib/i18n/routes";
 
 interface MobileNavDrawerProps {
   open: boolean;
@@ -27,9 +28,9 @@ export function MobileNavDrawer({
   triggerRef,
 }: MobileNavDrawerProps) {
   const links = [
-    { href: "/guides/", label: t.nav.guides },
-    { href: "/a-propos/", label: t.nav.about },
-    { href: "/contact/", label: t.nav.contact },
+    { href: localizedPath("/guides/"), label: t.nav.guides },
+    { href: localizedPath("/a-propos/"), label: t.nav.about },
+    { href: localizedPath("/contact/"), label: t.nav.contact },
   ];
   const row =
     "flex min-h-11 items-center gap-3 rounded-md px-2 py-2 text-[15px] font-medium hover:bg-muted";
@@ -49,7 +50,11 @@ export function MobileNavDrawer({
         <nav aria-label={t.common.menu} className="flex flex-col gap-5">
           <ul className="flex flex-col">
             <li>
-              <Link href="/outils/" className={row} data-testid="mobile-nav-all-tools">
+              <Link
+                href={localizedPath("/outils/")}
+                className={row}
+                data-testid="mobile-nav-all-tools"
+              >
                 <LayoutGrid className="size-4 text-muted-foreground" aria-hidden="true" />
                 {t.nav.tools}
               </Link>
@@ -91,7 +96,7 @@ export function MobileNavDrawer({
             ))}
           </ul>
           <div className="flex items-center gap-2 border-t border-border pt-4">
-            <LanguageMenu />
+            <LanguageSwitcher />
             <ThemeMenu />
           </div>
         </nav>

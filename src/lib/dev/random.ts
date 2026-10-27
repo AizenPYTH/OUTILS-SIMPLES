@@ -2,6 +2,8 @@
  * Cryptographically secure random helpers (Web Crypto). Nothing generated is
  * ever stored or transmitted.
  */
+import { tr } from "@/lib/i18n/messages";
+
 function randomInt(maxExclusive: number): number {
   if (maxExclusive <= 0) throw new Error("maxExclusive must be > 0");
   // Rejection sampling to avoid modulo bias.
@@ -46,7 +48,7 @@ export function generatePassword(options: PasswordOptions): string {
   const pools = (["lowercase", "uppercase", "digits", "symbols"] as const)
     .filter((k) => options[k])
     .map((k) => (options.excludeAmbiguous ? SETS[k].replace(AMBIGUOUS, "") : SETS[k]));
-  if (pools.length === 0) throw new Error("Sélectionnez au moins un type de caractères.");
+  if (pools.length === 0) throw new Error(tr("Sélectionnez au moins un type de caractères."));
   const length = Math.max(4, Math.min(128, Math.floor(options.length)));
   const all = pools.join("");
   const chars: string[] = [];
@@ -74,7 +76,7 @@ export function passwordEntropyBits(options: PasswordOptions): number {
 }
 
 export function randomString(length: number, alphabet: string): string {
-  if (!alphabet) throw new Error("Alphabet vide.");
+  if (!alphabet) throw new Error(tr("Alphabet vide."));
   let out = "";
   for (let i = 0; i < length; i += 1) out += alphabet[randomInt(alphabet.length)];
   return out;
