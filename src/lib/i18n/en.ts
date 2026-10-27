@@ -164,6 +164,8 @@ export const en: Dictionary = {
     betaBadge: "Beta",
     inputFormats: "Accepted formats",
     maxSize: "Maximum size",
+    noFileTitle: "Files",
+    noFileBody: "No file to import: everything happens on the page.",
     guideLink: "Detailed guide",
   },
   upload: {

@@ -8,6 +8,7 @@ import { OfflineControl } from "@/components/offline/offline-control";
 import { offlineGroupsFor } from "@/lib/offline/needs";
 import { Badge } from "@/components/ui/badge";
 import { formatBytes } from "@/lib/files/format";
+import { getToolInputLimits } from "@/lib/tools/input-limits";
 import { getGuidesForTool } from "@/lib/content/guides";
 import { buildFaqJsonLd, buildToolJsonLd } from "@/lib/seo";
 import {
@@ -38,6 +39,7 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
   const related = getRelatedTools(tool);
   const guides = getGuidesForTool(tool.id);
   const faqJsonLd = buildFaqJsonLd(tool);
+  const inputLimits = getToolInputLimits(tool);
 
   return (
     <div className="container-page py-5 sm:py-7">
@@ -111,20 +113,31 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
                 <li key={i}>{item}</li>
               ))}
             </ul>
-            <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
-              <div className="rounded-md bg-muted p-3">
-                <dt className="text-muted-foreground">{t.tool.inputFormats}</dt>
-                <dd className="font-medium">{tool.inputFormats.map(formatMime).join(", ")}</dd>
-              </div>
-              <div className="rounded-md bg-muted p-3">
-                <dt className="text-muted-foreground">{t.tool.maxSize}</dt>
-                <dd className="font-medium">
-                  {formatBytes(tool.limits.maxFileSizeBytes)}
-                  {tool.limits.maxFileCount > 1
-                    ? ` · ${tool.limits.maxFileCount} ${t.common.files} max`
-                    : ""}
-                </dd>
-              </div>
+            <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2" data-testid="tool-input-limits">
+              {inputLimits.acceptsFiles ? (
+                <>
+                  {inputLimits.formats.length > 0 ? (
+                    <div className="rounded-md bg-muted p-3">
+                      <dt className="text-muted-foreground">{t.tool.inputFormats}</dt>
+                      <dd className="font-medium">{inputLimits.formats.join(", ")}</dd>
+                    </div>
+                  ) : null}
+                  <div className="rounded-md bg-muted p-3">
+                    <dt className="text-muted-foreground">{t.tool.maxSize}</dt>
+                    <dd className="font-medium">
+                      {formatBytes(inputLimits.maxFileSizeBytes!)}
+                      {inputLimits.maxFileCount
+                        ? ` · ${inputLimits.maxFileCount} ${t.common.files} max`
+                        : ""}
+                    </dd>
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-md bg-muted p-3 sm:col-span-2">
+                  <dt className="text-muted-foreground">{t.tool.noFileTitle}</dt>
+                  <dd className="font-medium">{t.tool.noFileBody}</dd>
+                </div>
+              )}
             </dl>
           </section>
 
@@ -195,16 +208,4 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
       </div>
     </div>
   );
-}
-
-function formatMime(mime: string): string {
-  const map: Record<string, string> = {
-    "application/pdf": "PDF",
-    "application/zip": "ZIP",
-    "image/png": "PNG",
-    "image/jpeg": "JPEG",
-    "image/webp": "WebP",
-    "text/plain": "Texte",
-  };
-  return map[mime] ?? mime;
 }

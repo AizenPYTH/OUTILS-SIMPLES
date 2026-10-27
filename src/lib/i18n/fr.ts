@@ -169,6 +169,8 @@ export const fr = {
     betaBadge: "Bêta",
     inputFormats: "Formats acceptés",
     maxSize: "Taille maximale",
+    noFileTitle: "Fichiers",
+    noFileBody: "Aucun fichier à importer : tout se fait dans la page.",
     guideLink: "Guide détaillé",
   },
   upload: {

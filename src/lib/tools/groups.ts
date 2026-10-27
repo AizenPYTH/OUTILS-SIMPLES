@@ -1,3 +1,4 @@
+import { getLocale, type Locale } from "@/lib/i18n/locale";
 import type { ToolCategoryId } from "./types";
 
 /**
@@ -63,8 +64,35 @@ export const toolGroups: ToolGroup[] = [
   { category: "developpeur", name: "Utilitaires", ids: ["dev-regex", "dev-timestamp"] },
 ];
 
-export function getToolGroups(category: ToolCategoryId): ToolGroup[] {
-  return toolGroups.filter((g) => g.category === category);
+/**
+ * English names of the sub-groups, keyed by the French name (the source).
+ * Kept next to the groups so that a new group cannot ship without its
+ * translation (checked by tests).
+ */
+export const toolGroupNamesEn: Record<string, string> = {
+  "Organiser les pages": "Organise pages",
+  "Modifier et signer": "Edit and sign",
+  "Convertir et extraire": "Convert and extract",
+  "Optimiser et sécuriser": "Optimise and secure",
+  Analyser: "Analyse",
+  Retoucher: "Edit",
+  "Optimiser et convertir": "Optimise and convert",
+  Données: "Data",
+  Encodages: "Encodings",
+  Générateurs: "Generators",
+  Utilitaires: "Utilities",
+};
+
+/** Name of the fallback group holding tools that belong to no sub-group. */
+export function otherToolsGroupName(locale: Locale = getLocale()): string {
+  return locale === "en" ? "Other" : "Autres";
+}
+
+/** Sub-groups of a category, with names in the requested locale. */
+export function getToolGroups(category: ToolCategoryId, locale: Locale = getLocale()): ToolGroup[] {
+  return toolGroups
+    .filter((g) => g.category === category)
+    .map((g) => (locale === "fr" ? g : { ...g, name: toolGroupNamesEn[g.name] ?? g.name }));
 }
 
 /** Tailwind classes of the icon tile per category (hue per family, same shape everywhere). */

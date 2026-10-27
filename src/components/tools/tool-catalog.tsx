@@ -9,16 +9,16 @@ import { ToolIcon } from "@/components/tools/tool-icon";
 import { ToolCard } from "@/components/tools/tool-card";
 import { AdSlot } from "@/components/monetization/ad-slot";
 import {
+  getCategories,
   getPublishedTools,
   getToolsByCategory,
   searchTools,
-  toolCategories,
   toolRegistry,
   type ToolCategory,
   type ToolDefinition,
   getCategoryPath,
 } from "@/lib/tools";
-import { categoryTone, getToolGroups } from "@/lib/tools/groups";
+import { categoryTone, getToolGroups, otherToolsGroupName } from "@/lib/tools/groups";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { tr } from "@/lib/i18n/messages";
@@ -27,10 +27,12 @@ import { tr } from "@/lib/i18n/messages";
 // registered by a sibling client module whose evaluation order is not fixed.
 function catalogData() {
   const publishedTools = getPublishedTools();
+  // Localized categories (names, short names) in the ambient locale.
+  const categories = getCategories();
   return {
     publishedTools,
-    activeCategories: toolCategories.filter((c) => getToolsByCategory(c.id).length > 0),
-    plannedCategories: toolCategories.filter((c) => getToolsByCategory(c.id).length === 0),
+    activeCategories: categories.filter((c) => getToolsByCategory(c.id).length > 0),
+    plannedCategories: categories.filter((c) => getToolsByCategory(c.id).length === 0),
     popularTools: publishedTools.filter((x) => x.featured).slice(0, 8),
   };
 }
@@ -48,7 +50,7 @@ function suggestAlternatives(query: string): ToolDefinition[] {
   return merged.filter((tool, i) => merged.findIndex((x) => x.id === tool.id) === i).slice(0, 4);
 }
 
-/** Tools of a category split into its sub-groups; ungrouped tools fall into "Autres". */
+/** Tools of a category split into its sub-groups; ungrouped tools fall into "Autres"/"Other". */
 function groupsOf(category: ToolCategory, tools: ToolDefinition[]) {
   const groups = getToolGroups(category.id);
   if (groups.length === 0) return [{ name: null, tools }];
@@ -63,7 +65,7 @@ function groupsOf(category: ToolCategory, tools: ToolDefinition[]) {
     })
     .filter((g) => g.tools.length > 0);
   const rest = tools.filter((x) => !used.has(x.id));
-  if (rest.length) out.push({ name: "Autres", tools: rest });
+  if (rest.length) out.push({ name: otherToolsGroupName(), tools: rest });
   return out;
 }
 
