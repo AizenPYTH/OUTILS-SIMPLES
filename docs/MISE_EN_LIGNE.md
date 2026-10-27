@@ -32,8 +32,9 @@ le sitemap, `robots.txt`, les balises Open Graph et les images de partage.
 
 - `NEXT_PUBLIC_ANALYTICS_PROVIDER=plausible` (+ `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`) ou `gtag`
   (+ `NEXT_PUBLIC_GA_MEASUREMENT_ID`). Rien n'est chargé avant consentement.
-- `NEXT_PUBLIC_ADS_ENABLED=true` + identifiants AdSense si la publicité est voulue ; les
-  emplacements sont réservés hors des zones de dépôt et de l'éditeur.
+- Publicité : procédure complète dans `docs/MONETISATION_PUBLICITAIRE.md` (compte AdSense validé,
+  CMP certifiée, `NEXT_PUBLIC_ADS_ENABLED=true`, fournisseur, identifiant éditeur, un identifiant de
+  bloc par emplacement voulu) ; `pnpm check:launch` refuse une configuration incomplète.
 - `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` pour la Search Console.
 
 ## 4. Vérifications sur l'hébergement

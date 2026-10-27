@@ -1,8 +1,9 @@
+import * as React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
-import { AdSlot } from "@/components/monetization/ad-slot";
+import { AdPlacement } from "@/components/monetization/ad-placement";
 import { Button } from "@/components/ui/button";
 import { ToolCard } from "@/components/tools/tool-card";
 import { siteConfig, absoluteUrl } from "@/config/site";
@@ -54,22 +55,28 @@ export function GuidePage({ guide }: { guide: Guide }) {
           </Button>
         ) : null}
         <div className="mt-10 space-y-10 text-[16px] leading-relaxed">
-          {guide.sections.map((section) => (
-            <section key={section.heading}>
-              <h2 className="text-2xl">{section.heading}</h2>
-              {section.paragraphs.map((p, i) => (
-                <p key={i} className="mt-3">
-                  {p}
-                </p>
-              ))}
-              {section.list ? (
-                <ul className="mt-3 list-disc space-y-2 pl-5">
-                  {section.list.map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
+          {guide.sections.map((section, index) => (
+            <React.Fragment key={section.heading}>
+              {/* Optional advertising placement between sections of long guides only. */}
+              {index === 2 && guide.sections.length >= 3 ? (
+                <AdPlacement placement="guide-inline" />
               ) : null}
-            </section>
+              <section>
+                <h2 className="text-2xl">{section.heading}</h2>
+                {section.paragraphs.map((p, i) => (
+                  <p key={i} className="mt-3">
+                    {p}
+                  </p>
+                ))}
+                {section.list ? (
+                  <ul className="mt-3 list-disc space-y-2 pl-5">
+                    {section.list.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </section>
+            </React.Fragment>
           ))}
         </div>
         {tool && tool.status === "published" ? (
@@ -96,7 +103,7 @@ export function GuidePage({ guide }: { guide: Guide }) {
             </ul>
           </section>
         ) : null}
-        <AdSlot placement="guide-bottom" className="mt-12" />
+        <AdPlacement placement="guide-end" className="mt-12" />
       </article>
     </div>
   );

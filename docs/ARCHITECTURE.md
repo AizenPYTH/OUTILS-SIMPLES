@@ -241,12 +241,12 @@ développement). Détails : `docs/OCR_ORIENTATIONS.md`.
 
 ## Points d'intégration monétisation
 
-| Élément                    | Fichier                                                                   | État                                                                                             |
-| -------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Emplacements publicitaires | `components/monetization/ad-slot.tsx`                                     | Rendu nul tant que `NEXT_PUBLIC_ADS_ENABLED` ≠ `true` ; réserve l'espace ; exige le consentement |
-| Consentement               | `lib/consent/store.ts`, `components/monetization/consent-*.tsx`           | Bannière first-party ; mode `external` prévu pour une CMP certifiée                              |
-| Analytics                  | `lib/analytics/events.ts`, `components/monetization/analytics-loader.tsx` | Plausible ou GA4, chargé après consentement, propriétés en liste blanche                         |
-| Premium                    | `config/limits.ts`, champs `premium`/`featureFlags` du registre           | Architecture seulement : pas de compte ni de paiement                                            |
+| Élément                    | Fichier                                                                   | État                                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Emplacements publicitaires | `config/ads.ts`, `components/monetization/ad-slot.tsx`                    | Six emplacements logiques ; rendu nul sans activation + consentement ; aperçu dev ; `docs/MONETISATION_PUBLICITAIRE.md` |
+| Consentement               | `lib/consent/store.ts`, `components/monetization/consent-*.tsx`           | Bannière first-party ; mode `external` prévu pour une CMP certifiée                                                     |
+| Analytics                  | `lib/analytics/events.ts`, `components/monetization/analytics-loader.tsx` | Plausible ou GA4, chargé après consentement, propriétés en liste blanche                                                |
+| Premium                    | `config/limits.ts`, champs `premium`/`featureFlags` du registre           | Architecture seulement : pas de compte ni de paiement                                                                   |
 
 ### Premium (conception future)
 

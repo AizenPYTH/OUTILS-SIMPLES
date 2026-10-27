@@ -316,7 +316,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
               })}
             </>
           )}
-          <AdSlot placement="directory-footer" />
+          {initialCategory ? <AdSlot placement="category-inline" /> : null}
         </div>
       </div>
     </div>

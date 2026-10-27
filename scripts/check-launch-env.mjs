@@ -75,9 +75,28 @@ if (analytics === "plausible" && !(env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? "").trim(
   errors.push("Plausible activé sans NEXT_PUBLIC_PLAUSIBLE_DOMAIN.");
 if (analytics === "gtag" && !(env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "").trim())
   errors.push("Google Analytics activé sans NEXT_PUBLIC_GA_MEASUREMENT_ID.");
+if (env.NEXT_PUBLIC_ADS_PREVIEW === "true")
+  warnings.push(
+    "NEXT_PUBLIC_ADS_PREVIEW=true : sans effet en production, mais à retirer de la configuration.",
+  );
 if (env.NEXT_PUBLIC_ADS_ENABLED === "true") {
+  if ((env.NEXT_PUBLIC_ADS_PROVIDER ?? "none") === "none")
+    errors.push("Publicité activée sans NEXT_PUBLIC_ADS_PROVIDER (adsense).");
   if (!(env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "").trim())
     errors.push("Publicité activée sans NEXT_PUBLIC_ADSENSE_CLIENT.");
+  else if (!/^ca-pub-\d{10,20}$/.test(env.NEXT_PUBLIC_ADSENSE_CLIENT.trim()))
+    errors.push("NEXT_PUBLIC_ADSENSE_CLIENT n'a pas le format attendu (ca-pub-<chiffres>).");
+  const slots = Object.keys(env).filter(
+    (k) => k.startsWith("NEXT_PUBLIC_ADSENSE_SLOT_") && (env[k] ?? "").trim(),
+  );
+  if (slots.length === 0)
+    errors.push(
+      "Publicité activée mais aucun emplacement n'a d'identifiant de bloc (NEXT_PUBLIC_ADSENSE_SLOT_*).",
+    );
+  if ((env.NEXT_PUBLIC_CONSENT_MODE ?? "builtin") !== "external")
+    errors.push(
+      "Publicité activée avec la bannière maison (NEXT_PUBLIC_CONSENT_MODE=builtin) : une plateforme de consentement certifiée est requise pour le trafic EEE/Royaume-Uni/Suisse (NEXT_PUBLIC_CONSENT_MODE=external).",
+    );
   warnings.push(
     "Publicité activée : relire /confidentialite/ et /gestion-cookies/ (et leurs versions /en/) avant publication.",
   );

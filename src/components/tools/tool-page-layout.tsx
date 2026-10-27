@@ -3,7 +3,7 @@ import { BookOpen, ShieldCheck } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ToolCard } from "@/components/tools/tool-card";
-import { AdSlot } from "@/components/monetization/ad-slot";
+import { AdPlacement } from "@/components/monetization/ad-placement";
 import { OfflineControl } from "@/components/offline/offline-control";
 import { offlineGroupsFor } from "@/lib/offline/needs";
 import { Badge } from "@/components/ui/badge";
@@ -73,6 +73,9 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
               </span>
             </div>
           </section>
+
+          {/* Optional advertising placement: below the work area, never above the drop zone. */}
+          <AdPlacement placement="tool-after-intro" />
 
           <section aria-labelledby="about-heading" className="prose-tool">
             <h2 id="about-heading" className="text-2xl">
@@ -170,7 +173,7 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
             </section>
           ) : null}
 
-          <AdSlot placement="tool-bottom" />
+          <AdPlacement placement="tool-after-result" />
         </div>
 
         <aside className="space-y-8 lg:sticky lg:top-[calc(var(--header-height)+24px)] lg:self-start">
@@ -188,7 +191,6 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
               </ul>
             </section>
           ) : null}
-          <AdSlot placement="tool-aside" className="hidden lg:flex" />
         </aside>
       </div>
     </div>

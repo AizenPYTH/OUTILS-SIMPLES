@@ -308,6 +308,11 @@ export const fr = {
     openTool: (name: string) => `Ouvrir l'outil : ${name}`,
     tool: "Outil",
   },
+  ads: {
+    label: "Publicité",
+    previewTitle: "Aperçu d'emplacement publicitaire (simulation)",
+    previewHint: "aucune annonce réelle, aucun appel réseau",
+  },
   languageSwitcher: {
     label: "Langue",
     french: "Français",

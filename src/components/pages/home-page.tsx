@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import editorShot from "@/assets/editeur-apercu.webp";
 import { HomeDrop } from "@/components/home/home-drop";
+import { AdPlacement } from "@/components/monetization/ad-placement";
 import { HomeSearch } from "@/components/tools/home-search";
 import { ToolCard } from "@/components/tools/tool-card";
 import { ToolIcon } from "@/components/tools/tool-icon";
@@ -146,6 +147,9 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Optional advertising placement: after the hero, never inside it (src/config/ads.ts). */}
+      <AdPlacement placement="home-after-intro" className="container-page" />
 
       {/* 2. The editor, shown rather than described */}
       <section className="container-page py-12 sm:py-16" aria-labelledby="editor-heading">

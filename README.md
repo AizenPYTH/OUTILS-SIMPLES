@@ -231,15 +231,11 @@ les en-têtes de sécurité devront alors être configurés au niveau de l'hébe
 
 Tout est désactivé par défaut et le site reste complet sans.
 
-**Publicité (AdSense)**
-
-1. Obtenir l'approbation AdSense et créer les blocs (728×90 catalogue, 300×250 colonne outil, 728×90 bas de guide).
-2. Mettre en place une CMP certifiée Google (TCF v2.2) pour le trafic EEE : `NEXT_PUBLIC_CONSENT_MODE=external`
-   et charger le script de la CMP dans `src/components/monetization/consent-banner.tsx` (point d'intégration
-   documenté). La bannière interne n'est pas une CMP certifiée.
-3. Renseigner `NEXT_PUBLIC_ADS_ENABLED=true`, `NEXT_PUBLIC_ADSENSE_CLIENT`, les `NEXT_PUBLIC_ADSENSE_SLOT_*`.
-   Les hôtes Google sont ajoutés automatiquement à la CSP (`src/config/security.ts`).
-4. `AdSlot` réserve l'espace pour éviter les décalages ; aucun emplacement dans les zones de dépôt ni dans l'éditeur.
+**Publicité (AdSense)** : infrastructure prête et désactivée (`docs/MONETISATION_PUBLICITAIRE.md`).
+Six emplacements logiques (`src/config/ads.ts`), chacun activé par sa propre variable ; rien n'est chargé
+sans `NEXT_PUBLIC_ADS_ENABLED=true`, un fournisseur, l'identifiant éditeur et le consentement du visiteur ;
+aperçu de développement avec `NEXT_PUBLIC_ADS_PREVIEW=true` (sans effet en production). Une CMP certifiée
+(`NEXT_PUBLIC_CONSENT_MODE=external`) est requise avant toute publicité en Europe.
 
 **Mesure d'audience** : `NEXT_PUBLIC_ANALYTICS_PROVIDER=plausible` (+ domaine) ou `gtag` (+ id GA4). Le script
 n'est chargé qu'après consentement ; les événements suivis sont `tool_view/start/success/error/download`,

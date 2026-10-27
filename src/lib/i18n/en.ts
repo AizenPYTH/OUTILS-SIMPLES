@@ -295,6 +295,11 @@ export const en: Dictionary = {
     openTool: (name: string) => `Open the tool: ${name}`,
     tool: "Tool",
   },
+  ads: {
+    label: "Advertisement",
+    previewTitle: "Ad placement preview (simulation)",
+    previewHint: "no real ad, no network request",
+  },
   languageSwitcher: {
     label: "Language",
     french: "Français",
