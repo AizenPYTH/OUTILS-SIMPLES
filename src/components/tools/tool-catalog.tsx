@@ -330,7 +330,10 @@ function GroupedCategory({ category, tools }: { category: ToolCategory; tools: T
     <div className="space-y-6">
       {groups.map((group) => (
         <div key={group.name ?? "all"}>
-          <h3 className="section-label mb-2.5">{group.name}</h3>
+          {/* Readable group title followed by a rule (design audit C3). */}
+          <h3 className="mb-3 flex items-center gap-3 text-[13px] font-semibold text-foreground after:h-px after:flex-1 after:bg-border">
+            {group.name}
+          </h3>
           <ToolGrid tools={group.tools} />
         </div>
       ))}

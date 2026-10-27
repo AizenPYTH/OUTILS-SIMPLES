@@ -16,7 +16,12 @@ export function GuidePage({ guide }: { guide: Guide }) {
   const locale = getLocale();
   const base = localizedPath("/guides/");
   const tool = getToolById(guide.toolId);
-  const related = tool ? getRelatedTools(tool, 3) : [];
+  // Two columns: an even number of cards so that none is left alone on its row.
+  const relatedAll = tool ? getRelatedTools(tool, 4) : [];
+  const related =
+    relatedAll.length > 1
+      ? relatedAll.slice(0, relatedAll.length - (relatedAll.length % 2))
+      : relatedAll;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",

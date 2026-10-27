@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLocale } from "@/lib/i18n/locale";
 import { tr } from "@/lib/i18n/messages";
+import { workspaceHeights } from "@/lib/tools/workspace-heights";
 
 const loading = () => (
   <div className="space-y-3" aria-busy="true" aria-label={tr("Chargement de l'outil")}>
@@ -390,5 +391,27 @@ export function ToolRenderer({ toolId }: { toolId: string }) {
     throw new Error(`Tool "${toolId}" is published but has no implementation.`);
   }
   const Component = components[toolId];
-  return <Component />;
+  const reserved = workspaceHeights[toolId];
+  // While the client-only component loads (its skeleton carries aria-busy),
+  // the slot keeps the measured height of the loaded tool: no jump below.
+  return (
+    <div
+      data-tool-slot={toolId}
+      className={
+        reserved
+          ? "has-[>[aria-busy=true]]:min-h-[var(--slot-h)] sm:has-[>[aria-busy=true]]:min-h-[var(--slot-h-wide)]"
+          : undefined
+      }
+      style={
+        reserved
+          ? ({
+              "--slot-h": `${reserved[0]}px`,
+              "--slot-h-wide": `${reserved[1]}px`,
+            } as React.CSSProperties)
+          : undefined
+      }
+    >
+      <Component />
+    </div>
+  );
 }

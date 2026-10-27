@@ -11,7 +11,9 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import editorShot from "@/assets/editeur-apercu.webp";
+import editorShotFr from "@/assets/editeur-apercu.webp";
+import editorShotEn from "@/assets/editor-preview-en.webp";
+import { getLocale } from "@/lib/i18n/locale";
 import { HomeDrop } from "@/components/home/home-drop";
 import { AdPlacement } from "@/components/monetization/ad-placement";
 import { HomeSearch } from "@/components/tools/home-search";
@@ -70,6 +72,8 @@ const EDITOR_POINTS = () => [
 
 export function HomePage() {
   const editorPoints = EDITOR_POINTS();
+  // Real captures of the editor in the page's language (src/assets).
+  const editorShot = getLocale() === "en" ? editorShotEn : editorShotFr;
   const guides = getGuides();
   const tools = getPublishedTools();
   const popular = POPULAR_IDS.map((id) => getToolById(id)).filter(

@@ -1,5 +1,9 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { ToolIcon } from "@/components/tools/tool-icon";
+import { categoryTone } from "@/lib/tools/groups";
+import { cn } from "@/lib/utils";
 import { getGuides } from "@/lib/content/guides";
 import { getToolById } from "@/lib/tools";
 import { t } from "@/lib/i18n";
@@ -21,22 +25,43 @@ export function GuidesIndexPage() {
       {guides.length === 0 ? (
         <p className="mt-8 text-muted-foreground">{t.guidesPage.empty}</p>
       ) : null}
-      <ul className="mt-8 grid gap-4 md:grid-cols-2">
+      {/* Three columns when the count allows full rows, otherwise two. */}
+      <ul
+        className={cn(
+          "mt-8 grid gap-4 md:grid-cols-2",
+          guides.length % 3 === 0 && guides.length % 2 !== 0 && "lg:grid-cols-3",
+        )}
+      >
         {guides.map((guide) => {
           const tool = getToolById(guide.toolId);
           return (
             <li key={guide.slug}>
               <Link
                 href={`${base}${guide.slug}/`}
-                className="block h-full rounded-[16px] border border-border bg-surface p-5 transition-[transform,border-color] hover:-translate-y-[3px] hover:border-primary motion-reduce:hover:translate-y-0"
+                className="flex h-full gap-4 rounded-[16px] border border-border bg-surface p-5 transition-[transform,border-color] hover:-translate-y-[3px] hover:border-primary motion-reduce:hover:translate-y-0"
               >
-                <h2 className="text-lg">{guide.title}</h2>
-                <p className="mt-2 text-sm text-muted-foreground">{guide.description}</p>
+                {/* The family of the related tool, as on the catalogue cards. */}
                 {tool ? (
-                  <p className="mt-3 text-xs font-medium text-link">
-                    {t.legal.tool}: {tool.name}
-                  </p>
+                  <span
+                    className={cn(
+                      "flex size-11 shrink-0 items-center justify-center rounded-[12px]",
+                      categoryTone[tool.category].tile,
+                    )}
+                    aria-hidden="true"
+                  >
+                    <ToolIcon name={tool.icon} className="size-5" strokeWidth={1.7} />
+                  </span>
                 ) : null}
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <h2 className="text-lg">{guide.title}</h2>
+                  <span className="mt-2 text-sm text-muted-foreground">{guide.description}</span>
+                  {tool ? (
+                    <span className="mt-auto pt-3 text-sm font-medium text-link">
+                      {t.legal.openTool(tool.name)}{" "}
+                      <ArrowRight className="inline size-3.5 align-[-2px]" aria-hidden="true" />
+                    </span>
+                  ) : null}
+                </span>
               </Link>
             </li>
           );

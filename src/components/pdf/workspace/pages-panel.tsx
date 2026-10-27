@@ -298,7 +298,6 @@ const PageItem = React.forwardRef<
               width={120}
               height={156}
               extraRotation={rotation}
-              className="bg-transparent"
             />
           </div>
           <span className="absolute bottom-1 left-1 rounded-full bg-foreground/80 px-1.5 text-[11px] text-background">

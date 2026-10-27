@@ -26,6 +26,12 @@ export default function OfflinePage() {
   const names = Object.fromEntries(
     getPublishedTools("en").map((tool) => [getToolPath(tool, "en"), tool.name]),
   );
+  const icons = Object.fromEntries(
+    getPublishedTools("en").map((tool) => [
+      getToolPath(tool, "en"),
+      { icon: tool.icon, category: tool.category },
+    ]),
+  );
   return (
     <LegalPage
       title="Offline"
@@ -34,7 +40,7 @@ export default function OfflinePage() {
     >
       <section>
         <h2>Tools saved on this device</h2>
-        <OfflineToolList names={names} />
+        <OfflineToolList names={names} icons={icons} />
       </section>
       <section>
         <h2>How to save a tool</h2>

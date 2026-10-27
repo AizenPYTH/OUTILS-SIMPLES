@@ -20,6 +20,12 @@ export default function HorsLignePage() {
   const names = Object.fromEntries(
     getPublishedTools().map((tool) => [getToolPath(tool), tool.name]),
   );
+  const icons = Object.fromEntries(
+    getPublishedTools().map((tool) => [
+      getToolPath(tool),
+      { icon: tool.icon, category: tool.category },
+    ]),
+  );
   return (
     <LegalPage
       title="Hors connexion"
@@ -28,7 +34,7 @@ export default function HorsLignePage() {
     >
       <section>
         <h2>Outils enregistrés sur cet appareil</h2>
-        <OfflineToolList names={names} />
+        <OfflineToolList names={names} icons={icons} />
       </section>
       <section>
         <h2>Comment enregistrer un outil</h2>

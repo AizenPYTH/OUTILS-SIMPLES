@@ -105,3 +105,22 @@ describe("tool input limits (design audit T1)", () => {
     expect(formatInputFormat("text/plain", "fr")).toBe("Texte");
   });
 });
+
+describe("reserved tool heights (layout stability)", () => {
+  it("only reference published form-based tools, with plausible heights", async () => {
+    const { workspaceHeights } = await import("@/lib/tools/workspace-heights");
+    const published = getPublishedTools("fr");
+    const ids = Object.keys(workspaceHeights);
+    expect(ids.length).toBeGreaterThan(20);
+    for (const id of ids) {
+      const tool = published.find((x) => x.id === id);
+      expect(tool, id).toBeTruthy();
+      // Drop-zone families are deliberately not reserved (LCP, see the script).
+      expect(["pdf", "numerisation", "images", "conversion"], id).not.toContain(tool!.category);
+      for (const h of workspaceHeights[id]!) {
+        expect(h, id).toBeGreaterThan(150);
+        expect(h, id).toBeLessThan(2000);
+      }
+    }
+  });
+});
