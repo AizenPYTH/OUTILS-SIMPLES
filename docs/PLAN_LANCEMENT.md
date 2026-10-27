@@ -23,6 +23,10 @@ dans `docs/MISE_EN_LIGNE.md` ; la procédure sur appareils réels dans `docs/VAL
 4. Parcours manuels sur appareils réels (iPhone Safari, Android Chrome, Firefox desktop) selon
    `docs/VALIDATION_APPAREIL_REEL.md` : fusion, compression, scanner (caméra), OCR, modificateur, HEIC,
    mode hors ligne, pages `/en/`.
+   Points de design à regarder en particulier (finition UX/UI, `docs/AUDIT_DESIGN.md` §7) : rail du
+   modificateur sur un portable de 768 px de haut (icônes sur deux colonnes, tous les outils visibles),
+   bouton caméra en action principale du scanner sur téléphone, nom de fichier et bouton de
+   téléchargement de l'en-tête du modificateur sur iPhone, contrôle « HT / TTC / TVA » sur mobile.
 5. Tester une page de partage (Open Graph) FR et EN avec un validateur.
 
 ## 2. Mise en ligne (J0)
@@ -44,6 +48,8 @@ dans `docs/MISE_EN_LIGNE.md` ; la procédure sur appareils réels dans `docs/VAL
 - Mettre à jour le service worker à chaque déploiement (version automatique au build) ; vérifier qu'une
   visite en ligne récupère la nouvelle version (bannière « mise à jour disponible » du site).
 - Décider de la monétisation seulement avec des données (`docs/MONETISATION_ET_VIABILITE.md`).
+- Finitions de design non bloquantes restées ouvertes (`docs/AUDIT_DESIGN.md` §7.5) : à traiter
+  dans un lot « polish » après les premiers retours d'utilisateurs, sans urgence.
 
 ## 4. Procédure de retour arrière
 

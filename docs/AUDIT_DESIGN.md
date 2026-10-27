@@ -235,3 +235,160 @@ Le reste (P3) relève de la finition et peut suivre dans un lot « polish » san
 - Les 58 pages d'outils non capturées partagent le même gabarit que les 11 capturées ; les constats
   de gabarit (T1 à T8, F1 à F4) s'y appliquent, mais un défaut propre à un outil précis a pu
   échapper à l'audit.
+
+## 7. Corrections apportées (mission de finition UX/UI, après l'audit)
+
+Les constats ci-dessus décrivent l'état au commit `2670931`. Cette section liste ce qui a été corrigé
+ensuite, sans changer l'identité visuelle (palette, typographies, composants), sans supprimer d'outil
+ni modifier d'URL. Rien n'a été déployé et la configuration publicitaire n'a pas été touchée.
+
+### 7.1 Défauts P1 corrigés
+
+| #       | Cause réelle                                                                                                                                                                                                                                              | Correction                                                                                                                                                                                                                                                                                                                           | Fichiers                                                                                          |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| N1      | Le catalogue (composant client) lisait `toolCategories`, la source française brute, au lieu de `getCategories()` qui applique la locale. Les noms de sous-groupes n'avaient aucune version anglaise.                                                      | Le catalogue passe par `getCategories()` (locale ambiante). Les noms anglais des 11 sous-groupes sont centralisés à côté de leur définition (`toolGroupNamesEn`), le groupe de repli « Autres » devient « Other ». Aucune condition locale dispersée dans les composants.                                                            | `src/components/tools/tool-catalog.tsx`, `src/lib/tools/groups.ts`                                |
+| T1 / G1 | La page d'outil affichait toujours `formatBytes(limits.maxFileSizeBytes)` et la liste brute `inputFormats`, y compris pour les 10 outils déclarés sans fichier (`maxFileSizeBytes: 0`). Les types MIME inconnus (`image/gif`, DOCX…) s'affichaient bruts. | Un helper unique `getToolInputLimits()` décide : outil avec fichier → formats lisibles et taille réelle ; outil sans fichier → encart « Aucun fichier à importer : tout se fait dans la page » (traduit). Aucune valeur inventée : une limite absente reste absente. Libellés de formats FR/EN (GIF, SVG, Word (.docx), Texte/Text). | `src/lib/tools/input-limits.ts`, `src/components/tools/tool-page-layout.tsx`, `src/lib/i18n/*.ts` |
+
+Tests ajoutés : `tests/unit/catalog-design.test.ts` (libellés des 9 familles et 11 sous-groupes en
+anglais, noms français inchangés, limites des 10 outils sans fichier, limites réelles des outils avec
+fichier, libellés de formats sans `/` dans les deux langues) et `e2e/catalog-labels.spec.ts` (HTML
+serveur et page hydratée de `/en/tools/` et des 9 familles anglaises, catalogue français inchangé,
+encart des limites sur 4 pages et sur fusion/Word → PDF).
+
+### 7.2 Problèmes P2 corrigés
+
+| #   | Correction                                                                                                                                                                                                                                                                                                                              | Pages                                                      |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| T2  | Une seule barre de recherche de page, partagée (`SearchField`), sur l'accueil, le catalogue et les familles ; l'en-tête garde sa pilule de recherche rapide (Ctrl K). Sur l'accueil : dépôt de fichier (action principale), puis recherche plus discrète (48 px, ombre légère), puis raccourcis.                                        | Accueil, catalogue, 9 familles (FR et EN)                  |
+| T3  | Invite courte (« Rechercher parmi 69 outils… », « Rechercher parmi ces 27 outils… » sur une famille) et bouton « Rechercher » réduit à une icône sur mobile : l'invite n'est plus coupée.                                                                                                                                               | Idem                                                       |
+| A2  | Raccourcis du héros sur une seule ligne à 1440 px (libellés français raccourcis), bande défilante sur mobile comme les catégories du catalogue.                                                                                                                                                                                         | Accueil                                                    |
+| A1  | Familles compactes sur mobile (sans exemples), cartes populaires en ligne sur mobile.                                                                                                                                                                                                                                                   | Accueil                                                    |
+| C1  | Le bloc « Outils populaires » n'est plus répété dans le catalogue (il reste sur l'accueil) ; cartes du catalogue sur une ligne de description sur mobile, deux à partir de 640 px. Les 69 outils restent tous listés et rendus côté serveur.                                                                                            | Catalogue                                                  |
+| C2  | Les pages de famille gardent leur H1 et leur introduction propres ; le titre de section qui répétait le nom de la famille est réservé aux lecteurs d'écran ; la recherche annonce « parmi ces N outils » et cherche dans la famille ; la barre latérale reste pour changer de famille.                                                  | 9 familles                                                 |
+| T4  | Une seule notification par problème de fichier : encart d'erreur en ligne (icône, fond rouge pâle, `role="alert"`) sous la zone de dépôt. Les toasts doublons ont été retirés des deux zones de dépôt ; les erreurs de lecture, doublons et « au moins deux fichiers » de la fusion vont dans le même encart.                           | Tous les outils à zone de dépôt                            |
+| F4  | Plus de toast « n fichiers ajoutés » (les lignes de fichiers et le résumé suffisent). Les toasts restants (copie, téléchargement, OCR terminé…) s'affichent en bas à droite sur grand écran, hors de la colonne de contenu.                                                                                                             | Fusion, toutes pages                                       |
+| T5  | « Utiliser hors ligne · 4,7 Mo » : le poids est dans le bouton, la phrase d'explication devient sa description accessible et son infobulle.                                                                                                                                                                                             | Tous les outils                                            |
+| E1  | Rail de 88 px, libellés sur une ligne (« Modifier », « Texte » ; nom complet conservé pour l'accessibilité et l'infobulle). Rail adaptatif : sous 940 px de haut, titres de groupes masqués et boutons de 38 px ; sous 820 px, icônes seules sur deux colonnes. Tous les outils restent visibles à 1440 × 900 et 1366 × 768 (captures). | Modificateur                                               |
+| E2  | En-tête du panneau des pages sur une ligne (« 3 pages », « Insérer », fermer).                                                                                                                                                                                                                                                          | Modificateur                                               |
+| E3  | Vignettes de 120 × 156 px (au lieu de 80 × 104), actions de page sur une seule ligne sous la vignette.                                                                                                                                                                                                                                  | Modificateur                                               |
+| E4  | Zoom initial « largeur » : la page remplit la largeur disponible jusqu'à 920 px, en gardant au moins une demi-page visible sur les écrans peu hauts (116 % à 1440 × 900 au lieu de 84 %). Seule l'échelle d'affichage change : coordonnées du document et des annotations inchangées (en points PDF).                                   | Modificateur                                               |
+| E5  | Mobile : nom de fichier lisible (extension toujours visible, 13 px), bouton de téléchargement en icône (nom accessible complet), ligne d'état déplacée dans le menu « ⋯ » (conservée pour les lecteurs d'écran), dégradé signalant que la barre d'outils défile.                                                                        | Modificateur mobile                                        |
+| S1  | Une seule action principale : caméra en principal sur les appareils tactiles (placée en premier), import en principal ailleurs ; l'autre bouton passe en contour.                                                                                                                                                                       | Scanner                                                    |
+| G2  | Le contrôle segmenté reste une rangée de trois segments sur mobile (« HT / TTC / TVA », libellé complet pour l'accessibilité) ; option `shortLabel` du composant partagé, sans effet sur les autres usages.                                                                                                                             | TVA                                                        |
+| F1  | Hiérarchie des boutons : « Tout retirer » en bouton discret, action principale seule en plein ; boutons « Ajouter des fichiers/images » des zones compactes en contour.                                                                                                                                                                 | Compression et outils images par lot, images → PDF, fusion |
+| F2  | Les réglages viennent après les fichiers, juste au-dessus de l'action (ils n'étaient affichés qu'une fois une image chargée, mais au-dessus d'elle).                                                                                                                                                                                    | Compression et outils images par lot                       |
+
+### 7.3 Finitions P3 réalisées
+
+- **T6 / H3** : guide → outils liés en nombre pair sur deux colonnes ; index des guides sur trois
+  colonnes quand le nombre de guides le permet (9 en français : 3 × 3), deux sinon.
+- **H1 / H2** : cartes de l'index des guides avec l'icône teintée de la famille de l'outil lié et un
+  lien explicite « Ouvrir l'outil : … → ».
+- **A3 / A4 / N2** : nouvelles captures réelles du modificateur avec l'interface actuelle, cadrées
+  plus serré (1180 × 760 au lieu de 1366 × 860), une en français et une en anglais ; l'accueil anglais
+  affiche la capture anglaise.
+- **L1** : fil d'Ariane aligné sur la colonne de lecture des pages légales et éditoriales.
+- **L3** : espacement entre une liste et le paragraphe qui la suit (page cookies et toutes les pages
+  textuelles).
+- **G4** : bouton principal désactivé en gris neutre (et non plus en indigo pâle) dans tout le site ;
+  pendant un traitement (`aria-busy`), il garde sa couleur avec l'indicateur de chargement.
+- **C3** : titres de sous-groupes du catalogue en 13 px semi-gras, suivis d'un filet.
+- **E6** : outil actif du rail en contour indigo ; le plein indigo reste réservé au téléchargement.
+- **E7** : en mode sombre, fond du canevas plus sombre que les panneaux.
+- **O1** : icône de famille devant chaque outil enregistré sur la page hors ligne.
+
+### 7.4 Mesures (mêmes méthodes que l'audit : captures Playwright 1440 × 900 et 390 × 844)
+
+| Page              | Avant (audit) | Après    |
+| ----------------- | ------------- | -------- |
+| Accueil, mobile   | 8 682 px      | 7 247 px |
+| Catalogue, mobile | 12 095 px     | 9 103 px |
+| Catalogue, bureau | 5 836 px      | 5 406 px |
+| Accueil, bureau   | 4 441 px      | 4 397 px |
+
+Le tableau 4.1 de l'audit indiquait ≈ 5 700 px pour l'accueil sur bureau : la capture d'origine
+mesure en réalité 4 441 px (estimation erronée de l'audit, corrigée ici).
+
+### 7.5 Défauts encore ouverts (non bloquants)
+
+| #   | Priorité | Pourquoi il reste ouvert                                                                                                                                                                                                                                                                  |
+| --- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C4  | P3       | Descriptions coupées par « … » sur les cartes : la correction propre passe par une réécriture des 69 descriptions courtes (FR et EN), un travail de contenu plus que de design.                                                                                                           |
+| F3  | P3       | Listes « Limites » longues : les replier masquerait des informations utiles (formats, limites réelles). À décider avec le contenu.                                                                                                                                                        |
+| G3  | P3       | Zones de texte JSON de hauteur fixe : à revoir avec l'outil (redimensionnement manuel déjà possible).                                                                                                                                                                                     |
+| G4  | P3       | Partiellement traité : le bouton désactivé est désormais gris neutre ; les actions du QR code restent affichées (désactivées) avant saisie, ce qui annonce ce que l'outil produira.                                                                                                       |
+| S2  | P3       | Titre H1 de l'OCR sur deux lignes : le H1 est le nom de l'outil, partagé avec le titre SEO, le fil d'Ariane et les cartes ; le raccourcir est une décision éditoriale et SEO.                                                                                                             |
+| E8  | P3       | Ligne d'aide de l'outil actif alignée à droite sous la barre d'intention : à déplacer avec une refonte de la barre contextuelle.                                                                                                                                                          |
+| T7  | P3       | Compteurs « PDF 27 » (pied de page, chips) et « 27 outils » (titres) : deux contextes de densité différents, laissés en l'état.                                                                                                                                                           |
+| T8  | P3       | Contrôles de l'en-tête (recherche, tous les outils, langue, thème) de formes différentes : cohérents en hauteur, à unifier si l'en-tête est revu.                                                                                                                                         |
+| CLS | P2       | QR code, testeur de regex et générateur d'UUID gardent leur décalage au chargement (CLS mobile antérieur, ≈ 0,3 pour le QR code) : réserver la hauteur de l'outil y retardait le LCP mesuré au-delà de 4 s. Correction durable : rendre côté serveur une coquille statique de ces outils. |
+| L2  | P3       | Page Contact courte : elle dépend de l'adresse de contact que l'éditeur doit renseigner (`docs/PLAN_LANCEMENT.md` §0) ; aucun contenu n'a été inventé.                                                                                                                                    |
+| —   | P3       | Capture anglaise de l'éditeur : l'interface est en anglais, le document de test affiché reste un document français (contenu du fichier, pas de l'interface).                                                                                                                              |
+
+### 7.6 Reporté après le lancement
+
+- Lot « polish » des P3 ci-dessus, après les premiers retours réels.
+- Vérification sur appareils réels (Safari iOS, Firefox, Android) des écrans modifiés :
+  `docs/PLAN_LANCEMENT.md` §1, point 4. **Non vérifié dans cet environnement** (Chromium seul).
+
+### 7.7 Stabilité de mise en page des pages d'outils (constat ajouté pendant la vérification)
+
+Les outils sont des composants chargés côté client ; pendant leur chargement, un squelette de 256 px
+occupe leur place. Mesuré au Lighthouse mobile, ce squelette provoquait un décalage visible sur les
+outils « formulaire », dont la zone réelle mesure 500 à 1 300 px : CLS de 0,21 à 0,31 au commit
+`004c0d4`, **avant cette mission** (vérifié en reconstruisant ce commit dans une copie de travail
+séparée). Ce n'est pas un défaut introduit par les lots ci-dessus, mais il nuit à la fiabilité perçue :
+il a été corrigé.
+
+- Chaque emplacement d'outil réserve, pendant le chargement seulement, la hauteur mesurée de l'outil
+  chargé (390 px et 1440 px) : `src/lib/tools/workspace-heights.ts`, généré par
+  `scripts/measure-workspace-heights.mjs` à relancer après un changement de mise en page d'outil.
+- Réservé pour 26 outils des familles texte, développeur, calculatrices, codes et documents.
+  Volontairement **pas** pour les familles à zone de dépôt (PDF, numérisation, images, conversion) :
+  sur les pages de ces familles mesurées, le CLS final va de 0 à 0,09, et la réserve y repoussait le
+  grand texte de la page sous la ligne de flottaison, ce qui retardait le LCP mesuré de 3,3 s à 6,3 s
+  (modificateur, signature, OCR).
+  Trois outils formulaire sont exclus pour la même raison (§7.5).
+
+| Page (Lighthouse mobile)                   | Avant (`004c0d4`)     | Après                                                                                   |
+| ------------------------------------------ | --------------------- | --------------------------------------------------------------------------------------- |
+| `/calculatrices/tva/`                      | CLS 0,222 · perf 78   | CLS 0 · perf 87–90                                                                      |
+| `/texte/compteur-de-mots/`                 | CLS 0,24 · perf 77    | CLS 0 · perf 90–94                                                                      |
+| `/codes/convertisseur-couleurs/`           | CLS 0,251 · perf 77   | CLS 0 · perf 89–94                                                                      |
+| `/conversion/word-vers-pdf/` (non réservé) | CLS 0,211 · perf 70   | CLS 0 · perf 77 (constaté ; cause non isolée, la famille conversion n'a pas de réserve) |
+| `/pdf/modifier/`                           | CLS 0,005 · LCP 3,3 s | CLS 0,005 · LCP 3,3 s                                                                   |
+
+Les scores de performance mobiles varient de quelques points d'une mesure à l'autre (serveur local,
+CPU ralenti ×4) ; les valeurs de CLS sont stables.
+
+### 7.8 Tests exécutés et captures vérifiées
+
+Toutes les commandes ont été exécutées sur le build de production final de la mission.
+
+| Contrôle                                                             | Résultat                                                                                                                                                                                                                   |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tsc --noEmit`, ESLint, Prettier (`--check .`)                       | 0 erreur, 0 avertissement                                                                                                                                                                                                  |
+| Vitest                                                               | 266 tests, 32 fichiers, 0 échec (8 nouveaux)                                                                                                                                                                               |
+| `next build`                                                         | réussi                                                                                                                                                                                                                     |
+| Playwright complet, Chromium bureau + Pixel 7                        | 302 exécutions : 289 passées, 13 ignorées par conception, 0 échec (32 nouvelles), lancé deux fois                                                                                                                          |
+| Lighthouse mobile (CPU ×4), même méthode que `AUDIT_PERFORMANCES.md` | accessibilité, bonnes pratiques et SEO à 100 sur les 15 pages mesurées en entier ; CLS de 0 à 0,09 partout, sauf les 3 outils du §7.5 (QR code : 0,306, inchangé) ; performance seule mesurée sur les 29 outils formulaire |
+
+**Régressions rencontrées et résolues pendant la mission**
+
+- Le nouveau zoom initial agrandit la page : deux tests Playwright cliquaient dans la moitié basse de
+  la page, hors d'une fenêtre de 720 px de haut. Les points de clic ont été remontés (le comportement
+  testé est inchangé) et le zoom garde au moins une demi-page visible sur les écrans peu hauts.
+- Le rail du modificateur débordait encore de quelques pixels à 900 px et 768 px de haut après le
+  premier passage : variantes de hauteur ajustées et icônes sur deux colonnes sous 820 px.
+- La réserve de hauteur des outils retardait le LCP de pages à zone de dépôt et de trois outils
+  formulaire : limitée aux outils où elle est un gain mesuré (§7.7).
+
+**Captures vérifiées** (Playwright, mêmes formats que l'audit ; conservées hors dépôt) : accueil FR
+et EN (bureau, mobile, mobile sombre), catalogue FR et EN, page de famille PDF et Images, TVA (bureau,
+mobile, sombre), QR code, scanner (bureau, mobile tactile), compression d'image avec fichier chargé,
+fusion avec fichiers et en erreur (bureau, mobile), Word → PDF, modificateur ouvert à 1440 × 900,
+1366 × 768, 390 × 844 et en sombre, modificateur anglais, index des guides, guide, contact, cookies.
+
+**Non vérifié** : Safari (macOS, iOS), Firefox et appareils réels ne sont pas disponibles dans cet
+environnement ; voir §7.6. Aucun déploiement n'a eu lieu et la configuration publicitaire n'a pas été
+modifiée.
