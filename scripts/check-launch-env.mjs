@@ -29,6 +29,10 @@ const warnOnly = process.argv.includes("--warn");
 const errors = [];
 const warnings = [];
 
+if (env.NEXT_PUBLIC_NOINDEX === "true")
+  errors.push(
+    "NEXT_PUBLIC_NOINDEX=true : réservé aux prévisualisations, le site de production serait invisible des moteurs.",
+  );
 const siteUrl = (env.NEXT_PUBLIC_SITE_URL ?? "").trim();
 if (!siteUrl) errors.push("NEXT_PUBLIC_SITE_URL absente (canonical, sitemap, robots, Open Graph).");
 else {

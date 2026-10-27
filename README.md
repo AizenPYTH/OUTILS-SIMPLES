@@ -194,14 +194,14 @@ les avertissements (éléments ignorés, scans sans texte). PowerPoint et PDF/A 
 
 ## Tests
 
-- `pnpm test` : 244 tests Vitest (registre bilingue, i18n et couverture des traductions, contrôle de mise en ligne, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
+- `pnpm test` : 258 tests Vitest (registre bilingue, i18n et couverture des traductions, contrôle de mise en ligne, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
   sur fixtures réelles, permissions de chiffrement relues par pdf.js, géométrie/détection du scanner, OCR →
   PDF recherchable, métadonnées d'images, encodeur PNG, extraction d'images et de liens, comparaison,
   caviardage (y compris pages pivotées), Markdown → PDF, regex, dates et jours fériés, TVA, unités,
   codes-barres, couleurs, décodage QR, documents imprimables, limites et fichiers invalides, fondations
   de l'éditeur : diagnostic d'import, mot de passe, couche OCR, plan de pages, passages OCR, modèle de
   zoom, palette de polices incorporées, besoins hors ligne et manifeste du service worker, conversions Office, détection de type de fichier, décodage HEIC, insertion de pages, différence visuelle).
-- `pnpm build && pnpm test:e2e` : 130 parcours Playwright exécutés sur desktop et mobile (Pixel 7, 260 exécutions dont 13 ignorées par conception) :
+- `pnpm build && pnpm test:e2e` : 135 parcours Playwright exécutés sur desktop et mobile (Pixel 7, 270 exécutions dont 13 ignorées par conception) :
   catalogue, recherche, navigation, 404, métadonnées, sitemap/robots/CSP, thème, version anglaise (routes, hreflang, sélecteur, 404, pages légales), absence de débordement
   horizontal, et pour chacun des 66 outils un parcours avec fichiers téléchargés vérifiés (pdf-lib, pdf.js,
   en-têtes d'images, ZIP, EXIF), dont OCR sur image et sur PDF scanné, protection AES-128/256 et caviardage.

@@ -1,19 +1,20 @@
 /**
- * Makes the English dictionary and inline messages available (`t`, `tr()`).
- * Imported for its side effect by the root layouts and the sitemap on the
- * server, by `EnglishBundle` in the English client bundle (both are needed
- * during hydration), and by the tests. The French client bundle never imports
- * it. The English text of the tools (much larger, needed by fewer pages) is
- * registered separately by `register-en-registry.ts`.
+ * Makes the English dictionary and the shared inline messages available
+ * (`t`, `tr()` for the page chrome). Imported for its side effect by the root
+ * layouts and the sitemap on the server, by `EnglishBundle` in the English
+ * client bundle (needed during hydration), and by the tests. The French
+ * client bundle never imports it. The much larger per-tool messages and the
+ * English registry are registered separately (`register-en-messages.ts`,
+ * `register-en-registry.ts`) with the tool component that needs them.
  */
 import { registerDictionary } from "./index";
 import { en } from "./en";
 import { registerMessages } from "./messages";
-import { messagesEn } from "./messages/en";
+import { sharedEn } from "./messages/en/shared";
 
 export function registerEnglish(): void {
   registerDictionary("en", en);
-  registerMessages(messagesEn);
+  registerMessages(sharedEn);
 }
 
 registerEnglish();

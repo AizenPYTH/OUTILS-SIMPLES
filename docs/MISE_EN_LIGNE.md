@@ -23,6 +23,14 @@ Vérifier ensuite `/mentions-legales/`, `/confidentialite/`, `/contact/` : aucun
 « à compléter » ne doit rester. Relire la politique de confidentialité au regard des choix réels
 (analytics, publicité).
 
+## 1 bis. Prévisualisation sans indexation
+
+Tout déploiement qui n'est pas le site public (prévisualisation, recette) doit porter
+`NEXT_PUBLIC_NOINDEX=true` : `robots.txt` passe en `Disallow: /`, chaque page reçoit
+`<meta name="robots" content="noindex">` et l'en-tête `X-Robots-Tag: noindex, nofollow`, le
+sitemap est vide. En production la variable doit être absente ou `false` : `pnpm check:launch`
+bloque sinon.
+
 ## 2. Adresse publique
 
 `NEXT_PUBLIC_SITE_URL=https://votre-domaine.fr` (sans barre finale). Elle alimente le canonical,

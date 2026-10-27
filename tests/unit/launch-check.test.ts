@@ -53,3 +53,11 @@ describe("launch readiness check", () => {
     expect(run({ ...complete, NEXT_PUBLIC_ANALYTICS_PROVIDER: "plausible" }).status).toBe(1);
   });
 });
+
+describe("preview no-index switch", () => {
+  it("is refused in a production configuration", () => {
+    const { status, out } = run({ ...complete, NEXT_PUBLIC_NOINDEX: "true" });
+    expect(status).toBe(1);
+    expect(out).toContain("NEXT_PUBLIC_NOINDEX");
+  });
+});

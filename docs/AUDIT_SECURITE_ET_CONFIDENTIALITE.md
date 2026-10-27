@@ -39,7 +39,16 @@ Aucun `innerHTML`/`insertAdjacentHTML` ailleurs. Les noms de fichiers produits p
 
 - pdf.js, pdf-lib, Tesseract.js, qpdf-wasm, libheif-js, mammoth, exceljs, docx, marked + DOMPurify, jsQR, exifr : toutes servies depuis l'origine (`public/pdfjs`, `/ocr`, `/qpdf`, `/heif`, bundles), aucun CDN tiers. WebAssembly autorisé par `'wasm-unsafe-eval'` uniquement.
 - Workers (pdf.js, OCR) : `worker-src 'self' blob:` ; les messages d'erreur produits dans un worker sont traduits à l'affichage (`tr(error.message)`), aucune donnée n'y transite vers l'extérieur.
-- Versions épinglées dans `package.json` ; `pnpm audit` n'a pas été exécuté dans cette session (accès réseau du conteneur limité) : à lancer avant mise en ligne (`docs/PLAN_LANCEMENT.md`).
+- Versions épinglées dans `package.json`. **`pnpm audit --prod` exécuté le 2026-10-27** (registre joignable) :
+  deux avis « modéré » trouvés, tous deux corrigés, puis « No known vulnerabilities found ».
+  - `fflate` 0.8.2 (GHSA-px8p-9vwx-vf98, boucle infinie d'`unzipSync` sur une archive ZIP64 malformée) :
+    le site n'utilise que `zipSync`/`zlibSync` (création d'archives et de PNG), jamais la
+    décompression ; non exploitable, mais mis à jour vers 0.8.3 (correctif mineur, tests inchangés).
+  - `uuid` 8.3.2 via `exceljs` (GHSA-w5hq-g745-h8pq, absence de contrôle de borne dans v3/v5/v6 avec
+    tampon fourni) : exceljs ne sert qu'à lire des classeurs dans le navigateur et n'appelle pas ces
+    fonctions avec un tampon externe ; non applicable. Résolu par une surcharge pnpm
+    (`uuid@<11.1.1` → 11.1.1), vérifiée par les tests de conversion Excel → PDF (unitaires et
+    Playwright).
 
 ## 6. Analytique et publicité (préparées, désactivées)
 

@@ -30,8 +30,9 @@ interface Pattern {
 let messagesEn: Record<string, string> = {};
 let patterns: Pattern[] | null = null;
 
+/** Adds English texts (merging): the shared chrome at load, the tool maps with the tool. */
 export function registerMessages(map: Record<string, string>): void {
-  messagesEn = map;
+  messagesEn = { ...messagesEn, ...map };
   patterns = null;
 }
 

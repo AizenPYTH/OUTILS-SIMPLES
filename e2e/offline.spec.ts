@@ -77,4 +77,26 @@ test.describe("mode hors ligne", () => {
     expect(manifest.groups.pdf.files).toContain("/pdfjs/pdf.worker.min.mjs");
     expect(manifest.groups.pdf.files).toContain("/qpdf/qpdf.wasm");
   });
+
+  test("an English page never stored falls back to the English offline page", async ({
+    page,
+    context,
+  }) => {
+    test.setTimeout(120_000);
+    await page.goto("/en/");
+    await page.evaluate(() => navigator.serviceWorker.ready);
+    await expect(page.locator("h1")).toHaveText("Your files, your tools, your browser.");
+    // Give the worker time to finish precaching both offline pages.
+    await page.waitForTimeout(2_000);
+    await context.setOffline(true);
+    try {
+      await page.goto("/en/pdf/split/");
+      await expect(page).toHaveURL(/\/en\/offline\/$/, { timeout: 20_000 });
+      await expect(page.locator("html")).toHaveAttribute("lang", "en");
+      await expect(page.locator("h1")).toHaveText("Offline");
+      await expect(page.getByTestId("offline-list-empty")).toBeVisible({ timeout: 20_000 });
+    } finally {
+      await context.setOffline(false);
+    }
+  });
 });

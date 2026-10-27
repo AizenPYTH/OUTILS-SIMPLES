@@ -67,6 +67,22 @@ function groupsOf(category: ToolCategory, tools: ToolDefinition[]) {
   return out;
 }
 
+/**
+ * Mirrors the `?q=` search parameter into the catalogue's state. Kept in its
+ * own Suspense boundary: `useSearchParams` makes its nearest boundary render
+ * on the client only, so isolating it here lets the whole tool list be
+ * prerendered (indexable HTML, no layout shift) while the query still applies
+ * after hydration and follows header searches.
+ */
+function UrlQuerySync({ onChange }: { onChange: (query: string) => void }) {
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get("q") ?? "";
+  React.useEffect(() => {
+    onChange(urlQuery);
+  }, [urlQuery, onChange]);
+  return null;
+}
+
 export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategory["id"] }) {
   const { publishedTools, activeCategories, plannedCategories, popularTools } = React.useMemo(
     () => catalogData(),
@@ -74,19 +90,10 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
   );
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const urlQuery = searchParams.get("q") ?? "";
-  const [query, setQuery] = React.useState(urlQuery);
-  const [lastUrlQuery, setLastUrlQuery] = React.useState(urlQuery);
+  const [query, setQuery] = React.useState("");
   const [category, setCategory] = React.useState<string>(initialCategory ?? "all");
   const inputRef = React.useRef<HTMLInputElement>(null);
   const resultsId = React.useId();
-
-  // Follow the URL when it changes (e.g. header search submits ?q=), without an effect.
-  if (urlQuery !== lastUrlQuery) {
-    setLastUrlQuery(urlQuery);
-    setQuery(urlQuery);
-  }
 
   const trimmed = query.trim();
   const isFiltering = trimmed.length > 0 || category !== "all";
@@ -152,7 +159,7 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
         <span
           className={cn(
             "rounded-full px-1.5 text-[11px] tabular-nums",
-            active ? "bg-white/20 lg:bg-primary/15" : "bg-muted text-muted-foreground",
+            active ? "bg-black/15 lg:bg-primary/15" : "bg-muted text-muted-foreground",
           )}
         >
           {countFor(id)}
@@ -163,6 +170,9 @@ export function ToolCatalog({ initialCategory }: { initialCategory?: ToolCategor
 
   return (
     <div className="space-y-8" id="outils">
+      <React.Suspense fallback={null}>
+        <UrlQuerySync onChange={setQuery} />
+      </React.Suspense>
       <form role="search" onSubmit={onSubmit} className="relative">
         <label htmlFor="catalog-search" className="sr-only">
           {t.nav.search}

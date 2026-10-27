@@ -10,6 +10,7 @@ import {
   stripLocalePrefix,
 } from "@/lib/i18n/routes";
 import "@/lib/i18n/register-en";
+import "@/lib/i18n/register-en-messages";
 import "@/lib/i18n/register-en-registry";
 import { tr } from "@/lib/i18n/messages";
 import { isToolUiTranslated } from "@/lib/i18n/ui-coverage";

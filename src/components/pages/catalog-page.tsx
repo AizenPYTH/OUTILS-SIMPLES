@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { ToolCatalog } from "@/components/tools/tool-catalog";
 import { getPublishedTools } from "@/lib/tools";
@@ -22,9 +21,7 @@ export function CatalogPage() {
           {t.directory.subtitleWithCount(count)}
         </p>
       </div>
-      <Suspense fallback={<div className="h-[52px] rounded-[16px] bg-muted" aria-hidden="true" />}>
-        <ToolCatalog />
-      </Suspense>
+      <ToolCatalog />
     </div>
   );
 }

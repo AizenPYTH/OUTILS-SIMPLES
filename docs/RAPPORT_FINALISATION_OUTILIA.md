@@ -1,115 +1,162 @@
-# Rapport de finalisation OUTILIA
+# Rapport de finalisation OUTILIA — validation pré-lancement
 
-Date : 2026-10-27. Branche `claude/festive-turing-f4fmzh`. Point de départ : commit `c97e3be`
-(arbre propre). **Aucun déploiement n'a été effectué ; le site n'est pas publié.**
+Date : 2026-10-27. Branche `claude/festive-turing-f4fmzh`, commit de départ de cette validation
+`b4e62e8` (version anglaise + emplacements publicitaires), commit final : voir `git log`.
+**Aucun déploiement n'a été effectué, aucune publicité n'est activée, aucune opération Git
+destructive.** Les résultats historiques n'ont pas été réutilisés : chaque contrôle ci-dessous a été
+réexécuté sur l'état final du dépôt.
 
-## 1. Résumé exécutif
+## 1. Décision de lancement (synthèse)
 
-- **Version anglaise réelle** : français à la racine (URL inchangées), anglais sous `/en/` avec slugs
-  anglais ; navigation, accueil, catalogue, familles, 69 pages d'outils (contenu éditorial et
-  interface), modificateur PDF, 4 guides, 9 pages éditoriales/légales, page hors ligne, messages
-  d'erreur et d'état traduits. Sélecteur de langue accessible qui conserve la page équivalente.
-  SEO international (`lang`, canonical, `hreflang` réciproques + `x-default`, sitemap bilingue sans
-  route vide, images de partage par langue). Aucune redirection automatique.
-- **Honnêteté de la couverture** : un mécanisme affiche un avertissement et retire de l'index tout
-  outil dont l'interface ne serait pas traduite ; aujourd'hui les 69 outils sont déclarés traduits et
-  un test analyse les sources pour l'interdire si du français réapparaît.
-- **Qualité** : typecheck, lint, format, 244 tests unitaires (30 fichiers) et la suite Playwright
-  complète verts sur le commit final (détail § 6). Audits sécurité/confidentialité, performance,
-  SEO documentés ; régression de poids introduite par la traduction détectée par la mesure et
-  corrigée avant commit.
-- **Préparation du lancement** : `pnpm check:launch` (contrôle automatisé des variables légales et de
-  l'URL publique, bloquant en production, informatif en CI), `docs/PLAN_LANCEMENT.md`,
-  `docs/MISE_EN_LIGNE.md`, procédure sur appareils réels étendue à l'anglais.
-- **Décisions documentées, non construites** : champs de formulaire dans le modificateur (spécifié),
-  PowerPoint → PDF et PDF/A (refusés faute de fidélité), stockage en nuage et IA (incompatibles avec
-  la promesse sans décision produit), monétisation (préparée, désactivée).
+**Lancement possible après les actions P0, toutes du ressort du propriétaire** (aucune ne concerne le
+code) : identité légale et URL publique dans l'environnement de production, déploiement de
+prévisualisation non indexé, contrôle sur appareils réels (iPhone Safari, Android, Firefox) des
+parcours caméra/OCR/éditeur FR et EN. Le code est vert sur toutes les suites, l'audit de dépendances
+est propre, le SEO international est vérifié page par page sur le build, les emplacements
+publicitaires sont inertes et les mesures Lighthouse sont bonnes sur bureau et acceptables sur mobile
+simulé (limitées par le travail JavaScript de React et des moteurs PDF).
 
-## 2. Internationalisation (phase 1)
+| Priorité | Point                                                                                                                                                                                         | Responsable              |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| **P0**   | Renseigner `NEXT_PUBLIC_SITE_URL` et les 7 variables légales obligatoires (+ SIREN/TVA si entreprise) ; `pnpm check:launch` → 0 bloquant                                                      | Propriétaire             |
+| **P0**   | Déployer une prévisualisation avec `NEXT_PUBLIC_NOINDEX=true`, vérifier en-têtes (CSP, HSTS, `X-Robots-Tag`), puis exécuter `docs/VALIDATION_APPAREIL_REEL.md` (§ 1–6) sur de vrais appareils | Propriétaire             |
+| **P0**   | Choisir l'hébergeur et le domaine ; HTTPS obligatoire (caméra)                                                                                                                                | Propriétaire             |
+| **P1**   | Relecture native des textes anglais (interface, SEO, pages légales de courtoisie)                                                                                                             | Propriétaire / relecteur |
+| **P1**   | Mesurer les Core Web Vitals de terrain après lancement (Search Console) ; le TBT mobile simulé reste élevé sur les pages d'outils                                                             | Propriétaire             |
+| **P1**   | Ajouter `pnpm audit --prod` à la routine avant chaque publication (non inclus dans `pnpm check`)                                                                                              | Propriétaire             |
+| **P2**   | Titres rendus > 75 caractères sur 35 pages FR (suffixe « \| OUTILIA ») : à retravailler si la Search Console réécrit les titres                                                               | Éditorial                |
+| **P2**   | Champs de formulaire dans le modificateur (`docs/ETUDE_FONCTIONNALITES_DIFFEREES.md`), monétisation (`docs/MONETISATION_ET_VIABILITE.md`, `docs/MONETISATION_PUBLICITAIRE.md`)                | Produit                  |
 
-| Élément                                                                                                         | Réalisé                                                                                                                     | Vérifié par                                                                                                                                                        |
-| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Architecture `(fr)` / `en`, locale ambiante, dictionnaire `en.ts` typé                                          | oui                                                                                                                         | typecheck, `tests/unit/i18n.test.ts` (parité des clés)                                                                                                             |
-| Registre anglais des 69 outils (slug, nom, descriptions, mots-clés, SEO, étapes, limites, FAQ, confidentialité) | oui                                                                                                                         | `validateRegistry` sur le registre anglais, unicité des chemins, longueurs SEO                                                                                     |
-| Familles, guides (4), pages légales/éditoriales (9), hors ligne, « Check it yourself »                          | oui                                                                                                                         | `e2e/i18n.spec.ts` (statut 200, `lang`, h1)                                                                                                                        |
-| Interfaces d'outils et modificateur : ≈ 1 500 chaînes via `tr()` + cartes anglaises                             | oui                                                                                                                         | `tests/unit/i18n-messages.test.ts` (chaque clé a un texte anglais, aucun français dans les textes, placeholders cohérents), scanner de sources dans `i18n.test.ts` |
-| Erreurs, chargement, succès                                                                                     | oui (`t.errors/progress/result` + `tr(error.message)` aux points d'affichage, y compris messages produits dans les workers) | tests unitaires des bibliothèques (sortie française inchangée)                                                                                                     |
-| Sélecteur de langue (liens réels, `hreflang`, nom accessible, clavier)                                          | oui                                                                                                                         | `e2e/i18n.spec.ts`, `e2e/a11y.spec.ts` (axe)                                                                                                                       |
-| SEO : `lang`, canonical, `hreflang`, `x-default`, sitemap, `og:locale`, images OG EN, JSON-LD `inLanguage`      | oui                                                                                                                         | `i18n.test.ts`, `registry.test.ts`, `e2e/i18n.spec.ts`, requêtes HTTP (`docs/AUDIT_SEO_FINAL.md`)                                                                  |
-| 404 par langue                                                                                                  | oui (statut 404, `noindex`, texte de la langue ; rendu client après coquille Next)                                          | `e2e/i18n.spec.ts`                                                                                                                                                 |
-| Formats de nombres et de dates                                                                                  | par langue (`currentLanguageTag()`, `formatBytes` Mo/MB)                                                                    | `files.test.ts` (FR), vérification manuelle EN                                                                                                                     |
-| Service worker                                                                                                  | page hors ligne de la langue de l'URL (`/hors-ligne/`, `/en/offline/`) précachée                                            | `e2e/offline.spec.ts` (FR), relecture du code (EN)                                                                                                                 |
+## 2. Commandes exécutées et résultats
 
-Limites : traductions produites dans cette session (relecture native recommandée) ; noms de jours
-fériés et exemples français conservés et signalés ; modèle OCR anglais téléchargé à la demande.
-Détail : `docs/INTERNATIONALISATION.md`.
+| Commande                                                                          | Résultat                                                                                                                                                                                                                                                        |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `git status` / `git log`                                                          | branche `claude/festive-turing-f4fmzh`, arbre propre au départ, synchronisé avec `origin`                                                                                                                                                                       |
+| `pnpm audit --prod`                                                               | 2 avis modérés (fflate 0.8.2, uuid 8.3.2 via exceljs) → corrigés (fflate 0.8.3, surcharge `uuid@<11.1.1`→11.1.1) → **« No known vulnerabilities found »**                                                                                                       |
+| `pnpm typecheck`                                                                  | OK                                                                                                                                                                                                                                                              |
+| `pnpm lint`                                                                       | OK (0 erreur, 0 avertissement)                                                                                                                                                                                                                                  |
+| `pnpm format:check`                                                               | OK                                                                                                                                                                                                                                                              |
+| `pnpm test` (Vitest)                                                              | 258 tests, 31 fichiers, 0 échec                                                                                                                                                                                                                                 |
+| `pnpm build`                                                                      | OK (191 pages prérendues FR + EN, images OG, sitemap, routes d'images de partage)                                                                                                                                                                               |
+| `pnpm test:e2e` (Playwright, Chromium desktop + Pixel 7)                          | 270 exécutions : 257 passées, 13 ignorées par conception, 0 échec (8,0 min). Après le dernier correctif (liens soulignés des pages légales, classe CSS seule), rebuild puis suites a11y, site, i18n, ads, privacy réexécutées : 52 passées, 8 ignorées, 0 échec |
+| Lighthouse 13.5 (`pnpm dlx lighthouse`, Chromium Playwright)                      | exécuté sur 9 pages × (mobile, desktop) : voir § 5                                                                                                                                                                                                              |
+| Sondage SEO HTTP des 191 URL du sitemap                                           | aucune anomalie structurelle (détail `docs/AUDIT_SEO_FINAL.md`)                                                                                                                                                                                                 |
+| `pnpm check:launch` (sans variables / avec publicité incomplète / avec `NOINDEX`) | 8 bloquants explicites / 3 bloquants explicites / 1 bloquant ; messages en clair                                                                                                                                                                                |
+| Mesure des bundles (script reproductible, `docs/AUDIT_PERFORMANCES.md` § 5)       | avant/après : § 5                                                                                                                                                                                                                                               |
 
-## 3. Qualité technique (phases 2, 4, 6)
+Non exécutés et pourquoi : Safari, Firefox et appareils réels (non disponibles dans l'environnement :
+procédure manuelle fournie) ; tests de charge ; mesure de terrain (site non publié).
 
-- **Compatibilité / responsive** : parcours clés exécutés sur Chromium desktop et émulation Pixel 7
-  (suite Playwright complète) ; Safari, Firefox et appareils réels **non testés** ici : procédure
-  manuelle `docs/VALIDATION_APPAREIL_REEL.md` (section anglaise ajoutée). Aucune validation iPhone
-  n'est revendiquée.
-- **Accessibilité** : axe-core (sérieux/critique = 0) sur les pages clés, outil chargé et modificateur ;
-  un défaut introduit par le sélecteur de langue (nom accessible ≠ texte visible) détecté par la
-  suite et corrigé ; clavier, focus du menu mobile, états annoncés vérifiés par les tests existants.
-- **Hors ligne** : première visite, visite en cache, mise à jour du SW (version par build), coupure
-  réseau avec repli vers la page hors ligne de la langue : test Playwright FR (Chromium) ; EN relu,
-  non exécuté en e2e (la suite hors ligne est française).
+## 3. Corrections apportées pendant cette validation
 
-## 4. Performance (phase 3)
+1. **Dépendances** : fflate 0.8.3 ; uuid 11.1.1 (surcharge pnpm) ; audit propre. Vérifié par les
+   tests de conversion Excel → PDF et de compression par lot (ZIP).
+2. **Performance / SEO** : le catalogue et les 18 pages de familles n'avaient **aucune carte d'outil
+   dans le HTML** (rendu client forcé par `useSearchParams`) et un décalage de mise en page de 0,98 :
+   corrigé (77 cartes rendues côté serveur, CLS 0, `/outils/` desktop 75 → 100).
+3. **Performance EN** : messages anglais découpés (chrome à l'hydratation, outils avec le composant) :
+   −41 Ko gzip sur chaque page anglaise (accueil EN 229 → 188 Ko).
+4. **Mesure corrigée** : la hausse « 183 → 221 Ko » annoncée précédemment venait d'une méthode
+   incluant le chunk de polyfills `noModule` ; à méthode égale, l'internationalisation a coûté +3 Ko
+   sur l'accueil français (180 → 183 Ko), confirmé en reconstruisant le commit d'avant.
+5. **Prévisualisation non indexable** : `NEXT_PUBLIC_NOINDEX=true` (robots `Disallow: /`, meta
+   `noindex`, en-tête `X-Robots-Tag`, sitemap vide), refusé en production par `pnpm check:launch`.
+6. **Accessibilité** : contraste du badge de compteur des familles (4,17 → conforme) ; Lighthouse
+   accessibilité 100 sur toutes les pages mesurées.
+7. **SEO** : quatre descriptions de familles raccourcies.
+8. **Tests ajoutés** : parcours anglais complet (fusion + réouverture du PDF produit, état d'erreur
+   traduit), repli hors ligne vers `/en/offline/`, contrôle `NOINDEX`, composants hydratés limités
+   à la carte de messages partagée.
 
-Mesures sur le build final (`docs/AUDIT_PERFORMANCES.md`) : JS initial gzip accueil FR 221 Ko,
-outil FR 214 Ko, accueil EN 266 Ko, catalogue FR 266 Ko / EN 349 Ko. La première mesure après
-traduction donnait 265 Ko (FR) et 349 Ko (EN) sur toutes les pages : les cartes de traduction et le
-registre anglais étaient embarqués partout ; corrigé par enregistrement par arbre de langue et
-chargement différé. Lighthouse non exécutable dans l'environnement : à mesurer sur l'URL de
-prévisualisation.
+## 4. Tests : réussis, échoués, ignorés, non exécutés
 
-## 5. Sécurité et confidentialité (phase 5)
+| Suite                       | Réussis                 | Échoués | Ignorés                                                                         | Non exécutés                     |
+| --------------------------- | ----------------------- | ------- | ------------------------------------------------------------------------------- | -------------------------------- |
+| Vitest                      | 258                     | 0       | 0                                                                               | —                                |
+| Playwright desktop + mobile | 257                     | 0       | 13 (caméra et hors ligne sur mobile, axe sur desktop seulement, par conception) | Safari, Firefox, appareils réels |
+| Lighthouse                  | 18 audits (9 pages × 2) | —       | —                                                                               | pages restantes (même gabarit)   |
 
-`docs/AUDIT_SECURITE_ET_CONFIDENTIALITE.md` : aucun endpoint serveur, CSP stricte (`connect-src
-'self'`), trois `dangerouslySetInnerHTML` examinés (JSON-LD interne, Markdown assaini par DOMPurify,
-SVG échappé), stockage limité au thème et au consentement, service worker même origine uniquement,
-caviardage = réécriture des pages en images (jamais présenté comme un masque), masque = visuel
-(indiqué). Aucune vulnérabilité exploitable identifiée ; `pnpm audit` à exécuter avant mise en ligne.
+Parcours couverts par les tests automatisés : dépôt universel (détection PDF/image/Word/inconnu,
+transfert vers l'outil), fusion et modification de PDF (export relu par pdf-lib/pdf.js), OCR (image et
+PDF scanné, orientations), conversions Office (Word → PDF, Excel/CSV → PDF, PDF → Word), HEIC,
+hors ligne FR et EN (outil enregistré puis exécuté sans réseau, repli), changement de langue sur page
+équivalente, routes principales FR et EN, 404 par langue, publicité inerte, accessibilité (axe,
+clavier), confidentialité (aucune requête hors origine, mot de passe jamais transmis), rendu mobile
+(projet Pixel 7 sur toutes les suites).
 
-## 6. Tests (phase 10) — exécutés sur le commit final
+## 5. Performance (mesures, pas d'estimation)
 
-| Suite                                                    | Résultat                                                                                                          |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `pnpm typecheck`                                         | OK                                                                                                                |
-| `pnpm lint`                                              | OK (0 erreur, 0 avertissement)                                                                                    |
-| `pnpm format:check`                                      | OK                                                                                                                |
-| `pnpm test` (Vitest)                                     | 244 tests, 30 fichiers, 0 échec                                                                                   |
-| `pnpm build`                                             | OK (pages FR et EN prérendues, images OG, sitemap)                                                                |
-| `pnpm test:e2e` (Playwright, desktop Chromium + Pixel 7) | **E2E**                                                                                                           |
-| Non exécutés                                             | Lighthouse (installation réseau refusée), Safari/Firefox/appareils réels (non disponibles), `pnpm audit` (réseau) |
+JS initial des navigateurs modernes (gzip) : accueil FR 183 Ko (180 avant la version anglaise),
+accueil EN 188 Ko (229 avant cette mission), outil FR 173 Ko, outil EN 178 Ko (219 avant),
+catalogue FR 228 Ko, catalogue EN 271 Ko (311 avant), guide 167 Ko, page légale 166 / 172 Ko.
+Méthode, script et détail : `docs/AUDIT_PERFORMANCES.md`.
 
-## 7. Liste de contrôle de lancement (phase 8)
+Lighthouse (build local, sans CDN) :
 
-Voir `docs/PLAN_LANCEMENT.md` et `docs/MISE_EN_LIGNE.md`. **Confirmation : aucun déploiement, aucune
-publication, aucun identifiant ni information légale n'ont été créés.** `pnpm check:launch` doit
-afficher « 0 bloquant » avec les variables de production avant mise en ligne.
+| Page                                 | Mobile (perf / a11y / BP / SEO · métriques)               | Desktop                                                   |
+| ------------------------------------ | --------------------------------------------------------- | --------------------------------------------------------- |
+| `/`                                  | 90 / 100 / 100 / 100 · LCP 3.5 s · TBT 130 ms · CLS 0     | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 20 ms · CLS 0     |
+| `/confidentialite/`                  | 91 / 96 / 100 / 100 · LCP 2.7 s · TBT 280 ms · CLS 0      | 100 / 96 / 100 / 100 · LCP 0.7 s · TBT 10 ms · CLS 0      |
+| `/en/`                               | 88 / 100 / 100 / 100 · LCP 3.6 s · TBT 170 ms · CLS 0     | 100 / 100 / 100 / 100 · LCP 0.8 s · TBT 10 ms · CLS 0     |
+| `/en/pdf/merge/`                     | 80 / 100 / 100 / 100 · LCP 3.0 s · TBT 540 ms · CLS 0.059 | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 40 ms · CLS 0.015 |
+| `/en/tools/`                         | 81 / 100 / 100 / 100 · LCP 3.8 s · TBT 340 ms · CLS 0     | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 0 ms · CLS 0.005  |
+| `/guides/comment-fusionner-des-pdf/` | 93 / 100 / 100 / 100 · LCP 2.9 s · TBT 170 ms · CLS 0     | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 0 ms · CLS 0      |
+| `/outils/`                           | 87 / 100 / 100 / 100 · LCP 3.2 s · TBT 290 ms · CLS 0     | 100 / 100 / 100 / 100 · LCP 0.8 s · TBT 20 ms · CLS 0     |
+| `/pdf/fusionner/`                    | 80 / 100 / 100 / 100 · LCP 3.3 s · TBT 490 ms · CLS 0.025 | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 20 ms · CLS 0.017 |
+| `/pdf/modifier/`                     | 71 / 100 / 100 / 100 · LCP 3.3 s · TBT 800 ms · CLS 0.103 | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 50 ms · CLS 0.033 |
 
-## 8. État Git
+Lecture : accessibilité, bonnes pratiques et SEO à 100 partout (le 96 initial de `/confidentialite/`
+venait de liens distingués par la couleur seule : soulignés depuis, 100 après remesure). Les scores
+« performance » mobiles (71–93) sont limités par le temps de blocage sur CPU ralenti ×4 : React DOM et,
+sur les pages d'outils, les moteurs PDF chargés dès l'hydratation ; le modificateur (`/pdf/modifier/`)
+est le plus lourd (TBT 800 ms, CLS 0,10 à la limite). Mesures locales sans CDN ni Brotli ; les valeurs
+de terrain sont à mesurer après lancement.
 
-Commits de cette mission sur `claude/festive-turing-f4fmzh` (voir `git log`) : version anglaise,
-corrections de poids, images de partage, audits et documents. Fichiers principaux : `src/lib/i18n/*`,
-`src/lib/tools/registry/en/*`, `src/app/en/*`, `src/app/(fr)/*`, `src/components/pages/*`,
-`src/lib/i18n/messages/en/*`, `scripts/i18n-scan.mjs`, `scripts/check-launch-env.mjs`,
-`tests/unit/i18n*.test.ts`, `tests/unit/launch-check.test.ts`, `e2e/i18n.spec.ts`, `docs/*`.
+## 6. Sécurité et confidentialité
 
-## 9. Prochaines actions
+- Audit de dépendances propre (§ 2). Risques encore ouverts : `'unsafe-inline'` dans `script-src`
+  (rendu statique sans nonce ; aucune injection HTML non assainie trouvée : JSON-LD interne,
+  Markdown passé par DOMPurify, SVG échappé) ; dépendances à surveiller à chaque mise à jour.
+- Appels réseau réels du code applicatif : `fetch` vers l'origine uniquement (`/heif/libheif.wasm`,
+  `/fonts/*`, `/offline-manifest.json`, modèles OCR, assets `/_next`) ; `navigator.clipboard` pour
+  le bouton Copier ; aucune requête tierce avec la configuration par défaut (CSP `connect-src 'self'`,
+  vérifié par `e2e/privacy.spec.ts` et `e2e/ads.spec.ts`). Stockage : `localStorage` pour le thème et
+  le consentement uniquement. Les affirmations de `/confidentialite/` et `/en/privacy/` correspondent
+  au code.
+- Publicité : désactivée par défaut, aucun script, aucun identifiant fictif (test), aucun emplacement
+  dans le modificateur, les pages légales, hors ligne ou 404 ; activation refusée sans fournisseur,
+  identifiant éditeur au bon format, bloc, et `NEXT_PUBLIC_CONSENT_MODE=external` (CMP certifiée).
+  Le bandeau maison n'est pas présenté comme certifié.
 
-**P0 (avant mise en ligne)**
+## 7. Informations à fournir par le propriétaire avant publication
 
-1. Renseigner l'identité légale et `NEXT_PUBLIC_SITE_URL` ; `pnpm check:launch` à 0 bloquant.
-2. Déploiement de prévisualisation en `noindex`, en-têtes vérifiés, procédure appareils réels
-   (iPhone Safari, Android, Firefox) FR et EN.
-3. `pnpm audit --prod` et mise à jour des dépendances si nécessaire.
+| Variable                                                                                                                                                          | Obligatoire                                        | Usage                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | --------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`                                                                                                                                            | oui (https, domaine réel)                          | canonical, hreflang, sitemap, robots, Open Graph          |
+| `NEXT_PUBLIC_LEGAL_PUBLISHER_NAME`, `_PUBLISHER_STATUS`, `_PUBLISHER_ADDRESS`, `_PUBLICATION_DIRECTOR`, `_CONTACT_EMAIL`, `_HOSTING_PROVIDER`, `_HOSTING_ADDRESS` | oui                                                | mentions légales, confidentialité, contact (FR et EN)     |
+| `NEXT_PUBLIC_LEGAL_REGISTRATION_NUMBER`, `_VAT_NUMBER`                                                                                                            | si entreprise / si assujetti                       | mentions légales                                          |
+| `NEXT_PUBLIC_NOINDEX`                                                                                                                                             | absente en production ; `true` en prévisualisation | indexation                                                |
+| `NEXT_PUBLIC_ANALYTICS_PROVIDER` (+ domaine ou identifiant), `NEXT_PUBLIC_CONSENT_MODE`                                                                           | facultatif                                         | mesure d'audience après consentement                      |
+| `NEXT_PUBLIC_ADS_*`, `NEXT_PUBLIC_ADSENSE_*`                                                                                                                      | facultatif, désactivé                              | publicité (procédure `docs/MONETISATION_PUBLICITAIRE.md`) |
+| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`                                                                                                                            | facultatif                                         | Search Console                                            |
 
-**P1** 4. Relecture native des textes anglais (interface, SEO, pages légales : traduction de courtoisie). 5. Mesure Lighthouse / Web Vitals sur la prévisualisation ; décider des optimisations du gabarit. 6. Mode hors ligne anglais : test Playwright dédié (aujourd'hui vérifié par relecture).
+Aucune de ces valeurs n'a été inventée ni inscrite dans le dépôt.
 
-**P2** 7. Champs de formulaire dans le modificateur selon `docs/ETUDE_FONCTIONNALITES_DIFFEREES.md`. 8. Monétisation : décisions du propriétaire (`docs/MONETISATION_ET_VIABILITE.md`), CMP certifiée si
-publicité en EEE.
+## 8. Checklist exacte de publication
+
+1. Environnement de production : variables du § 7 ; `pnpm check:launch` → « 0 bloquant ».
+2. `pnpm install --frozen-lockfile && pnpm audit --prod && pnpm check && pnpm test:e2e` sur le commit
+   candidat (CI verte).
+3. Prévisualisation (`NEXT_PUBLIC_NOINDEX=true`) : `curl -I` (CSP, HSTS, `X-Robots-Tag: noindex`,
+   `Cache-Control: no-cache` sur `/sw.js`), parcours `docs/VALIDATION_APPAREIL_REEL.md` FR et EN,
+   validateur de partage (image OG) FR et EN.
+4. Production : retirer `NEXT_PUBLIC_NOINDEX`, redéployer ; vérifier `/robots.txt`, `/sitemap.xml`
+   (191 URL), absence de `X-Robots-Tag`, une page FR et une page EN (`lang`, canonical, hreflang).
+5. Search Console : propriété, sitemap ; surveiller « Ciblage international » et les Core Web Vitals.
+6. Retour arrière : `docs/PLAN_LANCEMENT.md` § 4.
+
+## 9. Étapes manuelles sur appareils réels (non réalisées ici)
+
+`docs/VALIDATION_APPAREIL_REEL.md` : scanner (caméra arrière, orientation EXIF, mémoire sur Android
+d'entrée de gamme), lecteur QR, OCR, modificateur (tactile, zoom, export), Safari et Firefox desktop,
+version anglaise (§ 6). Aucune de ces validations n'est revendiquée par ce rapport.

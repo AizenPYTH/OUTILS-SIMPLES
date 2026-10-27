@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { expectValidPdf, readDownload, uploadPdf } from "./helpers";
 
 /** English version: routes, metadata, switcher, 404s, and the French pages left untouched. */
 test.describe("internationalisation", () => {
@@ -168,5 +169,38 @@ test.describe("internationalisation", () => {
       const path = new URL(url).pathname;
       expect((await request.get(path)).status(), path).toBe(200);
     }
+  });
+
+  test("an English tool page runs the whole journey in English and the file reopens", async ({
+    page,
+  }) => {
+    await page.goto("/en/pdf/merge/");
+    await uploadPdf(page, "simple-3-pages.pdf", "simple-5-pages.pdf");
+    await expect(page.getByTestId("merge-file-row")).toHaveCount(2);
+    await expect(page.getByTestId("merge-file-row").first()).toContainText("3 pages");
+    const workspace = page.getByTestId("tool-workspace");
+    await expect(workspace).not.toContainText(/Fusionner|Télécharger|fichier/);
+    const downloadPromise = page.waitForEvent("download");
+    await page.getByRole("button", { name: /^Merge/ }).click();
+    await expect(page.getByTestId("done-panel")).toBeVisible({ timeout: 60_000 });
+    await expect(page.getByTestId("done-panel")).not.toContainText(/Télécharger|Recommencer/);
+    await page.getByTestId("download-button").click();
+    await expectValidPdf(await readDownload(await downloadPromise), 8);
+    // The success state is announced in English and no French leaked into the page.
+    const main = await page.locator("main").innerText();
+    expect(main).not.toMatch(/Déposez|Télécharger|Recommencer|Fusionner/);
+  });
+
+  test("an English error state is translated", async ({ page }) => {
+    await page.goto("/en/pdf/merge/");
+    await page.getByTestId("pdf-input").setInputFiles({
+      name: "not-a-pdf.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("hello"),
+    });
+    const alert = page.getByRole("alert").first();
+    await expect(alert).toBeVisible();
+    await expect(alert).not.toContainText(/fichier|n'est pas|Choisissez/);
+    await expect(alert).toContainText(/PDF/);
   });
 });

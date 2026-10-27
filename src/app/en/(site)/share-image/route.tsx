@@ -1,4 +1,5 @@
 import "@/lib/i18n/register-en";
+import "@/lib/i18n/register-en-messages";
 import "@/lib/i18n/register-en-registry";
 import { ogImage, OG_FOOTER_EN } from "@/lib/og";
 import { getPublishedTools } from "@/lib/tools";

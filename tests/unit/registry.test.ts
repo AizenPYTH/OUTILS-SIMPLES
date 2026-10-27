@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import "@/lib/i18n/register-en";
+import "@/lib/i18n/register-en-messages";
 import "@/lib/i18n/register-en-registry";
 import {
   getIndexableTools,

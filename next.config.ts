@@ -23,7 +23,13 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/:path*",
-        headers: buildSecurityHeaders({ isDev: process.env.NODE_ENV !== "production" }),
+        headers: [
+          ...buildSecurityHeaders({ isDev: process.env.NODE_ENV !== "production" }),
+          // Preview deployments must never be indexed, whatever a page says.
+          ...(process.env.NEXT_PUBLIC_NOINDEX === "true"
+            ? [{ key: "X-Robots-Tag", value: "noindex, nofollow" }]
+            : []),
+        ],
       },
       // The service worker and the offline manifest are revalidated on every check for updates.
       {

@@ -12,6 +12,8 @@ const ADS_PROVIDERS = ["none", "adsense"] as const;
 
 export interface PublicEnv {
   NEXT_PUBLIC_SITE_URL: string;
+  /** Preview deployments: true forbids indexing everywhere (robots.txt, meta robots, X-Robots-Tag). */
+  NEXT_PUBLIC_NOINDEX: boolean;
   /** Master switch of the advertising system (see src/config/ads.ts). */
   NEXT_PUBLIC_ADS_ENABLED: boolean;
   NEXT_PUBLIC_ADS_PROVIDER: (typeof ADS_PROVIDERS)[number];
@@ -90,6 +92,7 @@ export function parsePublicEnv(raw: Record<string, string | undefined>): PublicE
       raw.NEXT_PUBLIC_SITE_URL,
       "http://localhost:3000",
     ),
+    NEXT_PUBLIC_NOINDEX: bool("NEXT_PUBLIC_NOINDEX", raw.NEXT_PUBLIC_NOINDEX),
     NEXT_PUBLIC_ADS_ENABLED: bool("NEXT_PUBLIC_ADS_ENABLED", raw.NEXT_PUBLIC_ADS_ENABLED),
     NEXT_PUBLIC_ADS_PROVIDER: oneOf(
       "NEXT_PUBLIC_ADS_PROVIDER",
@@ -139,6 +142,7 @@ export function parsePublicEnv(raw: Record<string, string | undefined>): PublicE
  */
 export const publicEnv: PublicEnv = parsePublicEnv({
   NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+  NEXT_PUBLIC_NOINDEX: process.env.NEXT_PUBLIC_NOINDEX,
   NEXT_PUBLIC_ADS_ENABLED: process.env.NEXT_PUBLIC_ADS_ENABLED,
   NEXT_PUBLIC_ADS_PROVIDER: process.env.NEXT_PUBLIC_ADS_PROVIDER,
   NEXT_PUBLIC_ADS_PREVIEW: process.env.NEXT_PUBLIC_ADS_PREVIEW,

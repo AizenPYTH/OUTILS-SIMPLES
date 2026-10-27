@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
 import "@/lib/i18n/register-en";
+import "@/lib/i18n/register-en-messages";
 import "@/lib/i18n/register-en-registry";
 import { absoluteUrl } from "@/config/site";
+import { publicEnv } from "@/config/env";
 import { alternateGuideSlug, getGuides } from "@/lib/content/guides";
 import { locales, type Locale } from "@/lib/i18n/locale";
 import { localizedPath, staticRoutes } from "@/lib/i18n/routes";
@@ -77,5 +79,5 @@ export function buildSitemapEntries(): MetadataRoute.Sitemap {
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return buildSitemapEntries();
+  return publicEnv.NEXT_PUBLIC_NOINDEX ? [] : buildSitemapEntries();
 }

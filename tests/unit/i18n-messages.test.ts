@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { messagesEn } from "@/lib/i18n/messages/en";
+import { sharedEn } from "@/lib/i18n/messages/en/shared";
 
 const root = path.resolve(__dirname, "../../src");
 
@@ -56,5 +57,19 @@ describe("inline message translations", () => {
       if (!value.trim()) problems.push(`empty ${key}`);
     }
     expect(problems, problems.join("\n")).toEqual([]);
+  });
+
+  it("components hydrated on English pages only use keys of the shared map", () => {
+    // Tool components are loaded client-side with their own messages; everything
+    // else (chrome, pages, catalogue, monetization, offline, home) is server-rendered
+    // and hydrated before the tool maps arrive, so its keys must be in sharedEn.
+    const toolDirs =
+      /^components\/(pdf|scan|ocr|images|text|dev|calc|codes|documents|conversion)\//;
+    const missing: string[] = [];
+    for (const [key, files] of collectKeys()) {
+      const hydrated = files.filter((f) => !toolDirs.test(f) && !f.startsWith("lib/"));
+      if (hydrated.length && !(key in sharedEn)) missing.push(`${key}  ←  ${hydrated[0]}`);
+    }
+    expect(missing, `keys to move into messages/en/shared.ts:\n${missing.join("\n")}`).toEqual([]);
   });
 });

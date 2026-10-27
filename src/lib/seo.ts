@@ -54,7 +54,7 @@ function staticAlternates(path: string): Partial<Record<Locale, string>> | null 
 export function buildPageMetadata(input: PageMetadataInput): Metadata {
   const locale = input.locale ?? getLocale();
   const canonical = absoluteUrl(input.path);
-  const indexable = input.indexable ?? true;
+  const indexable = (input.indexable ?? true) && !publicEnv.NEXT_PUBLIC_NOINDEX;
   const alternates = input.alternates ?? staticAlternates(input.path) ?? { [locale]: input.path };
   const dictionary = getDictionary(locale);
   return {

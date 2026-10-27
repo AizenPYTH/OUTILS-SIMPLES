@@ -14,7 +14,7 @@ export const toolCategories: readonly ToolCategory[] = [
     seo: {
       title: "Outils PDF en ligne gratuits : fusionner, diviser, compresser, signer",
       description:
-        "Tous les outils PDF d'OUTILIA : fusion, division, compression, organisation, rotation, texte, annotation, signature, filigrane, protection, conversion. Traitement local, sans envoi de fichiers.",
+        "Tous les outils PDF d'OUTILIA : fusion, division, compression, organisation, signature, filigrane, protection, conversion. Traitement local, sans envoi de fichiers.",
     },
   },
   {
@@ -28,7 +28,7 @@ export const toolCategories: readonly ToolCategory[] = [
     seo: {
       title: "Scanner un document et reconnaître le texte (OCR) en ligne",
       description:
-        "Scanner de documents pour smartphone, correction de perspective et OCR français/anglais dans le navigateur. PDF recherchables, extraction de texte, confidentialité totale.",
+        "Scanner de documents pour smartphone, correction de perspective et OCR français/anglais dans le navigateur. PDF recherchables, extraction de texte, rien n'est envoyé.",
     },
   },
   {
@@ -70,7 +70,7 @@ export const toolCategories: readonly ToolCategory[] = [
     seo: {
       title: "Outils texte en ligne : compter, nettoyer, comparer, transformer",
       description:
-        "Compteur de mots, nettoyage de texte, majuscules/minuscules, comparateur de textes, tri et dédoublonnage de lignes, extraction d'e-mails et d'URL. Gratuit et local.",
+        "Compteur de mots, nettoyage de texte, majuscules/minuscules, comparateur de textes, tri et dédoublonnage de lignes, extraction d'e-mails et d'URL. Gratuit, local.",
     },
   },
   {
@@ -84,7 +84,7 @@ export const toolCategories: readonly ToolCategory[] = [
     seo: {
       title: "Outils développeur en ligne : JSON, Base64, UUID, hash, regex",
       description:
-        "Formateur et validateur JSON, encodeurs Base64 et URL, générateur UUID et mots de passe, hash SHA-256, testeur de regex, timestamps Unix. Tout fonctionne dans votre navigateur.",
+        "Formateur et validateur JSON, encodeurs Base64 et URL, générateur UUID et mots de passe, hash SHA-256, testeur de regex, timestamps Unix. Tout reste dans votre navigateur.",
     },
   },
   {

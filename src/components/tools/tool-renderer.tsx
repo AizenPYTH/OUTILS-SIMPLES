@@ -25,7 +25,12 @@ const loading = () => (
  */
 function load<T>(factory: () => Promise<T>): () => Promise<T> {
   return async () => {
-    if (getLocale() === "en") await import("@/lib/i18n/register-en-registry");
+    if (getLocale() === "en") {
+      await Promise.all([
+        import("@/lib/i18n/register-en-registry"),
+        import("@/lib/i18n/register-en-messages"),
+      ]);
+    }
     return factory();
   };
 }

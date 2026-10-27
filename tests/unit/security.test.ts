@@ -74,3 +74,11 @@ describe("consent parsing", () => {
     ).toBe(true);
   });
 });
+
+describe("preview no-index switch", () => {
+  it("defaults to indexable and forbids indexing on preview deployments", async () => {
+    const { parsePublicEnv } = await import("@/config/env");
+    expect(parsePublicEnv({}).NEXT_PUBLIC_NOINDEX).toBe(false);
+    expect(parsePublicEnv({ NEXT_PUBLIC_NOINDEX: "true" }).NEXT_PUBLIC_NOINDEX).toBe(true);
+  });
+});

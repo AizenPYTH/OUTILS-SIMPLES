@@ -1,72 +1,122 @@
 # Audit de performance
 
-Date : 2026-10-27. Build de production (`next build`, Turbopack), serveur `next start` local, mesures
-reproductibles avec les scripts décrits en § 4. **Lighthouse n'a pas pu être exécuté** dans cet
-environnement (installation de `lighthouse` via `npx` refusée par le réseau du conteneur) : les Core
-Web Vitals de terrain restent à mesurer après mise en ligne (Search Console, PageSpeed Insights).
+Date : 2026-10-27 (mission de validation pré-lancement). Build de production (`next build`,
+Turbopack), serveur `next start` local, Node 22, Chromium Playwright pour Lighthouse 13.5. Toutes les
+mesures de ce document ont été **exécutées** sur le commit décrit dans `docs/RAPPORT_FINALISATION_OUTILIA.md` ;
+rien n'est estimé.
 
-## 1. JavaScript initial (scripts référencés par le HTML, gzip)
+## 1. Correction de la mesure précédente
 
-| Page                                                 | Avant la version anglaise (rapport précédent) | Français, après | Anglais, après |
-| ---------------------------------------------------- | --------------------------------------------- | --------------- | -------------- |
-| Accueil                                              | 183 Ko                                        | 221 Ko          | 266 Ko         |
-| Page d'outil (fusionner / merge)                     | 176 Ko                                        | 214 Ko          | 259 Ko         |
-| Modificateur PDF (page, avant chargement de l'outil) | —                                             | 214 Ko          | 259 Ko         |
-| Guide                                                | 167 Ko (page de contenu)                      | 208 Ko          | 253 Ko         |
-| Catalogue                                            | —                                             | 266 Ko          | 349 Ko         |
+Le rapport antérieur annonçait une hausse du JavaScript initial de 183 Ko à 221 Ko (accueil) après
+l'internationalisation. La comparaison a été refaite en construisant le commit d'avant la version
+anglaise (`c97e3be`) dans un worktree séparé et en mesurant les deux builds avec le même script :
+
+- la mesure « 221 Ko » incluait le chunk de polyfills (38 Ko gzip) servi avec l'attribut `noModule`,
+  que les navigateurs modernes ne téléchargent pas ; la mesure « 183 Ko » l'excluait ;
+- à méthode égale (scripts `<script src>` sans `noModule`, gzip), l'accueil français est passé de
+  **180 Ko à 183 Ko** (+3 Ko) et la page d'outil de **172 Ko à 173 Ko** (+1 Ko). La version anglaise
+  n'a donc pas alourdi les pages françaises de façon significative.
+
+## 2. JavaScript initial (navigateurs modernes, gzip, scripts référencés par le HTML)
+
+| Page                       | Avant i18n (`c97e3be`) | Avant cette mission | Après cette mission |
+| -------------------------- | ---------------------- | ------------------- | ------------------- |
+| Accueil FR `/`             | 180 Ko                 | 183 Ko              | 183 Ko              |
+| Accueil EN `/en/`          | —                      | 229 Ko              | **188 Ko**          |
+| Outil FR `/pdf/fusionner/` | 172 Ko                 | 173 Ko              | 173 Ko              |
+| Outil EN `/en/pdf/merge/`  | —                      | 219 Ko              | **178 Ko**          |
+| Catalogue FR `/outils/`    | 223 Ko                 | 228 Ko              | 228 Ko              |
+| Catalogue EN `/en/tools/`  | —                      | 311 Ko              | **271 Ko**          |
+| Famille FR `/pdf/`         | 223 Ko                 | 228 Ko              | 228 Ko              |
+| Guide FR                   | 167 Ko                 | 167 Ko              | 167 Ko              |
+| Page légale FR / EN        | 164 Ko / —             | 166 / 212 Ko        | 166 / **172 Ko**    |
+
+Avec le chunk de polyfills (anciens navigateurs seulement) ajouter 38 Ko à chaque valeur.
+
+Ce qui a été fait pendant cette mission (mesurable, sans changement fonctionnel) :
+
+1. **Messages anglais découpés** : seule la carte « chrome » (≈ 3 Ko) est enregistrée à l'hydratation
+   des pages anglaises ; les cartes des outils (≈ 35 Ko gzip) sont chargées avec le composant d'outil,
+   qui n'est pas rendu côté serveur. Un test (`tests/unit/i18n-messages.test.ts`) vérifie que les
+   composants hydratés n'utilisent que des clés de la carte partagée. Gain : −41 Ko sur chaque page
+   anglaise.
+2. **Catalogue et familles rendus côté serveur** : `useSearchParams` forçait le rendu client de toute
+   la liste d'outils (HTML sans aucune carte, décalage de mise en page 0,98 sur `/outils/`). Le
+   paramètre `?q=` est maintenant synchronisé par un composant isolé dans sa propre limite Suspense :
+   les 77 cartes du catalogue et les listes des familles sont dans le HTML (indexables), FR et EN.
+
+Ce qui reste et pourquoi : le plancher React + exécution Next ≈ 150 Ko ; le catalogue porte le registre
+(≈ 45 Ko) parce que la recherche et les filtres s'exécutent dans le navigateur ; le catalogue anglais
+porte les deux registres (le registre anglais est une surcouche du français). Découper le registre par
+famille ferait gagner ≈ 30 Ko sur ces deux pages seulement : non prioritaire.
+
+## 3. Lighthouse 13.5 (Chromium headless, émulation mobile « Moto G Power » CPU ×4 et desktop)
+
+Mesures sur le build final, machine sans autre charge (une première série lancée pendant un build
+parallèle donnait des scores mobiles de 52 à 79 : écartée, car le temps de blocage dépend du CPU
+disponible ; ce biais est documenté pour ne pas être reproduit).
+
+| Page                                 | Mobile (perf / a11y / BP / SEO · métriques)               | Desktop                                                   |
+| ------------------------------------ | --------------------------------------------------------- | --------------------------------------------------------- |
+| `/`                                  | 90 / 100 / 100 / 100 · LCP 3.5 s · TBT 130 ms · CLS 0     | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 20 ms · CLS 0     |
+| `/confidentialite/`                  | 91 / 96 / 100 / 100 · LCP 2.7 s · TBT 280 ms · CLS 0      | 100 / 96 / 100 / 100 · LCP 0.7 s · TBT 10 ms · CLS 0      |
+| `/en/`                               | 88 / 100 / 100 / 100 · LCP 3.6 s · TBT 170 ms · CLS 0     | 100 / 100 / 100 / 100 · LCP 0.8 s · TBT 10 ms · CLS 0     |
+| `/en/pdf/merge/`                     | 80 / 100 / 100 / 100 · LCP 3.0 s · TBT 540 ms · CLS 0.059 | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 40 ms · CLS 0.015 |
+| `/en/tools/`                         | 81 / 100 / 100 / 100 · LCP 3.8 s · TBT 340 ms · CLS 0     | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 0 ms · CLS 0.005  |
+| `/guides/comment-fusionner-des-pdf/` | 93 / 100 / 100 / 100 · LCP 2.9 s · TBT 170 ms · CLS 0     | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 0 ms · CLS 0      |
+| `/outils/`                           | 87 / 100 / 100 / 100 · LCP 3.2 s · TBT 290 ms · CLS 0     | 100 / 100 / 100 / 100 · LCP 0.8 s · TBT 20 ms · CLS 0     |
+| `/pdf/fusionner/`                    | 80 / 100 / 100 / 100 · LCP 3.3 s · TBT 490 ms · CLS 0.025 | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 20 ms · CLS 0.017 |
+| `/pdf/modifier/`                     | 71 / 100 / 100 / 100 · LCP 3.3 s · TBT 800 ms · CLS 0.103 | 100 / 100 / 100 / 100 · LCP 0.7 s · TBT 50 ms · CLS 0.033 |
 
 Lecture :
 
-- Le plancher React + exécution Next + polyfills (≈ 150 Ko) est inchangé. L'écart français
-  « avant/après » (≈ +40 Ko) correspond au gabarit devenu bilingue : fournisseur de locale,
-  table des routes, sélecteur de langue, formats de nombres par langue et le code `tr()`
-  des composants partagés. Il a été réduit de 265 Ko à 221 Ko pendant cette mission en retirant
-  les cartes de traduction anglaises du bundle français (voir § 3).
-- Les pages anglaises portent en plus le dictionnaire et les messages anglais (≈ 45 Ko gzip),
-  nécessaires à l'hydratation ; le registre anglais (≈ 80 Ko gzip avec le registre français
-  dont il dépend) n'est téléchargé que par le catalogue/familles anglais et au chargement d'un
-  composant d'outil.
-- Les moteurs (pdf.js 4,7 Mo, OCR 17 Mo, polices 4,2 Mo, HEIC 1,5 Mo) ne sont chargés qu'à l'usage,
-  comme avant.
+- Accessibilité, bonnes pratiques et SEO : 100 sur toutes les pages (après deux corrections :
+  contraste du badge de compteur des familles, liens des pages légales distingués par la couleur seule).
+- Catalogue `/outils/` : CLS 0,98 (desktop) et 0,57 (mobile) avant correction, 0 après ; score
+  desktop 75 → 100, mobile 68 → 87.
+- Les scores « performance » mobiles (71–93) viennent du **temps de blocage du fil principal** sur
+  un CPU ralenti ×4 : évaluation de React DOM et, sur les pages d'outils, des moteurs PDF chargés
+  dès l'hydratation (pdf-lib, pdf.js). Le modificateur est le plus lourd (TBT 800 ms, CLS 0,10 à la
+  limite recommandée). Aucune ressource bloquante tierce, aucune image lourde.
+- Mesures d'un serveur local sans CDN ni compression Brotli ; `uses-http2` ignoré (serveur local).
 
-## 2. Autres mesures
+## 4. Pistes mesurées mais non appliquées (arbitrage)
 
-| Mesure          | Valeur                                                                                           | Commentaire                                            |
-| --------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
-| CSS             | 16 Ko gzip, une feuille                                                                          | Tailwind 4, inchangé                                   |
-| HTML accueil    | 39 Ko gzip (FR) / 37 Ko (EN)                                                                     | contient la charge utile RSC                           |
-| Pages statiques | accueil, catalogue, familles, 69 × 2 pages d'outils, guides, pages légales dans les deux langues | prérendues au build (`○`/`●` dans le journal de build) |
-| Images OG       | générées au build par route, FR et EN                                                            | `opengraph-image` par page                             |
-| Service worker  | version par build, précache de `/hors-ligne/` et `/en/offline/`                                  | aucune mise en cache de ressource tierce               |
+| Piste                                                                            | Gain attendu                                       | Pourquoi pas maintenant                                                                                           |
+| -------------------------------------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Différer le chargement du composant d'outil jusqu'à l'intersection/l'interaction | −0,3 à −0,5 s de TBT mobile sur les pages d'outils | Le dépôt de fichier est l'action principale : un délai perçu avant qu'il soit utilisable serait pire que le score |
+| Découper le registre par famille pour le catalogue                               | −30 Ko sur `/outils/` et `/pdf/`                   | Deux pages seulement ; la recherche multi-familles en dépend                                                      |
+| Nonce CSP pour retirer `'unsafe-inline'`                                         | sécurité, pas performance                          | impose un rendu dynamique par requête                                                                             |
 
-## 3. Correctifs appliqués pendant la mission
-
-1. Les cartes de messages anglais (`src/lib/i18n/messages/en`, ≈ 120 Ko bruts) étaient importées par
-   les composants partagés : elles arrivaient sur toutes les pages françaises (+ 41 Ko gzip). Elles sont
-   désormais enregistrées par la racine `/en/` (`register-en.ts` + `EnglishBundle`).
-2. Le registre anglais était importé statiquement par les requêtes du registre : il arrivait avec le
-   registre français sur le catalogue (+ 37 Ko gzip, FR et EN). Il est désormais enregistré par les
-   pages anglaises qui en ont besoin et chargé à la demande avant un composant d'outil.
-3. Le dictionnaire anglais complet était embarqué dans le bundle français : enregistré par la racine
-   `/en/` uniquement.
-
-## 4. Reproduire
+## 5. Reproduire
 
 ```bash
 pnpm build && pnpm start -p 3100
-# scripts référencés par le HTML, taille gzip (Node 22)
-node -e '
-const zlib=require("zlib");(async()=>{for(const u of ["/","/en/","/pdf/fusionner/","/en/pdf/merge/","/outils/","/en/tools/"]){
-const html=await (await fetch("http://127.0.0.1:3100"+u)).text();
-const srcs=[...new Set([...html.matchAll(/<script[^>]+src="([^"]+)"/g)].map(m=>m[1]))];let gz=0;
-for(const s of srcs){const b=Buffer.from(await (await fetch("http://127.0.0.1:3100"+s)).arrayBuffer());gz+=zlib.gzipSync(b).length;}
-console.log(u,srcs.length,"scripts",(gz/1024).toFixed(0),"Ko gz");}})()'
+# JS initial des navigateurs modernes (scripts sans noModule), gzip
+node /tmp/measure-modern.mjs http://127.0.0.1:3100   # script : voir ci-dessous
+# Lighthouse (Chromium de Playwright)
+CHROME_PATH=/opt/pw-browsers/chromium pnpm dlx lighthouse http://127.0.0.1:3100/ \
+  --only-categories=performance,accessibility,best-practices,seo --output=json \
+  --chrome-flags="--headless=new --no-sandbox" --output-path=./lh-home-mobile.json
+# même commande avec --preset=desktop pour le bureau
 ```
 
-## 5. Pistes non réalisées (à arbitrer)
+Script de mesure (`measure-modern.mjs`) :
 
-- Un nonce CSP permettrait de retirer `'unsafe-inline'` mais impose un rendu dynamique : écarté
-  (voir `docs/AUDIT_SECURITE_ET_CONFIDENTIALITE.md`).
-- Réduire encore le gabarit (≈ 60 Ko hors plancher) demanderait de découper le dictionnaire par page ;
-  gain estimé < 10 Ko gzip, non prioritaire.
-- Mesure Lighthouse/Web Vitals : à faire sur l'URL de prévisualisation (`docs/PLAN_LANCEMENT.md`).
+```js
+import zlib from "node:zlib";
+const base = process.argv[2];
+for (const u of ["/", "/en/", "/pdf/fusionner/", "/en/pdf/merge/", "/outils/", "/en/tools/"]) {
+  const html = await (await fetch(base + u)).text();
+  const tags = [...html.matchAll(/<script([^>]+)>/g)]
+    .map((m) => m[1])
+    .filter((a) => /src="/.test(a));
+  const modern = new Set(
+    tags.filter((a) => !/nomodule/i.test(a)).map((a) => a.match(/src="([^"]+)"/)[1]),
+  );
+  let gz = 0;
+  for (const s of modern)
+    gz += zlib.gzipSync(Buffer.from(await (await fetch(base + s)).arrayBuffer())).length;
+  console.log(u, modern.size, "scripts", (gz / 1024).toFixed(0), "KB gz");
+}
+```

@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { ToolCatalog } from "@/components/tools/tool-catalog";
 import { getCategoryPath, type ToolCategory } from "@/lib/tools";
@@ -20,9 +19,7 @@ export function CategoryPage({ category }: { category: ToolCategory }) {
           {category.description}
         </p>
       </div>
-      <Suspense fallback={<div className="h-[52px] rounded-[16px] bg-muted" aria-hidden="true" />}>
-        <ToolCatalog initialCategory={category.id} />
-      </Suspense>
+      <ToolCatalog initialCategory={category.id} />
     </div>
   );
 }

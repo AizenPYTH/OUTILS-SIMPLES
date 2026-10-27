@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "@/lib/i18n/register-en";
+import "@/lib/i18n/register-en-messages";
 import "@/lib/i18n/register-en-registry";
 import { EnglishBundle } from "@/components/providers/english-bundle";
 import { RootDocument } from "@/components/layout/root-document";

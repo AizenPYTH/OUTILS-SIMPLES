@@ -1,4 +1,5 @@
 import "@/lib/i18n/register-en";
+import "@/lib/i18n/register-en-messages";
 import "@/lib/i18n/register-en-registry";
 import { ogImage, OG_CONTENT_TYPE, OG_FOOTER_EN, OG_SIZE } from "@/lib/og";
 import { getActiveCategories, getCategoryBySlug, getToolsByCategory } from "@/lib/tools";

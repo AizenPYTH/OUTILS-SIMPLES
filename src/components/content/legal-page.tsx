@@ -26,7 +26,7 @@ export function LegalPage({ title, path, intro, updatedAt, children }: LegalPage
         {updatedAt ? (
           <p className="mt-2 text-sm text-muted-foreground">{t.legal.updatedAt(updatedAt)}</p>
         ) : null}
-        <div className="mt-8 space-y-8 text-[15px] leading-relaxed [&_h2]:mt-10 [&_h2]:text-2xl [&_h3]:mt-6 [&_h3]:text-lg [&_p+p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5 [&_a]:text-link [&_a]:underline-offset-4 hover:[&_a]:underline">
+        <div className="mt-8 space-y-8 text-[15px] leading-relaxed [&_h2]:mt-10 [&_h2]:text-2xl [&_h3]:mt-6 [&_h3]:text-lg [&_p+p]:mt-3 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5 [&_a]:text-link [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-link/50 hover:[&_a]:decoration-link">
           {children}
         </div>
       </article>
