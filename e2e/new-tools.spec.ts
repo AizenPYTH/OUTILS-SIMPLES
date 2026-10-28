@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { PDFDocument } from "pdf-lib";
-import { expectValidPdf, extractPageText, fixture, readDownload, uploadPdf } from "./helpers";
+import {
+  expectValidPdf,
+  extractPageText,
+  fixture,
+  readDownload,
+  uploadPdf,
+  gotoTool,
+} from "./helpers";
 
 test.describe("catalogue with the extended registry", () => {
   test("catalogue lists several categories and search understands intents", async ({ page }) => {
@@ -249,7 +256,7 @@ test.describe("text, QR and developer tools", () => {
   });
 
   test("QR generator produces PNG and SVG downloads", async ({ page }) => {
-    await page.goto("/codes/generateur-qr-code/");
+    await gotoTool(page, "/codes/generateur-qr-code/");
     await page.getByTestId("qr-url").fill("https://outilia.fr/");
     await expect(page.getByTestId("qr-payload")).toHaveText("https://outilia.fr/");
     const png = page.waitForEvent("download");
@@ -434,12 +441,14 @@ test.describe("lot 2 : liens, images, comparaison, caviardage, Markdown", () => 
 
 test.describe("lot 3 : développeur, calculatrices, codes, documents", () => {
   test("uuid, password, hash, regex and timestamp tools", async ({ page }) => {
-    await page.goto("/developpeur/generateur-uuid/");
-    const first = await page.getByTestId("uuid-output-output").inputValue();
+    await gotoTool(page, "/developpeur/generateur-uuid/");
+    // Server-rendered: the v4 format is shown until the tool hydrates.
+    const output = page.getByTestId("uuid-output-output");
+    const v4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+    await expect.poll(async () => (await output.inputValue()).split("\n")[0]).toMatch(v4);
+    const first = await output.inputValue();
     expect(first.split("\n")).toHaveLength(5);
-    expect(first.split("\n")[0]).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
-    );
+    expect(first.split("\n").every((line) => v4.test(line))).toBe(true);
     await page.getByTestId("uuid-regenerate").click();
     expect(await page.getByTestId("uuid-output-output").inputValue()).not.toBe(first);
 
@@ -457,7 +466,7 @@ test.describe("lot 3 : développeur, calculatrices, codes, documents", () => {
       .fill("BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD");
     await expect(page.getByText("correspond", { exact: true })).toBeVisible();
 
-    await page.goto("/developpeur/testeur-regex/");
+    await gotoTool(page, "/developpeur/testeur-regex/");
     await expect(page.getByTestId("regex-results")).toContainText("2 correspondances");
     await page.getByTestId("regex-pattern").fill("(");
     await expect(page.getByTestId("regex-error")).toBeVisible();

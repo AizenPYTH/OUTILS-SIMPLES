@@ -17,8 +17,10 @@ import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import { generateUuid } from "@/lib/dev/random";
 import { tr } from "@/lib/i18n/messages";
 import { track } from "@/lib/analytics/events";
+import { useHydrated } from "@/lib/use-hydrated";
 
 const TOOL_ID = "dev-uuid";
+const UUID_V4_FORMAT = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx";
 
 interface Options {
   count: number;
@@ -40,9 +42,21 @@ export function UuidTool() {
     braces: false,
     noHyphens: false,
   });
-  const [raw, setRaw] = React.useState<string[]>(() =>
-    Array.from({ length: 5 }, () => generateUuid()),
+  // Random values cannot be produced on the server (every visitor would get
+  // the same ones). The server render and the hydration pass show the v4
+  // *format* (`xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`, no value), at the same
+  // size as the result, while the tool is inert; real UUIDs replace it as soon
+  // as the browser runs the tool.
+  const hydrated = useHydrated();
+  const initial = React.useMemo(
+    () =>
+      hydrated
+        ? Array.from({ length: 5 }, () => generateUuid())
+        : Array.from({ length: 5 }, () => UUID_V4_FORMAT),
+    [hydrated],
   );
+  const [generated, setRaw] = React.useState<string[] | null>(null);
+  const raw = generated ?? initial;
   const patch = (p: Partial<Options>) => setOptions((o) => ({ ...o, ...p }));
 
   const regenerate = (count = options.count) => {

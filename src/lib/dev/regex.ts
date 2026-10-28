@@ -13,7 +13,13 @@ export type RegexResult =
   | { ok: true; matches: RegexMatch[]; truncated: boolean; global: boolean }
   | { ok: false; error: string };
 
-export const REGEX_FLAGS: { flag: string; label: string }[] = [
+/**
+ * Flag and preset labels are translated when called (at render), never at
+ * module load: on the server a module is evaluated once for every request,
+ * whatever its language, and the tool is server-rendered (no hydration
+ * mismatch between a French and an English label).
+ */
+export const regexFlags = (): { flag: string; label: string }[] => [
   { flag: "g", label: tr("g — toutes les occurrences") },
   { flag: "i", label: tr("i — ignorer la casse") },
   { flag: "m", label: tr("m — ^ et $ par ligne") },
@@ -103,7 +109,7 @@ export function segmentMatches(
   return out;
 }
 
-export const REGEX_PRESETS: { label: string; pattern: string; flags: string }[] = [
+export const regexPresets = (): { label: string; pattern: string; flags: string }[] => [
   { label: tr("Adresse e-mail"), pattern: "[\\w.+-]+@[\\w-]+\\.[\\w.-]+", flags: "gi" },
   { label: "URL", pattern: "https?://[^\\s<>\"']+", flags: "gi" },
   {

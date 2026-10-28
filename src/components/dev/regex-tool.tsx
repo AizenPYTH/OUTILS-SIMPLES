@@ -15,8 +15,8 @@ import {
 import { TextInputPanel, TextOutputPanel } from "@/components/tools/shared/text-io";
 import { ToolPanel } from "@/components/tools/shared/tool-panel";
 import {
-  REGEX_FLAGS,
-  REGEX_PRESETS,
+  regexFlags,
+  regexPresets,
   replaceWithRegex,
   runRegex,
   segmentMatches,
@@ -24,15 +24,19 @@ import {
 import { tr } from "@/lib/i18n/messages";
 import { cn } from "@/lib/utils";
 
-const SAMPLE = [
-  tr("Contactez jean.dupont@exemple.fr ou marie@site.org avant le 12/03/2026."),
-  tr("Téléphone : 06 12 34 56 78 — code postal 75011."),
-].join("\n");
+// Translated at render (see src/lib/dev/regex.ts): the tool is server-rendered.
+const sample = () =>
+  [
+    tr("Contactez jean.dupont@exemple.fr ou marie@site.org avant le 12/03/2026."),
+    tr("Téléphone : 06 12 34 56 78 — code postal 75011."),
+  ].join("\n");
 
 export function RegexTool() {
   const [pattern, setPattern] = React.useState("[\\w.+-]+@[\\w-]+\\.[\\w.-]+");
   const [flags, setFlags] = React.useState("gi");
-  const [text, setText] = React.useState(SAMPLE);
+  const [text, setText] = React.useState(sample);
+  const presets = regexPresets();
+  const flagOptions = regexFlags();
   const [replacement, setReplacement] = React.useState("");
 
   const result = React.useMemo(() => runRegex(pattern, flags, text), [pattern, flags, text]);
@@ -66,7 +70,7 @@ export function RegexTool() {
             <Label htmlFor="regex-preset">{tr("Exemples")}</Label>
             <Select
               onValueChange={(v) => {
-                const preset = REGEX_PRESETS[Number(v)];
+                const preset = presets[Number(v)];
                 if (preset) {
                   setPattern(preset.pattern);
                   setFlags(preset.flags);
@@ -77,7 +81,7 @@ export function RegexTool() {
                 <SelectValue placeholder={tr("Choisir un modèle")} />
               </SelectTrigger>
               <SelectContent>
-                {REGEX_PRESETS.map((p, i) => (
+                {presets.map((p, i) => (
                   <SelectItem key={p.label} value={String(i)}>
                     {p.label}
                   </SelectItem>
@@ -87,7 +91,7 @@ export function RegexTool() {
           </div>
         </div>
         <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-          {REGEX_FLAGS.map((f) => (
+          {flagOptions.map((f) => (
             <label key={f.flag} className="flex items-center gap-2">
               <Checkbox
                 checked={flags.includes(f.flag)}

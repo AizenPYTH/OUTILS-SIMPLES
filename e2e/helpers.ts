@@ -7,6 +7,20 @@ import { PDFDocument } from "pdf-lib";
 export const fixtures = path.resolve(__dirname, "../tests/fixtures");
 export const fixture = (name: string) => path.join(fixtures, name);
 
+/**
+ * Server-rendered tools (QR code, regex, UUID) are visible before hydration
+ * but inert until React takes over: wait for that before interacting
+ * (Playwright's fill() would otherwise set a value that hydration resets).
+ */
+export async function gotoTool(page: Page, path: string) {
+  await page.goto(path);
+  await page.locator("[data-tool-slot]").waitFor();
+  if (
+    (await page.locator("[data-tool-slot] [inert], [data-tool-slot] [data-hydrated]").count()) > 0
+  )
+    await page.locator("[data-tool-slot] [data-hydrated]").waitFor({ state: "attached" });
+}
+
 export async function uploadPdf(page: Page, ...names: string[]) {
   await page.setInputFiles('[data-testid="pdf-input"]', names.map(fixture));
 }

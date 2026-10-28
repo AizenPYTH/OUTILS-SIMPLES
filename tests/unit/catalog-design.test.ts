@@ -124,3 +124,11 @@ describe("reserved tool heights (layout stability)", () => {
     }
   });
 });
+
+describe("server-rendered tools", () => {
+  it("are published tools with a client implementation too", async () => {
+    const { SERVER_RENDERED_TOOL_IDS } = await import("@/components/tools/ssr-tool-ids");
+    const published = getPublishedTools("fr").map((x) => x.id);
+    for (const id of SERVER_RENDERED_TOOL_IDS) expect(published, id).toContain(id);
+  });
+});

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import QRCode from "qrcode";
 import { PDFDocument } from "pdf-lib";
-import { REGEX_PRESETS, replaceWithRegex, runRegex, segmentMatches } from "@/lib/dev/regex";
+import { regexPresets, replaceWithRegex, runRegex, segmentMatches } from "@/lib/dev/regex";
 import { describeInstant, isoWeek, parseInstant } from "@/lib/dev/timestamp";
 import {
   FRENCH_VAT_RATES,
@@ -72,11 +72,11 @@ describe("regex tester", () => {
       ok: true,
       result: "b@a",
     });
-    for (const preset of REGEX_PRESETS)
+    for (const preset of regexPresets())
       expect(runRegex(preset.pattern, preset.flags, "test").ok).toBe(true);
     const email = runRegex(
-      REGEX_PRESETS[0]!.pattern,
-      REGEX_PRESETS[0]!.flags,
+      regexPresets()[0]!.pattern,
+      regexPresets()[0]!.flags,
       "Écrire à jean.dupont@exemple.fr vite",
     );
     expect(email.ok && email.matches[0]!.text).toBe("jean.dupont@exemple.fr");

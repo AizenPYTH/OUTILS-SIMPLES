@@ -4,7 +4,7 @@
  * must not persist anything but the consent choice.
  */
 import { expect, test, type Page, type Request } from "@playwright/test";
-import { fixture, uploadPdf } from "./helpers";
+import { fixture, uploadPdf, gotoTool } from "./helpers";
 
 function watch(page: Page): Request[] {
   const requests: Request[] = [];
@@ -47,7 +47,7 @@ test.describe("audit — confidentialité", () => {
       timeout: 30_000,
     });
 
-    await page.goto("/codes/generateur-qr-code/");
+    await gotoTool(page, "/codes/generateur-qr-code/");
     await page.getByTestId("qr-url").fill("https://exemple.fr/secret?token=abc");
     await expect(page.getByTestId("qr-payload")).toHaveText("https://exemple.fr/secret?token=abc");
 
