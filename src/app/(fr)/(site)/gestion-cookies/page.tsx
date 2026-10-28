@@ -11,6 +11,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/gestion-cookies/",
 });
 
+/** Lists every kind of storage the site writes on the device (checked 2026-10-28). */
 export default function GestionCookiesPage() {
   const thirdParties =
     publicEnv.NEXT_PUBLIC_ANALYTICS_PROVIDER !== "none" || publicEnv.NEXT_PUBLIC_ADS_ENABLED;
@@ -31,7 +32,19 @@ export default function GestionCookiesPage() {
             <strong>Choix de consentement</strong> — stockage local, pour ne pas vous redemander
             votre avis à chaque visite.
           </li>
+          <li>
+            <strong>Copies des pages et fichiers du site</strong> — cache du navigateur (service
+            worker), pour accélérer les visites et faire fonctionner le mode hors ligne.
+          </li>
+          <li>
+            <strong>Modèles de langue de la reconnaissance de texte</strong> — base IndexedDB, après
+            le premier usage de l&apos;OCR, pour ne pas les retélécharger.
+          </li>
         </ul>
+        <p>
+          Aucun de ces éléments n&apos;est un cookie, ne contient d&apos;identifiant ni de donnée
+          vous concernant, et aucun n&apos;est transmis à l&apos;éditeur ou à un tiers.
+        </p>
         {thirdParties ? (
           <p>
             Des services tiers soumis à consentement sont configurés sur ce site. Ils ne se chargent

@@ -26,6 +26,7 @@ export const siteConfig = {
    * with an explicit "à compléter" marker when left empty — nothing is invented.
    */
   legal: {
+    publisherKind: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_KIND,
     publisherName: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_NAME,
     publisherStatus: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS,
     publisherAddress: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS,
@@ -35,6 +36,7 @@ export const siteConfig = {
     contactEmail: publicEnv.NEXT_PUBLIC_LEGAL_CONTACT_EMAIL,
     hostingProvider: publicEnv.NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER,
     hostingAddress: publicEnv.NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS,
+    hostingPhone: publicEnv.NEXT_PUBLIC_LEGAL_HOSTING_PHONE,
   },
   /** Repository URL shown nowhere publicly by default. */
   links: {

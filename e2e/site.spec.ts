@@ -176,6 +176,9 @@ test.describe("site", () => {
     await expect(page.locator("h1")).toHaveText("Page introuvable");
     await page.goto("/mentions-legales/");
     await expect(page.locator("[data-placeholder]").first()).toBeVisible();
+    // Without a configured company, the publisher is never described as one.
+    await expect(page.locator("main")).toContainText("personne physique");
+    await expect(page.locator("main")).not.toContainText(/siège|SIREN|TVA intracommunautaire/);
     await page.goto("/gestion-cookies/");
     await expect(page.getByRole("button", { name: "Gérer mes préférences" })).toBeVisible();
   });

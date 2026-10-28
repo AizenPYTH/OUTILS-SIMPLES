@@ -109,9 +109,12 @@ export const fr = {
       {
         question: "AVEROPDF est-il vraiment gratuit ?",
         answer:
-          "Oui, tous les outils publiés sont gratuits et sans filigrane. Le site peut afficher de la publicité contextuelle, jamais basée sur le contenu de vos fichiers.",
+          "Oui, tous les outils publiés sont gratuits, sans compte et sans filigrane. Le site n'affiche aucune publicité.",
       },
     ],
+    /** Replaces the last FAQ answer when advertising is really enabled (src/config/ads.ts). */
+    faqFreeAnswerWithAds:
+      "Oui, tous les outils publiés sont gratuits, sans compte et sans filigrane. Le site affiche de la publicité, uniquement après votre consentement et jamais basée sur le contenu de vos fichiers.",
     heroCta: "Voir tous les outils",
     searchPlaceholder: (n: number) => `Rechercher parmi ${n} outils…`,
     searchButton: "Rechercher",
@@ -296,7 +299,7 @@ export const fr = {
     siteHeading: "Site",
     legalHeading: "Informations légales",
     rights: (year: number) => `© ${year} AVEROPDF. Tous droits réservés.`,
-    openSource: "Construit avec pdf.js et pdf-lib, deux bibliothèques open source.",
+    openSource: "Construit avec des bibliothèques open source : pdf.js, pdf-lib, Tesseract…",
   },
   site: {
     tagline: "Outils en ligne simples, rapides et privés",

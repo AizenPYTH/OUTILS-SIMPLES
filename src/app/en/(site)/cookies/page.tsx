@@ -36,7 +36,19 @@ export default function CookiesPage() {
           <li>
             <strong>Consent choices</strong> — local storage, so we do not ask again on every visit.
           </li>
+          <li>
+            <strong>Copies of the site&apos;s pages and files</strong> — browser cache (service
+            worker), for faster visits and offline use.
+          </li>
+          <li>
+            <strong>Text recognition language models</strong> — IndexedDB, after you first use OCR,
+            so they are not downloaded again.
+          </li>
         </ul>
+        <p>
+          None of these is a cookie, contains an identifier or data about you, or is sent to the
+          publisher or a third party.
+        </p>
         {thirdParties ? (
           <p>
             Third-party services subject to consent are configured on this site. They only load

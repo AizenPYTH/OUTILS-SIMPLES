@@ -7,6 +7,7 @@ import { getLocale } from "@/lib/i18n/locale";
 import { HomeDrop } from "@/components/home/home-drop";
 import { HomeToolFilter, type HomeFilter } from "@/components/home/home-tool-filter";
 import { AdPlacement } from "@/components/monetization/ad-placement";
+import { adsConfig } from "@/config/ads";
 import { HomeSearch } from "@/components/tools/home-search";
 import { ToolCard } from "@/components/tools/tool-card";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -247,10 +248,14 @@ export function HomePage() {
           {t.home.faqTitle}
         </h2>
         <dl className="mt-5 grid gap-4 md:grid-cols-2" data-testid="home-faq">
-          {t.home.faq.map((item) => (
+          {t.home.faq.map((item, i, all) => (
             <div key={item.question} className="rounded-[14px] border border-border bg-surface p-5">
               <dt className="font-semibold">{item.question}</dt>
-              <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.answer}</dd>
+              <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {i === all.length - 1 && adsConfig().enabled
+                  ? t.home.faqFreeAnswerWithAds
+                  : item.answer}
+              </dd>
             </div>
           ))}
         </dl>

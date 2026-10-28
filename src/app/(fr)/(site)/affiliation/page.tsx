@@ -1,44 +1,49 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
+import { adsConfig } from "@/config/ads";
 import { LegalPage } from "@/components/content/legal-page";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Information sur l'affiliation et la publicité",
-  description: `Comment ${siteConfig.name} se finance : publicité et liens d'affiliation éventuels, toujours signalés.`,
+  description: `Publicité et liens d'affiliation sur ${siteConfig.name} : la situation actuelle et les engagements de l'éditeur.`,
   path: "/affiliation/",
 });
 
+/** States the current situation from the configuration: no ads unless they are really enabled. */
 export default function AffiliationPage() {
+  const ads = adsConfig().enabled;
   return (
-    <LegalPage title="Information sur l'affiliation et la publicité" path="/affiliation/">
+    <LegalPage
+      title="Information sur l'affiliation et la publicité"
+      path="/affiliation/"
+      updatedAt="28 octobre 2026"
+    >
       <section>
-        <h2>Un service gratuit, financé de manière transparente</h2>
+        <h2>Situation actuelle</h2>
         <p>
-          Les outils de {siteConfig.name} sont gratuits. Pour couvrir les coûts d&apos;hébergement
-          et de développement, le site pourra afficher de la publicité et, dans certains guides,
-          recommander des produits ou services via des liens d&apos;affiliation.
+          Les outils de {siteConfig.name} sont gratuits.{" "}
+          {ads ? (
+            <>Le site affiche des emplacements publicitaires, décrits ci-dessous.</>
+          ) : (
+            <strong>Le site n&apos;affiche aucune publicité.</strong>
+          )}{" "}
+          <strong>Aucun lien d&apos;affiliation n&apos;est présent sur le site.</strong>
         </p>
       </section>
       <section>
-        <h2>Liens d&apos;affiliation</h2>
+        <h2>Engagements</h2>
         <p>
-          Lorsqu&apos;un lien d&apos;affiliation est présent, il est signalé explicitement à
-          proximité (« lien affilié »). Si vous achetez via ce lien, nous pouvons percevoir une
-          commission, sans surcoût pour vous. Nous ne recommandons que des produits que nous jugeons
-          réellement utiles au sujet traité, et nous ne publions ni avis fictifs ni prix non
-          vérifiés.
+          Si des liens d&apos;affiliation étaient ajoutés, chacun serait signalé explicitement à
+          proximité (« lien affilié ») et cette page serait mise à jour. Seuls des produits jugés
+          réellement utiles au sujet traité seraient recommandés, sans avis fictif ni prix non
+          vérifié.
         </p>
         <p>
-          <strong>À ce jour, aucun lien d&apos;affiliation n&apos;est présent sur le site.</strong>
-        </p>
-      </section>
-      <section>
-        <h2>Publicité</h2>
-        <p>
-          Les éventuels emplacements publicitaires sont identifiés par la mention « Publicité », ne
-          sont jamais placés dans les zones de dépôt de fichiers ni dans l&apos;éditeur, et ne se
-          chargent qu&apos;après votre consentement.
+          Tout emplacement publicitaire serait identifié par la mention « Publicité », jamais placé
+          dans les zones de dépôt de fichiers ni dans l&apos;éditeur, et ne se chargerait
+          qu&apos;après votre consentement. La politique de confidentialité serait mise à jour avant
+          toute activation.
         </p>
       </section>
     </LegalPage>

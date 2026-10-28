@@ -200,7 +200,7 @@ les avertissements (éléments ignorés, scans sans texte). PowerPoint et PDF/A 
 
 ## Tests
 
-- `pnpm test` : 269 tests Vitest (registre bilingue, i18n et couverture des traductions, contrôle de mise en ligne, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
+- `pnpm test` : 274 tests Vitest (registre bilingue, i18n et couverture des traductions, contrôle de mise en ligne, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
   sur fixtures réelles, permissions de chiffrement relues par pdf.js, géométrie/détection du scanner, OCR →
   PDF recherchable, métadonnées d'images, encodeur PNG, extraction d'images et de liens, comparaison,
   caviardage (y compris pages pivotées), Markdown → PDF, regex, dates et jours fériés, TVA, unités,

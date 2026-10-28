@@ -3,12 +3,16 @@
 À faire **avant** de rendre le site public. Rien de ce qui suit n'est inventé par le code : les
 valeurs absentes s'affichent « à compléter » sur les pages concernées.
 
-## 1. Identité légale (obligatoire, LCEN art. 6-III)
+## 1. Identité légale (obligatoire, LCEN art. 1-1)
+
+Lancement par un particulier, sans publicité, sur Vercel : suivre d'abord
+`docs/LANCEMENT_SANS_PUBLICITE.md` (choix du type d'éditeur, hébergeur, questions juridiques).
 
 Renseigner dans l'environnement de déploiement (jamais dans le dépôt) :
 
 | Variable                                 | Contenu                                                      |
 | ---------------------------------------- | ------------------------------------------------------------ |
+| `NEXT_PUBLIC_LEGAL_PUBLISHER_KIND`       | `individual` (particulier), `company` ou `anonymous`         |
 | `NEXT_PUBLIC_LEGAL_PUBLISHER_NAME`       | Nom ou raison sociale de l'éditeur                           |
 | `NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS`     | Forme juridique (auto-entrepreneur, SAS…) ou « particulier » |
 | `NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS`    | Adresse du siège (ou de l'éditeur personne physique)         |
@@ -18,6 +22,7 @@ Renseigner dans l'environnement de déploiement (jamais dans le dépôt) :
 | `NEXT_PUBLIC_LEGAL_CONTACT_EMAIL`        | Adresse de contact (page Contact, confidentialité)           |
 | `NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER`     | Hébergeur (ex. Vercel Inc.)                                  |
 | `NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS`      | Adresse de l'hébergeur                                       |
+| `NEXT_PUBLIC_LEGAL_HOSTING_PHONE`        | Téléphone de l'hébergeur (art. 1-1, I, 4°)                   |
 
 Vérifier ensuite `/mentions-legales/`, `/confidentialite/`, `/contact/` : aucun encadré jaune
 « à compléter » ne doit rester. Relire la politique de confidentialité au regard des choix réels
@@ -37,7 +42,8 @@ bloque sinon.
 le sitemap, `robots.txt`, les balises Open Graph et les images de partage. **Sans elle, le build
 produit des canoniques en `http://localhost:3000`** : en production, la commande de build de
 l'hébergeur doit donc être `pnpm check:launch && pnpm build`, pour qu'un environnement incomplet
-échoue au lieu de publier. `pnpm check:launch` refuse aussi les adresses en `http`, `localhost` et
+échoue au lieu de publier. Sur une prévisualisation Vercel (`VERCEL_ENV=preview`), la même
+commande exige `NEXT_PUBLIC_NOINDEX=true` et ne fait qu'avertir pour l'identité. `pnpm check:launch` refuse aussi les adresses en `http`, `localhost` et
 les noms réservés aux exemples (`example.com/.org/.net`, `.example`, `.test`, `.invalid`,
 `.localhost`).
 

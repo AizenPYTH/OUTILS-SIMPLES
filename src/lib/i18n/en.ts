@@ -107,9 +107,11 @@ export const en: Dictionary = {
       {
         question: "Is AVEROPDF really free?",
         answer:
-          "Yes, every published tool is free and adds no watermark. The site may show contextual ads, never based on the content of your files.",
+          "Yes, every published tool is free, needs no account and adds no watermark. The site shows no advertising.",
       },
     ],
+    faqFreeAnswerWithAds:
+      "Yes, every published tool is free, needs no account and adds no watermark. The site shows advertising, only after your consent and never based on the content of your files.",
     heroCta: "See all tools",
     searchPlaceholder: (n: number) => `Search ${n} tools…`,
     searchButton: "Search",
@@ -285,7 +287,7 @@ export const en: Dictionary = {
     siteHeading: "Site",
     legalHeading: "Legal information",
     rights: (year: number) => `© ${year} AVEROPDF. All rights reserved.`,
-    openSource: "Built with pdf.js and pdf-lib, two open-source libraries.",
+    openSource: "Built with open-source libraries: pdf.js, pdf-lib, Tesseract…",
   },
   site: {
     tagline: "Simple, fast and private online tools",

@@ -50,6 +50,16 @@ propriétaire (§7) et à la procédure `docs/VALIDATION_APPAREIL_REEL.md`, non 
 - Textes anglais non relus par un anglophone ; descriptions de cartes coupées sur bureau (éditorial).
 - Le CLS du modificateur PDF et le remplacement des polices web sont à suivre en données de terrain.
 
+### 0.4 Lancement sans publicité par un particulier (2026-10-28)
+
+Pages légales adaptées à un éditeur personne physique (aucune mention d'entreprise), option
+d'anonymat de l'éditeur non professionnel (LCEN art. 1-1, II) préparée mais à valider, téléphone de
+l'hébergeur exigé, prévisualisations Vercel prises en charge par `pnpm check:launch`, textes sur
+la publicité alignés sur la configuration (aucune publicité). Détail, variables Vercel, questions
+juridiques et statistiques : `docs/LANCEMENT_SANS_PUBLICITE.md`. **Le lancement reste bloqué
+tant que l'identité de l'éditeur, l'adresse de contact et le téléphone de l'hébergeur ne sont pas
+renseignés et vérifiés.**
+
 ## 1. Décision de lancement
 
 **Le code est prêt pour la validation finale. La publication reste conditionnée aux actions P0 du

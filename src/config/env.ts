@@ -9,6 +9,15 @@
 const CONSENT_MODES = ["builtin", "external"] as const;
 const ANALYTICS_PROVIDERS = ["none", "plausible", "gtag"] as const;
 const ADS_PROVIDERS = ["none", "adsense"] as const;
+/**
+ * Who publishes the site (legal notice wording, launch check):
+ * - individual: a private person (name and address published, no company wording);
+ * - company: a business (registration number required);
+ * - anonymous: a private person publishing on a non-professional basis who keeps
+ *   their identity with the host only (LCEN art. 1-1, II) — to be confirmed legally.
+ * Empty until the owner chooses: pages show the individual wording with placeholders.
+ */
+const PUBLISHER_KINDS = ["", "individual", "company", "anonymous"] as const;
 
 export interface PublicEnv {
   NEXT_PUBLIC_SITE_URL: string;
@@ -35,6 +44,7 @@ export interface PublicEnv {
   NEXT_PUBLIC_GA_MEASUREMENT_ID: string;
   NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: string;
   /** Legal identity shown on the legal pages (empty = "à compléter" placeholder, never invented). */
+  NEXT_PUBLIC_LEGAL_PUBLISHER_KIND: (typeof PUBLISHER_KINDS)[number];
   NEXT_PUBLIC_LEGAL_PUBLISHER_NAME: string;
   NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS: string;
   NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS: string;
@@ -44,6 +54,7 @@ export interface PublicEnv {
   NEXT_PUBLIC_LEGAL_CONTACT_EMAIL: string;
   NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER: string;
   NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS: string;
+  NEXT_PUBLIC_LEGAL_HOSTING_PHONE: string;
 }
 
 class PublicEnvError extends Error {
@@ -124,6 +135,12 @@ export function parsePublicEnv(raw: Record<string, string | undefined>): PublicE
     NEXT_PUBLIC_PLAUSIBLE_HOST: str(raw.NEXT_PUBLIC_PLAUSIBLE_HOST),
     NEXT_PUBLIC_GA_MEASUREMENT_ID: str(raw.NEXT_PUBLIC_GA_MEASUREMENT_ID),
     NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: str(raw.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION),
+    NEXT_PUBLIC_LEGAL_PUBLISHER_KIND: oneOf(
+      "NEXT_PUBLIC_LEGAL_PUBLISHER_KIND",
+      raw.NEXT_PUBLIC_LEGAL_PUBLISHER_KIND,
+      PUBLISHER_KINDS,
+      "",
+    ),
     NEXT_PUBLIC_LEGAL_PUBLISHER_NAME: str(raw.NEXT_PUBLIC_LEGAL_PUBLISHER_NAME),
     NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS: str(raw.NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS),
     NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS: str(raw.NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS),
@@ -133,6 +150,7 @@ export function parsePublicEnv(raw: Record<string, string | undefined>): PublicE
     NEXT_PUBLIC_LEGAL_CONTACT_EMAIL: str(raw.NEXT_PUBLIC_LEGAL_CONTACT_EMAIL),
     NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER: str(raw.NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER),
     NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS: str(raw.NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS),
+    NEXT_PUBLIC_LEGAL_HOSTING_PHONE: str(raw.NEXT_PUBLIC_LEGAL_HOSTING_PHONE),
   };
 }
 
@@ -160,6 +178,7 @@ export const publicEnv: PublicEnv = parsePublicEnv({
   NEXT_PUBLIC_PLAUSIBLE_HOST: process.env.NEXT_PUBLIC_PLAUSIBLE_HOST,
   NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
   NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  NEXT_PUBLIC_LEGAL_PUBLISHER_KIND: process.env.NEXT_PUBLIC_LEGAL_PUBLISHER_KIND,
   NEXT_PUBLIC_LEGAL_PUBLISHER_NAME: process.env.NEXT_PUBLIC_LEGAL_PUBLISHER_NAME,
   NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS: process.env.NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS,
   NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS: process.env.NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS,
@@ -169,4 +188,5 @@ export const publicEnv: PublicEnv = parsePublicEnv({
   NEXT_PUBLIC_LEGAL_CONTACT_EMAIL: process.env.NEXT_PUBLIC_LEGAL_CONTACT_EMAIL,
   NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER: process.env.NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER,
   NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS: process.env.NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS,
+  NEXT_PUBLIC_LEGAL_HOSTING_PHONE: process.env.NEXT_PUBLIC_LEGAL_HOSTING_PHONE,
 });

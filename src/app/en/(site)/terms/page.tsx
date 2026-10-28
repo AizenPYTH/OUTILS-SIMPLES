@@ -18,7 +18,7 @@ export function generateMetadata(): Metadata {
 export default function TermsPage() {
   setRequestLocale("en");
   return (
-    <LegalPage title="Terms of use" path="/en/terms/" updatedAt="27 October 2026">
+    <LegalPage title="Terms of use" path="/en/terms/" updatedAt="28 October 2026">
       <section>
         <h2>1. Purpose</h2>
         <p>
@@ -52,8 +52,8 @@ export default function TermsPage() {
         <h2>4. Availability and changes</h2>
         <p>
           The publisher may modify, suspend or withdraw all or part of the tools at any time, in
-          particular for maintenance. Paid features may be offered later; the basic tools will
-          remain usable without an account.
+          particular for maintenance. The tools are offered free of charge and without an account;
+          any change to these terms would be announced on this page before it applies.
         </p>
       </section>
       <section>

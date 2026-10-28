@@ -3,6 +3,8 @@ import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { publicEnv } from "@/config/env";
 import { LegalPage, Placeholder } from "@/components/content/legal-page";
+import { publisherKind } from "@/lib/legal";
+import { getPublishedTools } from "@/lib/tools";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -11,34 +13,50 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/confidentialite/",
 });
 
+/**
+ * Describes what the code actually does (checked 2026-10-28): every published
+ * tool runs in the browser (registry `processing: "client"`), the only
+ * requests are for the site's own files, and the device keeps the theme, the
+ * consent choice, cached site files and the OCR language models.
+ */
 export default function ConfidentialitePage() {
   const analytics = publicEnv.NEXT_PUBLIC_ANALYTICS_PROVIDER;
   const ads = publicEnv.NEXT_PUBLIC_ADS_ENABLED;
+  const l = siteConfig.legal;
+  const tools = getPublishedTools();
+  const allLocal = tools.every((tool) => tool.processing === "client");
   return (
     <LegalPage
       title="Politique de confidentialité"
       path="/confidentialite/"
       intro="Ce que nous faisons, et surtout ce que nous ne faisons pas, avec vos fichiers et vos données."
-      updatedAt="25 octobre 2026"
+      updatedAt="28 octobre 2026"
     >
       <section>
         <h2>1. Vos fichiers ne quittent pas votre navigateur</h2>
         <p>
-          Tous les outils PDF publiés sur {siteConfig.name} fonctionnent intégralement dans votre
-          navigateur, grâce aux bibliothèques open source pdf.js (affichage) et pdf-lib
-          (modification). Concrètement :
+          {allLocal
+            ? `Les ${tools.length} outils publiés sur ${siteConfig.name} fonctionnent intégralement dans votre navigateur`
+            : `Les outils marqués « Traitement dans votre navigateur » fonctionnent intégralement dans votre navigateur`}
+          , grâce à des bibliothèques open source exécutées sur votre appareil (notamment pdf.js,
+          pdf-lib, qpdf, Tesseract pour la reconnaissance de texte, libheif pour les photos HEIC).
+          Concrètement :
         </p>
         <ul>
           <li>
-            le fichier que vous déposez est lu par votre navigateur et n&apos;est jamais transmis à
-            nos serveurs ;
+            le fichier que vous déposez, ou la photo prise avec la caméra, est lu par votre
+            navigateur et n&apos;est jamais transmis à un serveur ;
           </li>
           <li>
             le résultat est généré sur votre appareil et téléchargé directement depuis celui-ci ;
           </li>
           <li>
             aucun fichier, aucun contenu de document, aucun nom de fichier n&apos;est stocké,
-            journalisé ou analysé par nous ;
+            journalisé ou analysé par l&apos;éditeur ;
+          </li>
+          <li>
+            les seuls téléchargements effectués par les outils concernent les fichiers du site
+            lui-même (code, polices, moteur de reconnaissance de texte et modèles de langue) ;
           </li>
           <li>
             les données temporaires sont libérées dès que vous quittez la page ou traitez un autre
@@ -48,29 +66,52 @@ export default function ConfidentialitePage() {
         <p>
           Si un outil nécessitant un traitement sur serveur était ajouté à l&apos;avenir, il serait
           clairement signalé sur sa page (mention « Traitement sur nos serveurs ») et cette
-          politique serait mise à jour avant sa publication.
+          politique serait mise à jour avant sa publication. La page{" "}
+          <Link href="/verifiez-le/">Vérifiez-le vous-même</Link> explique comment le constater.
         </p>
       </section>
       <section>
-        <h2>2. Données techniques</h2>
+        <h2>2. Hébergement et données techniques</h2>
         <p>
-          Comme tout site web, nos serveurs d&apos;hébergement peuvent enregistrer des journaux
-          techniques (adresse IP, horodatage, page demandée, navigateur) nécessaires à la sécurité
-          et au bon fonctionnement du service. Ces journaux sont conservés par l&apos;hébergeur
-          selon sa propre politique (
-          <Placeholder
-            label="Hébergeur et durée de conservation"
-            value={siteConfig.legal.hostingProvider}
-          />
-          ).
+          Les pages et les fichiers du site sont servis par l&apos;hébergeur (
+          <Placeholder label="Hébergeur" value={l.hostingProvider} />, voir les{" "}
+          <Link href="/mentions-legales/">mentions légales</Link>). Comme pour tout site web, chaque
+          requête lui transmet des données techniques : adresse IP, date et heure, page ou fichier
+          demandé, navigateur et page d&apos;origine. L&apos;hébergeur les traite pour acheminer les
+          pages et assurer la sécurité du service, et les conserve selon sa propre politique de
+          confidentialité. L&apos;éditeur ne s&apos;en sert pas pour suivre les visiteurs.
+        </p>
+        <p>
+          Base légale : l&apos;intérêt légitime de l&apos;éditeur à fournir un site fonctionnel et
+          sécurisé (article 6, 1, f du RGPD). Lorsque l&apos;hébergeur est établi hors de
+          l&apos;Union européenne, les garanties qui encadrent le transfert (décision
+          d&apos;adéquation ou clauses contractuelles types) sont décrites dans sa politique de
+          confidentialité.
         </p>
       </section>
       <section>
-        <h2>3. Préférences stockées sur votre appareil</h2>
+        <h2>3. Ce qui est stocké sur votre appareil</h2>
         <p>
-          Nous utilisons le stockage local de votre navigateur (localStorage), et non des cookies,
-          pour mémoriser votre thème (clair/sombre) et vos choix de consentement. Ces informations
-          ne contiennent aucun identifiant et ne nous sont jamais transmises.
+          Le site n&apos;utilise pas de cookie. Il conserve dans votre navigateur, sans identifiant
+          et sans jamais nous les transmettre :
+        </p>
+        <ul>
+          <li>
+            votre thème (clair, sombre ou système) et vos choix de consentement (stockage local) ;
+          </li>
+          <li>
+            des copies des pages et fichiers du site déjà consultés, et des outils que vous
+            enregistrez pour le mode hors ligne (cache du navigateur, via un service worker) ;
+          </li>
+          <li>
+            les modèles de langue de la reconnaissance de texte, après le premier usage de
+            l&apos;OCR, pour ne pas les retélécharger (base IndexedDB du navigateur).
+          </li>
+        </ul>
+        <p>
+          Aucun de ces éléments ne contient vos documents ni de donnée vous concernant. Vous pouvez
+          les supprimer à tout moment en effaçant les données du site dans les réglages de votre
+          navigateur.
         </p>
       </section>
       <section>
@@ -78,9 +119,8 @@ export default function ConfidentialitePage() {
         {analytics === "none" ? (
           <p>
             <strong>Aucun outil de mesure d&apos;audience n&apos;est actuellement activé.</strong>{" "}
-            Si l&apos;éditeur en active un, il ne se chargera qu&apos;après votre consentement
-            explicite, et les événements mesurés (page vue, outil utilisé, succès ou erreur) ne
-            contiendront jamais de nom de fichier ni de contenu de document.
+            Si l&apos;éditeur en active un, cette politique sera mise à jour avant son activation,
+            et les mesures ne contiendront jamais de nom de fichier ni de contenu de document.
           </p>
         ) : (
           <p>
@@ -104,28 +144,43 @@ export default function ConfidentialitePage() {
           </p>
         ) : (
           <p>
-            <strong>Aucune publicité n&apos;est actuellement diffusée.</strong> Si l&apos;éditeur
-            active un partenaire publicitaire, cette section et la page de gestion des cookies
-            seront mises à jour, et aucun script publicitaire ne sera chargé sans votre
-            consentement.
+            <strong>Le site n&apos;affiche aucune publicité</strong> et ne charge aucun script
+            publicitaire.
           </p>
         )}
       </section>
       <section>
-        <h2>6. Vos droits</h2>
+        <h2>6. Si vous nous écrivez</h2>
         <p>
-          Dans la mesure où nous ne collectons pas de données personnelles via les outils, les
-          demandes d&apos;accès, de rectification ou d&apos;effacement concernent principalement les
-          éventuels échanges par e-mail. Vous pouvez nous contacter à{" "}
-          <Placeholder label="Adresse e-mail de contact" value={siteConfig.legal.contactEmail} />.
-          Vous disposez également du droit d&apos;introduire une réclamation auprès de la CNIL.
+          Les messages envoyés à l&apos;adresse de contact (votre adresse e-mail et le contenu du
+          message) servent uniquement à vous répondre et à suivre votre demande, puis sont supprimés
+          lorsqu&apos;ils ne sont plus utiles à ce suivi. Ils ne sont ni vendus ni utilisés à des
+          fins commerciales. N&apos;y joignez pas de document confidentiel.
         </p>
       </section>
       <section>
-        <h2>7. Responsable du traitement</h2>
+        <h2>7. Vos droits</h2>
         <p>
-          <Placeholder label="Nom ou raison sociale" value={siteConfig.legal.publisherName} /> —
-          voir les <Link href="/mentions-legales/">mentions légales</Link>.
+          Vous disposez d&apos;un droit d&apos;accès, de rectification, d&apos;effacement,
+          d&apos;opposition et de limitation pour les données vous concernant. Écrivez à{" "}
+          <Placeholder label="Adresse e-mail de contact" value={l.contactEmail} />. Vous pouvez
+          aussi introduire une réclamation auprès de la CNIL (
+          <a href="https://www.cnil.fr/fr/plaintes" rel="noopener noreferrer">
+            cnil.fr/fr/plaintes
+          </a>
+          ).
+        </p>
+      </section>
+      <section>
+        <h2>8. Responsable du traitement</h2>
+        <p>
+          {publisherKind() === "anonymous" ? (
+            <>L&apos;éditeur du site</>
+          ) : (
+            <Placeholder label="Nom de l'éditeur" value={l.publisherName} />
+          )}{" "}
+          — voir les <Link href="/mentions-legales/">mentions légales</Link>. Contact :{" "}
+          <Placeholder label="Adresse e-mail de contact" value={l.contactEmail} />.
         </p>
       </section>
     </LegalPage>

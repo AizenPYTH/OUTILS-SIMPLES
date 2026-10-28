@@ -15,7 +15,7 @@ export default function ConditionsPage() {
     <LegalPage
       title="Conditions d'utilisation"
       path="/conditions-utilisation/"
-      updatedAt="25 octobre 2026"
+      updatedAt="28 octobre 2026"
     >
       <section>
         <h2>1. Objet</h2>
@@ -52,8 +52,9 @@ export default function ConditionsPage() {
         <h2>4. Disponibilité et évolution</h2>
         <p>
           L&apos;éditeur peut modifier, suspendre ou retirer tout ou partie des outils à tout
-          moment, notamment pour maintenance. Des fonctionnalités payantes pourront être proposées
-          ultérieurement ; les outils de base resteront utilisables sans compte.
+          moment, notamment pour maintenance. Les outils sont proposés gratuitement et sans compte ;
+          toute évolution de ces conditions serait annoncée sur cette page avant de
+          s&apos;appliquer.
         </p>
       </section>
       <section>

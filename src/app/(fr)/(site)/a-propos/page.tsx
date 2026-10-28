@@ -31,10 +31,11 @@ export default function AProposPage() {
       <section>
         <h2>Comment ça fonctionne</h2>
         <p>
-          Les {count} outils publiés aujourd&apos;hui reposent sur deux bibliothèques open source
-          éprouvées : pdf.js, développée par Mozilla, pour afficher les pages, et pdf-lib pour les
-          modifier. Le fichier est lu par votre navigateur, transformé sur votre appareil, puis
-          téléchargé : il ne transite par aucun serveur.
+          Les {count} outils publiés aujourd&apos;hui reposent sur des bibliothèques open source
+          éprouvées : pdf.js, développée par Mozilla, pour afficher les pages, pdf-lib pour les
+          modifier, Tesseract pour la reconnaissance de texte. Le fichier est lu par votre
+          navigateur, transformé sur votre appareil, puis téléchargé : il ne transite par aucun
+          serveur.
         </p>
       </section>
       <section>
@@ -51,9 +52,9 @@ export default function AProposPage() {
       <section>
         <h2>Et ensuite</h2>
         <p>
-          La suite PDF est la première étape. Des outils pour les images, le texte et les petites
-          entreprises suivront, toujours avec la même exigence. Une question, une idée ? Rendez-vous
-          sur la page <Link href="/contact/">contact</Link>.
+          De nouveaux outils sont ajoutés lorsqu&apos;ils répondent à un besoin réel et fonctionnent
+          de manière fiable dans le navigateur. Une question, une idée ? Rendez-vous sur la page{" "}
+          <Link href="/contact/">contact</Link>.
         </p>
       </section>
     </LegalPage>
