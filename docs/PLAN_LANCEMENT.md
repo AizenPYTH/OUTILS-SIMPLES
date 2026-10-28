@@ -6,12 +6,13 @@ dans `docs/MISE_EN_LIGNE.md` ; la procédure sur appareils réels dans `docs/VAL
 
 ## 0. Préalables (bloquants)
 
-| #   | Action                                                                                                                                               | Comment vérifier                                                      |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| 0.1 | Choisir l'hébergeur (statique/edge ou Node : le site n'a aucun endpoint serveur, seuls le rendu, les images OG et les en-têtes sont servis par Next) | Un déploiement de prévisualisation répond en HTTPS                    |
-| 0.2 | Renseigner l'identité légale et l'URL publique dans l'environnement de production (jamais dans le dépôt) ; `NEXT_PUBLIC_NOINDEX` absente ou `false`  | `pnpm check:launch` avec les variables de production : « 0 bloquant » |
-| 0.3 | Relire `/mentions-legales/`, `/confidentialite/`, `/contact/` et leurs versions `/en/` : aucun encadré « à compléter »                               | Visite des 6 pages                                                    |
-| 0.4 | Décider : analytics (aucun, Plausible, GA4) et publicité (non par défaut)                                                                            | Variables `NEXT_PUBLIC_ANALYTICS_PROVIDER`, `NEXT_PUBLIC_ADS_ENABLED` |
+| #   | Action                                                                                                                                                                 | Comment vérifier                                                      |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 0.1 | Choisir l'hébergeur (statique/edge ou Node : le site n'a aucun endpoint serveur, seuls le rendu, les images OG et les en-têtes sont servis par Next)                   | Un déploiement de prévisualisation répond en HTTPS                    |
+| 0.2 | Renseigner l'identité légale et l'URL publique dans l'environnement de production (jamais dans le dépôt) ; `NEXT_PUBLIC_NOINDEX` absente ou `false`                    | `pnpm check:launch` avec les variables de production : « 0 bloquant » |
+| 0.5 | Commande de build de production chez l'hébergeur : `pnpm check:launch && pnpm build` (un environnement incomplet échoue au lieu de publier des canoniques `localhost`) | Un build lancé sans variables échoue avec la liste des manques        |
+| 0.3 | Relire `/mentions-legales/`, `/confidentialite/`, `/contact/` et leurs versions `/en/` : aucun encadré « à compléter »                                                 | Visite des 6 pages                                                    |
+| 0.4 | Décider : analytics (aucun, Plausible, GA4) et publicité (non par défaut)                                                                                              | Variables `NEXT_PUBLIC_ANALYTICS_PROVIDER`, `NEXT_PUBLIC_ADS_ENABLED` |
 
 ## 1. Déploiement de prévisualisation (J-7)
 
@@ -19,7 +20,9 @@ dans `docs/MISE_EN_LIGNE.md` ; la procédure sur appareils réels dans `docs/VAL
 2. Déployer sur une URL de prévisualisation avec **`NEXT_PUBLIC_NOINDEX=true`** (robots.txt
    `Disallow: /`, meta robots `noindex`, en-tête `X-Robots-Tag`, sitemap vide) tant que le domaine
    définitif n'est pas actif. Vérifier : `curl -sI https://preview/ | grep -i x-robots`.
-3. Vérifier les en-têtes (`curl -I`) : CSP, HSTS, `Cache-Control: no-cache` sur `/sw.js`.
+3. Vérifier les en-têtes et l'indexation avec le tableau de `docs/MISE_EN_LIGNE.md` §6 (colonne
+   « prévisualisation ») : CSP, HSTS, `Cache-Control: no-cache` sur `/sw.js`, `noindex` sur toutes
+   les pages y compris les deux accueils, sitemap vide.
 4. Parcours manuels sur appareils réels (iPhone Safari, Android Chrome, Firefox desktop) selon
    `docs/VALIDATION_APPAREIL_REEL.md` : fusion, compression, scanner (caméra), OCR, modificateur, HEIC,
    mode hors ligne, pages `/en/`.
@@ -33,8 +36,9 @@ dans `docs/MISE_EN_LIGNE.md` ; la procédure sur appareils réels dans `docs/VAL
 
 1. Domaine définitif, HTTPS, redirection `www` ↔ apex choisie une fois pour toutes (le canonical suit
    `NEXT_PUBLIC_SITE_URL`).
-2. Retirer `NEXT_PUBLIC_NOINDEX` ; vérifier `/robots.txt` (`Allow: /`), `/sitemap.xml` (191 URL) et
-   l'absence d'en-tête `X-Robots-Tag` en production.
+2. Retirer `NEXT_PUBLIC_NOINDEX` ; refaire le tableau de `docs/MISE_EN_LIGNE.md` §6 (colonne
+   « production ») : `/robots.txt` (`Allow: /`), `/sitemap.xml` (191 URL), aucun en-tête
+   `X-Robots-Tag`, canonique et alternates sur le domaine définitif, aucun code publicitaire.
 3. Search Console : propriété, soumission du sitemap, vérification `hreflang` (rapport « Ciblage
    international ») après quelques jours.
 4. Surveillance minimale : disponibilité (ping externe), erreurs navigateur (aucun outil tiers n'est

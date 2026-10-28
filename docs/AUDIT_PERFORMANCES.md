@@ -120,3 +120,17 @@ for (const u of ["/", "/en/", "/pdf/fusionner/", "/en/pdf/merge/", "/outils/", "
   console.log(u, modern.size, "scripts", (gz / 1024).toFixed(0), "KB gz");
 }
 ```
+
+## 6. Mise à jour du 2026-10-28 : stabilité des pages d'outils
+
+- **Méthode** : la limitation simulée de Lighthouse (par défaut) donne des CLS instables sur les
+  pages dont l'outil est chargé après coup (0,306 puis 0 sur la même page). Pour les mesures de
+  stabilité, utiliser `--throttling-method=devtools` (limitation réelle), 3 passages, et retenir la
+  médiane.
+- **Correction** : QR code, testeur de regex et générateur d'UUID sont rendus côté serveur ; CLS
+  mobile 0,326 / 0,201 / 0,079 → 0,001 / 0,002 / 0,003, outil visible à ≈ 1,2 s au lieu de ≈ 4 s,
+  JavaScript initial inchangé (174 Ko FR, 179 Ko EN). Les outils « formulaire » restants réservent
+  leur hauteur pendant le chargement (`src/lib/tools/workspace-heights.ts`). Détail, solutions
+  écartées et compromis : `docs/RAPPORT_FINALISATION_OUTILIA.md` §3.
+- **Reste** : décalage dû au remplacement des polices web (≈ 0,02 sur toutes les pages) ; CLS du
+  modificateur PDF à 0,082 en limitation réelle.

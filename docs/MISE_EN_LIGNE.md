@@ -34,7 +34,12 @@ bloque sinon.
 ## 2. Adresse publique
 
 `NEXT_PUBLIC_SITE_URL=https://votre-domaine.fr` (sans barre finale). Elle alimente le canonical,
-le sitemap, `robots.txt`, les balises Open Graph et les images de partage.
+le sitemap, `robots.txt`, les balises Open Graph et les images de partage. **Sans elle, le build
+produit des canoniques en `http://localhost:3000`** : en production, la commande de build de
+l'hébergeur doit donc être `pnpm check:launch && pnpm build`, pour qu'un environnement incomplet
+échoue au lieu de publier. `pnpm check:launch` refuse aussi les adresses en `http`, `localhost` et
+les noms réservés aux exemples (`example.com/.org/.net`, `.example`, `.test`, `.invalid`,
+`.localhost`).
 
 ## 3. Mesure d'audience et publicité (facultatif)
 
@@ -58,5 +63,21 @@ le sitemap, `robots.txt`, les balises Open Graph et les images de partage.
 
 ## 5. Avant chaque publication
 
-`pnpm check` (typecheck, lint, tests, build) puis `pnpm test:e2e` ; la CI GitHub (`.github/workflows/ci.yml`)
-exécute la même chose à chaque poussée. Procédure appareil réel : `docs/VALIDATION_APPAREIL_REEL.md`.
+`pnpm audit --prod`, `pnpm check` (typecheck, lint, tests, build) puis `pnpm test:e2e` ; la CI
+GitHub (`.github/workflows/ci.yml`) exécute les tests à chaque poussée (`pnpm audit --prod` n'y
+est pas : à lancer à la main). Procédure appareil réel : `docs/VALIDATION_APPAREIL_REEL.md`.
+
+## 6. Contrôles après déploiement (prévisualisation puis production)
+
+Remplacer `https://DOMAINE` par l'adresse réelle du déploiement.
+
+| Contrôle                         | Commande ou geste                                                                        | Attendu en prévisualisation (`NEXT_PUBLIC_NOINDEX=true`) | Attendu en production                                                            |
+| -------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `robots.txt`                     | `curl -s https://DOMAINE/robots.txt`                                                     | `Disallow: /`                                            | `Allow: /`, `Host` et `Sitemap` sur le bon domaine                               |
+| Sitemap                          | `curl -s https://DOMAINE/sitemap.xml \| grep -c "<loc>"`                                 | `0`                                                      | `191` (98 FR, 93 EN au 2026-10-28)                                               |
+| En-tête d'indexation             | `curl -sI https://DOMAINE/ \| grep -i x-robots-tag`                                      | `X-Robots-Tag: noindex, nofollow`                        | aucune ligne                                                                     |
+| Balise robots (accueil FR et EN) | `curl -s https://DOMAINE/ \| grep -o '<meta name="robots"[^>]*>'` (idem `/en/`)          | `noindex, nofollow`                                      | `index, follow`                                                                  |
+| Canonique et langues             | `curl -s https://DOMAINE/pdf/fusionner/ \| grep -oE 'rel="(canonical\|alternate)"[^>]*'` | canonique sur le domaine de prévisualisation             | canonique `https://DOMAINE/pdf/fusionner/`, alternates `fr`, `en`, `x-default`   |
+| Publicité                        | `curl -s https://DOMAINE/ \| grep -cE "adsbygoogle\|googlesyndication"`                  | `0`                                                      | `0` tant que la publicité n'est pas activée selon `MONETISATION_PUBLICITAIRE.md` |
+| En-têtes de sécurité             | `curl -sI https://DOMAINE/ \| grep -iE "content-security-policy\|strict-transport"`      | présents                                                 | présents                                                                         |
+| Service worker                   | `curl -sI https://DOMAINE/sw.js \| grep -i cache-control`                                | `no-cache`                                               | `no-cache`                                                                       |
