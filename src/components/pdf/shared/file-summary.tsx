@@ -22,7 +22,8 @@ export function FileSummary({ name, size, pageCount, onReset, children }: FileSu
       <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-primary-soft text-link">
         <FileText className="size-5" aria-hidden="true" />
       </span>
-      <div className="min-w-0 flex-1">
+      {/* On phones the name takes the whole row next to the icon; actions wrap below. */}
+      <div className="min-w-0 flex-1 basis-[calc(100%-3.25rem)] sm:basis-0">
         <p className="truncate font-medium" title={name}>
           {name}
         </p>

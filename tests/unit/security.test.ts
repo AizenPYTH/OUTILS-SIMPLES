@@ -100,4 +100,22 @@ describe("preview no-index switch", () => {
     const fresh = await import("@/lib/seo");
     expect(fresh.buildRootMetadata("fr").robots).toEqual({ index: true, follow: true });
   });
+
+  it("robots.txt lets crawlers fetch /_next/ in production and refuses everything in preview", async () => {
+    vi.resetModules();
+    const robots = (await import("@/app/robots")).default();
+    const rules = [robots.rules].flat();
+    expect(rules[0]).toMatchObject({ userAgent: "*", allow: "/" });
+    expect([rules[0]!.disallow].flat()).not.toContain("/_next/");
+    expect(robots.sitemap).toMatch(/\/sitemap\.xml$/);
+    vi.doMock("@/config/env", async (importOriginal) => {
+      const actual = await importOriginal<typeof import("@/config/env")>();
+      return { ...actual, publicEnv: { ...actual.publicEnv, NEXT_PUBLIC_NOINDEX: true } };
+    });
+    vi.resetModules();
+    const preview = (await import("@/app/robots")).default();
+    expect(preview).toEqual({ rules: [{ userAgent: "*", disallow: "/" }] });
+    vi.doUnmock("@/config/env");
+    vi.resetModules();
+  });
 });

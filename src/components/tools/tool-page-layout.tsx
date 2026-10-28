@@ -92,10 +92,10 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
             <h2 id="related-heading" className="mb-5 text-2xl">
               {t.tool.related}
             </h2>
-            <ul className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+            <ul className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {related.map((r) => (
                 <li key={r.id}>
-                  <ToolCard tool={r} />
+                  <ToolCard tool={r} compactOnPhone />
                 </li>
               ))}
             </ul>

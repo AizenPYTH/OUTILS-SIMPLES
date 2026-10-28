@@ -119,12 +119,12 @@ export function HomePage() {
         </h2>
         <HomeToolFilter filters={filters}>
           <ul
-            className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
+            className="mt-5 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
             data-testid="tool-grid"
           >
             {ordered.map((tool) => (
               <li key={tool.id} data-cat={tool.category}>
-                <ToolCard tool={tool} />
+                <ToolCard tool={tool} compactOnPhone />
               </li>
             ))}
           </ul>

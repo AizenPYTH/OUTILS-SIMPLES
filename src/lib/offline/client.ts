@@ -20,6 +20,28 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
   }
 }
 
+/**
+ * Development only: removes a service worker left by a production run on the
+ * same origin (e.g. `pnpm start` then `pnpm dev` on localhost:3000) and its
+ * caches. Development file names carry no content hash, so such a worker would
+ * keep serving stale styles and scripts. Returns true if a worker controlled the page.
+ */
+export async function removeServiceWorkers(): Promise<boolean> {
+  if (!serviceWorkerSupported()) return false;
+  const controlled = Boolean(navigator.serviceWorker.controller);
+  try {
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+    if ("caches" in window) {
+      const names = await caches.keys();
+      await Promise.all(names.map((name) => caches.delete(name)));
+    }
+  } catch {
+    return false;
+  }
+  return controlled;
+}
+
 async function activeWorker(): Promise<ServiceWorker | null> {
   if (!serviceWorkerSupported()) return null;
   const registration = await navigator.serviceWorker.ready;

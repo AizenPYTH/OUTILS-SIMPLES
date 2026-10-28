@@ -1,19 +1,26 @@
 "use client";
 
 import * as React from "react";
-import { registerServiceWorker } from "@/lib/offline/client";
+import { registerServiceWorker, removeServiceWorkers } from "@/lib/offline/client";
 import { useOnline } from "@/lib/offline/use-online";
 import { t } from "@/lib/i18n";
 import { localizedPath } from "@/lib/i18n/routes";
 
 /**
  * Registers the service worker (production builds only: in development it would
- * cache stale files) and shows a thin bar while the browser is offline.
+ * cache stale files) and shows a thin bar while the browser is offline. In
+ * development, a worker left by an earlier production run on the same origin
+ * is removed and the page reloaded once, served fresh.
  */
 export function ServiceWorkerRegistration() {
   const online = useOnline();
   React.useEffect(() => {
-    if (process.env.NODE_ENV !== "production") return;
+    if (process.env.NODE_ENV !== "production") {
+      void removeServiceWorkers().then((controlled) => {
+        if (controlled) window.location.reload();
+      });
+      return;
+    }
     const id = window.setTimeout(() => void registerServiceWorker(), 0);
     return () => window.clearTimeout(id);
   }, []);

@@ -18,6 +18,11 @@ interface ToolCardProps {
    * stays scannable (the tile layout takes over from the "sm" breakpoint).
    */
   dense?: boolean;
+  /**
+   * Grids of tiles (home, related tools): on phones a small square tile, icon
+   * and name only, two per row, instead of a full-width row with description.
+   */
+  compactOnPhone?: boolean;
 }
 
 /**
@@ -25,13 +30,19 @@ interface ToolCardProps {
  * does. On phones the icon sits on the left of the text (a list is easier to
  * scan); from the "sm" breakpoint up it is a tile, icon on top.
  */
-export function ToolCard({ tool, className, dense = false }: ToolCardProps) {
+export function ToolCard({
+  tool,
+  className,
+  dense = false,
+  compactOnPhone = false,
+}: ToolCardProps) {
   const tone = categoryTone[tool.category];
   return (
     <Link
       href={getToolPath(tool)}
       className={cn(
-        "card-interactive group relative flex h-full items-start gap-3.5 rounded-[16px] border border-border bg-surface p-4 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:flex-col sm:gap-0 sm:p-6",
+        "card-interactive group relative flex h-full items-start rounded-[16px] border border-border bg-surface shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:flex-col sm:gap-0 sm:p-6",
+        compactOnPhone ? "flex-col gap-3 p-3.5" : "gap-3.5 p-4",
         className,
       )}
       data-testid="tool-card"
@@ -45,9 +56,14 @@ export function ToolCard({ tool, className, dense = false }: ToolCardProps) {
       >
         <ToolIcon name={tool.icon} className="size-[22px] sm:size-6" strokeWidth={1.9} />
       </span>
-      <span className="min-w-0 flex-1 sm:mt-4">
+      <span className={cn("min-w-0 flex-1 sm:mt-4", compactOnPhone && "w-full")}>
         <span className="flex flex-wrap items-center gap-2">
-          <span className="font-heading text-base font-bold leading-snug text-foreground sm:text-[19px]">
+          <span
+            className={cn(
+              "font-heading font-bold leading-snug text-foreground sm:text-[19px]",
+              compactOnPhone ? "text-[15px] max-sm:hyphens-auto" : "text-base",
+            )}
+          >
             {tool.name}
           </span>
           {tool.status === "beta" ? <Badge variant="warning">{t.tool.betaBadge}</Badge> : null}
@@ -55,7 +71,7 @@ export function ToolCard({ tool, className, dense = false }: ToolCardProps) {
         <span
           className={cn(
             "mt-1 block text-sm leading-relaxed text-muted-foreground sm:mt-2 sm:line-clamp-3 sm:text-[15px]",
-            dense ? "line-clamp-1" : "line-clamp-2",
+            compactOnPhone ? "max-sm:hidden" : dense ? "line-clamp-1" : "line-clamp-2",
           )}
         >
           {tool.shortDescription}

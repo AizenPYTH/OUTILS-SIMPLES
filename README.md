@@ -32,6 +32,12 @@ cp .env.example .env.local
 pnpm dev              # http://localhost:3000
 ```
 
+Le cache disque de Turbopack est désactivé en développement (`next.config.ts`) : il servait une
+ancienne version de `globals.css` après redémarrage. En développement, la page supprime aussi un
+service worker laissé par un `pnpm start` sur la même adresse. Si d'anciennes couleurs restent
+affichées après une mise à jour : arrêter le serveur, supprimer `.next/`, relancer, puis recharger
+sans cache (Ctrl + Maj + R).
+
 Commandes :
 
 | Commande                                                                | Rôle                                                                |
@@ -194,7 +200,7 @@ les avertissements (éléments ignorés, scans sans texte). PowerPoint et PDF/A 
 
 ## Tests
 
-- `pnpm test` : 268 tests Vitest (registre bilingue, i18n et couverture des traductions, contrôle de mise en ligne, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
+- `pnpm test` : 269 tests Vitest (registre bilingue, i18n et couverture des traductions, contrôle de mise en ligne, sitemap, SEO, CSP, env, consentement, toutes les opérations PDF
   sur fixtures réelles, permissions de chiffrement relues par pdf.js, géométrie/détection du scanner, OCR →
   PDF recherchable, métadonnées d'images, encodeur PNG, extraction d'images et de liens, comparaison,
   caviardage (y compris pages pivotées), Markdown → PDF, regex, dates et jours fériés, TVA, unités,

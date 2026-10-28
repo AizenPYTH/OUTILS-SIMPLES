@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Canonical URLs, sitemap and internal links all use trailing slashes.
   trailingSlash: true,
+  experimental: {
+    // The dev disk cache kept serving an outdated globals.css across restarts
+    // (Tailwind loader output not invalidated): pages updated, colours did not.
+    // Development only; production builds are unaffected and keep their cache.
+    turbopackFileSystemCacheForDev: false,
+  },
   turbopack: {
     // qpdf-wasm's Emscripten glue references Node built-ins; serve empty modules in the browser.
     resolveAlias: {
