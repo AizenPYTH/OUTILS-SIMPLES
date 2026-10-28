@@ -240,8 +240,8 @@ describe("QR payloads", () => {
     card: { firstName: "", lastName: "", phone: "", email: "", organization: "", url: "" },
   };
   it("builds url, wifi and vcard strings", () => {
-    expect(buildQrPayload("url", { ...base, url: "outilia.fr/pdf" }).value).toBe(
-      "https://outilia.fr/pdf",
+    expect(buildQrPayload("url", { ...base, url: "averopdf.fr/pdf" }).value).toBe(
+      "https://averopdf.fr/pdf",
     );
     expect(buildQrPayload("url", { ...base, url: "https://" }).value).toBe("");
     expect(

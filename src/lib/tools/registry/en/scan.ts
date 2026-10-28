@@ -131,7 +131,7 @@ export const scanEn: Record<string, ToolLocalization> = {
         {
           question: "Are my documents sent to a server?",
           answer:
-            "No. Tesseract runs in WebAssembly in your browser. Only the engine and the language model (public files, hosted on OUTILIA) are downloaded, never your pages.",
+            "No. Tesseract runs in WebAssembly in your browser. Only the engine and the language model (public files, hosted on AVEROPDF) are downloaded, never your pages.",
         },
         {
           question: "What is a searchable PDF?",

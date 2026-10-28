@@ -310,19 +310,19 @@ describe("watermark", () => {
     expect(readWatermarkRecord(await openPdf(bytes))).toEqual([0, 2]);
 
     const diagnostic = await analyzeWatermarks(bytes);
-    expect(diagnostic.outiliaPages).toEqual([0, 2]);
+    expect(diagnostic.averopdfPages).toEqual([0, 2]);
     expect(diagnostic.watermarkAnnotations).toEqual([]);
     expect(diagnostic.recordedButMissing).toEqual([]);
 
     const removed = await removeWatermarks(bytes, {
-      removeOutilia: true,
+      removeAveropdf: true,
       removeWatermarkAnnotations: false,
     });
     expect(removed.removedBlocks).toBe(2);
     expect((await extractPageText(removed.bytes, 0)).join(" ")).not.toContain("CONFIDENTIEL");
     expect((await extractPageText(removed.bytes, 0)).join(" ")).toContain("Page 1 / 3");
     expect(readWatermarkRecord(await openPdf(removed.bytes))).toEqual([]);
-    expect((await analyzeWatermarks(removed.bytes)).outiliaPages).toEqual([]);
+    expect((await analyzeWatermarks(removed.bytes)).averopdfPages).toEqual([]);
   });
 
   it("adds a tiled image watermark on all pages", async () => {
@@ -339,7 +339,7 @@ describe("watermark", () => {
       pageIndices: [],
     });
     expect(pagesMarked).toEqual([0, 1, 2]);
-    expect((await analyzeWatermarks(bytes)).outiliaPages).toEqual([0, 1, 2]);
+    expect((await analyzeWatermarks(bytes)).averopdfPages).toEqual([0, 1, 2]);
   });
 
   it("detects and removes native /Watermark annotations", async () => {
@@ -347,7 +347,7 @@ describe("watermark", () => {
     const diagnostic = await analyzeWatermarks(src);
     expect(diagnostic.watermarkAnnotations).toEqual([{ pageIndex: 0, count: 1 }]);
     const result = await removeWatermarks(src, {
-      removeOutilia: false,
+      removeAveropdf: false,
       removeWatermarkAnnotations: true,
     });
     expect(result.removedAnnotations).toBe(1);
@@ -357,13 +357,13 @@ describe("watermark", () => {
   it("refuses honestly when nothing removable exists", async () => {
     const src = await fixture("simple-3-pages.pdf");
     await expect(
-      removeWatermarks(src, { removeOutilia: true, removeWatermarkAnnotations: true }),
+      removeWatermarks(src, { removeAveropdf: true, removeWatermarkAnnotations: true }),
     ).rejects.toMatchObject({ code: "UNSUPPORTED" });
   });
 
   it("strips only tagged blocks, including nested marked content", () => {
     const content =
-      "q 1 0 0 RG BT (keep) Tj ET Q /OutiliaWatermark BMC /Span BDC (wm) Tj EMC (wm2) Tj EMC q (after) Tj Q";
+      "q 1 0 0 RG BT (keep) Tj ET Q /AveropdfWatermark BMC /Span BDC (wm) Tj EMC (wm2) Tj EMC q (after) Tj Q";
     const { content: cleaned, removed } = stripMarkedContent(content);
     expect(removed).toBe(1);
     expect(cleaned).toContain("(keep) Tj");

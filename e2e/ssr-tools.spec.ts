@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 /**
  * QR code generator, regex tester and UUID generator are server-rendered so
  * that the page does not jump when they load (layout shift measured in
- * docs/RAPPORT_FINALISATION_OUTILIA.md). The server HTML holds the real tool
+ * docs/RAPPORT_FINALISATION_AVEROPDF.md). The server HTML holds the real tool
  * (no loading placeholder), in the page's language, inert until hydration;
  * the browser then takes over without hydration errors.
  */

@@ -43,8 +43,8 @@ describe("public env", () => {
   });
   it("strips trailing slashes and rejects invalid values", () => {
     expect(
-      parsePublicEnv({ NEXT_PUBLIC_SITE_URL: "https://outilia.fr/" }).NEXT_PUBLIC_SITE_URL,
-    ).toBe("https://outilia.fr");
+      parsePublicEnv({ NEXT_PUBLIC_SITE_URL: "https://averopdf.fr/" }).NEXT_PUBLIC_SITE_URL,
+    ).toBe("https://averopdf.fr");
     expect(() => parsePublicEnv({ NEXT_PUBLIC_ANALYTICS_PROVIDER: "spyware" })).toThrow();
     expect(() => parsePublicEnv({ NEXT_PUBLIC_SITE_URL: "not a url" })).toThrow();
   });

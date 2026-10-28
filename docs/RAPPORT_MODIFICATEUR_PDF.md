@@ -1,4 +1,4 @@
-# OUTILIA — Rapport : le modificateur PDF (`/pdf/modifier/`)
+# AVEROPDF — Rapport : le modificateur PDF (`/pdf/modifier/`)
 
 Documents liés : `docs/EDITION_TEXTE.md` (édition du texte existant), `docs/OCR_ORIENTATIONS.md`
 (moteur OCR), `docs/DESIGN_PRINCIPES.md` (identité v2), `docs/KNOWN_LIMITATIONS.md`,

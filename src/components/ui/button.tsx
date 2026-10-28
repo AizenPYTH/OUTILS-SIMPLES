@@ -13,7 +13,7 @@ const buttonVariants = cva(
         // action is not mistaken for a pale secondary button (audit G4).
         default:
           "bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover disabled:[&:not([aria-busy])]:bg-muted disabled:[&:not([aria-busy])]:text-muted-foreground disabled:[&:not([aria-busy])]:opacity-100 disabled:[&:not([aria-busy])]:shadow-none",
-        secondary: "bg-muted text-foreground hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-muted text-foreground hover:bg-primary-soft hover:text-accent-foreground",
         outline: "border border-input bg-surface text-foreground shadow-sm hover:bg-muted",
         ghost: "text-foreground hover:bg-muted",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:opacity-90",

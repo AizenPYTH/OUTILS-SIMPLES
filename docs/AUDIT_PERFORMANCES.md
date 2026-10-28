@@ -2,7 +2,7 @@
 
 Date : 2026-10-27 (mission de validation pré-lancement). Build de production (`next build`,
 Turbopack), serveur `next start` local, Node 22, Chromium Playwright pour Lighthouse 13.5. Toutes les
-mesures de ce document ont été **exécutées** sur le commit décrit dans `docs/RAPPORT_FINALISATION_OUTILIA.md` ;
+mesures de ce document ont été **exécutées** sur le commit décrit dans `docs/RAPPORT_FINALISATION_AVEROPDF.md` ;
 rien n'est estimé.
 
 ## 1. Correction de la mesure précédente
@@ -131,6 +131,6 @@ for (const u of ["/", "/en/", "/pdf/fusionner/", "/en/pdf/merge/", "/outils/", "
   mobile 0,326 / 0,201 / 0,079 → 0,001 / 0,002 / 0,003, outil visible à ≈ 1,2 s au lieu de ≈ 4 s,
   JavaScript initial inchangé (174 Ko FR, 179 Ko EN). Les outils « formulaire » restants réservent
   leur hauteur pendant le chargement (`src/lib/tools/workspace-heights.ts`). Détail, solutions
-  écartées et compromis : `docs/RAPPORT_FINALISATION_OUTILIA.md` §3.
+  écartées et compromis : `docs/RAPPORT_FINALISATION_AVEROPDF.md` §3.
 - **Reste** : décalage dû au remplacement des polices web (≈ 0,02 sur toutes les pages) ; CLS du
   modificateur PDF à 0,082 en limitation réelle.

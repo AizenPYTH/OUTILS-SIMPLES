@@ -171,7 +171,7 @@ function WatermarkWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void 
         ) : null}
         {manageTool ? (
           <p className="text-center text-sm text-muted-foreground">
-            {tr("Ce filigrane porte un marqueur OUTILIA : vous pourrez le retirer plus tard avec")}{" "}
+            {tr("Ce filigrane porte un marqueur AVEROPDF : vous pourrez le retirer plus tard avec")}{" "}
             <a href={getToolPath(manageTool)} className="font-medium text-link underline">
               {manageTool.name}
             </a>

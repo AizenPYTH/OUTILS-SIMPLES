@@ -23,7 +23,7 @@ async function textPdf(pageCount, { rotateSecond = false, mixedSizes = false } =
       font,
       color: rgb(0.1, 0.1, 0.3),
     });
-    page.drawText("Document de test OUTILIA — contenu synthétique.", {
+    page.drawText("Document de test AVEROPDF — contenu synthétique.", {
       x: 60,
       y: size[1] - 120,
       size: 12,

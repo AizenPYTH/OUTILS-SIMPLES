@@ -19,7 +19,7 @@ arbre de travail propre (aucune modification locale non validée avant le début
 
 Documents demandés par la mission et absents du dépôt (ils sont créés par cette mission) :
 `AUDIT_PERFORMANCES.md`, `AUDIT_SECURITE_ET_CONFIDENTIALITE.md`, `PLAN_LANCEMENT.md`,
-`RAPPORT_FINAL_MISSION_OUTILIA.md` (l'équivalent existant est `RAPPORT_AUDIT_ACTIONS.md`),
+`RAPPORT_FINAL_MISSION_AVEROPDF.md` (l'équivalent existant est `RAPPORT_AUDIT_ACTIONS.md`),
 `INTERNATIONALISATION.md`, `AUDIT_SEO_FINAL.md`, `MONETISATION_ET_VIABILITE.md`.
 
 ## 2. Décisions d'architecture pour la version anglaise

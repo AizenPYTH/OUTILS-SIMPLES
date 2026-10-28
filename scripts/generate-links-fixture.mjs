@@ -7,11 +7,11 @@ import { PDFDocument, PDFName, PDFString, StandardFonts, rgb } from "pdf-lib";
 const fixtures = path.resolve(process.cwd(), "tests/fixtures");
 const doc = await PDFDocument.create();
 doc.setTitle("Liens et images");
-doc.setAuthor("OUTILIA tests");
+doc.setAuthor("AVEROPDF tests");
 const font = await doc.embedFont(StandardFonts.Helvetica);
 const page1 = doc.addPage([595, 842]);
 page1.drawText("Document de test : liens et images", { x: 50, y: 790, size: 18, font });
-page1.drawText("Site : https://outilia.fr/aide/ et contact : bonjour@exemple.fr", {
+page1.drawText("Site : https://averopdf.fr/aide/ et contact : bonjour@exemple.fr", {
   x: 50,
   y: 750,
   size: 11,
@@ -35,7 +35,7 @@ const link = doc.context.obj({
   Subtype: "Link",
   Rect: [50, 685, 260, 702],
   Border: [0, 0, 0],
-  A: { Type: "Action", S: "URI", URI: PDFString.of("https://outilia.fr/documentation/") },
+  A: { Type: "Action", S: "URI", URI: PDFString.of("https://averopdf.fr/documentation/") },
 });
 page1.node.addAnnot(doc.context.register(link));
 const jpg = await doc.embedJpg(await readFile(path.join(fixtures, "photo-800x600.jpg")));

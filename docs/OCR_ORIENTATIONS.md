@@ -17,7 +17,7 @@ Node, **avant** toute modification :
 | Panneau à 90°     | **correct**, confiance ≈ 95 (Tesseract détecte lui-même les lignes verticales) | boîtes **hautes et étroites** (ex. 27 × 524 px), `baseline` verticale allant du bas vers le haut |
 | Consigne à 180°   | charabia (`SIVTIF4 30 30N39V ‘1N3SAV IS YNOLIU`), confiance 37                 | boîte horizontale                                                                                |
 
-Causes réelles des défauts visibles dans OUTILIA :
+Causes réelles des défauts visibles dans AVEROPDF :
 
 1. **Couche de texte du PDF recherchable** (`searchable-pdf.ts`) : chaque mot était dessiné
    horizontalement avec une taille de police tirée de la **hauteur** de sa boîte. Pour un mot du

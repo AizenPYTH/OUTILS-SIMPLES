@@ -1,8 +1,8 @@
 /** French source string → English text (see src/lib/i18n/messages.ts). PDF tools and src/lib/pdf messages. */
 export const pdfToolsEn: Record<string, string> = {
   // annotation-tool
-  "Dès qu'un fichier est chargé, OUTILIA l'analyse (texte natif, scan, mixte, protégé) et ouvre l'éditeur en plein écran : texte existant modifiable quand la police le permet, OCR intégré pour les scans, ajouts par-dessus, pages à réorganiser.":
-    "As soon as a file is loaded, OUTILIA analyzes it (native text, scan, mixed, protected) and opens the editor in full screen: existing text can be edited when the font allows it, built-in OCR for scans, additions on top, pages to reorganize.",
+  "Dès qu'un fichier est chargé, AVEROPDF l'analyse (texte natif, scan, mixte, protégé) et ouvre l'éditeur en plein écran : texte existant modifiable quand la police le permet, OCR intégré pour les scans, ajouts par-dessus, pages à réorganiser.":
+    "As soon as a file is loaded, AVEROPDF analyzes it (native text, scan, mixed, protected) and opens the editor in full screen: existing text can be edited when the font allows it, built-in OCR for scans, additions on top, pages to reorganize.",
   "Les annotations sont dessinées dans les pages (visibles partout, non modifiables après export).":
     "Annotations are drawn into the pages (visible everywhere, not editable after export).",
   "Signature visuelle uniquement : elle n'équivaut pas à une signature électronique qualifiée. Rien n'est enregistré ni transmis.":
@@ -219,22 +219,22 @@ export const pdfToolsEn: Record<string, string> = {
   "Les liens s'ouvrent dans un nouvel onglet ; vérifiez-les avant de cliquer.":
     "Links open in a new tab; check them before clicking.",
   // manage-watermark-tool
-  "{blocks} filigrane(s) OUTILIA et {annots} annotation(s) retiré(s) · {size}":
-    "{blocks} OUTILIA watermark(s) and {annots} annotation(s) removed · {size}",
+  "{blocks} filigrane(s) AVEROPDF et {annots} annotation(s) retiré(s) · {size}":
+    "{blocks} AVEROPDF watermark(s) and {annots} annotation(s) removed · {size}",
   "Analyse du document…": "Analyzing the document…",
   Diagnostic: "Diagnostic",
-  "Filigranes ajoutés avec OUTILIA": "Watermarks added with OUTILIA",
+  "Filigranes ajoutés avec AVEROPDF": "Watermarks added with AVEROPDF",
   "Détectés sur les pages {pages} — retrait fiable grâce au marqueur technique.":
     "Detected on pages {pages} — reliable removal thanks to the technical marker.",
-  "Aucun marqueur OUTILIA trouvé.": "No OUTILIA marker found.",
+  "Aucun marqueur AVEROPDF trouvé.": "No AVEROPDF marker found.",
   "Annotations PDF de type « Watermark »": "PDF annotations of type “Watermark”",
   "{n} annotation(s) sur les pages {pages}.": "{n} annotation(s) on pages {pages}.",
   "Aucune annotation de ce type.": "No annotation of this type.",
-  "Le document indique un filigrane OUTILIA sur les pages {pages} mais le marqueur n'y est plus : le fichier a probablement été modifié par un autre logiciel.":
-    "The document reports an OUTILIA watermark on pages {pages} but the marker is no longer there: the file was probably modified by another program.",
+  "Le document indique un filigrane AVEROPDF sur les pages {pages} mais le marqueur n'y est plus : le fichier a probablement été modifié par un autre logiciel.":
+    "The document reports an AVEROPDF watermark on pages {pages} but the marker is no longer there: the file was probably modified by another program.",
   "Aucun filigrane retirable de manière fiable": "No watermark can be removed reliably",
-  "Si ce document comporte un filigrane visible, il est fondu dans le contenu de la page ou incrusté dans une image. Le retirer supposerait de deviner et de réécrire le contenu, avec un risque réel d'endommager le document : OUTILIA ne le fait pas.":
-    "If this document has a visible watermark, it is merged into the page content or baked into an image. Removing it would mean guessing and rewriting the content, with a real risk of damaging the document: OUTILIA does not do that.",
+  "Si ce document comporte un filigrane visible, il est fondu dans le contenu de la page ou incrusté dans une image. Le retirer supposerait de deviner et de réécrire le contenu, avec un risque réel d'endommager le document : AVEROPDF ne le fait pas.":
+    "If this document has a visible watermark, it is merged into the page content or baked into an image. Removing it would mean guessing and rewriting the content, with a real risk of damaging the document: AVEROPDF does not do that.",
   "Les filigranes ajoutés avec": "Watermarks added with",
   "notre outil": "our tool",
   "restent retirables.": "remain removable.",
@@ -451,8 +451,8 @@ export const pdfToolsEn: Record<string, string> = {
   "Bas droite": "Bottom right",
   CONFIDENTIEL: "CONFIDENTIAL",
   "Filigrane appliqué sur {n} page(s) · {size}": "Watermark applied to {n} page(s) · {size}",
-  "Ce filigrane porte un marqueur OUTILIA : vous pourrez le retirer plus tard avec":
-    "This watermark carries an OUTILIA marker: you can remove it later with",
+  "Ce filigrane porte un marqueur AVEROPDF : vous pourrez le retirer plus tard avec":
+    "This watermark carries an AVEROPDF marker: you can remove it later with",
   Image: "Image",
   "Texte du filigrane": "Watermark text",
   "Taille ({size} pt)": "Size ({size} pt)",

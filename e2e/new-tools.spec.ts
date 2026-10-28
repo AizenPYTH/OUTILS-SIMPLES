@@ -257,8 +257,8 @@ test.describe("text, QR and developer tools", () => {
 
   test("QR generator produces PNG and SVG downloads", async ({ page }) => {
     await gotoTool(page, "/codes/generateur-qr-code/");
-    await page.getByTestId("qr-url").fill("https://outilia.fr/");
-    await expect(page.getByTestId("qr-payload")).toHaveText("https://outilia.fr/");
+    await page.getByTestId("qr-url").fill("https://averopdf.fr/");
+    await expect(page.getByTestId("qr-payload")).toHaveText("https://averopdf.fr/");
     const png = page.waitForEvent("download");
     await page.getByTestId("qr-download-png").click();
     expect((await png).suggestedFilename()).toBe("qr-code-url.png");
@@ -350,7 +350,7 @@ test.describe("lot 2 : liens, images, comparaison, caviardage, Markdown", () => 
     await expect(page.getByTestId("pdf-links")).toBeVisible({ timeout: 30_000 });
     const rows = page.getByTestId("pdf-link-row");
     await expect(rows).toHaveCount(4);
-    await expect(page.getByTestId("pdf-links")).toContainText("https://outilia.fr/documentation/");
+    await expect(page.getByTestId("pdf-links")).toContainText("https://averopdf.fr/documentation/");
     await expect(page.getByTestId("pdf-links")).toContainText("mailto:bonjour@exemple.fr");
     await expect(page.getByTestId("pdf-links")).toContainText("https://www.exemple.org");
     await expect(page.getByTestId("stat-grid")).toContainText("Liens internes (pages)1");
@@ -533,8 +533,8 @@ test.describe("lot 3 : développeur, calculatrices, codes, documents", () => {
     await expect(page.getByTestId("palette-css-output")).toHaveValue(/--couleur-1: #[0-9a-f]{6};/);
 
     await page.goto("/codes/lire-un-qr-code/");
-    await page.setInputFiles('[data-testid="qr-dropzone-input"]', fixture("qr-outilia.png"));
-    await expect(page.getByTestId("qr-text")).toHaveText("https://outilia.fr/aide", {
+    await page.setInputFiles('[data-testid="qr-dropzone-input"]', fixture("qr-averopdf.png"));
+    await expect(page.getByTestId("qr-text")).toHaveText("https://averopdf.fr/aide", {
       timeout: 30_000,
     });
     await expect(page.getByTestId("qr-result")).toContainText("Lien web");

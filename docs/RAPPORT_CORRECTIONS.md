@@ -1,4 +1,4 @@
-# OUTILIA — Rapport : corrections ciblées et simplification du design
+# AVEROPDF — Rapport : corrections ciblées et simplification du design
 
 Principes de design et application page par page : `docs/DESIGN_PRINCIPES.md`.
 Étude et limites de l'édition du texte existant : `docs/EDITION_TEXTE.md`.

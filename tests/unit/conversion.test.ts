@@ -43,7 +43,7 @@ async function pageText(bytes: Uint8Array, pageIndex: number): Promise<string> {
 describe("html → markdown (mammoth output)", () => {
   it("converts headings, inline styles, links, nested lists, tables and data-URI images", () => {
     const html =
-      '<h1>Titre</h1><p>Texte <strong>gras</strong> et <em>italique</em>, lien <a href="https://outilia.fr/">site</a>.</p>' +
+      '<h1>Titre</h1><p>Texte <strong>gras</strong> et <em>italique</em>, lien <a href="https://averopdf.fr/">site</a>.</p>' +
       "<ul><li>Un</li><li>Deux<ol><li>Deux a</li></ol></li></ul>" +
       "<table><tr><th>A</th><th>B | C</th></tr><tr><td><p>1</p></td><td>2</td></tr></table>" +
       '<p><img src="data:image/png;base64,iVBORw0KGgo=" alt="logo" /></p><p>5 * 3 = 15 &amp; fin</p>';
@@ -51,7 +51,7 @@ describe("html → markdown (mammoth output)", () => {
     expect(markdown).toContain("# Titre");
     expect(markdown).toContain("**gras**");
     expect(markdown).toContain("*italique*");
-    expect(markdown).toContain("[site](https://outilia.fr/)");
+    expect(markdown).toContain("[site](https://averopdf.fr/)");
     expect(markdown).toContain("- Un\n- Deux\n    1. Deux a");
     expect(markdown).toContain("| A | B \\| C |\n| --- | --- |\n| 1 | 2 |");
     expect(markdown).toContain("![logo](data:image/png;base64,iVBORw0KGgo=)");
@@ -87,7 +87,7 @@ describe("word → pdf", () => {
   it("keeps headings, styles, list, table cells, the image and the second page", async () => {
     const bytes = await fixture("office-sample.docx");
     const { markdown, warnings } = await docxToMarkdown(bytes);
-    expect(markdown).toContain("# Rapport de test OUTILIA");
+    expect(markdown).toContain("# Rapport de test AVEROPDF");
     expect(markdown).toContain("**texte en gras**");
     expect(markdown).toContain("- Déposer le fichier");
     expect(markdown).toContain("| Carnet \\| A5 | 2 | 4,90 € |");
@@ -97,7 +97,7 @@ describe("word → pdf", () => {
     expect(result.pageCount).toBeGreaterThanOrEqual(1);
     expect(result.imageCount).toBe(1);
     const text = await pageText(result.bytes, 0);
-    expect(text).toContain("Rapport de test OUTILIA");
+    expect(text).toContain("Rapport de test AVEROPDF");
     expect(text).toContain("Prix unitaire");
     expect(text).toContain("Seconde page");
   });

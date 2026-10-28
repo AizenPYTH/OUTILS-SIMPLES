@@ -1,4 +1,4 @@
-# Rapport — Extension majeure du catalogue OUTILIA
+# Rapport — Extension majeure du catalogue AVEROPDF
 
 Branche : `claude/festive-turing-f4fmzh`. Commits de l'extension : `fa9916b` (lot 1), `8795989` (lot 2),
 `a806b09` (lot 3), puis le commit de documentation qui accompagne ce rapport.

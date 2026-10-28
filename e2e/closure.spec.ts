@@ -270,7 +270,7 @@ test.describe("clôture — gros fichiers et limites (scénarios reproductibles)
     // Playwright refuses in-memory buffers above 50 MB: write the file to disk.
     const huge = Buffer.alloc(101 * MB + 16, 0x20);
     huge.write("%PDF-1.4\n", 0, "latin1");
-    const hugePath = path.join(tmpdir(), "outilia-enorme.pdf");
+    const hugePath = path.join(tmpdir(), "averopdf-enorme.pdf");
     await writeFile(hugePath, huge);
     await page.setInputFiles('[data-testid="pdf-input"]', hugePath);
     await expect(page.getByRole("alert").first()).toContainText("100", { timeout: 60_000 });
@@ -305,7 +305,7 @@ test.describe("clôture — gros fichiers et limites (scénarios reproductibles)
     });
     const big = Buffer.from(await doc.save({ useObjectStreams: false }));
     expect(big.length).toBeGreaterThan(60 * MB);
-    const bigPath = path.join(tmpdir(), "outilia-lourd.pdf");
+    const bigPath = path.join(tmpdir(), "averopdf-lourd.pdf");
     await writeFile(bigPath, big);
 
     await page.goto("/pdf/rotation/");

@@ -430,7 +430,7 @@ export const defaultCoverOptions: CoverPageOptions = {
   date: "",
   footer: "",
   page: "a4",
-  accent: "#5146e5",
+  accent: "#0e6b3c",
 };
 
 export async function coverPagePdf(

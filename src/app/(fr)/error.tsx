@@ -13,7 +13,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     // Only the error message is logged: never file names or document data.
-    console.error("[outilia] route error", error.digest ?? error.message);
+    console.error("[averopdf] route error", error.digest ?? error.message);
   }, [error]);
 
   return (

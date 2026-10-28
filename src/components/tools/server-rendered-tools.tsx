@@ -8,7 +8,7 @@ import type { ServerRenderedToolId } from "./ssr-tool-ids";
  * Form tools rendered on the server as well as in the browser: their initial
  * layout is deterministic, so the page is painted with the real tool instead
  * of a loading placeholder that the tool would later push down (layout shift,
- * measured in docs/RAPPORT_FINALISATION_OUTILIA.md).
+ * measured in docs/RAPPORT_FINALISATION_AVEROPDF.md).
  *
  * - `next/dynamic` with plain `import()` calls: each tool keeps its own chunk
  *   (a static import from the shared tool page would put the three tools in

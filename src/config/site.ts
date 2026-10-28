@@ -5,12 +5,12 @@
 import { publicEnv } from "@/config/env";
 
 export const siteConfig = {
-  name: "OUTILIA",
+  name: "AVEROPDF",
   /** Short tagline shown in the header/footer and default title template. */
   tagline: "Outils en ligne simples, rapides et privés",
   /** Default meta description for the home page. */
   description:
-    "OUTILIA regroupe des outils en ligne gratuits pour vos PDF : fusionner, diviser, compresser, organiser, annoter, signer et ajouter un filigrane. Les fichiers sont traités dans votre navigateur et ne sont jamais envoyés sur un serveur.",
+    "AVEROPDF regroupe des outils en ligne gratuits pour vos PDF : fusionner, diviser, compresser, organiser, annoter, signer et ajouter un filigrane. Les fichiers sont traités dans votre navigateur et ne sont jamais envoyés sur un serveur.",
   /** Canonical origin, without trailing slash. */
   url: publicEnv.NEXT_PUBLIC_SITE_URL,
   locale: "fr-FR",

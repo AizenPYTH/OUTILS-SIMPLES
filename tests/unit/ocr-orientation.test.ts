@@ -109,7 +109,7 @@ beforeAll(async () => {
   engine = await createOcrEngine("fra", {
     encode,
     langPath: path.join(root, "public/ocr/lang"),
-    cachePath: "/tmp/outilia-tess-cache",
+    cachePath: "/tmp/averopdf-tess-cache",
   });
 }, 120_000);
 afterAll(async () => {
@@ -392,7 +392,7 @@ describe("OCR on synthetic pages (real Tesseract, measured error rate)", () => {
     const grayResult = await engine.recognize(gray, 0, { orientation: "0", preprocess: "auto" });
     expect(characterErrorRate("Document en niveaux de gris", grayResult.text)).toBeLessThan(0.06);
 
-    const qr = QRCode.create("https://outilia.example/colis/48213", { errorCorrectionLevel: "M" });
+    const qr = QRCode.create("https://averopdf.example/colis/48213", { errorCorrectionLevel: "M" });
     const withCodes = renderScene({
       width: 900,
       height: 500,

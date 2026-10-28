@@ -36,7 +36,7 @@ export function ManageWatermarkTool() {
 function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) {
   const [diagnostic, setDiagnostic] = React.useState<WatermarkDiagnostic | null>(null);
   const [analysisError, setAnalysisError] = React.useState<string | null>(null);
-  const [removeOutilia, setRemoveOutilia] = React.useState(true);
+  const [removeAveropdf, setRemoveAveropdf] = React.useState(true);
   const [removeAnnots, setRemoveAnnots] = React.useState(true);
   const [authorized, setAuthorized] = React.useState(false);
   const op = useOperation<RemoveWatermarkResult>(TOOL_ID);
@@ -63,7 +63,7 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
     const { bytes, removedBlocks, removedAnnotations } = op.state.result;
     return (
       <DonePanel
-        summary={tr("{blocks} filigrane(s) OUTILIA et {annots} annotation(s) retiré(s) · {size}", {
+        summary={tr("{blocks} filigrane(s) AVEROPDF et {annots} annotation(s) retiré(s) · {size}", {
           blocks: removedBlocks,
           annots: removedAnnotations,
           size: formatBytes(bytes.byteLength),
@@ -86,10 +86,10 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
   if (!diagnostic)
     return <BusyPanel progress={{ current: 0, total: 0, label: tr("Analyse du document…") }} />;
 
-  const hasOutilia = diagnostic.outiliaPages.length > 0;
+  const hasAveropdf = diagnostic.averopdfPages.length > 0;
   const hasAnnots = diagnostic.watermarkAnnotations.length > 0;
-  const nothing = !hasOutilia && !hasAnnots;
-  const canRemove = authorized && ((hasOutilia && removeOutilia) || (hasAnnots && removeAnnots));
+  const nothing = !hasAveropdf && !hasAnnots;
+  const canRemove = authorized && ((hasAveropdf && removeAveropdf) || (hasAnnots && removeAnnots));
 
   return (
     <div className="space-y-6">
@@ -110,21 +110,21 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
         <ul className="space-y-2 text-sm">
           <li className="flex items-start gap-3">
             <Checkbox
-              id="rm-outilia"
-              checked={hasOutilia && removeOutilia}
-              onCheckedChange={(c) => setRemoveOutilia(c === true)}
-              disabled={!hasOutilia}
+              id="rm-averopdf"
+              checked={hasAveropdf && removeAveropdf}
+              onCheckedChange={(c) => setRemoveAveropdf(c === true)}
+              disabled={!hasAveropdf}
               className="mt-0.5"
             />
-            <Label htmlFor="rm-outilia" className="flex-col items-start gap-0.5 font-normal">
-              <span className="font-medium">{tr("Filigranes ajoutés avec OUTILIA")}</span>
+            <Label htmlFor="rm-averopdf" className="flex-col items-start gap-0.5 font-normal">
+              <span className="font-medium">{tr("Filigranes ajoutés avec AVEROPDF")}</span>
               <span className="text-muted-foreground">
-                {hasOutilia
+                {hasAveropdf
                   ? tr(
                       "Détectés sur les pages {pages} — retrait fiable grâce au marqueur technique.",
-                      { pages: formatPageIndices(diagnostic.outiliaPages) },
+                      { pages: formatPageIndices(diagnostic.averopdfPages) },
                     )
-                  : tr("Aucun marqueur OUTILIA trouvé.")}
+                  : tr("Aucun marqueur AVEROPDF trouvé.")}
               </span>
             </Label>
           </li>
@@ -154,7 +154,7 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
         {diagnostic.recordedButMissing.length ? (
           <p className="text-sm text-muted-foreground">
             {tr(
-              "Le document indique un filigrane OUTILIA sur les pages {pages} mais le marqueur n'y est plus : le fichier a probablement été modifié par un autre logiciel.",
+              "Le document indique un filigrane AVEROPDF sur les pages {pages} mais le marqueur n'y est plus : le fichier a probablement été modifié par un autre logiciel.",
               { pages: formatPageIndices(diagnostic.recordedButMissing) },
             )}
           </p>
@@ -164,7 +164,7 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
       {nothing ? (
         <Alert variant="warning" title={tr("Aucun filigrane retirable de manière fiable")}>
           {tr(
-            "Si ce document comporte un filigrane visible, il est fondu dans le contenu de la page ou incrusté dans une image. Le retirer supposerait de deviner et de réécrire le contenu, avec un risque réel d'endommager le document : OUTILIA ne le fait pas.",
+            "Si ce document comporte un filigrane visible, il est fondu dans le contenu de la page ou incrusté dans une image. Le retirer supposerait de deviner et de réécrire le contenu, avec un risque réel d'endommager le document : AVEROPDF ne le fait pas.",
           )}
           {watermarkTool ? (
             <>
@@ -210,7 +210,7 @@ function ManageWorkspace({ pdf, reset }: { pdf: LoadedPdf; reset: () => void }) 
             onClick={() =>
               void op.run(() =>
                 removeWatermarks(pdf.bytes, {
-                  removeOutilia: hasOutilia && removeOutilia,
+                  removeAveropdf: hasAveropdf && removeAveropdf,
                   removeWatermarkAnnotations: hasAnnots && removeAnnots,
                 }),
               )

@@ -9,8 +9,8 @@
  * no-ads / first-party-analytics configuration and documents the integration
  * boundary; it must not be presented as a certified CMP.
  */
-export const CONSENT_STORAGE_KEY = "outilia-consent-v1";
-export const CONSENT_EVENT = "outilia:consent-changed";
+export const CONSENT_STORAGE_KEY = "averopdf-consent-v1";
+export const CONSENT_EVENT = "averopdf:consent-changed";
 
 export interface ConsentState {
   /** ISO timestamp of the decision; undefined until the visitor chooses. */

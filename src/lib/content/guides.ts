@@ -46,7 +46,7 @@ export const guides: readonly Guide[] = [
       {
         heading: "Fusionner dans le navigateur",
         paragraphs: [
-          "Avec l'outil Fusionner des PDF d'OUTILIA, la procédure tient en trois étapes :",
+          "Avec l'outil Fusionner des PDF d'AVEROPDF, la procédure tient en trois étapes :",
         ],
         list: [
           "Déposez vos fichiers dans la zone prévue (ou cliquez pour les sélectionner). Vous pouvez en ajouter d'autres ensuite.",
@@ -83,7 +83,7 @@ export const guides: readonly Guide[] = [
         ],
       },
       {
-        heading: "Les trois niveaux proposés par OUTILIA",
+        heading: "Les trois niveaux proposés par AVEROPDF",
         paragraphs: [
           "L'outil Compresser un PDF propose trois niveaux correspondant à des traitements réellement différents :",
         ],
@@ -96,7 +96,7 @@ export const guides: readonly Guide[] = [
       {
         heading: "Vérifier le résultat",
         paragraphs: [
-          "Comparez toujours la taille avant / après affichée par l'outil, puis ouvrez le fichier pour contrôler les pages contenant des images. Si une image recompressée serait plus lourde que l'originale, OUTILIA conserve l'originale : il peut donc arriver qu'un fichier déjà optimisé ne diminue pas, et l'outil vous le dit plutôt que de produire un faux gain.",
+          "Comparez toujours la taille avant / après affichée par l'outil, puis ouvrez le fichier pour contrôler les pages contenant des images. Si une image recompressée serait plus lourde que l'originale, AVEROPDF conserve l'originale : il peut donc arriver qu'un fichier déjà optimisé ne diminue pas, et l'outil vous le dit plutôt que de produire un faux gain.",
         ],
       },
     ],
@@ -132,7 +132,7 @@ export const guides: readonly Guide[] = [
       {
         heading: "Confidentialité",
         paragraphs: [
-          "Votre signature est une donnée sensible. Sur OUTILIA, le PDF et l'image de signature ne quittent jamais votre navigateur et rien n'est conservé : fermez l'onglet et il ne reste rien.",
+          "Votre signature est une donnée sensible. Sur AVEROPDF, le PDF et l'image de signature ne quittent jamais votre navigateur et rien n'est conservé : fermez l'onglet et il ne reste rien.",
         ],
       },
     ],
@@ -185,7 +185,7 @@ export const guides: readonly Guide[] = [
         heading: "Traitement local ou envoi sur serveur ?",
         paragraphs: [
           "Beaucoup de services envoient votre fichier sur leurs serveurs, le transforment, puis vous renvoient le résultat et promettent de l'effacer après un délai. Vous dépendez alors de leur sécurité, de leur sous-traitant d'hébergement et de leur bonne foi.",
-          "Un traitement local, comme celui d'OUTILIA, fait tout le travail dans votre navigateur : le fichier n'est jamais transmis. Vous pouvez le vérifier en coupant votre connexion après le chargement de la page : les outils continuent de fonctionner.",
+          "Un traitement local, comme celui d'AVEROPDF, fait tout le travail dans votre navigateur : le fichier n'est jamais transmis. Vous pouvez le vérifier en coupant votre connexion après le chargement de la page : les outils continuent de fonctionner.",
         ],
       },
       {
@@ -199,9 +199,9 @@ export const guides: readonly Guide[] = [
         ],
       },
       {
-        heading: "Ce qu'OUTILIA fait et ne fait pas",
+        heading: "Ce qu'AVEROPDF fait et ne fait pas",
         paragraphs: [
-          "Tous les outils PDF publiés sur OUTILIA fonctionnent localement, sans compte et sans stockage. Nous n'analysons pas le contenu des documents et les éventuelles statistiques de fréquentation, si elles sont activées, ne contiennent jamais de nom de fichier ni de contenu.",
+          "Tous les outils PDF publiés sur AVEROPDF fonctionnent localement, sans compte et sans stockage. Nous n'analysons pas le contenu des documents et les éventuelles statistiques de fréquentation, si elles sont activées, ne contiennent jamais de nom de fichier ni de contenu.",
         ],
       },
     ],
@@ -253,7 +253,7 @@ export const guides: readonly Guide[] = [
     publishedAt: "2026-10-26",
     updatedAt: "2026-10-26",
     intro:
-      "Un justificatif à envoyer, un formulaire signé à retourner : le téléphone suffit, à condition de produire un fichier propre et lisible plutôt qu'une photo de travers. Le scanner d'OUTILIA fonctionne dans le navigateur, sans installer d'application ni créer de compte.",
+      "Un justificatif à envoyer, un formulaire signé à retourner : le téléphone suffit, à condition de produire un fichier propre et lisible plutôt qu'une photo de travers. Le scanner d'AVEROPDF fonctionne dans le navigateur, sans installer d'application ni créer de compte.",
     sections: [
       {
         heading: "Prendre une bonne photo",

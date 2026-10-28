@@ -119,7 +119,7 @@ export function QuadEditor({ imageUrl, imageWidth, imageHeight, quad, onChange }
         <polygon
           points={points}
           fill="none"
-          stroke="var(--color-primary, #5146e5)"
+          stroke="var(--color-primary, #0e6b3c)"
           strokeWidth={2}
         />
         <line

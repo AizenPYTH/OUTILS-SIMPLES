@@ -67,12 +67,12 @@ export const en: Dictionary = {
     guides: "Guides",
   },
   home: {
-    heroTitle: "Your files, your tools, your browser.",
+    heroTitle: "Every tool for your PDFs and files",
     heroSubtitle:
-      "69 free tools for your PDFs, images, scans and text, processed on your device: nothing is uploaded, no account needed.",
+      "69 free, simple tools. Everything happens in your browser: your files are never uploaded and no account is needed.",
     usagesTitle: "What do you want to do?",
     usagesSubtitle: "Four paths for the most common tasks.",
-    trustTitle: "Why OUTILIA",
+    trustTitle: "Why AVEROPDF",
     trustItems: [
       {
         title: "Local processing",
@@ -105,7 +105,7 @@ export const en: Dictionary = {
           "Limits depend on your device's memory more than on the site: up to 100 MB and 1,000 pages per PDF, 50 MB per image. Each tool page lists its limits and accepted formats.",
       },
       {
-        question: "Is OUTILIA really free?",
+        question: "Is AVEROPDF really free?",
         answer:
           "Yes, every published tool is free and adds no watermark. The site may show contextual ads, never based on the content of your files.",
       },
@@ -120,7 +120,7 @@ export const en: Dictionary = {
     categoriesSubtitle: "The PDF suite is available today. Other categories are in preparation.",
     privacyTitle: "Your files stay with you",
     privacyBody:
-      "All OUTILIA PDF tools run in your browser thanks to open-source libraries. Your documents go through no server, are neither stored nor analysed, and disappear as soon as you close the tab.",
+      "All AVEROPDF PDF tools run in your browser thanks to open-source libraries. Your documents go through no server, are neither stored nor analysed, and disappear as soon as you close the tab.",
     privacyLink: "Read our privacy policy",
     recentTitle: "Recently used",
     howTitle: "How it works",
@@ -140,11 +140,12 @@ export const en: Dictionary = {
       `${n} free tools, processed in your browser. Search by name or need, or filter by category.`,
     seoTitle: "All free online tools: PDF, images, OCR, text",
     seoDescription:
-      "The complete OUTILIA catalogue: PDF, image, scanning and OCR, text, developer, calculator, code and document tools. Local processing, no sign-up.",
+      "The complete AVEROPDF catalogue: PDF, image, scanning and OCR, text, developer, calculator, code and document tools. Local processing, no sign-up.",
     filterAll: "All",
     resultsCount: (n: number) => (n === 1 ? "1 tool" : `${n} tools`),
     noResultsTitle: "No tool matches your search",
-    noResultsBody: "This tool does not exist on OUTILIA yet. Here are related tools that may help:",
+    noResultsBody:
+      "This tool does not exist on AVEROPDF yet. Here are related tools that may help:",
     noResultsEmpty: "Try another keyword or browse the categories.",
     plannedTitle: "In preparation",
     plannedBody:
@@ -250,7 +251,7 @@ export const en: Dictionary = {
   },
   consent: {
     title: "Cookies and analytics",
-    body: "OUTILIA works without advertising cookies or trackers by default. If the publisher enables third-party services (analytics, advertising), they only load with your consent.",
+    body: "AVEROPDF works without advertising cookies or trackers by default. If the publisher enables third-party services (analytics, advertising), they only load with your consent.",
     acceptAll: "Accept all",
     rejectAll: "Reject all",
     customize: "Customise",
@@ -283,7 +284,7 @@ export const en: Dictionary = {
     toolsHeading: "Tools",
     siteHeading: "Site",
     legalHeading: "Legal information",
-    rights: (year: number) => `© ${year} OUTILIA. All rights reserved.`,
+    rights: (year: number) => `© ${year} AVEROPDF. All rights reserved.`,
     openSource: "Built with pdf.js and pdf-lib, two open-source libraries.",
   },
   site: {

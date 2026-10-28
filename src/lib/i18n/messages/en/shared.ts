@@ -1,5 +1,13 @@
 /** French source string → English text (see src/lib/i18n/messages.ts). Shared tool chrome. */
 export const sharedEn: Record<string, string> = {
+  "Navigation principale": "Main navigation",
+  "Fusionner PDF": "Merge PDF",
+  "Compresser PDF": "Compress PDF",
+  "Modifier PDF": "Edit PDF",
+  "PDF en Word": "PDF to Word",
+  "Vous ne savez pas quel outil choisir ?": "Not sure which tool to pick?",
+  "Déposez votre fichier : son type est reconnu et les outils adaptés vous sont proposés.":
+    "Drop your file: its type is recognised and the matching tools are suggested.",
   "Ouverture du document…": "Opening the document…",
   "Déverrouillage du document…": "Unlocking the document…",
   "Analyse de votre document…": "Analysing your document…",

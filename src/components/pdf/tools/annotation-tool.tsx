@@ -31,7 +31,7 @@ export const EditorTool = makeTool(
   "pdf-edit",
   "editor",
   tr(
-    "Dès qu'un fichier est chargé, OUTILIA l'analyse (texte natif, scan, mixte, protégé) et ouvre l'éditeur en plein écran : texte existant modifiable quand la police le permet, OCR intégré pour les scans, ajouts par-dessus, pages à réorganiser.",
+    "Dès qu'un fichier est chargé, AVEROPDF l'analyse (texte natif, scan, mixte, protégé) et ouvre l'éditeur en plein écran : texte existant modifiable quand la police le permet, OCR intégré pour les scans, ajouts par-dessus, pages à réorganiser.",
   ),
 );
 export const AnnotateTool = makeTool(

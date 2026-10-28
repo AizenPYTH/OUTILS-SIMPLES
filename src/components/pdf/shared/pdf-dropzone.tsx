@@ -10,6 +10,7 @@ import { validatePdfFileMeta } from "@/lib/files/validation";
 import { isPdfError } from "@/lib/pdf/errors";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { orDrop } from "@/components/tools/shared/or-drop";
 
 interface PdfDropzoneProps {
   onFiles: (files: File[]) => void;
@@ -112,35 +113,36 @@ export function PdfDropzone({
         onDragLeave={() => setDragActive(false)}
         onDrop={onDrop}
         className={cn(
-          "flex flex-col items-center justify-center gap-4 rounded-[24px] border border-dashed text-center shadow-sm transition-[border-color,background-color,box-shadow]",
-          compact ? "px-6 py-6" : "px-6 py-9 sm:py-16",
+          "flex flex-col items-center justify-center rounded-[24px] border-2 border-dashed text-center transition-[border-color,background-color,box-shadow]",
+          compact ? "gap-4 px-6 py-6" : "gap-3 px-5 py-10 sm:py-16",
           dragActive
-            ? "border-primary bg-primary-soft shadow-md"
-            : "border-primary/40 bg-surface hover:border-primary/70 hover:bg-primary-soft/30",
+            ? "border-accent bg-primary-soft shadow-md"
+            : compact
+              ? "border-border bg-surface hover:border-accent"
+              : "border-border bg-surface/70 hover:border-accent hover:bg-surface",
           disabled && "opacity-60",
         )}
         data-testid="pdf-dropzone"
       >
-        <span
-          className={cn(
-            "flex items-center justify-center rounded-[14px] bg-primary-soft text-link",
-            compact ? "size-10" : "size-14",
-          )}
-        >
-          {dragActive ? (
-            <FileUp className={compact ? "size-5" : "size-7"} aria-hidden="true" />
-          ) : (
-            <Upload className={compact ? "size-5" : "size-7"} aria-hidden="true" />
-          )}
-        </span>
-        <div>
-          <p className={cn("font-heading font-bold", compact ? "text-base" : "text-xl")}>
-            {dragActive
-              ? t.upload.dragActive
-              : (title ?? (multiple ? t.upload.dropTitleMultiple : t.upload.dropTitle))}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">{hint}</p>
-        </div>
+        {compact ? (
+          <>
+            <span className="flex size-10 items-center justify-center rounded-[14px] bg-primary-soft text-link">
+              {dragActive ? (
+                <FileUp className="size-5" aria-hidden="true" />
+              ) : (
+                <Upload className="size-5" aria-hidden="true" />
+              )}
+            </span>
+            <div>
+              <p className="font-heading text-base font-bold">
+                {dragActive
+                  ? t.upload.dragActive
+                  : (title ?? (multiple ? t.upload.dropTitleMultiple : t.upload.dropTitle))}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{hint}</p>
+            </div>
+          </>
+        ) : null}
         <Button
           type="button"
           size={compact ? "default" : "lg"}
@@ -148,10 +150,26 @@ export function PdfDropzone({
           variant={compact ? "outline" : "default"}
           onClick={() => inputRef.current?.click()}
           disabled={disabled}
+          className={
+            compact
+              ? undefined
+              : "h-16 w-full max-w-[380px] gap-3 rounded-[14px] px-8 text-lg font-bold shadow-lg sm:h-[72px] sm:text-xl"
+          }
           data-testid="pdf-browse"
         >
+          {compact ? null : <Upload className="size-6" aria-hidden="true" />}
           {multiple ? (compact ? t.upload.addMore : t.upload.browseMultiple) : t.upload.browse}
         </Button>
+        {compact ? null : (
+          <div>
+            <p className="text-base font-medium text-foreground/80">
+              {dragActive
+                ? t.upload.dragActive
+                : orDrop(title ?? (multiple ? t.upload.dropTitleMultiple : t.upload.dropTitle))}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">{hint}</p>
+          </div>
+        )}
         <input
           ref={inputRef}
           type="file"

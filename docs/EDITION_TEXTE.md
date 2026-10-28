@@ -49,7 +49,7 @@ testé en Node. Aucune dépendance ajoutée.
    mode de rendu inchangés) :
    - si tous les caractères saisis ont un code dans la police d'origine : `<codes> Tj` (ou un
      tableau `TJ` avec un écart de −250 pour une espace absente de la police) ;
-   - sinon : `/FOutilia taille Tf <texte WinAnsi> Tj /FOrigine taille Tf`, avec une police standard
+   - sinon : `/FAveropdf taille Tf <texte WinAnsi> Tj /FOrigine taille Tf`, avec une police standard
      choisie d'après la police d'origine (serif / sans / monospace, gras, italique) et un rapport
      signalant le remplacement ;
    - les opérateurs `'` et `"` sont réécrits avec leur saut de ligne (`T*`, `Tw`, `Tc`) préservé.

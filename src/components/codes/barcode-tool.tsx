@@ -32,7 +32,7 @@ const SAMPLES: Record<BarcodeType, string> = {
   ean13: "400638133393",
   ean8: "9638507",
   upca: "03600029145",
-  code128: "OUTILIA-2026",
+  code128: "AVEROPDF-2026",
   code39: "REF 1234",
 };
 

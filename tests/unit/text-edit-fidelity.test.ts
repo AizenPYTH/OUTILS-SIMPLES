@@ -140,7 +140,7 @@ describe("text editing fidelity across producers", () => {
     expect(report.fontReplaced).toBe(1);
     expect(report.replacedCharacters).toBe(1); // Ω is outside WinAnsi too → "?"
     const names = await fontNames(out, 0);
-    expect(names.some((n) => n.startsWith("OutiliaTexte"))).toBe(true);
+    expect(names.some((n) => n.startsWith("AveropdfTexte"))).toBe(true);
     const after = (await extractPageText(out, 0)).join(" ");
     expect(after).toContain("Chiffre ? 2026");
     expect(after).not.toContain("affaires"); // every fragment of the old line is gone

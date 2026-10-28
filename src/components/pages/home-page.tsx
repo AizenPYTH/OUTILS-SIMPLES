@@ -1,24 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  BookOpen,
-  Camera,
-  FileText,
-  ImageIcon,
-  Lock,
-  ScanText,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Check, Lock, ShieldCheck, Sparkles } from "lucide-react";
 import editorShotFr from "@/assets/editeur-apercu.webp";
 import editorShotEn from "@/assets/editor-preview-en.webp";
 import { getLocale } from "@/lib/i18n/locale";
 import { HomeDrop } from "@/components/home/home-drop";
+import { HomeToolFilter, type HomeFilter } from "@/components/home/home-tool-filter";
 import { AdPlacement } from "@/components/monetization/ad-placement";
 import { HomeSearch } from "@/components/tools/home-search";
 import { ToolCard } from "@/components/tools/tool-card";
-import { ToolIcon } from "@/components/tools/tool-icon";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildWebsiteJsonLd } from "@/lib/seo";
 import { KIND_TOOLS } from "@/lib/files/detect";
@@ -28,170 +18,172 @@ import {
   getPublishedTools,
   getToolById,
   getToolPath,
-  getToolsByCategory,
 } from "@/lib/tools";
-import { categoryTone } from "@/lib/tools/groups";
 import { toSlimTool, type SlimTool } from "@/lib/tools/search-index";
 import { t } from "@/lib/i18n";
 import { localizedPath } from "@/lib/i18n/routes";
-import { getGuides } from "@/lib/content/guides";
-import { cn } from "@/lib/utils";
 import { tr } from "@/lib/i18n/messages";
 
+/** Shown first in the grid ("Tous"), in this order; the rest follows family by family. */
 const POPULAR_IDS = [
   "pdf-edit",
   "pdf-merge",
   "pdf-compress",
+  "pdf-split",
   "pdf-sign",
+  "conv-pdf-docx",
+  "conv-docx-pdf",
   "scan-document",
   "scan-ocr",
+  "pdf-to-images",
+  "pdf-from-images",
   "image-compress",
-  "conv-docx-pdf",
 ];
 
 const EDITOR_POINTS = () => [
-  {
-    title: tr("Modifier le texte existant"),
-    body: tr(
-      "Double-cliquez sur un mot et corrigez-le dans la police d'origine quand elle le permet, sans refaire la page.",
-    ),
-  },
-  {
-    title: tr("Annoter, signer, dessiner"),
-    body: tr(
-      "Texte, surlignage, formes, flèches, masques, signature manuscrite ou image : tout est déplaçable et modifiable.",
-    ),
-  },
-  {
-    title: tr("Pages, OCR et export vérifié"),
-    body: tr(
-      "Réorganisez les pages, reconnaissez le texte d'un scan et téléchargez un PDF relu par le site avant de vous être proposé.",
-    ),
-  },
+  tr("Modifier le texte existant"),
+  tr("Annoter, signer, dessiner"),
+  tr("Pages, OCR et export vérifié"),
 ];
 
+/**
+ * Home page: one clear headline, the search, then every tool as a large tile
+ * that can be filtered by family (the page is the catalogue's front door).
+ * The file drop, the editor, the privacy promise and the FAQ follow.
+ */
 export function HomePage() {
-  const editorPoints = EDITOR_POINTS();
-  // Real captures of the editor in the page's language (src/assets).
   const editorShot = getLocale() === "en" ? editorShotEn : editorShotFr;
-  const guides = getGuides();
   const tools = getPublishedTools();
-  const popular = POPULAR_IDS.map((id) => getToolById(id)).filter(
-    (tool): tool is NonNullable<typeof tool> => !!tool && tool.status === "published",
-  );
-  const categories = getActiveCategories();
-  const path = (id: string) => {
-    const tool = getToolById(id);
-    return tool ? getToolPath(tool) : "/outils/";
+  const rank = (id: string) => {
+    const i = POPULAR_IDS.indexOf(id);
+    return i === -1 ? POPULAR_IDS.length : i;
   };
+  // Stable sort: popular tools first, then registry order (family by family).
+  const ordered = tools
+    .map((tool, index) => ({ tool, index }))
+    .sort((a, b) => rank(a.tool.id) - rank(b.tool.id) || a.index - b.index)
+    .map((x) => x.tool);
+  const categories = getActiveCategories();
+  const filters: HomeFilter[] = [
+    {
+      id: "all",
+      label: t.directory.filterAll,
+      href: localizedPath("/outils/"),
+      count: tools.length,
+    },
+    ...categories.map((category) => ({
+      id: category.id,
+      label: category.shortName,
+      href: getCategoryPath(category),
+      count: tools.filter((tool) => tool.category === category.id).length,
+    })),
+  ];
+  const editor = getToolById("pdf-edit");
+  const editorPath = editor ? getToolPath(editor) : localizedPath("/outils/");
   const suggestable: Record<string, SlimTool> = {};
   for (const id of new Set(Object.values(KIND_TOOLS).flat())) {
     const tool = getToolById(id);
     if (tool && tool.status === "published") suggestable[id] = toSlimTool(tool, getToolPath(tool));
   }
-  const journeys = [
-    { label: t.homePage.journeys.editor, href: path("pdf-edit"), icon: FileText },
-    { label: t.homePage.journeys.scan, href: path("scan-document"), icon: Camera },
-    { label: t.homePage.journeys.image, href: path("image-convert"), icon: ImageIcon },
-    { label: t.homePage.journeys.ocr, href: path("scan-ocr"), icon: ScanText },
-  ];
   const trustIcons = [ShieldCheck, Lock, Sparkles];
 
   return (
     <div>
       <JsonLd data={buildWebsiteJsonLd()} />
 
-      {/* 1. Hero: one promise, the drop zone, the search, four shortcuts */}
+      {/* 1. Headline and search */}
       <section className="hero-glow" aria-labelledby="home-title">
-        <div className="container-page pb-10 pt-12 sm:pb-14 sm:pt-16">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="section-label mb-4">{t.homePage.label}</p>
-            <h1 id="home-title" className="text-[clamp(32px,5vw,54px)] leading-[1.06]">
-              {t.home.heroTitle}
-            </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
-              {t.home.heroSubtitle}
-            </p>
-          </div>
-          <div className="mt-7">
-            <HomeDrop tools={suggestable} />
-          </div>
-          <p className="mt-5 text-center text-sm text-muted-foreground">{t.homePage.orSearch}</p>
-          <div className="mt-2">
-            <HomeSearch toolCount={tools.length} />
-          </div>
-          <ul
-            className="-mx-5 mt-5 flex gap-2 overflow-x-auto px-5 pb-1 sm:mx-auto sm:max-w-4xl sm:flex-wrap sm:justify-center sm:overflow-visible sm:px-0 sm:pb-0"
-            data-testid="home-journeys"
-            aria-label={t.homePage.shortcuts}
+        <div className="container-page pb-8 pt-10 text-center sm:pb-10 sm:pt-14">
+          <h1
+            id="home-title"
+            className="mx-auto max-w-3xl text-[clamp(30px,4.6vw,50px)] leading-[1.08]"
           >
-            {journeys.map((journey) => (
-              <li key={journey.label} className="shrink-0">
-                <Link
-                  href={journey.href}
-                  className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-full border border-border bg-surface px-3.5 text-sm font-medium shadow-sm hover:bg-muted"
-                >
-                  <journey.icon className="size-4 text-link" aria-hidden="true" />
-                  {journey.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5 text-success-foreground">
-              <ShieldCheck className="size-4" aria-hidden="true" />
-              {t.home.privacyTitle}
-            </span>
-            <Link
-              href={localizedPath("/outils/")}
-              className="font-medium text-link hover:underline"
-            >
-              {t.home.allToolsLink(tools.length)}
-            </Link>
+            {t.home.heroTitle}
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">
+            {t.home.heroSubtitle}
+          </p>
+          <div className="mt-6">
+            <HomeSearch toolCount={tools.length} />
           </div>
         </div>
       </section>
 
-      {/* Optional advertising placement: after the hero, never inside it (src/config/ads.ts). */}
+      {/* Optional advertising placement: after the intro, never inside it (src/config/ads.ts). */}
       <AdPlacement placement="home-after-intro" className="container-page" />
 
-      {/* 2. The editor, shown rather than described */}
+      {/* 2. Every tool, filterable by family */}
+      <section className="container-page pb-14 pt-2" aria-labelledby="tools-heading">
+        <h2 id="tools-heading" className="sr-only">
+          {t.home.heroCta}
+        </h2>
+        <HomeToolFilter filters={filters}>
+          <ul
+            className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4"
+            data-testid="tool-grid"
+          >
+            {ordered.map((tool) => (
+              <li key={tool.id} data-cat={tool.category}>
+                <ToolCard tool={tool} />
+              </li>
+            ))}
+          </ul>
+        </HomeToolFilter>
+        <div className="mt-8 text-center">
+          <Link
+            href={localizedPath("/outils/")}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-border bg-surface px-5 text-sm font-semibold text-foreground shadow-sm hover:border-accent hover:bg-primary-soft"
+            data-testid="home-all-tools"
+          >
+            {t.home.allToolsLink(tools.length)}
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
+
+      {/* 3. Not sure which tool? Drop the file */}
+      <section
+        className="border-y border-border bg-surface py-12 sm:py-16"
+        aria-labelledby="drop-heading"
+      >
+        <div className="container-page">
+          <h2 id="drop-heading" className="text-center text-2xl sm:text-[28px]">
+            {tr("Vous ne savez pas quel outil choisir ?")}
+          </h2>
+          <p className="mx-auto mb-6 mt-2 max-w-xl text-center text-muted-foreground">
+            {tr(
+              "Déposez votre fichier : son type est reconnu et les outils adaptés vous sont proposés.",
+            )}
+          </p>
+          <HomeDrop tools={suggestable} />
+        </div>
+      </section>
+
+      {/* 4. The editor, shown rather than described */}
       <section className="container-page py-12 sm:py-16" aria-labelledby="editor-heading">
         <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
           <div>
-            <p className="section-label mb-1">{t.homePage.flagship}</p>
-            <h2 id="editor-heading" className="text-2xl sm:text-[28px]">
+            <h2 id="editor-heading" className="text-2xl sm:text-[30px]">
               {t.homePage.editorTitle}
             </h2>
-            <ul className="mt-5 space-y-4">
-              {editorPoints.map((point) => (
-                <li key={point.title} className="flex gap-3">
-                  <span className="mt-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-primary-soft text-link">
-                    <ArrowRight className="size-3.5" aria-hidden="true" />
+            <ul className="mt-5 space-y-3">
+              {EDITOR_POINTS().map((point) => (
+                <li key={point} className="flex items-center gap-3 font-medium">
+                  <span className="tile-brand flex size-6 shrink-0 items-center justify-center rounded-full">
+                    <Check className="size-3.5" strokeWidth={3} aria-hidden="true" />
                   </span>
-                  <div>
-                    <h3 className="text-base font-semibold">{point.title}</h3>
-                    <p className="mt-0.5 text-sm text-muted-foreground">{point.body}</p>
-                  </div>
+                  {point}
                 </li>
               ))}
             </ul>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Link
-                href={path("pdf-edit")}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary-hover"
-                data-testid="home-editor-cta"
-              >
-                {t.home.heroSecondaryCta}
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-              <Link
-                href={getCategoryPath(getActiveCategories()[0]!)}
-                className="text-sm font-medium text-link hover:underline"
-              >
-                {t.homePage.allPdfTools}
-              </Link>
-            </div>
+            <Link
+              href={editorPath}
+              className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-md bg-primary px-6 text-base font-semibold text-primary-foreground shadow-sm hover:bg-primary-hover"
+              data-testid="home-editor-cta"
+            >
+              {t.home.heroSecondaryCta}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
           </div>
           <figure className="overflow-hidden rounded-[18px] border border-border bg-surface shadow-md">
             <Image
@@ -200,126 +192,33 @@ export function HomePage() {
               sizes="(min-width: 1024px) 640px, 100vw"
               className="h-auto w-full"
             />
-            <figcaption className="border-t border-border px-4 py-2 text-xs text-muted-foreground">
-              {t.homePage.editorCaption}
-            </figcaption>
           </figure>
-        </div>
-      </section>
-
-      {/* 3. Popular tools */}
-      <section
-        className="border-y border-border bg-muted/40 py-12 sm:py-16"
-        aria-labelledby="popular-heading"
-      >
-        <div className="container-page">
-          <div className="mb-5 flex items-end justify-between gap-3">
-            <div>
-              <p className="section-label mb-1">{t.homePage.mostUsed}</p>
-              <h2 id="popular-heading" className="text-2xl sm:text-[28px]">
-                {t.home.featuredTitle}
-              </h2>
-            </div>
-            <Link
-              href={localizedPath("/outils/")}
-              className="hidden items-center gap-1 text-sm font-medium text-link hover:underline sm:inline-flex"
-            >
-              {t.home.heroCta}
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-          </div>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-testid="tool-grid">
-            {popular.map((tool) => (
-              <li key={tool.id}>
-                <ToolCard tool={tool} featured />
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* 4. Families */}
-      <section className="container-page py-12 sm:py-16" aria-labelledby="categories-heading">
-        <div className="mb-5">
-          <p className="section-label mb-1">{t.homePage.byFamily}</p>
-          <h2 id="categories-heading" className="text-2xl sm:text-[28px]">
-            {t.home.categoriesTitle}
-          </h2>
-        </div>
-        <ul
-          className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3"
-          data-testid="home-categories"
-        >
-          {categories.map((category) => {
-            const tone = categoryTone[category.id];
-            const family = getToolsByCategory(category.id);
-            const examples = family.slice(0, 2).map((x) => x.name);
-            return (
-              <li key={category.id}>
-                <Link
-                  href={getCategoryPath(category)}
-                  className="card-interactive flex h-full flex-col gap-3 rounded-[16px] border border-border bg-surface p-3.5 shadow-sm sm:p-5"
-                >
-                  <span className="flex items-center gap-3">
-                    <span
-                      className={cn(
-                        "flex size-10 shrink-0 items-center justify-center rounded-[12px] sm:size-11",
-                        tone.tile,
-                      )}
-                    >
-                      <ToolIcon name={category.icon} className="size-5" strokeWidth={1.7} />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block font-semibold">{category.shortName}</span>
-                      <span className="block text-xs text-muted-foreground">
-                        {t.directory.resultsCount(family.length)}
-                      </span>
-                    </span>
-                  </span>
-                  <span className="hidden text-sm text-muted-foreground sm:line-clamp-2">
-                    {examples.join(" · ")}
-                    {family.length > 2 ? " · …" : ""}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="mt-6 text-center sm:hidden">
-          <Link
-            href={localizedPath("/outils/")}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary-hover"
-            data-testid="home-all-tools"
-          >
-            {t.home.heroCta}
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
         </div>
       </section>
 
       {/* 5. Trust, compact */}
       <section className="container-page pb-12 sm:pb-16" aria-labelledby="trust-heading">
-        <div className="rounded-[24px] border border-success/30 bg-success-soft/40 p-6 sm:p-8">
-          <h2 id="trust-heading" className="text-2xl sm:text-[28px]">
+        <div className="rounded-[24px] bg-brand-dark p-6 text-white sm:p-10">
+          <h2 id="trust-heading" className="text-2xl sm:text-[30px]">
             {t.home.trustTitle}
           </h2>
-          <ul className="mt-5 grid gap-5 md:grid-cols-3">
+          <ul className="mt-6 grid gap-6 md:grid-cols-3">
             {t.home.trustItems.map((item, i) => {
               const Icon = trustIcons[i] ?? ShieldCheck;
               return (
                 <li key={item.title} className="flex gap-3">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-surface text-success shadow-sm">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-brand-bright text-brand-dark">
                     <Icon className="size-5" aria-hidden="true" />
                   </span>
                   <div>
                     <h3 className="text-base">{item.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
+                    <p className="mt-1 text-sm text-white/80">{item.body}</p>
                   </div>
                 </li>
               );
             })}
           </ul>
-          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm font-medium text-link">
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-[#c5f5ac]">
             <Link
               href={localizedPath("/confidentialite/")}
               className="underline-offset-4 hover:underline"
@@ -342,50 +241,8 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* 6. Guides */}
-      <section
-        className="border-t border-border bg-muted/40 py-12 sm:py-16"
-        aria-labelledby="guides-heading"
-      >
-        <div className="container-page">
-          <div className="mb-5 flex items-end justify-between gap-3">
-            <div>
-              <p className="section-label mb-1">{t.homePage.goFurther}</p>
-              <h2 id="guides-heading" className="text-2xl sm:text-[28px]">
-                {t.home.guidesTitle}
-              </h2>
-            </div>
-            <Link
-              href={localizedPath("/guides/")}
-              className="hidden items-center gap-1 text-sm font-medium text-link hover:underline sm:inline-flex"
-            >
-              {t.homePage.allGuides}
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-          </div>
-          <ul className="grid gap-3 md:grid-cols-3">
-            {guides.slice(0, 3).map((guide) => (
-              <li key={guide.slug}>
-                <Link
-                  href={`${localizedPath("/guides/")}${guide.slug}/`}
-                  className="card-interactive flex h-full gap-3 rounded-[14px] border border-border bg-surface p-4 shadow-sm"
-                >
-                  <BookOpen className="mt-0.5 size-5 shrink-0 text-link" aria-hidden="true" />
-                  <span>
-                    <span className="block font-semibold leading-snug">{guide.title}</span>
-                    <span className="mt-1 line-clamp-2 block text-sm text-muted-foreground">
-                      {guide.description}
-                    </span>
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      {/* 7. FAQ */}
-      <section className="container-page py-12 sm:py-16" aria-labelledby="faq-heading">
+      {/* 6. FAQ */}
+      <section className="container-page pb-14 sm:pb-20" aria-labelledby="faq-heading">
         <h2 id="faq-heading" className="text-2xl sm:text-[28px]">
           {t.home.faqTitle}
         </h2>

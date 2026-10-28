@@ -370,7 +370,7 @@ export async function applyTextEdits(
         const key = fallbackKey(edit.fallback);
         let resourceName = fontKeys.get(key);
         if (!resourceName) {
-          resourceName = page.node.newFontDictionary("OutiliaTexte", font.ref).asString().slice(1);
+          resourceName = page.node.newFontDictionary("AveropdfTexte", font.ref).asString().slice(1);
           fontKeys.set(key, resourceName);
         }
         const sanitized = sanitizeForStandardFont(text);

@@ -56,10 +56,10 @@ function concat(...parts: Uint8Array[]): Uint8Array {
 describe("image metadata", () => {
   it("strips an EXIF segment from a JPEG without touching the pixels", async () => {
     const photo = await fixture("photo-800x600.jpg");
-    const withExif = concat(photo.subarray(0, 2), exifApp1("OUTILIA"), photo.subarray(2));
+    const withExif = concat(photo.subarray(0, 2), exifApp1("AVEROPDF"), photo.subarray(2));
     const before = (await exifr.parse(withExif, { tiff: true, exif: true })) as
       Record<string, unknown> | undefined;
-    expect(before?.Make).toBe("OUTILIA");
+    expect(before?.Make).toBe("AVEROPDF");
     const baseline = stripJpegMetadata(photo);
     const stripped = stripJpegMetadata(withExif);
     expect(stripped.removed).toBe(baseline.removed + 1);
@@ -132,7 +132,7 @@ async function pdfWithLinks(): Promise<Uint8Array> {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const page = doc.addPage([400, 300]);
-  page.drawText("Voir https://outilia.fr/aide. Contact : contact@exemple.fr", {
+  page.drawText("Voir https://averopdf.fr/aide. Contact : contact@exemple.fr", {
     x: 20,
     y: 200,
     size: 10,
@@ -143,7 +143,7 @@ async function pdfWithLinks(): Promise<Uint8Array> {
     Subtype: "Link",
     Rect: [20, 190, 200, 210],
     Border: [0, 0, 0],
-    A: { Type: "Action", S: "URI", URI: PDFString.of("https://outilia.fr/") },
+    A: { Type: "Action", S: "URI", URI: PDFString.of("https://averopdf.fr/") },
   });
   page.node.addAnnot(doc.context.register(annot));
   const internal = doc.context.obj({
@@ -160,12 +160,12 @@ describe("pdf links", () => {
   it("reads link annotations and finds addresses in the text", async () => {
     const bytes = await pdfWithLinks();
     const annots = await extractLinkAnnotations(bytes);
-    expect(annots.links).toEqual([{ pageIndex: 0, url: "https://outilia.fr/", kind: "lien" }]);
+    expect(annots.links).toEqual([{ pageIndex: 0, url: "https://averopdf.fr/", kind: "lien" }]);
     expect(annots.internalLinks).toBe(1);
     const text = (await extractPageText(bytes, 0)).join(" ");
     const found = findTextLinks([{ pageIndex: 0, text }]);
     expect(found.map((l) => l.url)).toEqual([
-      "https://outilia.fr/aide",
+      "https://averopdf.fr/aide",
       "mailto:contact@exemple.fr",
     ]);
     const merged = mergeLinks(annots.links, found, found);
@@ -261,7 +261,7 @@ describe("redaction by rasterisation", () => {
 describe("markdown and text to PDF", () => {
   const markdown = `# Titre principal
 
-Un paragraphe avec du **gras**, de l'*italique*, du \`code\` et un [lien](https://outilia.fr/).
+Un paragraphe avec du **gras**, de l'*italique*, du \`code\` et un [lien](https://averopdf.fr/).
 
 - Premier point
 - Deuxième point
@@ -296,7 +296,7 @@ Fin du document.`;
     expect(text).toContain("Colonne B");
     expect(text).toContain("1 / 1");
     const links = await extractLinkAnnotations(result.bytes);
-    expect(links.links).toEqual([{ pageIndex: 0, url: "https://outilia.fr/", kind: "lien" }]);
+    expect(links.links).toEqual([{ pageIndex: 0, url: "https://averopdf.fr/", kind: "lien" }]);
   });
 
   it("paginates long plain text, numbers pages and flags unsupported characters", async () => {

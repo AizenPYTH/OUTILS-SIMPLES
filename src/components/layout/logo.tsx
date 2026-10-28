@@ -1,34 +1,43 @@
+import Image from "next/image";
 import Link from "next/link";
+import markImage from "@/assets/brand/averopdf-mark.png";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
-/** Rounded indigo square, white ring and a lilac dot (design handoff). */
+/**
+ * The AVEROPDF mark: the document wrapped in its green ribbon, cut from the
+ * supplied logo (docs/Logo AVEROPDF au document vert.png, transparent
+ * background so that it also sits on the dark theme).
+ */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 32 32"
-      className={cn("size-8", className)}
+    <Image
+      src={markImage}
+      alt=""
       aria-hidden="true"
-      focusable="false"
-    >
-      <rect x="2" y="2" width="28" height="28" rx="8" fill="#5146E5" />
-      <circle cx="16" cy="16" r="7" fill="none" stroke="#fff" strokeWidth="3" />
-      <circle cx="21.5" cy="10.5" r="2.2" fill="#C9BFFF" />
-    </svg>
+      priority
+      sizes="52px"
+      className={cn("h-10 w-auto", className)}
+    />
   );
 }
 
+/**
+ * Mark and wordmark: "AVERO" in dark green, "PDF" in the logo's bright green, deepened
+ * just enough for 3:1 on the light background (large bold text, WCAG 1.4.3).
+ */
 export function Logo({ className, withText = true }: { className?: string; withText?: boolean }) {
   return (
     <Link
       href="/"
-      className={cn("inline-flex items-center gap-2.5 rounded-md", className)}
+      className={cn("inline-flex shrink-0 items-center gap-2 rounded-md", className)}
       aria-label={`${siteConfig.name} – ${siteConfig.tagline}`}
     >
       <LogoMark />
       {withText ? (
-        <span className="font-heading text-[19px] font-extrabold tracking-[0.02em]">
-          {siteConfig.name}
+        <span className="font-heading text-[21px] font-extrabold leading-none tracking-[0.01em]">
+          <span className="text-brand-dark dark:text-foreground">AVERO</span>
+          <span className="text-[#36a01d] dark:text-brand-bright">PDF</span>
         </span>
       ) : null}
     </Link>

@@ -50,7 +50,7 @@ function Swatch({ rgb, label }: { rgb: Rgb; label?: string }) {
 }
 
 export function ColorTool() {
-  const [input, setInput] = React.useState("#5146E5");
+  const [input, setInput] = React.useState("#0E6B3C");
   const [background, setBackground] = React.useState("#ffffff");
   const rgb = parseColor(input);
   const bg = parseColor(background);

@@ -16,7 +16,7 @@ uniques par langue ; aucune trace publicitaire. Résultat : **aucune anomalie st
 Deux observations de longueur :
 
 - 35 pages FR dont le titre rendu dépasse 75 caractères : le titre du registre (≤ 70, contrôlé par
-  test) reçoit le suffixe « | OUTILIA ». Google tronque l'affichage vers 60–70 caractères ; la partie
+  test) reçoit le suffixe « | AVEROPDF ». Google tronque l'affichage vers 60–70 caractères ; la partie
   utile est en tête. Décision : conservé (P2, à retravailler titre par titre si la Search Console
   signale des titres réécrits).
 - Les descriptions des familles PDF, numérisation, texte et développeur dépassaient 170 caractères :

@@ -12,34 +12,36 @@
    utilities through @theme inline below.
    ------------------------------------------------------------------------- */
 :root {
-  /* Design handoff tokens (OUTILIA — Refonte outils et recherche) */
-  --background: #f8f9fc; /* --bg  */
-  --foreground: #15172b; /* --tx  */
-  --muted: #f0f1f8; /* --bg2 */
-  --muted-foreground: #696d82; /* --mu  (4.9:1 on white) */
-  --surface: #ffffff; /* --sf  */
-  --surface-foreground: #15172b;
-  --border: #e5e7f0; /* --bd  */
-  --input: #e5e7f0;
-  --ring: #ededfd; /* --soft focus ring (3px) */
+  /* AVEROPDF identity: bright light green, dark green and white. */
+  --brand-bright: #6cd83a; /* the "PDF" of the logo */
+  --brand-dark: #0e6b3c; /* the "AVERO" of the logo */
+  --background: #f5faf2;
+  --foreground: #10241a;
+  --muted: #eaf4e4;
+  --muted-foreground: #53665a; /* 5.9:1 on white */
+  --surface: #ffffff;
+  --surface-foreground: #10241a;
+  --border: #d9e8d1;
+  --input: #d9e8d1;
+  --ring: #d4f3c2; /* soft focus ring (3px) */
 
-  --primary: #5146e5; /* --btn */
-  --primary-hover: #4338ca; /* --btnh */
+  --primary: #0e6b3c; /* buttons: white text 6.9:1 */
+  --primary-hover: #0a552f;
   --primary-foreground: #ffffff;
-  --primary-soft: #edebfd; /* --soft */
-  --link: #5146e5; /* --pr  */
-  --accent: #7958f5; /* --ac  */
-  --accent-soft: #edebfd;
-  --accent-foreground: #3b32b0;
+  --primary-soft: #e4f7d9;
+  --link: #0d6a3b;
+  --accent: #6cd83a;
+  --accent-soft: #e4f7d9;
+  --accent-foreground: #0b4f2c;
 
-  --success: #12805c; /* --ok  */
-  --success-soft: #e3f6ee; /* --okb */
+  --success: #12805c;
+  --success-soft: #e3f6ee;
   --success-foreground: #0f6a4c;
   --warning: #b7791f;
   --warning-soft: #fdf3dd;
   --warning-foreground: #7a4f0a;
-  --destructive: #c0392b; /* --er  */
-  --destructive-soft: #fceae7; /* --erb */
+  --destructive: #c0392b;
+  --destructive-soft: #fceae7;
   --destructive-foreground: #ffffff;
 
   --radius-xs: 6px;
@@ -48,32 +50,34 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  --shadow-sm: 0 1px 2px rgba(21, 23, 43, 0.05), 0 8px 24px -8px rgba(21, 23, 43, 0.1);
-  --shadow-md: 0 1px 2px rgba(21, 23, 43, 0.05), 0 8px 24px -8px rgba(21, 23, 43, 0.1);
-  --shadow-lg: 0 24px 60px -20px rgba(81, 70, 229, 0.28), 0 2px 6px rgba(21, 23, 43, 0.06);
+  --shadow-sm: 0 1px 2px rgba(16, 36, 26, 0.05), 0 8px 24px -8px rgba(16, 36, 26, 0.1);
+  --shadow-md: 0 1px 2px rgba(16, 36, 26, 0.05), 0 8px 24px -8px rgba(16, 36, 26, 0.1);
+  --shadow-lg: 0 24px 60px -20px rgba(14, 107, 60, 0.28), 0 2px 6px rgba(16, 36, 26, 0.06);
 
   --header-height: 68px;
 }
 
 .dark {
-  --background: #0d0f1b;
-  --foreground: #ecedf7;
-  --muted: #1c2034;
-  --muted-foreground: #9da1bc;
-  --surface: #161929;
-  --surface-foreground: #ecedf7;
-  --border: #2a2f4a;
-  --input: #2a2f4a;
-  --ring: #26285a;
+  --brand-bright: #6cd83a;
+  --brand-dark: #0e6b3c;
+  --background: #0a140e;
+  --foreground: #e8f3eb;
+  --muted: #15241b;
+  --muted-foreground: #9fb5a7;
+  --surface: #101d15;
+  --surface-foreground: #e8f3eb;
+  --border: #233a2b;
+  --input: #233a2b;
+  --ring: #1d4a29;
 
-  --primary: #5146e5;
-  --primary-hover: #6359f0;
-  --primary-foreground: #ffffff;
-  --primary-soft: #26285a;
-  --link: #a9a3ff;
-  --accent: #9b82ff;
-  --accent-soft: #26285a;
-  --accent-foreground: #c9c4ff;
+  --primary: #6cd83a; /* dark text 9:1 */
+  --primary-hover: #86e35b;
+  --primary-foreground: #06200f;
+  --primary-soft: #183823;
+  --link: #8fe56b;
+  --accent: #6cd83a;
+  --accent-soft: #183823;
+  --accent-foreground: #b9f19e;
 
   --success: #4ade9f;
   --success-soft: #12332a;
@@ -117,6 +121,8 @@
   --color-destructive: var(--destructive);
   --color-destructive-soft: var(--destructive-soft);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-brand-bright: var(--brand-bright);
+  --color-brand-dark: var(--brand-dark);
 
   --radius-xs: var(--radius-xs);
   --radius-sm: var(--radius-sm);
@@ -237,16 +243,22 @@
   .touch-none-important {
     touch-action: none;
   }
-  /* Soft indigo halo behind the hero: light, no decorative gradient bands. */
+  /* Soft green halo behind the hero. */
   .hero-glow {
     background:
-      radial-gradient(60% 50% at 50% 0%, rgba(81, 70, 229, 0.12), transparent 70%),
-      radial-gradient(40% 40% at 85% 20%, rgba(18, 128, 92, 0.08), transparent 70%);
+      radial-gradient(60% 55% at 50% 0%, rgba(108, 216, 58, 0.2), transparent 70%),
+      radial-gradient(40% 40% at 85% 15%, rgba(14, 107, 60, 0.08), transparent 70%);
   }
   .dark .hero-glow {
     background:
-      radial-gradient(60% 50% at 50% 0%, rgba(99, 89, 240, 0.22), transparent 70%),
-      radial-gradient(40% 40% at 85% 20%, rgba(74, 222, 159, 0.08), transparent 70%);
+      radial-gradient(60% 55% at 50% 0%, rgba(108, 216, 58, 0.14), transparent 70%),
+      radial-gradient(40% 40% at 85% 15%, rgba(14, 107, 60, 0.18), transparent 70%);
+  }
+  /* Tool icon tile: the green of the logo's "PDF" badge, white pictogram. */
+  .tile-brand {
+    background: linear-gradient(140deg, #5cc93a 0%, #1f9447 100%);
+    color: #ffffff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
   }
   /* Interactive card: lift and primary border on hover, flat when motion is reduced. */
   .card-interactive {
@@ -257,7 +269,7 @@
   }
   .card-interactive:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+    border-color: color-mix(in srgb, var(--accent) 75%, var(--border));
     box-shadow: var(--shadow-md);
   }
   @media (prefers-reduced-motion: reduce) {

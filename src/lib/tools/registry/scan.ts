@@ -178,7 +178,7 @@ export const scanTools: readonly ToolDefinition[] = [
         {
           question: "Mes documents sont-ils envoyés sur un serveur ?",
           answer:
-            "Non. Tesseract fonctionne en WebAssembly dans votre navigateur. Seuls le moteur et le modèle de langue (fichiers publics, hébergés sur OUTILIA) sont téléchargés, jamais vos pages.",
+            "Non. Tesseract fonctionne en WebAssembly dans votre navigateur. Seuls le moteur et le modèle de langue (fichiers publics, hébergés sur AVEROPDF) sont téléchargés, jamais vos pages.",
         },
         {
           question: "Qu'est-ce qu'un PDF recherchable ?",

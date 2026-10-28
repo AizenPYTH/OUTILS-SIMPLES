@@ -33,11 +33,11 @@ async function docxFixture() {
   const png = await readFile(path.join(outDir, "logo-alpha.png"));
   const cell = (text) => new TableCell({ children: [new Paragraph(text)] });
   const doc = new Document({
-    creator: "OUTILIA fixtures",
+    creator: "AVEROPDF fixtures",
     sections: [
       {
         children: [
-          new Paragraph({ text: "Rapport de test OUTILIA", heading: HeadingLevel.HEADING_1 }),
+          new Paragraph({ text: "Rapport de test AVEROPDF", heading: HeadingLevel.HEADING_1 }),
           new Paragraph({
             children: [
               new TextRun("Ce document synthétique contient du "),
@@ -46,8 +46,8 @@ async function docxFixture() {
               new TextRun({ text: "texte en italique", italics: true }),
               new TextRun(" et un lien : "),
               new ExternalHyperlink({
-                children: [new TextRun({ text: "outilia.fr", style: "Hyperlink" })],
-                link: "https://outilia.fr/",
+                children: [new TextRun({ text: "averopdf.fr", style: "Hyperlink" })],
+                link: "https://averopdf.fr/",
               }),
               new TextRun("."),
             ],

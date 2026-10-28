@@ -35,8 +35,15 @@ async function fonts() {
   ];
 }
 
-export async function ogImage({ title, subtitle, kicker, accent = "#5146e5", footer }: OgInput) {
+/** The logo mark (src/assets/brand), inlined as a data URL. */
+async function markDataUrl() {
+  const file = path.join(process.cwd(), "src", "assets", "brand", "averopdf-mark-og.png");
+  return `data:image/png;base64,${(await readFile(file)).toString("base64")}`;
+}
+
+export async function ogImage({ title, subtitle, kicker, accent = "#0e6b3c", footer }: OgInput) {
   const size = title.length > 48 ? 54 : title.length > 32 ? 64 : 76;
+  const mark = await markDataUrl();
   return new ImageResponse(
     <div
       style={{
@@ -46,27 +53,19 @@ export async function ogImage({ title, subtitle, kicker, accent = "#5146e5", foo
         flexDirection: "column",
         justifyContent: "space-between",
         padding: "64px 72px",
-        background: "linear-gradient(135deg, #f8f9fc 0%, #eef0fa 100%)",
-        color: "#14172b",
+        background: "linear-gradient(135deg, #ffffff 0%, #eaf7e1 100%)",
+        color: "#10241a",
         fontFamily: "Liberation",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-        <div
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 16,
-            background: accent,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div style={{ width: 22, height: 22, borderRadius: 11, border: "5px solid white" }} />
+        {/* eslint-disable-next-line @next/next/no-img-element -- rendered by ImageResponse, not the browser */}
+        <img src={mark} width={82} height={64} alt="" />
+        <div style={{ display: "flex", fontSize: 38, fontWeight: 700, letterSpacing: 1 }}>
+          <span style={{ color: "#0e6b3c" }}>AVERO</span>
+          <span style={{ color: "#4dbf2a" }}>PDF</span>
         </div>
-        <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: 2 }}>{siteConfig.name}</div>
-        <div style={{ marginLeft: "auto", fontSize: 24, color: "#5b6078" }}>
+        <div style={{ marginLeft: "auto", fontSize: 24, color: "#53665a" }}>
           {siteConfig.tagline}
         </div>
       </div>
@@ -80,7 +79,7 @@ export async function ogImage({ title, subtitle, kicker, accent = "#5146e5", foo
           {title}
         </div>
         {subtitle ? (
-          <div style={{ fontSize: 30, color: "#3f4460", lineHeight: 1.3, maxWidth: 1020 }}>
+          <div style={{ fontSize: 30, color: "#3a4d41", lineHeight: 1.3, maxWidth: 1020 }}>
             {subtitle}
           </div>
         ) : null}

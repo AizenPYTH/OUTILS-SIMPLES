@@ -15,12 +15,12 @@ function run(env: Record<string, string>, ...args: string[]) {
 // Test values only. ".zz" is an ISO 3166 user-assigned code that is never
 // delegated as a top-level domain: a syntactically valid, non-existent site.
 const complete = {
-  NEXT_PUBLIC_SITE_URL: "https://outilia.zz",
+  NEXT_PUBLIC_SITE_URL: "https://averopdf.zz",
   NEXT_PUBLIC_LEGAL_PUBLISHER_NAME: "Éditeur",
   NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS: "particulier",
   NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS: "1 rue",
   NEXT_PUBLIC_LEGAL_PUBLICATION_DIRECTOR: "D.",
-  NEXT_PUBLIC_LEGAL_CONTACT_EMAIL: "contact@outilia.example",
+  NEXT_PUBLIC_LEGAL_CONTACT_EMAIL: "contact@averopdf.example",
   NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER: "Hébergeur",
   NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS: "2 rue",
 };
@@ -35,15 +35,15 @@ describe("launch readiness check", () => {
   });
 
   it("rejects test addresses, http and placeholder values", () => {
-    expect(run({ ...complete, NEXT_PUBLIC_SITE_URL: "http://outilia.example" }).out).toContain(
+    expect(run({ ...complete, NEXT_PUBLIC_SITE_URL: "http://averopdf.example" }).out).toContain(
       "https",
     );
     for (const reserved of [
       "https://example.invalid",
       "https://www.example.org",
       "https://example.net",
-      "https://outilia.example",
-      "https://outilia.test",
+      "https://averopdf.example",
+      "https://averopdf.test",
       "https://preview.localhost",
     ])
       expect(run({ ...complete, NEXT_PUBLIC_SITE_URL: reserved }).out, reserved).toContain(

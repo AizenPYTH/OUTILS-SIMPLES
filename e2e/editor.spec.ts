@@ -25,7 +25,7 @@ test.describe("editor", () => {
     await page.mouse.click(box.x + box.width * 0.2, box.y + box.height * 0.3);
     const editor = page.getByTestId("text-annotation-editor");
     await expect(editor).toBeVisible();
-    await editor.fill("Bonjour OUTILIA");
+    await editor.fill("Bonjour AVEROPDF");
     await page.getByTestId("page-indicator").click(); // blur commits
     await expect(shell).toContainText("1 élément");
 
@@ -64,7 +64,7 @@ test.describe("editor", () => {
     expect(download.suggestedFilename()).toBe("simple-3-pages-modifie.pdf");
     const bytes = await readDownload(download);
     await expectValidPdf(bytes, 3);
-    expect((await extractPageText(bytes, 0)).join(" ")).toContain("Bonjour OUTILIA");
+    expect((await extractPageText(bytes, 0)).join(" ")).toContain("Bonjour AVEROPDF");
   });
 
   test("edit existing text: the run is replaced in the file, re-rendered, and exported as real text", async ({

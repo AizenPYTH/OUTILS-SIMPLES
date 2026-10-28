@@ -188,7 +188,7 @@ describe("applyTextEdits", () => {
     const doc = await PDFDocument.load(out);
     const page = doc.getPage(0);
     const content = latin1(pageContentBytes(doc, page));
-    expect(content).toMatch(/\/OutiliaTexte\S* 12 Tf <[0-9a-f]+> Tj \/\S+ 12 Tf/i);
+    expect(content).toMatch(/\/AveropdfTexte\S* 12 Tf <[0-9a-f]+> Tj \/\S+ 12 Tf/i);
     expect(await extractText(out, 0)).toContain("Café ?");
     // The first line is untouched.
     expect(await extractText(out, 0)).toContain("Bonjour le monde");

@@ -322,7 +322,7 @@ export const pdfExtraTools: readonly ToolDefinition[] = [
       ],
       limitations: [
         "Les restrictions (impression, copie…) dépendent du bon vouloir du lecteur PDF : seul le mot de passe d'ouverture garantit la confidentialité.",
-        "Un mot de passe oublié ne peut pas être récupéré par OUTILIA ni par personne : conservez-le en lieu sûr.",
+        "Un mot de passe oublié ne peut pas être récupéré par AVEROPDF ni par personne : conservez-le en lieu sûr.",
         "AES-256 nécessite un lecteur compatible PDF 1.7 (tous les lecteurs récents).",
       ],
       faq: [
@@ -375,7 +375,7 @@ export const pdfExtraTools: readonly ToolDefinition[] = [
         {
           question: "J'ai oublié le mot de passe, pouvez-vous l'ouvrir ?",
           answer:
-            "Non. Un PDF chiffré en AES ne peut pas être ouvert sans son mot de passe, et OUTILIA ne propose aucune attaque par force brute. Contactez l'auteur du document.",
+            "Non. Un PDF chiffré en AES ne peut pas être ouvert sans son mot de passe, et AVEROPDF ne propose aucune attaque par force brute. Contactez l'auteur du document.",
         },
       ],
       privacyNote: QPDF_NOTE,

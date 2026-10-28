@@ -303,7 +303,7 @@ export const pdfExtraEn: Record<string, ToolLocalization> = {
       ],
       limitations: [
         "Restrictions (printing, copying...) depend on the goodwill of the PDF reader: only the open password guarantees confidentiality.",
-        "A forgotten password cannot be recovered by OUTILIA or by anyone else: keep it somewhere safe.",
+        "A forgotten password cannot be recovered by AVEROPDF or by anyone else: keep it somewhere safe.",
         "AES-256 requires a reader compatible with PDF 1.7 (all recent readers).",
       ],
       faq: [
@@ -351,7 +351,7 @@ export const pdfExtraEn: Record<string, ToolLocalization> = {
         {
           question: "I forgot the password, can you open it?",
           answer:
-            "No. An AES-encrypted PDF cannot be opened without its password, and OUTILIA offers no brute-force attack. Contact the author of the document.",
+            "No. An AES-encrypted PDF cannot be opened without its password, and AVEROPDF offers no brute-force attack. Contact the author of the document.",
         },
       ],
       privacyNote: QPDF_PRIVACY,

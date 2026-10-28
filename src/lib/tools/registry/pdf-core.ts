@@ -25,7 +25,7 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
     shortDescription:
       "Modifiez le texte existant, ajoutez du texte, des annotations, des formes, des images et une signature.",
     description:
-      "L'éditeur PDF d'OUTILIA modifie le texte d'origine de vos pages quand le fichier le permet (texte réel, police connue), et vous permet d'ajouter du texte, de dessiner à main levée, de surligner, de tracer des formes, d'insérer des images et d'apposer une signature. Chaque ajout peut être déplacé, redimensionné ou supprimé avant l'export, et le PDF obtenu s'ouvre dans n'importe quel lecteur.",
+      "L'éditeur PDF d'AVEROPDF modifie le texte d'origine de vos pages quand le fichier le permet (texte réel, police connue), et vous permet d'ajouter du texte, de dessiner à main levée, de surligner, de tracer des formes, d'insérer des images et d'apposer une signature. Chaque ajout peut être déplacé, redimensionné ou supprimé avant l'export, et le PDF obtenu s'ouvre dans n'importe quel lecteur.",
     icon: "square-pen",
     keywords: [
       "éditer pdf",
@@ -54,7 +54,7 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
     featured: true,
     content: {
       steps: [
-        "Déposez votre PDF ou cliquez pour le sélectionner. OUTILIA l'analyse (texte natif, document scanné, mixte) et demande le mot de passe s'il est protégé.",
+        "Déposez votre PDF ou cliquez pour le sélectionner. AVEROPDF l'analyse (texte natif, document scanné, mixte) et demande le mot de passe s'il est protégé.",
         "Pour corriger un texte existant : outil « Modifier le texte », cliquez sur le passage, tapez le nouveau texte, Entrée. La page est réaffichée à partir du fichier réellement modifié. Sur un scan, lancez d'abord l'OCR intégré : le texte reconnu devient corrigeable.",
         "Pour ajouter des éléments : choisissez un outil (texte, rectangle, ellipse, ligne, flèche, dessin, surlignage, commentaire, image, signature, masque) et dessinez sur la page ; l'objet reste sélectionné et sa barre flottante règle contour, trait, remplissage, opacité, police, taille, gras, italique, souligné, alignement, couleurs. Déplacez, redimensionnez, dupliquez (Ctrl + D) ou supprimez. Le panneau des pages pivote, duplique, supprime et réordonne les pages, et « Insérer un PDF » ajoute les pages d'un autre document après la page courante. Annuler / Rétablir couvrent tout.",
         "Cliquez sur « Télécharger le PDF modifié » : le fichier est généré localement, puis rouvert pour vérification avant le téléchargement.",
@@ -213,7 +213,7 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
     shortDescription:
       "Réduisez le poids d'un PDF en nettoyant sa structure et en recompressant ses images, avec un bilan transparent.",
     description:
-      "Allégez vos PDF avant de les envoyer par e-mail ou de les archiver. OUTILIA nettoie la structure du fichier (objets inutilisés, flux d'objets) et, si vous le souhaitez, recompresse les images intégrées à la qualité choisie. Le gain réel est affiché avant le téléchargement : la réduction dépend du contenu du document et n'est jamais garantie.",
+      "Allégez vos PDF avant de les envoyer par e-mail ou de les archiver. AVEROPDF nettoie la structure du fichier (objets inutilisés, flux d'objets) et, si vous le souhaitez, recompresse les images intégrées à la qualité choisie. Le gain réel est affiché avant le téléchargement : la réduction dépend du contenu du document et n'est jamais garantie.",
     icon: "minimize",
     keywords: [
       "compresser pdf",
@@ -256,7 +256,7 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
         {
           question: "Pourquoi mon PDF n'est-il pas plus petit ?",
           answer:
-            "La taille d'un PDF dépend de son contenu. Si le fichier contient surtout du texte et des dessins vectoriels déjà compressés, il reste peu de marge. Si les images sont déjà très compressées, les recompresser peut même augmenter leur poids : dans ce cas OUTILIA conserve l'image d'origine et vous l'indique.",
+            "La taille d'un PDF dépend de son contenu. Si le fichier contient surtout du texte et des dessins vectoriels déjà compressés, il reste peu de marge. Si les images sont déjà très compressées, les recompresser peut même augmenter leur poids : dans ce cas AVEROPDF conserve l'image d'origine et vous l'indique.",
         },
         {
           question: "Le texte reste-t-il sélectionnable ?",
@@ -601,7 +601,7 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
         "Exportez le PDF filigrané.",
       ],
       limitations: [
-        "Le filigrane est dessiné dans le contenu des pages. OUTILIA y ajoute un marqueur technique qui permet à l'outil « Gérer un filigrane » de le retirer ultérieurement si vous en avez besoin.",
+        "Le filigrane est dessiné dans le contenu des pages. AVEROPDF y ajoute un marqueur technique qui permet à l'outil « Gérer un filigrane » de le retirer ultérieurement si vous en avez besoin.",
         "Un filigrane visuel n'empêche pas la copie du document : il sert à l'identifier, pas à le verrouiller.",
       ],
       faq: [],
@@ -614,9 +614,9 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
     category: "pdf",
     name: "Gérer un filigrane PDF",
     shortDescription:
-      "Retirez un filigrane ajouté avec OUTILIA ou une annotation « filigrane » identifiable, lorsque c'est possible sans altérer le document.",
+      "Retirez un filigrane ajouté avec AVEROPDF ou une annotation « filigrane » identifiable, lorsque c'est possible sans altérer le document.",
     description:
-      "Cet outil analyse votre PDF et vous indique honnêtement ce qui peut être retiré : les filigranes ajoutés avec OUTILIA (identifiés par leur marqueur technique) et les annotations PDF de type « Watermark » présentes dans le fichier. Lorsqu'un filigrane est fondu dans le contenu ou dans une image de la page, il ne peut pas être supprimé de manière fiable et l'outil vous l'explique au lieu d'abîmer votre document.",
+      "Cet outil analyse votre PDF et vous indique honnêtement ce qui peut être retiré : les filigranes ajoutés avec AVEROPDF (identifiés par leur marqueur technique) et les annotations PDF de type « Watermark » présentes dans le fichier. Lorsqu'un filigrane est fondu dans le contenu ou dans une image de la page, il ne peut pas être supprimé de manière fiable et l'outil vous l'explique au lieu d'abîmer votre document.",
     icon: "eraser",
     keywords: [
       "supprimer filigrane pdf",
@@ -626,9 +626,9 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
       "remove watermark",
     ],
     seo: {
-      title: "Gérer ou retirer un filigrane PDF (filigranes OUTILIA et annotations)",
+      title: "Gérer ou retirer un filigrane PDF (filigranes AVEROPDF et annotations)",
       description:
-        "Analysez un PDF et retirez les filigranes ajoutés avec OUTILIA ou les annotations de type filigrane quand c'est possible. Diagnostic honnête, traitement local.",
+        "Analysez un PDF et retirez les filigranes ajoutés avec AVEROPDF ou les annotations de type filigrane quand c'est possible. Diagnostic honnête, traitement local.",
     },
     status: "published",
     indexable: true,
@@ -642,19 +642,19 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
     content: {
       steps: [
         "Déposez votre PDF : l'outil recherche les filigranes identifiables.",
-        "Consultez le diagnostic : filigranes OUTILIA détectés, annotations « Watermark », ou rien de retirable.",
+        "Consultez le diagnostic : filigranes AVEROPDF détectés, annotations « Watermark », ou rien de retirable.",
         "Confirmez que vous êtes autorisé à modifier ce document, puis retirez les éléments proposés.",
         "Téléchargez le PDF nettoyé.",
       ],
       limitations: [
-        "Seuls deux types d'éléments sont pris en charge : les filigranes ajoutés par OUTILIA (grâce à leur marqueur) et les annotations PDF de sous-type « Watermark ». Un filigrane intégré dans une image, fusionné au contenu ou produit par un autre logiciel sans marqueur ne peut pas être retiré de manière fiable.",
+        "Seuls deux types d'éléments sont pris en charge : les filigranes ajoutés par AVEROPDF (grâce à leur marqueur) et les annotations PDF de sous-type « Watermark ». Un filigrane intégré dans une image, fusionné au contenu ou produit par un autre logiciel sans marqueur ne peut pas être retiré de manière fiable.",
         "Cet outil est destiné à vos propres documents ou à ceux que vous êtes autorisé à modifier. Il ne vise pas à contourner des mentions de droits d'auteur, de propriété ou des protections de documents.",
       ],
       faq: [
         {
           question: "Pourquoi l'outil refuse-t-il de retirer certains filigranes ?",
           answer:
-            "Quand un filigrane est dessiné dans le même flux que le texte de la page ou incrusté dans une image, aucune méthode ne permet de le séparer sans risque d'endommager le contenu. Plutôt que de produire un fichier dégradé, OUTILIA vous explique la situation.",
+            "Quand un filigrane est dessiné dans le même flux que le texte de la page ou incrusté dans une image, aucune méthode ne permet de le séparer sans risque d'endommager le contenu. Plutôt que de produire un fichier dégradé, AVEROPDF vous explique la situation.",
         },
       ],
       privacyNote: CLIENT_PRIVACY_NOTE,
@@ -668,7 +668,7 @@ export const pdfCoreTools: readonly ToolDefinition[] = [
     shortDescription:
       "Détectez les champs interactifs d'un formulaire PDF, remplissez-les et exportez.",
     description:
-      "Remplissez un formulaire PDF interactif (AcroForm) : OUTILIA détecte les champs texte, cases à cocher, boutons radio et listes déroulantes, vous permet de les compléter dans une interface claire avec aperçu de la page, puis exporte le document rempli, aplati ou non.",
+      "Remplissez un formulaire PDF interactif (AcroForm) : AVEROPDF détecte les champs texte, cases à cocher, boutons radio et listes déroulantes, vous permet de les compléter dans une interface claire avec aperçu de la page, puis exporte le document rempli, aplati ou non.",
     icon: "clipboard-list",
     keywords: [
       "remplir formulaire pdf",

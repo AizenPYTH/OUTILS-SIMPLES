@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { getCategoryById, getToolPath, type ToolDefinition } from "@/lib/tools";
+import { getToolPath, type ToolDefinition } from "@/lib/tools";
 import { categoryTone } from "@/lib/tools/groups";
 import { t } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -9,35 +9,29 @@ import { ToolIcon } from "./tool-icon";
 interface ToolCardProps {
   tool: ToolDefinition;
   className?: string;
-  /** Popular card: larger tile, family label, three description lines (row layout on phones). */
+  /** @deprecated every card shares the same tile; kept for callers. */
   featured?: boolean;
-  /** @deprecated every card shares the same layout; kept for callers. */
+  /** @deprecated every card shares the same tile; kept for callers. */
   compact?: boolean;
   /**
-   * Catalogue lists: same card, but one description line on phones so that a
-   * 69-tool list stays scannable (two lines from the "sm" breakpoint up).
+   * Catalogue lists: one description line on phones so that a 69-tool list
+   * stays scannable (the tile layout takes over from the "sm" breakpoint).
    */
   dense?: boolean;
 }
 
 /**
- * The tool card (docs/DESIGN_PRINCIPES.md § B): icon tile tinted by family,
- * name, two-line description, family label. One shape everywhere; the
- * "featured" variant only changes the scale.
+ * The tool tile: a large green icon, the tool's name in bold and what it
+ * does. On phones the icon sits on the left of the text (a list is easier to
+ * scan); from the "sm" breakpoint up it is a tile, icon on top.
  */
-export function ToolCard({ tool, className, featured = false, dense = false }: ToolCardProps) {
+export function ToolCard({ tool, className, dense = false }: ToolCardProps) {
   const tone = categoryTone[tool.category];
-  const category = getCategoryById(tool.category);
   return (
     <Link
       href={getToolPath(tool)}
       className={cn(
-        "card-interactive group relative flex h-full gap-3.5 rounded-[14px] border border-border bg-surface shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-        featured
-          ? "items-start p-4 sm:flex-col sm:p-5"
-          : dense
-            ? "items-start p-3.5 sm:p-4"
-            : "items-start p-4",
+        "card-interactive group relative flex h-full items-start gap-3.5 rounded-[16px] border border-border bg-surface p-4 shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:flex-col sm:gap-0 sm:p-6",
         className,
       )}
       data-testid="tool-card"
@@ -45,46 +39,27 @@ export function ToolCard({ tool, className, featured = false, dense = false }: T
     >
       <span
         className={cn(
-          "flex shrink-0 items-center justify-center rounded-[12px]",
+          "flex size-11 shrink-0 items-center justify-center rounded-[12px] sm:size-12",
           tone.tile,
-          featured ? "size-10 sm:size-12" : dense ? "size-9 sm:size-10" : "size-10",
         )}
       >
-        <ToolIcon
-          name={tool.icon}
-          className={featured ? "size-5 sm:size-6" : "size-5"}
-          strokeWidth={1.7}
-        />
+        <ToolIcon name={tool.icon} className="size-[22px] sm:size-6" strokeWidth={1.9} />
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          <span
-            className={cn(
-              "font-semibold leading-snug text-foreground",
-              featured ? "text-base" : "text-[15px]",
-            )}
-          >
+      <span className="min-w-0 flex-1 sm:mt-4">
+        <span className="flex flex-wrap items-center gap-2">
+          <span className="font-heading text-base font-bold leading-snug text-foreground sm:text-[19px]">
             {tool.name}
           </span>
           {tool.status === "beta" ? <Badge variant="warning">{t.tool.betaBadge}</Badge> : null}
         </span>
         <span
           className={cn(
-            "mt-1 block text-sm leading-relaxed text-muted-foreground",
-            featured
-              ? "line-clamp-2 sm:line-clamp-3"
-              : dense
-                ? "line-clamp-1 sm:line-clamp-2"
-                : "line-clamp-2",
+            "mt-1 block text-sm leading-relaxed text-muted-foreground sm:mt-2 sm:line-clamp-3 sm:text-[15px]",
+            dense ? "line-clamp-1" : "line-clamp-2",
           )}
         >
           {tool.shortDescription}
         </span>
-        {featured && category ? (
-          <span className={cn("mt-1.5 block text-xs font-medium sm:mt-3", tone.text)}>
-            {category.shortName}
-          </span>
-        ) : null}
       </span>
     </Link>
   );

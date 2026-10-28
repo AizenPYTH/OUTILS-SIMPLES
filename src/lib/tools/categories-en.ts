@@ -10,7 +10,7 @@ export const categoriesEn: Record<ToolCategoryId, CategoryLocalization> = {
     seo: {
       title: "Free online PDF tools: merge, split, compress, sign",
       description:
-        "All OUTILIA PDF tools: merge, split, compress, organise, rotate, text, annotation, signature, watermark, protection, conversion. Local processing, no file upload.",
+        "All AVEROPDF PDF tools: merge, split, compress, organise, rotate, text, annotation, signature, watermark, protection, conversion. Local processing, no file upload.",
     },
   },
   numerisation: {

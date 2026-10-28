@@ -21,7 +21,7 @@ test.describe("conversions Office", () => {
     const bytes = await readDownload(await download);
     await expectValidPdf(bytes);
     const text = (await extractPageText(bytes, 0)).join(" ");
-    expect(text).toContain("Rapport de test OUTILIA");
+    expect(text).toContain("Rapport de test AVEROPDF");
     expect(text).toContain("Prix unitaire");
     expect(text).toContain("Seconde page");
   });

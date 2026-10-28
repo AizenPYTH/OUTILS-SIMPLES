@@ -1,4 +1,4 @@
-# OUTILIA — Rapport de mission : qualité produit, OCR avancé, édition PDF, refonte design
+# AVEROPDF — Rapport de mission : qualité produit, OCR avancé, édition PDF, refonte design
 
 Documents liés : `docs/DESIGN_PRINCIPES.md` (identité v2), `docs/OCR_ORIENTATIONS.md`,
 `docs/EDITION_TEXTE.md`, `docs/MATRICE_OUTILS.md`, `docs/VALIDATION_APPAREIL_REEL.md`,

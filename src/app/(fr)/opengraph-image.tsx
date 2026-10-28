@@ -8,7 +8,7 @@ export const contentType = OG_CONTENT_TYPE;
 
 export default function Image() {
   return ogImage({
-    title: "Vos fichiers, vos outils, votre navigateur.",
+    title: "Tous les outils pour vos PDF et vos fichiers",
     subtitle: `${getPublishedTools().length} outils gratuits pour vos PDF, images, numérisation et texte, sans envoi ni compte.`,
   });
 }

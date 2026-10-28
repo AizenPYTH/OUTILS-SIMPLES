@@ -39,7 +39,7 @@ const photo = await render(
   600,
   `const g = ctx.createLinearGradient(0,0,width,height); g.addColorStop(0,'#2b6cb0'); g.addColorStop(1,'#f6ad55'); ctx.fillStyle=g; ctx.fillRect(0,0,width,height);
    for (let i=0;i<40;i++){ ctx.fillStyle = 'hsla(' + (i*37)%360 + ',70%,55%,0.7)'; ctx.beginPath(); ctx.arc((i*173)%width,(i*97)%height,20+(i%7)*8,0,Math.PI*2); ctx.fill(); }
-   ctx.fillStyle='#fff'; ctx.font='bold 48px sans-serif'; ctx.fillText('OUTILIA', 40, 80);`,
+   ctx.fillStyle='#fff'; ctx.font='bold 48px sans-serif'; ctx.fillText('AVEROPDF', 40, 80);`,
   "image/jpeg",
   0.92,
 );

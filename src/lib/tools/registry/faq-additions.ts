@@ -64,7 +64,7 @@ export const faqAdditions: Record<string, ToolFaqEntry[]> = {
     {
       question: "Pourrai-je retirer le filigrane plus tard ?",
       answer:
-        "Oui si vous l'avez ajouté avec OUTILIA : un marqueur technique permet à « Gérer un filigrane » de le repérer et de le supprimer. Les filigranes posés par d'autres logiciels ne peuvent être retirés que s'ils sont des annotations ou des objets identifiables.",
+        "Oui si vous l'avez ajouté avec AVEROPDF : un marqueur technique permet à « Gérer un filigrane » de le repérer et de le supprimer. Les filigranes posés par d'autres logiciels ne peuvent être retirés que s'ils sont des annotations ou des objets identifiables.",
     },
   ],
   "pdf-search": [

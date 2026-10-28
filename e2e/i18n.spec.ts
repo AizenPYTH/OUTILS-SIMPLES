@@ -6,7 +6,7 @@ test.describe("internationalisation", () => {
   test("English home is served in English with reciprocal hreflang", async ({ page }) => {
     await page.goto("/en/");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.locator("h1")).toHaveText("Your files, your tools, your browser.");
+    await expect(page.locator("h1")).toHaveText("Every tool for your PDFs and files");
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/en\/$/);
     await expect(page.locator('link[rel="alternate"][hreflang="fr"]')).toHaveAttribute(
       "href",
@@ -61,7 +61,7 @@ test.describe("internationalisation", () => {
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "index, follow");
     await expect(page.getByTestId("partial-translation")).toHaveCount(0);
     await expect(page.getByTestId("pdf-dropzone")).toBeVisible();
-    await expect(page.getByTestId("pdf-dropzone")).toContainText(/Drop your PDF files here/);
+    await expect(page.getByTestId("pdf-dropzone")).toContainText(/or drop your PDF files here/);
     await expect(page.getByTestId("pdf-dropzone")).not.toContainText(/Déposez|fichier/);
     await expect(page.getByRole("navigation", { name: "Breadcrumb" })).toContainText("PDF");
     const main = await page.locator("main").innerText();
@@ -75,7 +75,7 @@ test.describe("internationalisation", () => {
     await page.goto("/en/pdf/edit/");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(page.locator("h1")).toHaveText("Edit a PDF");
-    await expect(page.getByTestId("pdf-dropzone")).toContainText(/Drop your PDF file here/);
+    await expect(page.getByTestId("pdf-dropzone")).toContainText(/or drop your PDF file here/);
   });
 
   test("language switcher keeps the equivalent page in both directions", async ({

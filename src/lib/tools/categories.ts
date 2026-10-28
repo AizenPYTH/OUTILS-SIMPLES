@@ -14,7 +14,7 @@ export const toolCategories: readonly ToolCategory[] = [
     seo: {
       title: "Outils PDF en ligne gratuits : fusionner, diviser, compresser, signer",
       description:
-        "Tous les outils PDF d'OUTILIA : fusion, division, compression, organisation, signature, filigrane, protection, conversion. Traitement local, sans envoi de fichiers.",
+        "Tous les outils PDF d'AVEROPDF : fusion, division, compression, organisation, signature, filigrane, protection, conversion. Traitement local, sans envoi de fichiers.",
     },
   },
   {

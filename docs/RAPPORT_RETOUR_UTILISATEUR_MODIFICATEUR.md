@@ -1,4 +1,4 @@
-# OUTILIA — Retour utilisateur sur le modificateur PDF : audit et refonte des interactions
+# AVEROPDF — Retour utilisateur sur le modificateur PDF : audit et refonte des interactions
 
 Suite de `docs/RAPPORT_MODIFICATEUR_PDF.md`. Captures « avant » et « après » dans
 `docs/captures/retour-utilisateur/` (scripts `scripts/capture-editor-interactions.mjs`). Point de

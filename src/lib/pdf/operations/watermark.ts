@@ -25,9 +25,9 @@ import { t } from "@/lib/i18n";
 import { tr } from "@/lib/i18n/messages";
 
 /** Marked-content tag wrapping every watermark drawn by this platform. */
-export const WATERMARK_TAG = "OutiliaWatermark";
-/** Info-dictionary key recording the pages carrying an OUTILIA watermark. */
-export const WATERMARK_INFO_KEY = "OutiliaWatermark";
+export const WATERMARK_TAG = "AveropdfWatermark";
+/** Info-dictionary key recording the pages carrying an AVEROPDF watermark. */
+export const WATERMARK_INFO_KEY = "AveropdfWatermark";
 
 export type WatermarkPosition =
   | "center"
@@ -276,8 +276,8 @@ export function readWatermarkRecord(doc: PDFDocument): number[] {
 // ------------------------------------------------------------------ analysis
 
 export interface WatermarkDiagnostic {
-  /** Pages (0-based) where an OUTILIA marked-content watermark was found. */
-  outiliaPages: number[];
+  /** Pages (0-based) where an AVEROPDF marked-content watermark was found. */
+  averopdfPages: number[];
   /** Pages (0-based) carrying /Watermark annotations, with counts. */
   watermarkAnnotations: { pageIndex: number; count: number }[];
   /** Pages where the Info record claims a watermark but no marker was found (edited by another tool). */
@@ -333,7 +333,7 @@ function latin1Bytes(text: string): Uint8Array {
 }
 
 /**
- * Removes every `/OutiliaWatermark BMC … EMC` block from a content stream.
+ * Removes every `/AveropdfWatermark BMC … EMC` block from a content stream.
  * Nested marked content inside the block is handled by depth counting.
  */
 export function stripMarkedContent(content: string): { content: string; removed: number } {
@@ -380,7 +380,7 @@ export function stripMarkedContent(content: string): { content: string; removed:
 export async function analyzeWatermarks(bytes: Uint8Array): Promise<WatermarkDiagnostic> {
   const doc = await loadPdfDocument(bytes);
   const pages = doc.getPages();
-  const outiliaPages: number[] = [];
+  const averopdfPages: number[] = [];
   const watermarkAnnotations: { pageIndex: number; count: number }[] = [];
 
   pages.forEach((page, index) => {
@@ -395,7 +395,7 @@ export async function analyzeWatermarks(bytes: Uint8Array): Promise<WatermarkDia
         // Unsupported filter: cannot inspect this stream.
       }
     }
-    if (found) outiliaPages.push(index);
+    if (found) averopdfPages.push(index);
 
     const annots = page.node.Annots();
     if (annots) {
@@ -413,12 +413,12 @@ export async function analyzeWatermarks(bytes: Uint8Array): Promise<WatermarkDia
   });
 
   const recorded = readWatermarkRecord(doc);
-  const recordedButMissing = recorded.filter((p) => !outiliaPages.includes(p));
-  return { outiliaPages, watermarkAnnotations, recordedButMissing, pageCount: pages.length };
+  const recordedButMissing = recorded.filter((p) => !averopdfPages.includes(p));
+  return { averopdfPages, watermarkAnnotations, recordedButMissing, pageCount: pages.length };
 }
 
 export interface RemoveWatermarkOptions {
-  removeOutilia: boolean;
+  removeAveropdf: boolean;
   removeWatermarkAnnotations: boolean;
 }
 
@@ -439,7 +439,7 @@ export async function removeWatermarks(
 
   try {
     for (const page of pages) {
-      if (options.removeOutilia) {
+      if (options.removeAveropdf) {
         for (const { ref, stream } of getPageContentStreams(doc, page)) {
           let decoded: Uint8Array;
           try {
@@ -482,7 +482,7 @@ export async function removeWatermarks(
         }
       }
     }
-    if (options.removeOutilia) {
+    if (options.removeAveropdf) {
       const info = doc.context.lookup(doc.context.trailerInfo.Info);
       if (info instanceof PDFDict) info.delete(PDFName.of(WATERMARK_INFO_KEY));
     }

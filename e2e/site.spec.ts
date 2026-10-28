@@ -1,30 +1,51 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("site", () => {
-  test("home page shows the search, popular tools, categories and unique metadata", async ({
+  test("home page shows the search, every tool, the family filters and unique metadata", async ({
     page,
   }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle(/OUTILIA/);
+    await expect(page).toHaveTitle(/AVEROPDF/);
     await expect(page.locator("h1")).toHaveCount(1);
-    await expect(page.locator("h1")).toHaveText("Vos fichiers, vos outils, votre navigateur.");
+    await expect(page.locator("h1")).toHaveText("Tous les outils pour vos PDF et vos fichiers");
     await expect(page.getByTestId("home-search")).toBeVisible();
-    await expect(page.getByTestId("home-categories").getByRole("link")).toHaveCount(9);
+    // "Tous" + the nine families.
+    await expect(page.getByTestId("home-categories").getByRole("link")).toHaveCount(10);
     await expect(page.getByTestId("home-all-tools")).toHaveAttribute("href", "/outils/");
     await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /PDF/);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
       /^https?:\/\/[^/]+\/?$/,
     );
-    const cards = page.getByTestId("tool-card");
-    expect(await cards.count()).toBe(8); // popular tools only, never the whole catalogue
-    await expect(page.getByTestId("home-journeys").getByRole("listitem")).toHaveCount(4);
+    // Every published tool is a tile, the most used first.
+    const cards = page.getByTestId("tool-grid").getByTestId("tool-card");
+    await expect(cards).toHaveCount(69);
+    await expect(cards.first()).toContainText("Modifier un PDF");
     await expect(page.getByTestId("home-faq").locator("dt")).toHaveCount(4);
     // Every active family is linked (conversion became active with the Office tools).
     expect(await page.locator('a[href="/conversion/"]').count()).toBeGreaterThanOrEqual(1);
     await expect(page.getByTestId("consent-banner")).toHaveCount(0);
     const jsonLd = await page.locator('script[type="application/ld+json"]').first().textContent();
     expect(jsonLd).toContain("WebSite");
+  });
+
+  test("home family filters narrow the grid in place", async ({ page }) => {
+    await page.goto("/");
+    const visible = page
+      .getByTestId("tool-grid")
+      .getByTestId("tool-card")
+      .filter({ visible: true });
+    await page.getByTestId("home-filter-pdf").click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByTestId("home-filter-pdf")).toHaveAttribute("aria-current", "true");
+    await expect(visible).toHaveCount(27);
+    await expect(visible.filter({ hasText: "Compresser une image" })).toHaveCount(0);
+    await page.getByTestId("home-filter-images").click();
+    await expect(visible.filter({ hasText: "Compresser une image" })).toHaveCount(1);
+    await page.getByTestId("home-filter-all").click();
+    await expect(visible).toHaveCount(69);
+    // Without JavaScript the tab is a plain link to the family page.
+    await expect(page.getByTestId("home-filter-pdf")).toHaveAttribute("href", "/pdf/");
   });
 
   test("home search leads to the catalogue with the query", async ({ page }) => {
@@ -145,8 +166,8 @@ test.describe("site", () => {
         .getByRole("link", { name: /^PDF/ })
         .click();
     } else {
-      // Categories left the header (docs/DESIGN_PRINCIPES.md §3.5): the home cards lead to them.
-      await page.getByTestId("home-categories").getByRole("link", { name: /^PDF/ }).click();
+      // Family pages are linked from the footer (the home tabs filter in place).
+      await page.getByRole("contentinfo").getByRole("link", { name: /^PDF/ }).click();
     }
     await expect(page).toHaveURL(/\/pdf\/$/);
     await expect(page.locator("h1")).toHaveText("Outils PDF");

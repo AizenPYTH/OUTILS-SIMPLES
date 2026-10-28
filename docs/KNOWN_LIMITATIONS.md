@@ -40,7 +40,7 @@ Chaque limite ci-dessous est aussi écrite sur la page de l'outil concerné (sec
   avertissement. Intégration de polices Unicode (fontkit) prévue.
 - **Annotations** : aplaties dans le contenu des pages, pas d'objets `/Annot` natifs.
 - **Signature** : visuelle uniquement, pas de signature numérique (PKCS#7) ni qualifiée eIDAS.
-- **Filigrane** : retrait fiable uniquement pour les filigranes OUTILIA et les annotations `/Watermark`.
+- **Filigrane** : retrait fiable uniquement pour les filigranes AVEROPDF et les annotations `/Watermark`.
 - **Compression** : seules les images JPEG et Flate RVB/gris 8 bits sans masque sont réencodées ; gain
   non garanti ; aucune page pixellisée.
 - **Formulaires** : AcroForm uniquement ; XFA non pris en charge.

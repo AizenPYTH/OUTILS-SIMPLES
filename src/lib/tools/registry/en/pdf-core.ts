@@ -9,7 +9,7 @@ export const pdfCoreEn: Record<string, ToolLocalization> = {
     name: "Edit a PDF",
     shortDescription: "Edit existing text, add text, annotations, shapes, images and a signature.",
     description:
-      "OUTILIA's PDF editor changes the original text of your pages when the file allows it (real text, known font), and lets you add text, draw freehand, highlight, draw shapes, insert images and place a signature. Every addition can be moved, resized or deleted before export, and the resulting PDF opens in any reader.",
+      "AVEROPDF's PDF editor changes the original text of your pages when the file allows it (real text, known font), and lets you add text, draw freehand, highlight, draw shapes, insert images and place a signature. Every addition can be moved, resized or deleted before export, and the resulting PDF opens in any reader.",
     keywords: [
       "edit pdf",
       "pdf editor",
@@ -27,7 +27,7 @@ export const pdfCoreEn: Record<string, ToolLocalization> = {
     },
     content: {
       steps: [
-        "Drop your PDF or click to select it. OUTILIA analyzes it (native text, scanned document, mixed) and asks for the password if it is protected.",
+        "Drop your PDF or click to select it. AVEROPDF analyzes it (native text, scanned document, mixed) and asks for the password if it is protected.",
         'To correct existing text: pick the "Edit text" tool, click the passage, type the new text, then press Enter. The page is re-rendered from the actually modified file. On a scan, run the built-in OCR first: the recognized text then becomes editable.',
         'To add elements: choose a tool (text, rectangle, ellipse, line, arrow, drawing, highlight, comment, image, signature, mask) and draw on the page; the object stays selected and its floating bar sets outline, stroke, fill, opacity, font, size, bold, italic, underline, alignment and colors. Move, resize, duplicate (Ctrl + D) or delete it. The pages panel rotates, duplicates, deletes and reorders pages, and "Insert a PDF" adds the pages of another document after the current page. Undo / Redo cover everything.',
         'Click "Download the edited PDF": the file is generated locally, then reopened for verification before download.',
@@ -154,7 +154,7 @@ export const pdfCoreEn: Record<string, ToolLocalization> = {
     shortDescription:
       "Reduce a PDF's file size by cleaning its structure and recompressing its images, with a transparent report.",
     description:
-      "Make your PDFs lighter before emailing or archiving them. OUTILIA cleans the file structure (unused objects, object streams) and, if you wish, recompresses embedded images at the chosen quality. The actual saving is shown before download: the reduction depends on the document's content and is never guaranteed.",
+      "Make your PDFs lighter before emailing or archiving them. AVEROPDF cleans the file structure (unused objects, object streams) and, if you wish, recompresses embedded images at the chosen quality. The actual saving is shown before download: the reduction depends on the document's content and is never guaranteed.",
     keywords: [
       "compress pdf",
       "reduce pdf size",
@@ -186,7 +186,7 @@ export const pdfCoreEn: Record<string, ToolLocalization> = {
         {
           question: "Why isn't my PDF smaller?",
           answer:
-            "A PDF's size depends on its content. If the file mostly contains text and already compressed vector drawings, there is little room left. If the images are already heavily compressed, recompressing them can even increase their size: in that case OUTILIA keeps the original image and tells you so.",
+            "A PDF's size depends on its content. If the file mostly contains text and already compressed vector drawings, there is little room left. If the images are already heavily compressed, recompressing them can even increase their size: in that case AVEROPDF keeps the original image and tells you so.",
         },
         {
           question: "Does the text stay selectable?",
@@ -492,7 +492,7 @@ export const pdfCoreEn: Record<string, ToolLocalization> = {
         "Export the watermarked PDF.",
       ],
       limitations: [
-        'The watermark is drawn into the page content. OUTILIA adds a technical marker that lets the "Manage a watermark" tool remove it later if you need to.',
+        'The watermark is drawn into the page content. AVEROPDF adds a technical marker that lets the "Manage a watermark" tool remove it later if you need to.',
         "A visual watermark does not prevent copying the document: it identifies it, it does not lock it.",
       ],
       faq: [
@@ -504,7 +504,7 @@ export const pdfCoreEn: Record<string, ToolLocalization> = {
         {
           question: "Will I be able to remove the watermark later?",
           answer:
-            'Yes, if you added it with OUTILIA: a technical marker lets "Manage a watermark" find and remove it. Watermarks placed by other software can only be removed if they are annotations or identifiable objects.',
+            'Yes, if you added it with AVEROPDF: a technical marker lets "Manage a watermark" find and remove it. Watermarks placed by other software can only be removed if they are annotations or identifiable objects.',
         },
       ],
       privacyNote: PRIVACY_PDF,
@@ -515,9 +515,9 @@ export const pdfCoreEn: Record<string, ToolLocalization> = {
     slug: "manage-watermark",
     name: "Manage a PDF Watermark",
     shortDescription:
-      'Remove a watermark added with OUTILIA or an identifiable "Watermark" annotation, when it can be done without damaging the document.',
+      'Remove a watermark added with AVEROPDF or an identifiable "Watermark" annotation, when it can be done without damaging the document.',
     description:
-      'This tool analyzes your PDF and tells you honestly what can be removed: watermarks added with OUTILIA (identified by their technical marker) and PDF annotations of the "Watermark" type present in the file. When a watermark is blended into the page content or into an image, it cannot be removed reliably and the tool explains this instead of damaging your document.',
+      'This tool analyzes your PDF and tells you honestly what can be removed: watermarks added with AVEROPDF (identified by their technical marker) and PDF annotations of the "Watermark" type present in the file. When a watermark is blended into the page content or into an image, it cannot be removed reliably and the tool explains this instead of damaging your document.',
     keywords: [
       "remove watermark from pdf",
       "delete pdf watermark",
@@ -526,26 +526,26 @@ export const pdfCoreEn: Record<string, ToolLocalization> = {
       "remove watermark online",
     ],
     seo: {
-      title: "Remove a PDF Watermark: OUTILIA Watermarks and Annotations",
+      title: "Remove a PDF Watermark: AVEROPDF Watermarks and Annotations",
       description:
-        "Analyze a PDF and remove watermarks added with OUTILIA or watermark-type annotations when possible. Honest diagnosis, processed locally in your browser.",
+        "Analyze a PDF and remove watermarks added with AVEROPDF or watermark-type annotations when possible. Honest diagnosis, processed locally in your browser.",
     },
     content: {
       steps: [
         "Drop your PDF: the tool looks for identifiable watermarks.",
-        'Review the diagnosis: OUTILIA watermarks detected, "Watermark" annotations, or nothing removable.',
+        'Review the diagnosis: AVEROPDF watermarks detected, "Watermark" annotations, or nothing removable.',
         "Confirm that you are authorized to modify this document, then remove the proposed elements.",
         "Download the cleaned PDF.",
       ],
       limitations: [
-        'Only two kinds of elements are supported: watermarks added by OUTILIA (thanks to their marker) and PDF annotations of the "Watermark" subtype. A watermark embedded in an image, merged into the content or produced by other software without a marker cannot be removed reliably.',
+        'Only two kinds of elements are supported: watermarks added by AVEROPDF (thanks to their marker) and PDF annotations of the "Watermark" subtype. A watermark embedded in an image, merged into the content or produced by other software without a marker cannot be removed reliably.',
         "This tool is intended for your own documents or those you are authorized to modify. It is not meant to circumvent copyright or ownership notices or document protections.",
       ],
       faq: [
         {
           question: "Why does the tool refuse to remove some watermarks?",
           answer:
-            "When a watermark is drawn in the same stream as the page text or embedded in an image, no method can separate it without risking damage to the content. Rather than producing a degraded file, OUTILIA explains the situation.",
+            "When a watermark is drawn in the same stream as the page text or embedded in an image, no method can separate it without risking damage to the content. Rather than producing a degraded file, AVEROPDF explains the situation.",
         },
       ],
       privacyNote: PRIVACY_PDF,
@@ -557,7 +557,7 @@ export const pdfCoreEn: Record<string, ToolLocalization> = {
     name: "Fill a PDF Form",
     shortDescription: "Detect the interactive fields of a PDF form, fill them in and export.",
     description:
-      "Fill in an interactive PDF form (AcroForm): OUTILIA detects text fields, checkboxes, radio buttons and dropdown lists, lets you complete them in a clear interface with a page preview, then exports the filled document, flattened or not.",
+      "Fill in an interactive PDF form (AcroForm): AVEROPDF detects text fields, checkboxes, radio buttons and dropdown lists, lets you complete them in a clear interface with a page preview, then exports the filled document, flattened or not.",
     keywords: [
       "fill pdf form",
       "pdf form",

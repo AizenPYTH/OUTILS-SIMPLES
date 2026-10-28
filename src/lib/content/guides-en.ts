@@ -23,7 +23,7 @@ export const guidesEn: readonly Guide[] = [
       },
       {
         heading: "Merge in the browser",
-        paragraphs: ["With OUTILIA's Merge PDFs tool, it takes three steps:"],
+        paragraphs: ["With AVEROPDF's Merge PDFs tool, it takes three steps:"],
         list: [
           "Drop your files in the drop zone (or click to pick them). You can add more afterwards.",
           "Reorder them by drag and drop or with the arrows. The order shown is the final order.",

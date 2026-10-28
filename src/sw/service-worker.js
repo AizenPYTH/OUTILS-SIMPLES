@@ -1,6 +1,6 @@
 /* global self, caches, fetch, Response, URL */
 /*
- * OUTILIA service worker. Source: src/sw/service-worker.js, built by
+ * AVEROPDF service worker. Source: src/sw/service-worker.js, built by
  * scripts/build-sw.mjs into public/sw.js (version and asset key injected).
  *
  * Strategy (all same-origin, GET only):
@@ -15,9 +15,9 @@
  */
 const VERSION = "__SW_VERSION__";
 const ASSET_KEY = "__ASSET_KEY__";
-const SHELL = `outilia-shell-${VERSION}`;
-const STATIC = "outilia-static-v1";
-const ASSETS = `outilia-assets-${ASSET_KEY}`;
+const SHELL = `averopdf-shell-${VERSION}`;
+const STATIC = "averopdf-static-v1";
+const ASSETS = `averopdf-assets-${ASSET_KEY}`;
 const KEEP = new Set([SHELL, STATIC, ASSETS]);
 const OFFLINE_URLS = { fr: "/hors-ligne/", en: "/en/offline/" };
 const OFFLINE_SET = new Set(Object.values(OFFLINE_URLS));
@@ -29,7 +29,10 @@ function offlineUrlFor(pathname) {
 const ENGINE_PREFIXES = ["/pdfjs/", "/ocr/", "/qpdf/", "/fonts/", "/heif/"];
 const SHELL_FILES = new Set([
   "/manifest.webmanifest",
-  "/icon.svg",
+  "/icon.png",
+  "/apple-icon.png",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
   "/favicon.ico",
   "/offline-manifest.json",
 ]);
@@ -155,7 +158,7 @@ self.addEventListener("activate", (event) => {
     (async () => {
       const names = await caches.keys();
       await Promise.all(
-        names.filter((n) => n.startsWith("outilia-") && !KEEP.has(n)).map((n) => caches.delete(n)),
+        names.filter((n) => n.startsWith("averopdf-") && !KEEP.has(n)).map((n) => caches.delete(n)),
       );
       await self.clients.claim();
     })(),

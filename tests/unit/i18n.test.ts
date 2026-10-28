@@ -59,7 +59,7 @@ describe("dictionaries", () => {
       if (
         a === b &&
         /[a-zàâçéèêëîïôûù]{4,}\s[a-zàâçéèêëîïôûù]{3,}/i.test(a) &&
-        !/OUTILIA/.test(a)
+        !/AVEROPDF/.test(a)
       ) {
         sameValue.push(`${path}: ${a}`);
       }

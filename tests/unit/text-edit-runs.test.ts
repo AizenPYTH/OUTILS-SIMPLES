@@ -44,7 +44,7 @@ describe("extractTextRuns", () => {
     if (status.kind !== "ok") return;
     expect(status.runs.map((r) => r.text)).toEqual([
       "Page 1 / 3",
-      "Document de test OUTILIA — contenu synthétique.",
+      "Document de test AVEROPDF — contenu synthétique.",
     ]);
     const [title, body] = status.runs;
     // Raw stream: /Helvetica 24 Tf, 1 0 0 1 60 761.89 Tm.
@@ -90,7 +90,7 @@ describe("extractTextRuns", () => {
     if (after.kind !== "ok") return;
     expect(after.runs.map((r) => [r.opIndex, r.text])).toEqual([
       [0, "Titre corrigé"],
-      [1, "Document de test OUTILIA — contenu synthétique."],
+      [1, "Document de test AVEROPDF — contenu synthétique."],
     ]);
     expect(after.runs[0]!.x).toBeCloseTo(run.x, 3);
     expect(after.runs[0]!.fontSize).toBeCloseTo(run.fontSize, 3);

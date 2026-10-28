@@ -1,4 +1,4 @@
-# OUTILIA — Principes de design retenus (refonte « simplification »)
+# AVEROPDF — Principes de design retenus (refonte « simplification »)
 
 Document écrit **avant** les modifications d'interface, comme demandé. Il fixe ce qui est retenu,
 pourquoi, et comment chaque page existante est touchée. Les 66 outils, leurs routes et leur contenu
@@ -32,7 +32,7 @@ de garde-fous. Pour vérifier les interfaces réelles, il faut autoriser ces qua
 configuration réseau de l'environnement (voir le message de fin de travail) ou faire la revue
 manuellement : une grille de lecture est fournie en annexe.
 
-## 2. Constats mesurés sur OUTILIA (captures d'écran de l'état actuel, Chromium)
+## 2. Constats mesurés sur AVEROPDF (captures d'écran de l'état actuel, Chromium)
 
 | Constat                                                   | Mesure                                                                                                                                                       | Effet pour l'utilisateur                                                                                       |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
@@ -154,11 +154,36 @@ recherche est-elle un champ, un bouton, absente ; (3) combien d'outils sont visi
 et comment ils sont groupés ; (4) sur une page d'outil, à quelle hauteur commence la zone de dépôt ;
 (5) ce qui disparaît de l'écran pendant le traitement ; (6) comment le résultat est présenté
 (bouton unique, options, retour au début) ; (7) le menu mobile : nombre d'entrées, taille des
-cibles. Comparer avec OUTILIA après refonte, pas avant.
+cibles. Comparer avec AVEROPDF après refonte, pas avant.
 
 ---
 
-# Identité visuelle OUTILIA — version 2 (refonte « plateforme professionnelle »)
+# Identité visuelle AVEROPDF — version 3 (en vigueur)
+
+Remplace les couleurs, la carte d'outil, la zone d'import et l'accueil décrits dans la version 2
+ci-dessous (conservée pour l'historique).
+
+- **Logo** : fourni par le propriétaire (`docs/Logo AVEROPDF au document vert.png`). Le symbole
+  (document et ruban vert) est détouré sur fond transparent dans `src/assets/brand/` (en-tête, pied
+  de page, image de partage) ; le mot « AVEROPDF » est écrit en texte (« AVERO » vert foncé, « PDF »
+  vert vif) pour rester net et passer en mode sombre. Favicon, icône Apple et icônes de
+  l'application (`src/app/favicon.ico`, `icon.png`, `apple-icon.png`, `public/icons/`) sont tirés du
+  même symbole.
+- **Couleurs** (jetons de `src/app/globals.css`) : vert vif `#6CD83A` (`--brand-bright`, accents,
+  survols, focus), vert foncé `#0E6B3C` (`--brand-dark`, boutons, liens ; texte blanc 6,9:1), blanc
+  et fond blanc teinté `#F5FAF2`. En mode sombre, le bouton principal passe au vert vif avec texte
+  foncé. Le vert « succès » `#12805C` reste réservé aux états réussis.
+- **Pictogrammes d'outils** : pastille au dégradé vert du badge « PDF » du logo, icône blanche, la
+  même pour toutes les familles (`categoryTone` dans `src/lib/tools/groups.ts`).
+- **Accueil** : titre, phrase, recherche, puis les 69 outils en grandes tuiles, filtrables par
+  famille sur place (les onglets sont aussi des liens vers les pages de famille). Suivent le dépôt
+  de fichier avec détection, l'éditeur, la confiance (bandeau vert foncé) et la FAQ.
+- **Page d'outil** : titre et phrase centrés, l'outil au centre (860 px) avec un grand bouton
+  « Choisir… » et « ou déposez… ici » dessous, puis les outils associés en tuiles et le contenu.
+- **En-tête** : logo, liens directs vers Fusionner / Compresser / Modifier / PDF en Word (à partir
+  de 1 280 px), recherche, bouton « Tous les outils », langue et thème.
+
+# Identité visuelle AVEROPDF — version 2 (refonte « plateforme professionnelle »)
 
 Écrit avant l'application. Les sites de référence restent inaccessibles depuis l'environnement
 (voir § 1) : les principes ci-dessous s'appuient sur les attentes exprimées, sur les mesures de
@@ -168,7 +193,7 @@ l'interface actuelle et sur des patrons documentés d'interfaces d'outils de fic
 
 | Élément                      | Choix                                                                                                                                         | Pourquoi                                                                           |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Couleur principale           | Indigo OUTILIA `#5146E5` (survol `#4338CA`), teinte douce `#EDEBFD`                                                                           | Déjà associée à la marque ; distinctive sans être criarde ; contraste AA sur blanc |
+| Couleur principale           | Indigo AVEROPDF `#5146E5` (survol `#4338CA`), teinte douce `#EDEBFD`                                                                          | Déjà associée à la marque ; distinctive sans être criarde ; contraste AA sur blanc |
 | Couleur de confiance         | Vert `#12805C` (fond `#E3F6EE`)                                                                                                               | Réservée à « traitement local », résultats et états réussis                        |
 | Teintes par famille d'outils | PDF indigo · Numérisation violet · Images turquoise · Texte ambre · Développeur ardoise · Calculs émeraude · Codes rose · Documents bleu ciel | Repérage immédiat dans le catalogue, cartes « distinctes mais cohérentes »         |
 | Fond                         | Blanc cassé `#F8F9FC`, surfaces blanches, bordures `#E5E7F0`, halo radial indigo très léger derrière le héros                                 | Lumineux, pas de dégradés décoratifs                                               |

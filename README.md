@@ -1,6 +1,6 @@
-# OUTILIA — outils en ligne simples, rapides et privés
+# AVEROPDF — outils en ligne simples, rapides et privés
 
-OUTILIA est une plateforme de **69 outils en ligne traités intégralement dans le navigateur** : une suite
+AVEROPDF est une plateforme de **69 outils en ligne traités intégralement dans le navigateur** : une suite
 PDF complète (fusion, division, compression, édition, signature, protection, OCR, caviardage…), un scanner
 de documents pour mobile, des outils images, texte, développeur, des calculatrices, des générateurs de
 QR codes et codes-barres et des documents à imprimer. Aucun fichier ne quitte l'appareil de l'utilisateur :
@@ -98,7 +98,7 @@ Voir `docs/ARCHITECTURE.md` pour le détail.
 
 ```
 src/
-  config/        marque (OUTILIA), env, limites, en-têtes de sécurité / CSP
+  config/        marque (AVEROPDF), env, limites, en-têtes de sécurité / CSP
   lib/tools/     registre d'outils typé (un fichier par domaine) = source unique (navigation, recherche, sitemap, SEO)
   lib/pdf/       opérations pdf-lib pures et testées, qpdf (chiffrement), annotations, coordonnées, couche pdf.js
   lib/ocr/       moteur Tesseract (chargement, pages, nettoyage), PDF recherchable, exports
@@ -130,7 +130,7 @@ test statique vérifie que chaque outil publié a son composant).
 - `src/lib/pdf/coordinates.ts` : transformation écran ⇄ canvas ⇄ PDF partagée par l'aperçu et l'export.
 - `src/lib/pdf/browser/*` : pdf.js (actifs servis depuis `/public/pdfjs`), réencodage d'images par canvas,
   lecture de fichiers, ZIP.
-- Le filigrane OUTILIA est dessiné dans un bloc de contenu marqué (`/OutiliaWatermark BMC … EMC`) et
+- Le filigrane AVEROPDF est dessiné dans un bloc de contenu marqué (`/AveropdfWatermark BMC … EMC`) et
   enregistré dans le dictionnaire Info : c'est ce qui rend son retrait fiable.
 - La compression copie les pages dans un document neuf (suppression des objets orphelins), active les
   flux d'objets et, en mode avec perte, réencode uniquement les images JPEG / Flate RVB-gris sans masque,
@@ -201,7 +201,7 @@ les avertissements (éléments ignorés, scans sans texte). PowerPoint et PDF/A 
   codes-barres, couleurs, décodage QR, documents imprimables, limites et fichiers invalides, fondations
   de l'éditeur : diagnostic d'import, mot de passe, couche OCR, plan de pages, passages OCR, modèle de
   zoom, palette de polices incorporées, besoins hors ligne et manifeste du service worker, conversions Office, détection de type de fichier, décodage HEIC, insertion de pages, différence visuelle).
-- `pnpm build && pnpm test:e2e` : 158 parcours Playwright exécutés sur desktop et mobile (Pixel 7, 316 exécutions dont 13 ignorées par conception) :
+- `pnpm build && pnpm test:e2e` : 159 parcours Playwright exécutés sur desktop et mobile (Pixel 7, 318 exécutions dont 13 ignorées par conception) :
   catalogue, recherche, navigation, 404, métadonnées, sitemap/robots/CSP, thème, version anglaise (routes, hreflang, sélecteur, 404, pages légales), absence de débordement
   horizontal, et pour chacun des 66 outils un parcours avec fichiers téléchargés vérifiés (pdf-lib, pdf.js,
   en-têtes d'images, ZIP, EXIF), dont OCR sur image et sur PDF scanné, protection AES-128/256 et caviardage.

@@ -1,4 +1,4 @@
-# OUTILIA — Audit complet du site et analyse concurrentielle (26 octobre 2026)
+# AVEROPDF — Audit complet du site et analyse concurrentielle (26 octobre 2026)
 
 > **Suites données** : les actions menées à partir de cet audit (mise en ligne, hors ligne, conversions Office, accueil, compléments, contenu) et ce qui reste à faire sont consignés dans `docs/RAPPORT_AUDIT_ACTIONS.md`.
 
@@ -118,7 +118,7 @@ d'utile tant qu'il n'y a qu'une langue.
 Source principale : audit documentaire du 26 octobre 2026 fourni par le propriétaire (pages
 officielles), complété par les résumés de recherche cités en annexe.
 
-| Capacité                                     | Smallpdf                 | iLovePDF                  | PDF24                         | Adobe (web)                        | Sejda                        | PDFgear (web)         | Xodo / Foxit / Soda / Candy | **OUTILIA**                                                        |
+| Capacité                                     | Smallpdf                 | iLovePDF                  | PDF24                         | Adobe (web)                        | Sejda                        | PDFgear (web)         | Xodo / Foxit / Soda / Candy | **AVEROPDF**                                                       |
 | -------------------------------------------- | ------------------------ | ------------------------- | ----------------------------- | ---------------------------------- | ---------------------------- | --------------------- | --------------------------- | ------------------------------------------------------------------ |
 | Modifier le texte existant                   | Pro                      | non confirmé              | non confirmé                  | selon offre                        | **oui**                      | bureau seulement      | oui (bureau / payant)       | **oui, gratuit, local** (police d'origine si possible)             |
 | OCR intégré au parcours d'édition            | outil séparé             | outil séparé              | outil séparé                  | Pro                                | non                          | écosystème            | oui (bureau)                | **oui, dans l'éditeur**                                            |
@@ -136,7 +136,7 @@ officielles), complété par les résumés de recherche cités en annexe.
 | Catalogue (outils)                           | 30–48                    | 25+                       | ~24 catégories, le plus large | 25+                                | ~30                          | ~15                   | larges                      | 66 (dont 39 hors PDF)                                              |
 | Fidélité d'export documentée                 | —                        | —                         | —                             | oui                                | **oui** (limites écrites)    | —                     | —                           | **oui** (limites sur chaque page)                                  |
 
-Lecture : OUTILIA est déjà au niveau ou devant sur **l'édition gratuite et locale** (texte natif,
+Lecture : AVEROPDF est déjà au niveau ou devant sur **l'édition gratuite et locale** (texte natif,
 OCR intégré, caviardage réel, export vérifié, limites honnêtes : seuls Sejda et Adobe sont aussi
 explicites) et sur la **largeur hors PDF** (images, texte, développeur, calculs, documents). Il est
 derrière sur trois terrains visibles de tous : **conversions Office**, **mode hors ligne /
@@ -158,7 +158,7 @@ service externe**, licence, coût de maintenance, risque de décevoir.
    démontrable : couper le Wi-Fi et fusionner un PDF. Faisable : `serwist`/`workbox` avec
    précache du socle et mise en cache à l'usage des gros actifs (pdf.js, OCR, polices). Risques :
    invalidation des caches à chaque mise à jour, taille (ne pas précacher Tesseract). C'est ce
-   que PDF24, Sejda et PDF Candy vendent avec un logiciel à installer ; OUTILIA peut le faire sans
+   que PDF24, Sejda et PDF Candy vendent avec un logiciel à installer ; AVEROPDF peut le faire sans
    installation.
 3. **Conversions Office, direction Office → PDF d'abord.** Le trou fonctionnel le plus visible.
    - DOCX → PDF : `docx-to-pdf-wasm` (MIT, WebAssembly) ou `mammoth` (BSD, DOCX → HTML) +
@@ -208,7 +208,7 @@ service externe**, licence, coût de maintenance, risque de décevoir.
 
 15. **Contenu** : passer de 7 à 40 guides (un par outil phare + « comment vérifier qu'un site
     n'envoie pas vos fichiers », « PDF scanné ou natif ? », « signature électronique : ce qui est
-    valable »), FAQ sur les 35 outils qui n'en ont pas, pages comparatives honnêtes (« OUTILIA ou
+    valable »), FAQ sur les 35 outils qui n'en ont pas, pages comparatives honnêtes (« AVEROPDF ou
     iLovePDF pour fusionner ? » avec la différence réelle : local vs envoi), pages par cas d'usage
     (« alléger une pièce jointe pour un mail », « préparer un dossier de location »).
 16. **Version anglaise** : la couche i18n existe (`fr.ts` seul) ; les textes du registre (66 × 10

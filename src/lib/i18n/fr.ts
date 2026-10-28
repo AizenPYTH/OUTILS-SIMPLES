@@ -68,12 +68,12 @@ export const fr = {
     guides: "Guides",
   },
   home: {
-    heroTitle: "Vos fichiers, vos outils, votre navigateur.",
+    heroTitle: "Tous les outils pour vos PDF et vos fichiers",
     heroSubtitle:
-      "69 outils gratuits pour vos PDF, images, scans et textes, traités sur votre appareil : rien n'est envoyé, aucun compte à créer.",
+      "69 outils gratuits et simples. Tout se passe dans votre navigateur : vos fichiers ne sont jamais envoyés, aucun compte à créer.",
     usagesTitle: "Que voulez-vous faire ?",
     usagesSubtitle: "Quatre parcours pour les tâches les plus fréquentes.",
-    trustTitle: "Pourquoi OUTILIA",
+    trustTitle: "Pourquoi AVEROPDF",
     trustItems: [
       {
         title: "Traitement local",
@@ -107,7 +107,7 @@ export const fr = {
           "Les limites dépendent de la mémoire de votre appareil plus que du site : jusqu'à 100 Mo et 1 000 pages par PDF, 50 Mo par image. Chaque page d'outil indique ses limites et ses formats acceptés.",
       },
       {
-        question: "OUTILIA est-il vraiment gratuit ?",
+        question: "AVEROPDF est-il vraiment gratuit ?",
         answer:
           "Oui, tous les outils publiés sont gratuits et sans filigrane. Le site peut afficher de la publicité contextuelle, jamais basée sur le contenu de vos fichiers.",
       },
@@ -123,7 +123,7 @@ export const fr = {
       "La suite PDF est disponible dès aujourd'hui. Les autres catégories sont en préparation.",
     privacyTitle: "Vos fichiers restent chez vous",
     privacyBody:
-      "Tous les outils PDF d'OUTILIA fonctionnent dans votre navigateur grâce à des bibliothèques open source. Vos documents ne transitent par aucun serveur, ne sont ni stockés ni analysés, et disparaissent dès que vous fermez l'onglet.",
+      "Tous les outils PDF d'AVEROPDF fonctionnent dans votre navigateur grâce à des bibliothèques open source. Vos documents ne transitent par aucun serveur, ne sont ni stockés ni analysés, et disparaissent dès que vous fermez l'onglet.",
     privacyLink: "Lire notre politique de confidentialité",
     recentTitle: "Récemment utilisés",
     howTitle: "Comment ça marche",
@@ -143,12 +143,12 @@ export const fr = {
       `${n} outils gratuits, traités dans votre navigateur. Recherchez par nom ou besoin, ou filtrez par catégorie.`,
     seoTitle: "Tous les outils en ligne gratuits : PDF, images, OCR, texte",
     seoDescription:
-      "Le catalogue complet d'OUTILIA : outils PDF, images, numérisation et OCR, texte, développeur, calculatrices, codes et documents. Traitement local, sans inscription.",
+      "Le catalogue complet d'AVEROPDF : outils PDF, images, numérisation et OCR, texte, développeur, calculatrices, codes et documents. Traitement local, sans inscription.",
     filterAll: "Tous",
     resultsCount: (n: number) => (n === 1 ? "1 outil" : `${n} outils`),
     noResultsTitle: "Aucun outil ne correspond à votre recherche",
     noResultsBody:
-      "Cet outil n'existe pas encore sur OUTILIA. Voici des outils proches qui pourraient vous aider :",
+      "Cet outil n'existe pas encore sur AVEROPDF. Voici des outils proches qui pourraient vous aider :",
     noResultsEmpty: "Essayez un autre mot-clé ou parcourez les catégories.",
     plannedTitle: "En préparation",
     plannedBody:
@@ -258,7 +258,7 @@ export const fr = {
   },
   consent: {
     title: "Cookies et mesure d'audience",
-    body: "OUTILIA fonctionne sans cookie publicitaire ni traceur par défaut. Si des services tiers (mesure d'audience, publicité) sont activés par l'éditeur, ils ne se chargent qu'avec votre accord.",
+    body: "AVEROPDF fonctionne sans cookie publicitaire ni traceur par défaut. Si des services tiers (mesure d'audience, publicité) sont activés par l'éditeur, ils ne se chargent qu'avec votre accord.",
     acceptAll: "Tout accepter",
     rejectAll: "Tout refuser",
     customize: "Personnaliser",
@@ -295,7 +295,7 @@ export const fr = {
     toolsHeading: "Outils",
     siteHeading: "Site",
     legalHeading: "Informations légales",
-    rights: (year: number) => `© ${year} OUTILIA. Tous droits réservés.`,
+    rights: (year: number) => `© ${year} AVEROPDF. Tous droits réservés.`,
     openSource: "Construit avec pdf.js et pdf-lib, deux bibliothèques open source.",
   },
   site: {

@@ -240,11 +240,11 @@ describe("barcodes", () => {
   });
 
   it("encodes Code 128 and Code 39 and renders SVG", () => {
-    const c128 = encodeBarcode("code128", "OUTILIA-2026");
+    const c128 = encodeBarcode("code128", "AVEROPDF-2026");
     expect(c128.ok).toBe(true);
     if (c128.ok) {
-      // Start B + "OUTILIA-" (8) + switch to C + "20" "26" + checksum = 13 symbols × 11 modules + stop 13 modules.
-      expect(c128.barcode.modules).toHaveLength(13 * 11 + 13);
+      // Start B + "AVEROPDF-" (9) + switch to C + "20" "26" + checksum = 14 symbols × 11 modules + stop 13 modules.
+      expect(c128.barcode.modules).toHaveLength(14 * 11 + 13);
       expect(c128.barcode.modules[0]).toBe(true);
       expect(c128.barcode.modules[c128.barcode.modules.length - 1]).toBe(true);
     }
@@ -321,9 +321,9 @@ describe("qr reading", () => {
   }
 
   it("decodes a generated QR code and classifies the payload", async () => {
-    const { data, size } = await qrPixels("https://outilia.fr/");
+    const { data, size } = await qrPixels("https://averopdf.fr/");
     const decoded = decodeQrFromRgba(data, size, size);
-    expect(decoded?.text).toBe("https://outilia.fr/");
+    expect(decoded?.text).toBe("https://averopdf.fr/");
     expect(decoded?.kind).toBe("url");
     expect(decoded?.corners).toHaveLength(4);
     const wifi = await qrPixels("WIFI:T:WPA;S:Ma\\;Box;P:secret;;");

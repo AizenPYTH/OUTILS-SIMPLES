@@ -95,51 +95,26 @@ export function getToolGroups(category: ToolCategoryId, locale: Locale = getLoca
     .map((g) => (locale === "fr" ? g : { ...g, name: toolGroupNamesEn[g.name] ?? g.name }));
 }
 
-/** Tailwind classes of the icon tile per category (hue per family, same shape everywhere). */
+/**
+ * Classes of the icon tile, label and soft background per category. Every
+ * family uses the brand green (AVEROPDF identity): the icon, not the hue,
+ * tells families apart. Kept per category so that a family can be given its
+ * own tone again without touching the components.
+ */
+const brandTone = {
+  tile: "tile-brand",
+  text: "text-link",
+  soft: "bg-primary-soft",
+} as const;
+
 export const categoryTone: Record<ToolCategoryId, { tile: string; text: string; soft: string }> = {
-  pdf: {
-    tile: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200",
-    text: "text-indigo-700 dark:text-indigo-300",
-    soft: "bg-indigo-50 dark:bg-indigo-500/10",
-  },
-  numerisation: {
-    tile: "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-200",
-    text: "text-violet-700 dark:text-violet-300",
-    soft: "bg-violet-50 dark:bg-violet-500/10",
-  },
-  images: {
-    tile: "bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-200",
-    text: "text-teal-700 dark:text-teal-300",
-    soft: "bg-teal-50 dark:bg-teal-500/10",
-  },
-  conversion: {
-    tile: "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-200",
-    text: "text-cyan-700 dark:text-cyan-300",
-    soft: "bg-cyan-50 dark:bg-cyan-500/10",
-  },
-  texte: {
-    tile: "bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-200",
-    text: "text-amber-800 dark:text-amber-300",
-    soft: "bg-amber-50 dark:bg-amber-500/10",
-  },
-  developpeur: {
-    tile: "bg-slate-200 text-slate-700 dark:bg-slate-500/20 dark:text-slate-200",
-    text: "text-slate-700 dark:text-slate-300",
-    soft: "bg-slate-100 dark:bg-slate-500/10",
-  },
-  calculatrices: {
-    tile: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200",
-    text: "text-emerald-700 dark:text-emerald-300",
-    soft: "bg-emerald-50 dark:bg-emerald-500/10",
-  },
-  codes: {
-    tile: "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-200",
-    text: "text-rose-700 dark:text-rose-300",
-    soft: "bg-rose-50 dark:bg-rose-500/10",
-  },
-  documents: {
-    tile: "bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-200",
-    text: "text-sky-700 dark:text-sky-300",
-    soft: "bg-sky-50 dark:bg-sky-500/10",
-  },
+  pdf: brandTone,
+  numerisation: brandTone,
+  images: brandTone,
+  conversion: brandTone,
+  texte: brandTone,
+  developpeur: brandTone,
+  calculatrices: brandTone,
+  codes: brandTone,
+  documents: brandTone,
 };

@@ -9,7 +9,7 @@ export const dynamic = "force-static";
 
 export function GET() {
   return ogImage({
-    title: "Your files, your tools, your browser.",
+    title: "Every tool for your PDFs and files",
     subtitle: `${getPublishedTools("en").length} free tools for your PDFs, images, scans and text, with no upload and no account.`,
     footer: OG_FOOTER_EN,
   });

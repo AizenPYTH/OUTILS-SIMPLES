@@ -49,7 +49,7 @@ describe("inline message translations", () => {
   it("English texts contain no French and keep the placeholders of their key", () => {
     const problems: string[] = [];
     for (const [key, value] of Object.entries(messagesEn)) {
-      if (FRENCH.test(value.replace(/OUTILIA|café|cafe|résumé/g, "")))
+      if (FRENCH.test(value.replace(/AVEROPDF|café|cafe|résumé/g, "")))
         problems.push(`french? ${key} → ${value}`);
       const wanted = (key.match(/\{[a-zA-Z0-9_]+\}/g) ?? []).sort();
       const got = (value.match(/\{[a-zA-Z0-9_]+\}/g) ?? []).sort();

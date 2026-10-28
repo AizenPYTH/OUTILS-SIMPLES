@@ -328,7 +328,7 @@ export async function pdfToDocx(
               }),
       );
     const document = new docx.Document({
-      creator: "OUTILIA",
+      creator: "AVEROPDF",
       sections: [
         {
           properties: { page: { margin: { top: 1134, bottom: 1134, left: 1134, right: 1134 } } },

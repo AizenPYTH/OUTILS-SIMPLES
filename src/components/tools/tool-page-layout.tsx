@@ -30,10 +30,10 @@ interface ToolPageLayoutProps {
 }
 
 /**
- * Server-rendered template for every tool page. The action comes first:
- * breadcrumb, a compact H1 and one-line summary, then the tool itself. The
- * full description, steps, limitations, privacy, FAQ and related tools follow
- * (docs/DESIGN_PRINCIPES.md §4, "Pages d'outil"). Content comes from the registry.
+ * Server-rendered template for every tool page. The action comes first and
+ * alone: a centred title and one-line summary, then the tool itself with one
+ * large button. Related tools follow as tiles, then the description, steps,
+ * limitations, privacy, FAQ and guides. Content comes from the registry.
  */
 export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps) {
   const related = getRelatedTools(tool);
@@ -42,43 +42,69 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
   const inputLimits = getToolInputLimits(tool);
 
   return (
-    <div className="container-page py-5 sm:py-7">
+    <div>
       <JsonLd data={buildToolJsonLd(tool)} />
       {faqJsonLd ? <JsonLd data={faqJsonLd} /> : null}
-      <Breadcrumbs
-        items={[
-          { name: t.nav.home, path: localizedPath("/") },
-          { name: category.name, path: getCategoryPath(category) },
-          { name: tool.name, path: getToolPath(tool) },
-        ]}
-      />
-      <div className="mt-4 max-w-3xl">
-        <h1 className="text-[clamp(26px,3.4vw,38px)] leading-[1.1]">{tool.name}</h1>
-        <p className="mt-2 text-[15px] text-muted-foreground sm:text-base">
-          {tool.shortDescription}
-        </p>
-      </div>
+      <div className="hero-glow">
+        <div className="container-page pb-10 pt-4 sm:pb-14 sm:pt-5">
+          <Breadcrumbs
+            items={[
+              { name: t.nav.home, path: localizedPath("/") },
+              { name: category.name, path: getCategoryPath(category) },
+              { name: tool.name, path: getToolPath(tool) },
+            ]}
+          />
+          <div className="mx-auto mt-5 max-w-3xl text-center sm:mt-8">
+            <h1 className="text-[clamp(28px,4vw,44px)] leading-[1.1]">{tool.name}</h1>
+            <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground sm:text-lg">
+              {tool.shortDescription}
+            </p>
+          </div>
 
-      <div className="mt-5 grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="min-w-0 space-y-12">
-          <section aria-label={tool.name} data-testid="tool-workspace">
+          <section
+            aria-label={tool.name}
+            data-testid="tool-workspace"
+            className="mx-auto mt-6 max-w-[860px] sm:mt-8"
+          >
             {children}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
               <Badge variant="success">
                 <ShieldCheck aria-hidden="true" />{" "}
                 {tool.processing === "client" ? t.tool.processingLocal : t.tool.processingServer}
               </Badge>
               <Badge variant="neutral">{t.tool.freeBadge}</Badge>
               {tool.status === "beta" ? <Badge variant="warning">{t.tool.betaBadge}</Badge> : null}
-              <span className="ml-auto">
-                <OfflineControl toolId={tool.id} groups={offlineGroupsFor(tool)} />
-              </span>
+              <OfflineControl toolId={tool.id} groups={offlineGroupsFor(tool)} />
             </div>
           </section>
+        </div>
+      </div>
 
-          {/* Optional advertising placement: below the work area, never above the drop zone. */}
-          <AdPlacement placement="tool-after-intro" />
+      {/* Optional advertising placement: below the work area, never above the drop zone. */}
+      <AdPlacement placement="tool-after-intro" className="container-page" />
 
+      {related.length ? (
+        <section
+          aria-labelledby="related-heading"
+          className="border-y border-border bg-surface py-10 sm:py-12"
+        >
+          <div className="container-page">
+            <h2 id="related-heading" className="mb-5 text-2xl">
+              {t.tool.related}
+            </h2>
+            <ul className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+              {related.map((r) => (
+                <li key={r.id}>
+                  <ToolCard tool={r} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
+
+      <div className="container-page py-12 sm:py-14">
+        <div className="mx-auto max-w-3xl space-y-12">
           <section aria-labelledby="about-heading" className="prose-tool">
             <h2 id="about-heading" className="text-2xl">
               {t.tool.about}
@@ -188,23 +214,6 @@ export function ToolPageLayout({ tool, category, children }: ToolPageLayoutProps
 
           <AdPlacement placement="tool-after-result" />
         </div>
-
-        <aside className="space-y-8 lg:sticky lg:top-[calc(var(--header-height)+24px)] lg:self-start">
-          {related.length ? (
-            <section aria-labelledby="related-heading">
-              <h2 id="related-heading" className="mb-3 text-lg">
-                {t.tool.related}
-              </h2>
-              <ul className="space-y-2.5">
-                {related.map((r) => (
-                  <li key={r.id}>
-                    <ToolCard tool={r} />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-        </aside>
       </div>
     </div>
   );

@@ -54,7 +54,7 @@ export async function savePdfDocument(doc: PDFDocument): Promise<Uint8Array> {
 /** Creates an empty document stamped with the platform producer string. */
 export async function createPdfDocument(): Promise<PDFDocument> {
   const doc = await PDFDocument.create();
-  doc.setProducer("OUTILIA (pdf-lib)");
-  doc.setCreator("OUTILIA");
+  doc.setProducer("AVEROPDF (pdf-lib)");
+  doc.setCreator("AVEROPDF");
   return doc;
 }

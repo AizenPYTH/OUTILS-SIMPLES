@@ -17,7 +17,7 @@ export interface WatermarkSettings {
 }
 
 export const defaultWatermarkSettings: WatermarkSettings = {
-  text: "© OUTILIA",
+  text: "© AVEROPDF",
   opacity: 0.4,
   sizePercent: 6,
   color: "#ffffff",

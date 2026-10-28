@@ -6,7 +6,7 @@ export const dynamic = "force-static";
 
 export function GET() {
   return ogImage({
-    title: "Vos fichiers, vos outils, votre navigateur.",
+    title: "Tous les outils pour vos PDF et vos fichiers",
     subtitle: `${getPublishedTools("fr").length} outils gratuits pour vos PDF, images, numérisation et texte, sans envoi ni compte.`,
   });
 }

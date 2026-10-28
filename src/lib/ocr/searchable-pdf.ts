@@ -46,8 +46,8 @@ export async function buildSearchablePdf(
   options: SearchablePdfOptions = defaultSearchablePdfOptions,
 ): Promise<{ bytes: Uint8Array; wordsPlaced: number; wordsSkipped: number }> {
   const doc = await PDFDocument.create();
-  doc.setProducer("OUTILIA (pdf-lib + Tesseract.js)");
-  doc.setCreator("OUTILIA OCR");
+  doc.setProducer("AVEROPDF (pdf-lib + Tesseract.js)");
+  doc.setCreator("AVEROPDF OCR");
   if (options.title) doc.setTitle(options.title);
   const font = await doc.embedFont(StandardFonts.Helvetica);
   let wordsPlaced = 0;

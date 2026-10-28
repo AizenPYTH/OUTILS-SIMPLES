@@ -1,4 +1,4 @@
-# Audit de qualité des 66 outils OUTILIA
+# Audit de qualité des 66 outils AVEROPDF
 
 Branche `claude/festive-turing-f4fmzh`, état audité : commit `95d941d` (fin de l'extension) ; corrections et tests
 de l'audit : commits `481df21`, `596968b`, puis la phase de clôture des risques (section 8). Aucun outil ni aucune

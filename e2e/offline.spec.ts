@@ -51,7 +51,7 @@ test.describe("mode hors ligne", () => {
       // The visited home page is served from the cache; a client-side link to the saved tool works.
       await page.goto("/");
       await expect(page.locator("h1")).toBeVisible();
-      await page.locator('a[href="/pdf/fusionner/"]').first().click();
+      await page.locator('a[href="/pdf/fusionner/"]').filter({ visible: true }).first().click();
       await expect(page.locator("h1")).toHaveText("Fusionner des PDF", { timeout: 20_000 });
 
       // A page never stored falls back to the offline page, which lists the saved tool.
@@ -87,7 +87,7 @@ test.describe("mode hors ligne", () => {
     test.setTimeout(120_000);
     await page.goto("/en/");
     await page.evaluate(() => navigator.serviceWorker.ready);
-    await expect(page.locator("h1")).toHaveText("Your files, your tools, your browser.");
+    await expect(page.locator("h1")).toHaveText("Every tool for your PDFs and files");
     // Give the worker time to finish precaching both offline pages.
     await page.waitForTimeout(2_000);
     await context.setOffline(true);

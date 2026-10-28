@@ -74,9 +74,9 @@ describe("cleanText", () => {
 describe("extractors and helpers", () => {
   it("extracts emails, urls and phones", () => {
     const text =
-      "Contact : jeanne.martin@example.fr ou https://outilia.fr/pdf/?x=1, tel 06 12 34 56 78 / +33 1 23 45 67 89.";
+      "Contact : jeanne.martin@example.fr ou https://averopdf.fr/pdf/?x=1, tel 06 12 34 56 78 / +33 1 23 45 67 89.";
     expect(extractEmails(text)).toEqual(["jeanne.martin@example.fr"]);
-    expect(extractUrls(text)).toEqual(["https://outilia.fr/pdf/?x=1"]);
+    expect(extractUrls(text)).toEqual(["https://averopdf.fr/pdf/?x=1"]);
     expect(extractPhones(text)).toEqual(["06 12 34 56 78", "+33 1 23 45 67 89"]);
   });
   it("slugifies and compares lists", () => {
