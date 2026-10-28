@@ -47,7 +47,12 @@ else {
       errors.push(
         "NEXT_PUBLIC_SITE_URL doit être en https (la caméra du scanner est refusée en http).",
       );
-    if (/localhost|127\.0\.0\.1|example\.(invalid|com)|\.local$/.test(parsed.hostname))
+    // Reserved documentation and test names (RFC 2606 / 6761) are never a public address.
+    if (
+      /localhost|127\.0\.0\.1|(^|\.)example\.(com|org|net)$|\.(local|test|invalid|example|localhost)$/.test(
+        parsed.hostname,
+      )
+    )
       errors.push(`NEXT_PUBLIC_SITE_URL pointe vers une adresse de test : ${parsed.hostname}.`);
     if (siteUrl.endsWith("/"))
       warnings.push(

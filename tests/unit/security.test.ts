@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { buildContentSecurityPolicy, buildSecurityHeaders } from "@/config/security";
 import { parsePublicEnv } from "@/config/env";
 import { sanitizeProps, sizeBucket } from "@/lib/analytics/events";
@@ -80,5 +80,24 @@ describe("preview no-index switch", () => {
     const { parsePublicEnv } = await import("@/config/env");
     expect(parsePublicEnv({}).NEXT_PUBLIC_NOINDEX).toBe(false);
     expect(parsePublicEnv({ NEXT_PUBLIC_NOINDEX: "true" }).NEXT_PUBLIC_NOINDEX).toBe(true);
+  });
+
+  it("applies to the root metadata inherited by the home pages too", async () => {
+    vi.resetModules();
+    vi.doMock("@/config/env", async (importOriginal) => {
+      const actual = await importOriginal<typeof import("@/config/env")>();
+      return { ...actual, publicEnv: { ...actual.publicEnv, NEXT_PUBLIC_NOINDEX: true } };
+    });
+    const { buildRootMetadata, buildPageMetadata } = await import("@/lib/seo");
+    for (const locale of ["fr", "en"] as const)
+      expect(buildRootMetadata(locale).robots).toEqual({ index: false, follow: false });
+    expect(buildPageMetadata({ title: "t", description: "d", path: "/outils/" }).robots).toEqual({
+      index: false,
+      follow: false,
+    });
+    vi.doUnmock("@/config/env");
+    vi.resetModules();
+    const fresh = await import("@/lib/seo");
+    expect(fresh.buildRootMetadata("fr").robots).toEqual({ index: true, follow: true });
   });
 });

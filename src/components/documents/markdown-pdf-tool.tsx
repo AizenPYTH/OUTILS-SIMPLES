@@ -55,7 +55,7 @@ const SAMPLE_MD = tr(`# Compte rendu de réunion
 | Tests | Claire | 1er avril |
 | Design | Karim | 8 avril |
 
-Plus d'informations : [outilia.fr](https://outilia.fr/)
+Plus d'informations : [example.org](https://example.org/)
 `);
 
 export function TextPdfTool() {

@@ -155,7 +155,7 @@ export const calcCodesDocsEn: Record<string, string> = {
 | Tests | Claire | 1er avril |
 | Design | Karim | 8 avril |
 
-Plus d'informations : [outilia.fr](https://outilia.fr/)
+Plus d'informations : [example.org](https://example.org/)
 `]: `# Meeting notes
 
 **Date:** March 12, 2026 · **Attendees:** product team
@@ -177,7 +177,7 @@ Plus d'informations : [outilia.fr](https://outilia.fr/)
 | Tests | Claire | April 1 |
 | Design | Karim | April 8 |
 
-More information: [outilia.fr](https://outilia.fr/)
+More information: [example.org](https://example.org/)
 `,
   "Votre PDF est prêt": "Your PDF is ready",
   "{n} page": "{n} page",

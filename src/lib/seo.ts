@@ -105,7 +105,9 @@ export function buildRootMetadata(locale: Locale): Metadata {
     },
     description: d.site.description,
     applicationName: siteConfig.name,
-    robots: { index: true, follow: true },
+    // Inherited by pages that set no robots of their own (the two home pages):
+    // a preview deployment must not be indexable there either.
+    robots: publicEnv.NEXT_PUBLIC_NOINDEX ? noIndexRobots : { index: true, follow: true },
     alternates: { canonical: home, languages: languageAlternates({ fr: "/", en: "/en/" }) },
     openGraph: {
       type: "website",

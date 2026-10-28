@@ -12,8 +12,10 @@ function run(env: Record<string, string>, ...args: string[]) {
   return { status: result.status, out: String(result.stdout) };
 }
 
+// Test values only. ".zz" is an ISO 3166 user-assigned code that is never
+// delegated as a top-level domain: a syntactically valid, non-existent site.
 const complete = {
-  NEXT_PUBLIC_SITE_URL: "https://outilia.example",
+  NEXT_PUBLIC_SITE_URL: "https://outilia.zz",
   NEXT_PUBLIC_LEGAL_PUBLISHER_NAME: "Éditeur",
   NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS: "particulier",
   NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS: "1 rue",
@@ -36,7 +38,17 @@ describe("launch readiness check", () => {
     expect(run({ ...complete, NEXT_PUBLIC_SITE_URL: "http://outilia.example" }).out).toContain(
       "https",
     );
-    expect(run({ ...complete, NEXT_PUBLIC_SITE_URL: "https://example.invalid" }).status).toBe(1);
+    for (const reserved of [
+      "https://example.invalid",
+      "https://www.example.org",
+      "https://example.net",
+      "https://outilia.example",
+      "https://outilia.test",
+      "https://preview.localhost",
+    ])
+      expect(run({ ...complete, NEXT_PUBLIC_SITE_URL: reserved }).out, reserved).toContain(
+        "adresse de test",
+      );
     expect(run({ ...complete, NEXT_PUBLIC_LEGAL_PUBLISHER_NAME: "à compléter" }).out).toContain(
       "valeur de remplissage",
     );
