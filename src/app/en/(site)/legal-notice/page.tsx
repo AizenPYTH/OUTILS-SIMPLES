@@ -39,7 +39,8 @@ export default function LegalNoticePage() {
               The site {siteConfig.name} is published by{" "}
               <Placeholder label="Company name" value={l.publisherName} />,{" "}
               <Placeholder label="Legal form" value={l.publisherStatus} />, whose registered office
-              is at <Placeholder label="Registered office address" value={l.publisherAddress} />.
+              is at <Placeholder label="Registered office address" value={l.publisherAddress} />,
+              telephone: <Placeholder label="Telephone" value={l.publisherPhone} />.
             </p>
             <p>
               Registration:{" "}
@@ -66,7 +67,11 @@ export default function LegalNoticePage() {
               individual.
             </p>
             <p>
-              Address: <Placeholder label="Publisher's address" value={l.publisherAddress} />.
+              Home address:{" "}
+              <Placeholder label="Publisher's home address" value={l.publisherAddress} />.
+            </p>
+            <p>
+              Telephone: <Placeholder label="Publisher's telephone" value={l.publisherPhone} />.
             </p>
             {l.registrationNumber ? <p>Registration: {l.registrationNumber}.</p> : null}
             <p>

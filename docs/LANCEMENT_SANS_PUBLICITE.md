@@ -1,18 +1,18 @@
 # Lancement public d'AVEROPDF sans publicité (Vercel, averopdf.com)
 
-Préparé le 28 octobre 2026 pour une première mise en ligne par un particulier (étudiant, sans
+Préparé le 28 octobre 2026, complété le 29 octobre 2026, pour une première mise en ligne par un particulier (étudiant, sans
 entreprise), **sans publicité ni mesure d'audience**. Ce document ne constitue pas un conseil
 juridique : les points marqués « à vérifier » doivent l'être avant publication. **Rien n'a été
 déployé ; aucune configuration externe (DNS, Vercel, messagerie) n'a été modifiée.**
 
 ## 1. Domaine et adresse de contact
 
-| Point                         | Constat                                                                                                                                                                                                                                                                 |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Domaine dans le code          | Aucun domaine n'est écrit dans le code du site : canonical, hreflang, sitemap, `robots.txt`, Open Graph et données structurées utilisent `NEXT_PUBLIC_SITE_URL`. Avec `https://averopdf.com`, toutes les URL publiques seront en `.com` (vérifié sur un build de test). |
-| Domaine `averopdf.com`        | **Non vérifié** : ni l'enregistrement du domaine, ni ses DNS, ni son rattachement à Vercel n'ont pu être contrôlés depuis l'environnement de travail.                                                                                                                   |
-| Adresse `contagt@averopdf.fr` | Deux différences à confirmer : « contagt » (et non « contact ») et le domaine `.fr` alors que le site est en `.com`. Elle n'a été inscrite nulle part. **Non vérifié** : existence de la boîte, possession de `averopdf.fr`, réception des messages.                    |
-| Occurrences `averopdf.fr`     | Uniquement dans des données de test (fixtures, tests unitaires) : sans effet sur le site.                                                                                                                                                                               |
+| Point                     | Constat                                                                                                                                                                                                                                                                                                               |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Domaine dans le code      | Aucun domaine n'est écrit dans le code du site : canonical, hreflang, sitemap, `robots.txt`, Open Graph et données structurées utilisent `NEXT_PUBLIC_SITE_URL`. Avec `https://averopdf.com`, toutes les URL publiques seront en `.com` (vérifié sur un build de test).                                               |
+| Domaine `averopdf.com`    | **Non vérifié** : ni l'enregistrement du domaine, ni ses DNS, ni son rattachement à Vercel n'ont pu être contrôlés depuis l'environnement de travail.                                                                                                                                                                 |
+| Adresse de contact        | Deux orthographes ont été données (« contagt », puis « contact », sur `averopdf.fr`) : **confirmation définitive attendue**. Elle n'est écrite ni dans le code ni dans la configuration ; elle sera saisie dans Vercel. **Non vérifié** : existence de la boîte, possession de `averopdf.fr`, réception des messages. |
+| Occurrences `averopdf.fr` | Uniquement dans des données de test (fixtures, tests unitaires) : sans effet sur le site.                                                                                                                                                                                                                             |
 
 ## 2. Variables à saisir dans Vercel (jamais dans le dépôt)
 
@@ -23,8 +23,9 @@ Vercel → projet → Settings → Environment Variables. **Production** et **Pr
 | `NEXT_PUBLIC_SITE_URL`                                      | `https://averopdf.com` (choisir aussi entre `averopdf.com` et `www.averopdf.com`, l'autre redirigeant vers lui dans Vercel) | facultatif           |
 | `NEXT_PUBLIC_NOINDEX`                                       | absente                                                                                                                     | `true` (obligatoire) |
 | `NEXT_PUBLIC_LEGAL_PUBLISHER_KIND`                          | `individual` ou `anonymous` (§3) — pas `company` sans entreprise                                                            | idem ou vide         |
-| `NEXT_PUBLIC_LEGAL_PUBLISHER_NAME`                          | vos nom et prénom (`individual`)                                                                                            | —                    |
-| `NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS`                       | l'adresse que vous choisissez de publier (`individual`, §3)                                                                 | —                    |
+| `NEXT_PUBLIC_LEGAL_PUBLISHER_NAME`                          | vos nom et prénoms (`individual`)                                                                                           | —                    |
+| `NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS`                       | votre domicile (`individual`, §3)                                                                                           | —                    |
+| `NEXT_PUBLIC_LEGAL_PUBLISHER_PHONE`                         | votre numéro de téléphone (`individual`, §3)                                                                                | —                    |
 | `NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS`                        | facultatif, par exemple « à titre non professionnel »                                                                       | —                    |
 | `NEXT_PUBLIC_LEGAL_CONTACT_EMAIL`                           | l'adresse confirmée (§1)                                                                                                    | —                    |
 | `NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER`                        | `Vercel Inc.`                                                                                                               | —                    |
@@ -46,10 +47,24 @@ article 6, III). Version en vigueur à relire sur Légifrance :
 <https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000049568614> (non consultable depuis
 l'environnement de travail ; contenu connu par recherche, à confirmer).
 
-| Option                     | Ce qui est publié                                                                                                            | Conditions à vérifier                                                                                                                                                                                                                                                                                                                                                                                                 |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `individual` (art. 1-1, I) | nom, prénom, adresse de l'éditeur, contact, directeur de la publication (vous), hébergeur avec nom, adresse **et téléphone** | L'adresse publiée est visible de tous : vérifier quelle adresse il est possible et prudent d'indiquer (domicile, adresse de correspondance ou de domiciliation) — question à poser à un juriste, aucune adresse ne doit être inventée.                                                                                                                                                                                |
-| `anonymous` (art. 1-1, II) | mention d'un éditeur non professionnel anonyme, contact, hébergeur (nom et adresse)                                          | (1) l'édition doit être **non professionnelle** : sans publicité, sans revenu ; (2) vos éléments d'identification doivent avoir été **réellement communiqués à l'hébergeur** — vérifier que les informations de votre compte Vercel suffisent au sens de la loi ; (3) concilier l'anonymat avec l'obligation RGPD d'identifier le responsable du traitement (art. 13) ; (4) à abandonner si la publicité est activée. |
+| Option                     | Ce qui est publié                                                                                                                            | Conditions à vérifier                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `individual` (art. 1-1, I) | vos **nom, prénoms, domicile et numéro de téléphone**, contact, directeur de la publication (vous), hébergeur avec nom, adresse et téléphone | Ces informations sont visibles de tous. Le texte parle de « domicile » : savoir si une autre adresse (correspondance, domiciliation) peut convenir est une question à poser à un juriste ; aucune adresse ne doit être inventée.                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `anonymous` (art. 1-1, II) | mention d'un éditeur non professionnel anonyme, contact, hébergeur (nom et adresse)                                                          | (1) l'édition doit être faite **à titre non professionnel** : la loi ne définit pas ce critère et aucune source officielle consultée ne le précise ; un site gratuit sans publicité ni revenu peut en relever, sans que ce soit acquis ; (2) vos éléments d'identification personnelle « prévus au I » (nom, prénoms, domicile, téléphone) doivent avoir été **communiqués à l'hébergeur** : **non confirmé pour Vercel** (§3 bis) ; (3) concilier l'anonymat avec l'obligation RGPD d'identifier le responsable du traitement (art. 13) ; (4) à abandonner si la publicité ou un revenu apparaît. **Non activée** : `NEXT_PUBLIC_LEGAL_PUBLISHER_KIND` reste à choisir par vous. |
+
+### 3 bis. Vercel peut-il recevoir vos éléments d'identification ?
+
+**Non confirmé.** D'après les pages officielles de Vercel trouvées par recherche (non ouvertes
+directement) : l'inscription se fait avec une adresse e-mail ou un compte Git ; la Privacy Notice
+indique que Vercel _peut_ collecter nom, e-mail, téléphone et localisation, et des données de
+facturation pour les offres payantes. Aucune procédure permettant à un éditeur de transmettre
+confidentiellement ses nom, prénoms, domicile et téléphone au titre de la LCEN n'a été trouvée,
+ni d'engagement de Vercel à les conserver et à les communiquer à l'autorité judiciaire. Le secret
+professionnel prévu par l'article 1-1 vise les hébergeurs soumis au droit français ; son
+application à Vercel Inc. (société américaine) n'a pas été vérifiée. Avant d'utiliser l'option
+`anonymous`, obtenir une réponse écrite de Vercel (support, ou `privacy@vercel.com`) ou d'un
+juriste ; à défaut, rester sur `individual` ou choisir un hébergeur qui recueille et conserve ces
+éléments.
 
 Le site ne se présente jamais comme une entreprise : en mode `individual` et `anonymous`, aucune
 mention de siège, de forme sociale, de SIREN ni de TVA n'apparaît (sauf si une valeur est saisie).
@@ -65,9 +80,13 @@ les éléments ci-dessous proviennent de résultats de recherche limités au dom
 - Adresse : la Privacy Notice de Vercel (<https://vercel.com/legal/privacy-notice>) indique
   « Vercel Inc., 440 N Barranca Avenue #4133, Covina, CA 91723, United States ». Un ancien
   accord de traitement mentionne une autre adresse (Walnut, CA) : se fier à la page en vigueur.
-- Téléphone : aucun numéro sur la Privacy Notice. Un numéro figure sur l'ancienne page DMCA
-  (<https://vercel.com/legal/dmca-policy>) ; vérifier qu'il est toujours publié, ou demander à
-  Vercel le numéro à indiquer. Requis par l'article 1-1, I, 4° en mode `individual`.
+- Téléphone : **non vérifié**. Aucun numéro sur la Privacy Notice ni dans les conditions
+  d'utilisation ; seule l'ancienne page DMCA (<https://vercel.com/legal/dmca-policy>) en affiche
+  un, sans garantie qu'il soit à jour. Il n'est inscrit nulle part dans le projet. Demander à
+  Vercel le numéro à indiquer comme hébergeur, ou le relever vous-même sur une page officielle
+  en vigueur. Requis par l'article 1-1, I en mode `individual`.
+- Contacts écrits officiels : `privacy@vercel.com` (Privacy Notice), `legalnotices@vercel.com`
+  (conditions d'utilisation), support via <https://vercel.com/help>.
 - Transferts hors UE : Vercel déclare être certifié au Data Privacy Framework UE–États-Unis et
   prévoit des clauses contractuelles types dans son DPA (<https://vercel.com/legal/dpa>) ; à
   vérifier sur <https://www.dataprivacyframework.gov/list>.

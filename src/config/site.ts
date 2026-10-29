@@ -30,6 +30,7 @@ export const siteConfig = {
     publisherName: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_NAME,
     publisherStatus: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS,
     publisherAddress: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS,
+    publisherPhone: publicEnv.NEXT_PUBLIC_LEGAL_PUBLISHER_PHONE,
     registrationNumber: publicEnv.NEXT_PUBLIC_LEGAL_REGISTRATION_NUMBER,
     vatNumber: publicEnv.NEXT_PUBLIC_LEGAL_VAT_NUMBER,
     publicationDirector: publicEnv.NEXT_PUBLIC_LEGAL_PUBLICATION_DIRECTOR,

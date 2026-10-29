@@ -13,6 +13,7 @@ const REQUIRED: Record<PublisherKind, LegalField[]> = {
   individual: [
     "publisherName",
     "publisherAddress",
+    "publisherPhone",
     "contactEmail",
     "hostingProvider",
     "hostingAddress",
@@ -22,6 +23,7 @@ const REQUIRED: Record<PublisherKind, LegalField[]> = {
     "publisherName",
     "publisherStatus",
     "publisherAddress",
+    "publisherPhone",
     "registrationNumber",
     "publicationDirector",
     "contactEmail",

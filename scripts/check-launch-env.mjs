@@ -27,14 +27,16 @@ const COMMON_LEGAL = [
 ];
 const LEGAL_BY_KIND = {
   individual: [
-    ["NEXT_PUBLIC_LEGAL_PUBLISHER_NAME", "nom et prénom de l'éditeur (LCEN art. 1-1, I)"],
-    ["NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS", "adresse de l'éditeur (LCEN art. 1-1, I)"],
+    ["NEXT_PUBLIC_LEGAL_PUBLISHER_NAME", "nom et prénoms de l'éditeur (LCEN art. 1-1, I)"],
+    ["NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS", "domicile de l'éditeur (LCEN art. 1-1, I)"],
+    ["NEXT_PUBLIC_LEGAL_PUBLISHER_PHONE", "téléphone de l'éditeur (LCEN art. 1-1, I)"],
     ["NEXT_PUBLIC_LEGAL_HOSTING_PHONE", "téléphone de l'hébergeur (LCEN art. 1-1, I, 4°)"],
   ],
   company: [
     ["NEXT_PUBLIC_LEGAL_PUBLISHER_NAME", "raison sociale de l'éditeur"],
     ["NEXT_PUBLIC_LEGAL_PUBLISHER_STATUS", "forme juridique"],
     ["NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS", "adresse du siège"],
+    ["NEXT_PUBLIC_LEGAL_PUBLISHER_PHONE", "téléphone de l'éditeur (LCEN art. 1-1, I)"],
     ["NEXT_PUBLIC_LEGAL_REGISTRATION_NUMBER", "numéro d'immatriculation (SIREN/RCS)"],
     ["NEXT_PUBLIC_LEGAL_PUBLICATION_DIRECTOR", "directeur de la publication"],
     ["NEXT_PUBLIC_LEGAL_HOSTING_PHONE", "téléphone de l'hébergeur (LCEN art. 1-1, I, 4°)"],
@@ -123,9 +125,13 @@ if (kind === "anonymous") {
   warnings.push(
     "Éditeur anonyme (LCEN art. 1-1, II) : à confirmer avant publication — édition à titre non professionnel, éléments d'identification effectivement communiqués à l'hébergeur, et information RGPD sur le responsable du traitement.",
   );
-  if (filled("NEXT_PUBLIC_LEGAL_PUBLISHER_NAME") || filled("NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS"))
+  if (
+    filled("NEXT_PUBLIC_LEGAL_PUBLISHER_NAME") ||
+    filled("NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS") ||
+    filled("NEXT_PUBLIC_LEGAL_PUBLISHER_PHONE")
+  )
     warnings.push(
-      "Éditeur anonyme : NEXT_PUBLIC_LEGAL_PUBLISHER_NAME et _ADDRESS ne sont pas affichés dans ce mode.",
+      "Éditeur anonyme : NEXT_PUBLIC_LEGAL_PUBLISHER_NAME, _ADDRESS et _PHONE ne sont pas affichés dans ce mode.",
     );
   if (env.NEXT_PUBLIC_ADS_ENABLED === "true")
     errors.push(

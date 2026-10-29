@@ -7,6 +7,7 @@ const filled = {
   ...empty,
   publisherName: "Nom",
   publisherAddress: "Adresse",
+  publisherPhone: "+00",
   contactEmail: "contact@site.zz",
   hostingProvider: "Hébergeur",
   hostingAddress: "Adresse",
@@ -23,6 +24,9 @@ describe("publisher identity", () => {
     expect(isLegalIdentityIncomplete({ ...filled, publisherKind: "individual" })).toBe(false);
     expect(
       isLegalIdentityIncomplete({ ...filled, publisherKind: "individual", hostingPhone: "" }),
+    ).toBe(true);
+    expect(
+      isLegalIdentityIncomplete({ ...filled, publisherKind: "individual", publisherPhone: "" }),
     ).toBe(true);
     expect(isLegalIdentityIncomplete({ ...filled, publisherKind: "company" })).toBe(true);
   });

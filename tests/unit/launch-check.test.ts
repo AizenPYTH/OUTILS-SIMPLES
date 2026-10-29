@@ -19,6 +19,7 @@ const complete = {
   NEXT_PUBLIC_LEGAL_PUBLISHER_KIND: "individual",
   NEXT_PUBLIC_LEGAL_PUBLISHER_NAME: "Éditeur",
   NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS: "1 rue",
+  NEXT_PUBLIC_LEGAL_PUBLISHER_PHONE: "+00 1",
   NEXT_PUBLIC_LEGAL_CONTACT_EMAIL: "contact@averopdf.example",
   NEXT_PUBLIC_LEGAL_HOSTING_PROVIDER: "Hébergeur",
   NEXT_PUBLIC_LEGAL_HOSTING_ADDRESS: "2 rue",
@@ -40,6 +41,9 @@ describe("launch readiness check", () => {
     expect(individual.out).toContain("NEXT_PUBLIC_LEGAL_PUBLISHER_ADDRESS absente");
     // A private person needs no company details.
     expect(run(complete).out).not.toMatch(/SIREN|TVA|PUBLICATION_DIRECTOR|STATUS/);
+    expect(run({ ...complete, NEXT_PUBLIC_LEGAL_PUBLISHER_PHONE: "" }).out).toContain(
+      "téléphone de l'éditeur",
+    );
     expect(run({ ...complete, NEXT_PUBLIC_LEGAL_HOSTING_PHONE: "" }).out).toContain(
       "téléphone de l'hébergeur",
     );

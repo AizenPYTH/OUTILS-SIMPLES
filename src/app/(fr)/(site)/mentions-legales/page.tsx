@@ -37,7 +37,8 @@ export default function MentionsLegalesPage() {
               Le site {siteConfig.name} est édité par{" "}
               <Placeholder label="Raison sociale" value={l.publisherName} />,{" "}
               <Placeholder label="Forme juridique" value={l.publisherStatus} />, dont le siège est
-              situé <Placeholder label="Adresse du siège" value={l.publisherAddress} />.
+              situé <Placeholder label="Adresse du siège" value={l.publisherAddress} />, téléphone :{" "}
+              <Placeholder label="Téléphone" value={l.publisherPhone} />.
             </p>
             <p>
               Immatriculation :{" "}
@@ -61,11 +62,14 @@ export default function MentionsLegalesPage() {
           <>
             <p>
               Le site {siteConfig.name} est édité par{" "}
-              <Placeholder label="Nom et prénom" value={l.publisherName} />, personne physique
+              <Placeholder label="Nom et prénoms" value={l.publisherName} />, personne physique
               {l.publisherStatus ? `, ${l.publisherStatus}` : ""}.
             </p>
             <p>
-              Adresse : <Placeholder label="Adresse de l'éditeur" value={l.publisherAddress} />.
+              Domicile : <Placeholder label="Domicile de l'éditeur" value={l.publisherAddress} />.
+            </p>
+            <p>
+              Téléphone : <Placeholder label="Téléphone de l'éditeur" value={l.publisherPhone} />.
             </p>
             {l.registrationNumber ? <p>Immatriculation : {l.registrationNumber}.</p> : null}
             <p>
